@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <title>GTFS-RT Validator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href="static/css/bootstrap.css" rel="stylesheet">
+    <link rel="stylesheet" href="static/css/style.css"/>
+    <!--[if lt IE 9]>
+    <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link href="static/css/style.css" rel="stylesheet">
+</head>
+<body style="background-color: #e4e4e4">
+<div class="navbar navbar-default" style="margin-bottom: 0">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">GTFS-Realtime Validator</a>
+        </div>
+        <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav pull-right">
+                <li><a href="#about">About</a></li>
+                <li><a href="#">Help</a></li>
+                <li><a href="#contact">Contact Us</a></li>
+            </ul>
+        </div>
+        <!--/.nav-collapse -->
+    </div>
+</div>
+
+<div class="container main-container">
+
+    <div class="row">
+        <div class="container text-center">
+            <h1>Monitoring Feed(s)</h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <form action="">
+            <div class="col-md-12">
+                <div class="well content-well">
+                    <h3>Overview</h3>
+                    <hr/>
+                    <div class="row">
+
+                        <div class="col-md-12">
+                            <div class="well">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        Status:
+                                        <span class="info-text">Running</span>
+                                    </div>
+                                    <div class="col-md-4">
+                                        Running Time:
+                                        <span class="info-text">1h 30m 20s</span>
+                                    </div>
+                                    <div class="col-md-4">
+                                        Feed iterations Checked:
+                                        <span class="info-text">186</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="well">
+                                <table class="table table-striped table-hover ">
+
+                                    <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Vehicle</th>
+                                        <th>Trips</th>
+                                        <th>Alerts</th>
+                                        <th></th>
+                                        <th>Count</th>
+                                    </tr>
+                                    </thead>
+
+                                    <tbody>
+                                    <tr class="warning">
+                                        <td>Warning</td>
+                                        <td>Column content</td>
+                                        <td>Column content</td>
+                                        <td>Column content</td>
+                                        <td style="background:transparent"></td>
+                                        <td align="center"><span class="label label-default">42</span></td>
+                                    </tr>
+
+                                    <tr class="danger">
+                                        <td>Error</td>
+                                        <td>Column content</td>
+                                        <td>Column content</td>
+                                        <td>Column content</td>
+                                        <td style="background:transparent"></td>
+                                        <td align="center"><span class="label label-default">42</span></td>
+                                    </tr>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-md-4" style="height: 200px">
+                            <div style="bottom: 2px; position: absolute; right: 19px">
+                                <input class="btn btn-default" type="button" value="Stop"/>
+                                <input class="btn btn-primary" type="submit" value="Start"/>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </form>
+
+        <div class="col-md-12">
+            <div class="well content-well">
+                <h3>Monitor Details</h3>
+                <hr/>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Time Stamp</th>
+                        <th colspan="2">Vehicles</th>
+                        <th colspan="2">Alerts</th>
+                        <th colspan="2">Trip Updates</th>
+                    </tr>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th >Error</th>
+                        <th >Warning</th>
+                        <th >Error</th>
+                        <th >Warning</th>
+                        <th >Error</th>
+                        <th >Warning</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>123456</td>
+                        <td>13</td>
+                        <td>23</td>
+
+                        <td>0</td>
+                        <td>0</td>
+
+                        <td>4</td>
+                        <td>0</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="well content-well">
+                <h3>Most Recent Errors</h3>
+                <hr/>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Err#</th>
+                        <th>Type</th>
+                        <th>Error Description</th>
+                        <th>Feed</th>
+                        <th>Occurrences</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td><a href="detailed.html">1</a></td>
+                        <td><a>1243</a></td>
+                        <td>Error</td>
+                        <td>Short Error description</td>
+                        <td>0</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td><a href="detailed.html">2</a></td>
+                        <td><a>1243</a></td>
+                        <td>Error</td>
+                        <td>Short Error description</td>
+                        <td>0</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td><a href="detailed.html">3</a></td>
+                        <td><a >1243</a></td>
+                        <td>Error</td>
+                        <td>Short Error description</td>
+                        <td>0</td>
+                        <td>0</td>
+                    </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /.container -->
+<!-- script references -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+<script src="static/js/bootstrap.min.js"></script>
+</body>
+</html>

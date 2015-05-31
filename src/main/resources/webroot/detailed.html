@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <title>GTFS-RT Validator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href="static/css/bootstrap.css" rel="stylesheet">
+    <link rel="stylesheet" href="static/css/style.css"/>
+    <link rel="stylesheet" href="static/css/bootstrap-table.css"/>
+    <!--[if lt IE 9]>
+    <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link href="static/css/style.css" rel="stylesheet">
+</head>
+<body style="background-color: #e4e4e4">
+<div class="navbar navbar-default" style="margin-bottom: 0">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="index.html">GTFS-Realtime Validator</a>
+        </div>
+        <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav pull-right">
+                <li><a href="#about">About</a></li>
+                <li><a href="#">Help</a></li>
+                <li><a href="#contact">Contact Us</a></li>
+            </ul>
+        </div>
+        <!--/.nav-collapse -->
+    </div>
+</div>
+
+<div class="container main-container">
+
+    <div class="row">
+        <div class="container text-center">
+            <h1>Detailed Log: 123456</h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <form action="">
+
+            <div class="col-md-12">
+
+
+                <div class="panel panel-default" id="panel1">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" data-target="#collapseOne">
+                                Filters
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="collapseOne" class="panel-collapse collapse in">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h4>Error Type</h4>
+                                    <div class="checkbox">
+                                        <label>
+                                            <input id="chk-filter-err" type="checkbox"/>
+                                            Errors
+                                        </label>
+                                    </div>
+
+                                    <div class="checkbox">
+                                        <label>
+                                            <input id="chk-filter-warn" type="checkbox"/>
+                                            Warnings
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <h4>Stream</h4>
+                                    <div class="checkbox">
+                                        <label>
+                                            <input id="chk-filter-trip" type="checkbox"/>
+                                            Trip Updates
+                                        </label>
+                                    </div>
+
+                                    <div class="checkbox">
+                                        <label>
+                                            <input id="chk-filter-position" type="checkbox"/>
+                                            Vehicle Position
+                                        </label>
+                                    </div>
+
+                                    <div class="checkbox">
+                                        <label>
+                                            <input id="chk-filter-alert" type="checkbox"/>
+                                            Alerts
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+    <div class="col-md-12">
+        <div class="well content-well">
+            <h3>Error Details</h3>
+            <hr/>
+
+            <table id="detail-table"
+                   data-search="true"
+                   data-show-refresh="true"
+                   data-show-toggle="true"
+                   data-show-columns="true"
+
+                   data-sortable="true"
+
+                   data-pagination="true"
+                    >
+                <thead>
+                <tr>
+                    <th data-field="num" data-sortable="true" data-search="true">#</th>
+                    <th data-field="errNum" data-sortable="true">Err#</th>
+                    <th data-field="type">Error Type</th>
+                    <th data-field="description">Description</th>
+                    <th data-field="feed">Feed</th>
+                    <th data-field="occ" data-sortable="true">Occurrences</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+    </form>
+    </div>
+</div>
+<!-- /.container -->
+<!-- script references -->
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+<script src="static/js/bootstrap.min.js"></script>
+<script src="static/js/bootstrap-table.js"></script>
+<script src="static/js/detail_table_sample_data.js"></script>
+<script src="static/js/detail_table.js"></script>
+
+</body>
+</html>
