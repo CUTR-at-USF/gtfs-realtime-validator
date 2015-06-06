@@ -1,22 +1,72 @@
 package org.opentripplanner.gtfsrtvalidator.servlets;
 
+import com.google.transit.realtime.GtfsRealtime.*;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 @SuppressWarnings("serial")
 public class RTFeedValidatorServlet extends HttpServlet {
 
-    //TODO: Check a given url and validate whether it's a valid RT feed. If so return the type
+    private static final int INVALID_FEED = 0;
+    private static final int TRIP_FEED = 1;
+    private static final int ALERT_FEED = 2;
+    private static final int UPDATE_FEED = 3;
 
     @Override
     protected void doGet(HttpServletRequest request,
                          HttpServletResponse response) throws ServletException, IOException {
+
+        String feedURL = getParamter(request, "gtfsrt-url");
+
+        int feedType = checkFeedType(feedURL);
+
         response.setContentType("text/html");
         response.setStatus(HttpServletResponse.SC_OK);
-        response.getWriter().println("<h1>Hello from HelloServlet</h1>");
+        response.getWriter().println("<h1>"+feedType+"</h1>");
+    }
+
+    private String getParamter(HttpServletRequest request, String paramName){
+
+        String parameter = "";
+        String value = request.getParameter(paramName);
+
+        if (!(value == null || "".equals(value))) {
+            parameter = value;
+        }
+
+        return parameter;
+    }
+
+    private int checkFeedType(String FeedURL) {
+
+        FeedMessage feed;
+        try {
+            URI FeedURI = new URI(FeedURL);
+            URL url = FeedURI.toURL();
+            feed = FeedMessage.parseFrom(url.openStream());
+        } catch (URISyntaxException | IllegalArgumentException | IOException e ) {
+            return INVALID_FEED;
+        }
+
+        FeedEntity firstItem = feed.getEntity(0);
+        System.out.print(firstItem.toString());
+
+        if (firstItem.hasTripUpdate()) {
+            return TRIP_FEED;
+        } else if (firstItem.hasAlert()) {
+            return ALERT_FEED;
+        } else if (firstItem.hasVehicle()) {
+            return UPDATE_FEED;
+        }else {
+            return INVALID_FEED;
+        }
     }
 
 }

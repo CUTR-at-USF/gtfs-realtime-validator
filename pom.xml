@@ -10,9 +10,23 @@
 
     <properties>
         <jetty-version>9.2.6.v20141205</jetty-version>
+        <gtfs_realtime_api_version>1.1.0</gtfs_realtime_api_version>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>public.onebusaway.org</id>
+            <url>http://nexus.onebusaway.org/content/groups/public/</url>
+        </repository>
+    </repositories>
+
     <dependencies>
+        <dependency>
+            <groupId>org.onebusaway</groupId>
+            <artifactId>onebusaway-gtfs-realtime-api</artifactId>
+            <version>${gtfs_realtime_api_version}</version>
+        </dependency>
+
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
