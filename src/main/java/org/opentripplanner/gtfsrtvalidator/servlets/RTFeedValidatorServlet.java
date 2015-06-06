@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -23,13 +24,16 @@ public class RTFeedValidatorServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request,
                          HttpServletResponse response) throws ServletException, IOException {
 
-        String feedURL = getParamter(request, "gtfsrt-url");
+        String feedURL = getParamter(request, "gtfsrturl");
 
         int feedType = checkFeedType(feedURL);
 
-        response.setContentType("text/html");
+        response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_OK);
-        response.getWriter().println("<h1>"+feedType+"</h1>");
+
+        //Creates simple json object giving the feed type
+        //Should be changed to a java object if more complexities occur.
+        response.getWriter().println("{\"feedStatus\" : "+ feedType +"}");
     }
 
     private String getParamter(HttpServletRequest request, String paramName){
@@ -39,8 +43,14 @@ public class RTFeedValidatorServlet extends HttpServlet {
 
         if (!(value == null || "".equals(value))) {
             parameter = value;
-        }
 
+            try {
+                parameter = java.net.URLDecoder.decode(parameter, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println(parameter);
         return parameter;
     }
 
@@ -55,8 +65,14 @@ public class RTFeedValidatorServlet extends HttpServlet {
             return INVALID_FEED;
         }
 
-        FeedEntity firstItem = feed.getEntity(0);
-        System.out.print(firstItem.toString());
+        FeedEntity  firstItem;
+
+        try {
+            firstItem = feed.getEntity(0);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            //Empty feed
+            return INVALID_FEED;
+        }
 
         if (firstItem.hasTripUpdate()) {
             return TRIP_FEED;
