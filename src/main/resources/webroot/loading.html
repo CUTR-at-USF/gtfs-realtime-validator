@@ -51,10 +51,10 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="well">
-                                <label for="gtfs-progress">GTFS-Feed (Downloading Feed...)</label>
+                                <label for="gtfs-progress">GTFS-Feed <span class="status">(Downloading Feed...)</span></label>
 
                                 <div id="gtfs-progress" class="progress progress-striped active">
-                                    <div class="progress-bar" style="width: 45%"></div>
+                                    <div class="progress-bar" style="width: 100%"></div>
                                 </div>
                             </div>
                         </div>
@@ -88,8 +88,6 @@
             </div>
         </form>
     </div>
-</div>
-
 </div>
 </body>
 <!-- /.container -->
@@ -158,9 +156,37 @@
         }
     }
 
+    function downloadGTFSFeed(){
+
+        var paramVal = getUrlParameter("gtfs");
+        var progressID = "#gtfs-progress";
+
+        if (paramVal === null) {
+            alert("parameter is null/ undefined?")
+            //TODO: no URL for the given feed entered. Show status
+            //paramName + "-progress" to white.
+        } else if (paramVal === "") {
+            alert("empty string")
+            //TODO: no URL for the given feed entered. Show status
+            // paramName + "-progress" to white.
+        } else {
+            $.get("http://localhost:8080/downloadgtfs", {gtfsurl: paramVal})
+                    .done(function (data) {
+                        if(data["feedStatus"] === 1){
+                            $(progressID).removeClass("progress-striped active");
+                            $(progressID + " .progress-bar").addClass("progress-bar-success");
+
+                            $(progressID).prev().find(".status").text("(Download Successful)");
+                        }
+                    });
+        }
+    }
+
     checkUrlParamter("gtfsrt-vehicles");
     checkUrlParamter("gtfsrt-alerts");
     checkUrlParamter("gtfsrt-updates");
+
+    downloadGTFSFeed();
 
 </script>
 </body>
