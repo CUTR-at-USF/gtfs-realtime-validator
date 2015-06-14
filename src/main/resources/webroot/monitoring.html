@@ -59,7 +59,7 @@
                                     </div>
                                     <div class="col-md-4">
                                         Running Time:
-                                        <span class="info-text">1h 30m 20s</span>
+                                        <span class="info-text" id="time-elapsed">00h 00m 00s</span>
                                     </div>
                                     <div class="col-md-4">
                                         Feed iterations Checked:
@@ -211,5 +211,33 @@
 <!-- script references -->
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
 <script src="static/js/bootstrap.min.js"></script>
+
+<script>
+
+    //function to calculate the time elapsed from entering the page.
+    var start = new Date();
+
+    function getTimeElapsed(){
+        var elapsed = new Date() - start;
+
+        var seconds = Math.round(elapsed / 1000);
+        var minutes = Math.round(seconds / 60);
+        var hours = Math.round(minutes / 60);
+
+        var sec = TrimSecondsMinutes(seconds);
+        var min = TrimSecondsMinutes(minutes);
+
+        function TrimSecondsMinutes(elapsed) {
+            if (elapsed >= 60)
+                return TrimSecondsMinutes(elapsed - 60);
+            return elapsed;
+        }
+
+        $("#time-elapsed").text(hours + "h "+ min + "m " + sec + "s");
+    }
+
+    setInterval(getTimeElapsed,1000);
+
+</script>
 </body>
 </html>
