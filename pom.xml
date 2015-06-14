@@ -21,6 +21,7 @@
     </repositories>
 
     <dependencies>
+
         <dependency>
             <groupId>org.onebusaway</groupId>
             <artifactId>onebusaway-gtfs-realtime-api</artifactId>
@@ -60,6 +61,29 @@
             <groupId>com.beust</groupId>
             <artifactId>jcommander</artifactId>
             <version>1.27</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.weld.servlet</groupId>
+            <artifactId>weld-servlet</artifactId>
+            <version>2.2.12.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.transit</groupId>
+            <artifactId>gtfs-realtime-bindings</artifactId>
+            <version>0.0.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.8.10.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.3.1</version>
         </dependency>
     </dependencies>
 
@@ -111,7 +135,7 @@
                         <argument>-Dorg.eclipse.jetty.webapp.LEVEL=DEBUG</argument>
                         <argument>-cp</argument>
                         <classpath/>
-                        <argument>org.opentripplanner.gtfsrtvalidator.Main</argument>
+                        <argument>edu.usf.cutr.gtfsrtvalidator.Main</argument>
                         <argument>8080</argument>
                     </arguments>
                 </configuration>
@@ -127,7 +151,7 @@
                     <transformers>
                         <transformer
                                 implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                            <mainClass>org.opentripplanner.gtfsrtvalidator.Main</mainClass>
+                            <mainClass>edu.usf.cutr.gtfsrtvalidator.Main</mainClass>
                         </transformer>
                     </transformers>
                 </configuration>

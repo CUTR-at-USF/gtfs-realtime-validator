@@ -1,4 +1,4 @@
-package org.opentripplanner.gtfsrtvalidator.servlets;
+package edu.usf.cutr.gtfsrtvalidator.servlets;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
