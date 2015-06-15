@@ -9,8 +9,6 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import static edu.usf.cutr.gtfsrtvalidator.db.Database.getCount;
-
 public class RefreshCountTask implements Runnable {
 
     public static int count = 1;
@@ -32,7 +30,6 @@ public class RefreshCountTask implements Runnable {
         try {
             if (count != 0) {
                 fetch();
-                System.out.println("countObject: " + getCount().toString());
                 count++;
             }
 

@@ -245,62 +245,50 @@
     //function that draws the graph using Flot graph
     $(function() {
 
-        var data = [];
-        //The number of points shown at a time
-        var dataPoints = 10;
-
-        for(var i = 0; i < dataPoints; i++) {
-            data.push(0);
-        }
+        var updateInterval = 5000;
+        var countData = [];
 
         //TODO: Change to get number of vehicles
         function getVehicleCount() {
-
             //TODO: Add servelet to get vehicle count from the feed
             //TODO: In the background process keep current
             //TODO: Ajax call to the servlet to get the json with the count
-            //TODO: Add to servelet
-            //          -Iterations
-            //          -
-            //TODO: Update the chart with the latest 10 items
+            $.get("http://localhost:8080/count").done(function (data) {
+                //var counts = $.parseJSON(data);
 
-            var x = Math.random() * 10 - 5;
-            var y = Math.random() * 10 - 5;
-            var z = Math.random() * 10 - 5;
+                countData = [];
+                for(var count in data) {
+                    countData.push([count, data[count].tripCountCount])
+                    //alert(data[count].tripCountCount);
+                }
 
-
-
-            data = [x,y,43,43,2,12,x,52,z,123,z]
-            var res = [];
-            for (var i = 0; i < data.length; ++i) {
-                res.push([i, data[i]])
-            }
-
-            return res;
+            }).then(function(){
+                update();
+            });
         }
 
-        var updateInterval = 10000;
-
-        var plot = $.plot("#placeholder", [ getVehicleCount() ], {
+        var plot = $.plot("#placeholder", [ countData ], {
             series: {
-                shadowSize: 0
+                shadowSize: 0	// Drawing is faster without shadows
             },
             yaxis: {
                 min: 0,
-                max: 100
+                max: 500
             },
             xaxis: {
-                show: true
+                show: true,
+                min: 0,
+                max: 10
             }
         });
 
+        setInterval(getVehicleCount, updateInterval);
+
         function update() {
-            plot.setData([getVehicleCount()]);
+            plot.setData([ countData ]);
             plot.draw();
-            setTimeout(update, updateInterval);
         }
 
-        update();
     });
 
 </script>

@@ -73,7 +73,7 @@ public class Database {
             System.out.println("Opened database successfully");
 
             stmt = con.createStatement();
-            String sql = "SELECT * FROM COUNT LIMIT 10";
+            String sql = "SELECT * FROM COUNT ORDER BY ID DESC LIMIT 11";
 
             ResultSet rs = stmt.executeQuery(sql);
 
