@@ -82,7 +82,7 @@
                     </div>
                     <div align="right">
                         <input class="btn btn-default" type="reset" value="Retry"/>
-                        <input class="btn btn-primary" type="submit" value="Continue"/>
+                        <input class="btn btn-primary" id="btn-continue" onclick="startMonitoring()" value="Continue" disabled/>
                     </div>
                 </div>
             </div>
@@ -187,6 +187,34 @@
     checkUrlParamter("gtfsrt-updates");
 
     downloadGTFSFeed();
+
+    $("#btn-continue").removeAttr('disabled');
+
+    function startMonitoring(){
+
+        var path = "monitoring.html";
+        var parameters = {alert:'http://test', vehicle:'http://test2'};
+
+        var form = $('<form></form>');
+
+        form.attr("method", "post");
+        form.attr("action", path);
+
+        $.each(parameters, function(key, value) {
+            var field = $('<input></input>');
+
+            field.attr("type", "hidden");
+            field.attr("name", key);
+            field.attr("value", value);
+
+            form.append(field);
+        });
+
+        // The form needs to be a part of the document in
+        // order for us to be able to submit it.
+        $(document.body).append(form);
+        form.submit();
+    }
 
 </script>
 </body>

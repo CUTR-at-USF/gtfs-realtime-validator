@@ -11,13 +11,14 @@ import java.net.URL;
 
 public class RefreshCountTask implements Runnable {
 
-    public static int count = 1;
+    public static boolean urlRecived = true;
 
     public URL _tripUpdatesUrl;
     public URL _vehiclePositionsUrl;
 
     public RefreshCountTask(){
         try {
+            //TODO: URLs should be taken from the users input
             _vehiclePositionsUrl = new URL("http://developer.mbta.com/lib/GTRTFS/Alerts/VehiclePositions.pb");
             _tripUpdatesUrl = new URL("http://developer.mbta.com/lib/GTRTFS/Alerts/TripUpdates.pb");
         } catch (MalformedURLException e) {
@@ -28,9 +29,8 @@ public class RefreshCountTask implements Runnable {
     @Override
     public void run() {
         try {
-            if (count != 0) {
+            if (urlRecived) {
                 fetch();
-                count++;
             }
 
         } catch (Exception ex) {
