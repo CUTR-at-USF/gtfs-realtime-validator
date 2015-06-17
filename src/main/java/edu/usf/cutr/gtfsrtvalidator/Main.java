@@ -5,6 +5,7 @@ import edu.usf.cutr.gtfsrtvalidator.db.Database;
 import edu.usf.cutr.gtfsrtvalidator.servlets.CountServlet;
 import edu.usf.cutr.gtfsrtvalidator.servlets.GTFSDownloaderServlet;
 import edu.usf.cutr.gtfsrtvalidator.servlets.RTFeedValidatorServlet;
+import edu.usf.cutr.gtfsrtvalidator.servlets.TriggerBackgroundServlet;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -24,7 +25,7 @@ public class Main {
         context.setResourceBase(BASE_RESOURCE);
 
         ServletContextListener myListener = new BackgroundTask();
-        context.addEventListener(myListener);
+        //context.addEventListener(myListener);
 
         server.setHandler(context);
 
@@ -32,6 +33,7 @@ public class Main {
         context.addServlet(GTFSDownloaderServlet.class, "/downloadgtfs");
 
         context.addServlet(CountServlet.class, "/count");
+        context.addServlet(TriggerBackgroundServlet.class, "/startBackground");
 
         context.addServlet(DefaultServlet.class, "/");
 

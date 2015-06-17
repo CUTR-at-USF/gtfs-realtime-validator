@@ -1,7 +1,7 @@
 package edu.usf.cutr.gtfsrtvalidator.servlets;
 
-import com.google.transit.realtime.GtfsRealtime.*;
-import edu.usf.cutr.gtfsrtvalidator.background.RefreshCountTask;
+import com.google.transit.realtime.GtfsRealtime.FeedEntity;
+import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -24,8 +24,6 @@ public class RTFeedValidatorServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request,
                          HttpServletResponse response) throws ServletException, IOException {
-
-        RefreshCountTask.count = 1;
 
         String feedURL = getParamter(request, "gtfsrturl");
 
