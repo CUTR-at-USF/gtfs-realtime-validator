@@ -61,23 +61,7 @@
                         </div>
                         <div class="col-md-12">
                             <div class="well">
-                                <label for="gtfsrt-alerts-progress">GTFS-RT Alerts <span class="status">(Checking Feed...)</span></label>
-
-                                <div id="gtfsrt-alerts-progress" class="progress progress-striped active">
-                                    <div class="progress-bar" style="width: 100%"></div>
-                                </div>
-
-                                <label for="gtfsrt-updates-progress">GTFS-RT Updates <span class="status">(Checking Feed...)</span></label>
-
-                                <div id="gtfsrt-updates-progress" class="progress progress-striped active">
-                                    <div class="progress-bar" style="width: 100%"></div>
-                                </div>
-
-                                <label for="gtfsrt-vehicles-progress">GTFS-RT Vehicle Position <span class="status">(Checking Feed...)</span></label>
-
-                                <div id="gtfsrt-vehicles-progress" class="progress progress-striped active">
-                                    <div class="progress-bar" style="width: 100%"></div>
-                                </div>
+                                <div class="progress-placeholder"></div>
                             </div>
                         </div>
                     </div>
@@ -91,18 +75,26 @@
         </form>
     </div>
 </div>
-</body>
+
 <!-- /.container -->
 <!-- script references -->
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0/handlebars.js"></script>
+
+<script id="gtfsrt-progress-template" type="text/x-handlebars-template">
+        {{#each gtfsFeeds}}
+        <label for="gtfsrt-alerts-progress">GTFS-RT ( {{url}} ) <span class="status">(Checking Feed...)</span></label>
+
+        <div id="gtfsrt-progress-{{index}}" class="progress progress-striped active">
+            <div class="progress-bar" style="width: 100%"></div>
+        </div>
+        {{/each}}
+</script>
+
 <script>
 
-    var INVALID_FEED = 0;
-    var TRIP_FEED = 1;
-    var ALERT_FEED = 2;
-    var UPDATE_FEED = 3;
-
+    //Generic function that given a name, retrieves get parameters from the URL
     function getUrlParameter(sParam) {
         var sPageURL = window.location.search.substring(1);
         var sURLVariables = sPageURL.split('&');
@@ -114,7 +106,47 @@
         }
     }
 
-    function checkUrlParamter(paramName) {
+    //Fetches the list of get parameter which contain 'gtfs-realtime' feed URLs
+    function getRealTimeUrlList() {
+        var sPageURL = window.location.search.substring(1);
+        var sURLVariables = sPageURL.split('&');
+        var parameterList = [];
+        var urlList = new Object();
+        urlList.gtfsFeeds = [];
+
+        //Fetches all the get parameters into parameterList array
+        for (var i = 0; i < sURLVariables.length; i++) {
+            var getParameter = sURLVariables[i].split('=');
+            parameterList.push(getParameter);
+        }
+
+        //Takes all the get parameters and selects those with 'gtfsrt' in them
+        for (var i = 0; i < parameterList.length; i++) {
+            if (parameterList[i][0].indexOf("gtfsrt") != -1 && parameterList[i][1] != "") {
+                var gtfsFeed = new Object();
+
+                //Extract the number associated with the rt feed and save it in rtParam objects index field
+                //ex - gtfsrt-feed-1 would return the index of 1
+                gtfsFeed.index = parseInt(parameterList[i][0].substr(parameterList[i][0].length - 1));
+                gtfsFeed.url = parameterList[i][1];
+
+                urlList.gtfsFeeds.push(gtfsFeed);
+            }
+        }
+
+        alert(JSON.stringify(urlList));
+
+        var progressTemplateScript = $("#gtfsrt-progress-template").html();
+        var progressTemplate = Handlebars.compile(progressTemplateScript);
+        var compiledHtml = progressTemplate(urlList);
+        $('.progress-placeholder').html(compiledHtml);
+
+        return urlList;
+    }
+
+    function checkUrlParamter(gtfsRtParameter) {
+
+
         var paramVal = getUrlParameter(paramName);
         var progressID = "#" + paramName + "-progress";
         var requestFeedType;
@@ -133,28 +165,28 @@
             // paramName + "-progress" to white.
         } else {
             $.get("http://localhost:8080/validate", {gtfsrturl: paramVal})
-                .done(function (data) {
-                    if (data["feedStatus"] === requestFeedType) {
-                        $(progressID).removeClass("progress-striped active");
-                        $(progressID + " .progress-bar").addClass("progress-bar-success");
+                    .done(function (data) {
+                        if (data["feedStatus"] === requestFeedType) {
+                            $(progressID).removeClass("progress-striped active");
+                            $(progressID + " .progress-bar").addClass("progress-bar-success");
 
-                        $(progressID).prev().find(".status").text("(Feed Valid)");
+                            $(progressID).prev().find(".status").text("(Feed Valid)");
 
-                    } else if (data["feedStatus"] !== INVALID_FEED) {
-                        //Incorrect feed type given
-                        $(progressID).removeClass("progress-striped active");
-                        $(progressID + " .progress-bar").addClass("progress-bar-warning");
+                        } else if (data["feedStatus"] !== INVALID_FEED) {
+                            //Incorrect feed type given
+                            $(progressID).removeClass("progress-striped active");
+                            $(progressID + " .progress-bar").addClass("progress-bar-warning");
 
-                        $(progressID).prev().find(".status").text("(Invalid feed type)");
-                    } else {
-                        //the URL provided was invalid for the feed.
-                        //A warning will be displayed for the given feed
-                        $(progressID).removeClass("progress-striped active");
-                        $(progressID + " .progress-bar").addClass("progress-bar-danger");
+                            $(progressID).prev().find(".status").text("(Invalid feed type)");
+                        } else {
+                            //the URL provided was invalid for the feed.
+                            //A warning will be displayed for the given feed
+                            $(progressID).removeClass("progress-striped active");
+                            $(progressID + " .progress-bar").addClass("progress-bar-danger");
 
-                        $(progressID).prev().find(".status").text("(Invalid URL)");
-                    }
-                });
+                            $(progressID).prev().find(".status").text("(Invalid URL)");
+                        }
+                    });
         }
     }
 
@@ -184,9 +216,17 @@
         }
     }
 
-    checkUrlParamter("gtfsrt-vehicles");
-    checkUrlParamter("gtfsrt-alerts");
-    checkUrlParamter("gtfsrt-updates");
+    RTUrlList = getRealTimeUrlList();
+
+    for (var i = 0; i < RTUrlList.length; i++) {
+        if(RTUrlList[i].url != ""){
+            createProgressBar(RTUrlList[i]);
+        }
+    }
+
+    for (var i = 0; i < RTUrlList.length; i++) {
+        checkUrlParamter(RTUrlList[i]);
+    }
 
     downloadGTFSFeed();
 
