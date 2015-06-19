@@ -41,6 +41,7 @@ function getRtUrlList() {
     return urlList;
 }
 
+//Generates the progress bars for the list of RealTime Feeds provided
 function generateRealtimeProgressBar(urlList) {
     var progressTemplateScript = $("#gtfsrt-progress-template").html();
     var progressTemplate = Handlebars.compile(progressTemplateScript);
@@ -49,83 +50,31 @@ function generateRealtimeProgressBar(urlList) {
 }
 
 //Check if the urls provided are valid gtfs-rt feeds
-function checkUrlParamter(gtfsRtParameter) {
-    var paramVal = getUrlParameter(paramName);
-    var progressID = "#" + paramName + "-progress";
-    var requestFeedType;
-
-    if (paramName === "gtfsrt-vehicles") requestFeedType = UPDATE_FEED;
-    else if (paramName === "gtfsrt-alerts") requestFeedType = ALERT_FEED;
-    else if (paramName === "gtfsrt-updates") requestFeedType = TRIP_FEED;
-
-    if (paramVal === null) {
-        alert("parameter is null/ undefined?")
-        //TODO: no URL for the given feed entered. Show status
-        //paramName + "-progress" to white.
-    } else if (paramVal === "") {
-        alert("empty string")
-        //TODO: no URL for the given feed entered. Show status
-        // paramName + "-progress" to white.
-    } else {
-        $.get("http://localhost:8080/validate", {gtfsrturl: paramVal})
-            .done(function (data) {
-                if (data["feedStatus"] === requestFeedType) {
-                    $(progressID).removeClass("progress-striped active");
-                    $(progressID + " .progress-bar").addClass("progress-bar-success");
-
-                    $(progressID).prev().find(".status").text("(Feed Valid)");
-
-                } else if (data["feedStatus"] !== INVALID_FEED) {
-                    //Incorrect feed type given
-                    $(progressID).removeClass("progress-striped active");
-                    $(progressID + " .progress-bar").addClass("progress-bar-warning");
-
-                    $(progressID).prev().find(".status").text("(Invalid feed type)");
-                } else {
-                    //the URL provided was invalid for the feed.
-                    //A warning will be displayed for the given feed
-                    $(progressID).removeClass("progress-striped active");
-                    $(progressID + " .progress-bar").addClass("progress-bar-danger");
-
-                    $(progressID).prev().find(".status").text("(Invalid URL)");
-                }
-            });
-    }
-}
-
 function checkGtfsRtFeeds(gtfsrtUrlList) {
     //alert(JSON.stringify(gtfsrtUrlList));
-    for (var i = 0; i < gtfsrtUrlList.gtfsFeeds.length; i++){
+    for (var i = 0; i < gtfsrtUrlList.gtfsFeeds.length; i++) {
         var currentURL = gtfsrtUrlList.gtfsFeeds[i].url;
+        var currentIndex = gtfsrtUrlList.gtfsFeeds[i].index;
 
-        //TODO: async call to check the url change status when the result is returned.
-        $.get("http://localhost:8080/validate", {gtfsrturl: paramVal})
-            .done(function (data) {
+        (function (url, index) {
+            $.get("http://localhost:8080/validate", {gtfsrturl: currentURL})
+                .done(function (data) {
+                    var progressID = "#gtfsrt-progress-" + index;
+                    if (data["feedStatus"] === 1) {
+                        $(progressID).removeClass("progress-striped active");
+                        $(progressID + " .progress-bar").addClass("progress-bar-success");
 
-                //data should be only pass or failed
+                        $(progressID).prev().find(".status").text("(Feed Valid)");
 
+                    } else if (data["feedStatus"] === 0) {
+                        //Incorrect feed type given
+                        $(progressID).removeClass("progress-striped active");
+                        $(progressID + " .progress-bar").addClass("progress-bar-danger");
 
-                if (data["feedStatus"] === requestFeedType) {
-                    $(progressID).removeClass("progress-striped active");
-                    $(progressID + " .progress-bar").addClass("progress-bar-success");
-
-                    $(progressID).prev().find(".status").text("(Feed Valid)");
-
-                } else if (data["feedStatus"] !== INVALID_FEED) {
-                    //Incorrect feed type given
-                    $(progressID).removeClass("progress-striped active");
-                    $(progressID + " .progress-bar").addClass("progress-bar-warning");
-
-                    $(progressID).prev().find(".status").text("(Invalid feed type)");
-                } else {
-                    //the URL provided was invalid for the feed.
-                    //A warning will be displayed for the given feed
-                    $(progressID).removeClass("progress-striped active");
-                    $(progressID + " .progress-bar").addClass("progress-bar-danger");
-
-                    $(progressID).prev().find(".status").text("(Invalid URL)");
-                }
-            });
+                        $(progressID).prev().find(".status").text("(Invalid type)");
+                    }
+                });
+        }(currentURL, currentIndex));
     }
 }
 
@@ -156,14 +105,8 @@ function downloadGTFSFeed() {
 }
 
 var gtfsrtUrlList = getRtUrlList();
-
 generateRealtimeProgressBar(gtfsrtUrlList);
 checkGtfsRtFeeds(gtfsrtUrlList);
-
-for (var i = 0; i < RTUrlList.length; i++) {
-    checkUrlParamter(RTUrlList[i]);
-}
-
 downloadGTFSFeed();
 
 //TODO: check if any feed has failed

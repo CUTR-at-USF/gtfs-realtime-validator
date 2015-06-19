@@ -23,7 +23,7 @@ public class RTFeedValidatorServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request,
                          HttpServletResponse response) throws ServletException, IOException {
 
-        String feedURL = getParamter(request, "gtfsrturl");
+        String feedURL = getParameter(request, "gtfsrturl");
 
         int feedType = checkFeedType(feedURL);
 
@@ -35,7 +35,7 @@ public class RTFeedValidatorServlet extends HttpServlet {
         response.getWriter().println("{\"feedStatus\" : "+ feedType +"}");
     }
 
-    private String getParamter(HttpServletRequest request, String paramName){
+    private String getParameter(HttpServletRequest request, String paramName){
 
         String parameter = "";
         String value = request.getParameter(paramName);
@@ -49,7 +49,6 @@ public class RTFeedValidatorServlet extends HttpServlet {
                 e.printStackTrace();
             }
         }
-
         return parameter;
     }
 
@@ -62,16 +61,13 @@ public class RTFeedValidatorServlet extends HttpServlet {
             URL url = FeedURI.toURL();
             feed = FeedMessage.parseFrom(url.openStream());
         } catch (URISyntaxException | IllegalArgumentException | IOException e ) {
-            System.out.println("Exception");
             return INVALID_FEED;
         }
 
         if (feed.hasHeader()) {
-            System.out.println("");
             return VALID_FEED;
         }
 
-        System.out.println("Default");
         return INVALID_FEED;
     }
 
