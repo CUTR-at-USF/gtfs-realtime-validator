@@ -5,12 +5,12 @@
     <meta charset="utf-8">
     <title>GTFS-RT Validator</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link href="static/css/bootstrap.css" rel="stylesheet">
-    <link rel="stylesheet" href="static/css/style.css"/>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css"/>
     <!--[if lt IE 9]>
     <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-    <link href="static/css/style.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
 </head>
 <body style="background-color: #e4e4e4">
 <div class="navbar navbar-default" style="margin-bottom: 0">
@@ -51,7 +51,8 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="well">
-                                <label for="gtfs-progress">GTFS-Feed <span class="status">(Downloading Feed...)</span></label>
+                                <label for="gtfs-progress">GTFS-Feed <span
+                                        class="status">(Downloading Feed...)</span></label>
 
                                 <div id="gtfs-progress" class="progress progress-striped active">
                                     <div class="progress-bar" style="width: 100%"></div>
@@ -82,7 +83,8 @@
                     </div>
                     <div align="right">
                         <input class="btn btn-default" type="reset" value="Retry"/>
-                        <input class="btn btn-primary" id="btn-continue" onclick="startMonitoring()" value="Continue" disabled/>
+                        <input class="btn btn-primary" id="btn-continue" onclick="startMonitoring()" value="Continue"
+                               disabled/>
                     </div>
                 </div>
             </div>
@@ -93,7 +95,7 @@
 <!-- /.container -->
 <!-- script references -->
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
-<script src="static/js/bootstrap.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
 <script>
 
     var INVALID_FEED = 0;
@@ -117,9 +119,9 @@
         var progressID = "#" + paramName + "-progress";
         var requestFeedType;
 
-        if(paramName === "gtfsrt-vehicles") requestFeedType = UPDATE_FEED;
-        else if(paramName === "gtfsrt-alerts") requestFeedType = ALERT_FEED;
-        else if(paramName === "gtfsrt-updates") requestFeedType = TRIP_FEED;
+        if (paramName === "gtfsrt-vehicles") requestFeedType = UPDATE_FEED;
+        else if (paramName === "gtfsrt-alerts") requestFeedType = ALERT_FEED;
+        else if (paramName === "gtfsrt-updates") requestFeedType = TRIP_FEED;
 
         if (paramVal === null) {
             alert("parameter is null/ undefined?")
@@ -131,32 +133,32 @@
             // paramName + "-progress" to white.
         } else {
             $.get("http://localhost:8080/validate", {gtfsrturl: paramVal})
-                    .done(function (data) {
-                        if(data["feedStatus"] === requestFeedType){
-                            $(progressID).removeClass("progress-striped active");
-                            $(progressID + " .progress-bar").addClass("progress-bar-success");
+                .done(function (data) {
+                    if (data["feedStatus"] === requestFeedType) {
+                        $(progressID).removeClass("progress-striped active");
+                        $(progressID + " .progress-bar").addClass("progress-bar-success");
 
-                            $(progressID).prev().find(".status").text("(Feed Valid)");
+                        $(progressID).prev().find(".status").text("(Feed Valid)");
 
-                        }else if(data["feedStatus"] !== INVALID_FEED){
-                            //Incorrect feed type given
-                            $(progressID).removeClass("progress-striped active");
-                            $(progressID + " .progress-bar").addClass("progress-bar-warning");
+                    } else if (data["feedStatus"] !== INVALID_FEED) {
+                        //Incorrect feed type given
+                        $(progressID).removeClass("progress-striped active");
+                        $(progressID + " .progress-bar").addClass("progress-bar-warning");
 
-                            $(progressID).prev().find(".status").text("(Invalid feed type)");
-                        }else{
-                            //the URL provided was invalid for the feed.
-                            //A warning will be displayed for the given feed
-                            $(progressID).removeClass("progress-striped active");
-                            $(progressID + " .progress-bar").addClass("progress-bar-danger");
+                        $(progressID).prev().find(".status").text("(Invalid feed type)");
+                    } else {
+                        //the URL provided was invalid for the feed.
+                        //A warning will be displayed for the given feed
+                        $(progressID).removeClass("progress-striped active");
+                        $(progressID + " .progress-bar").addClass("progress-bar-danger");
 
-                            $(progressID).prev().find(".status").text("(Invalid URL)");
-                        }
-                    });
+                        $(progressID).prev().find(".status").text("(Invalid URL)");
+                    }
+                });
         }
     }
 
-    function downloadGTFSFeed(){
+    function downloadGTFSFeed() {
 
         var paramVal = getUrlParameter("gtfs");
         var progressID = "#gtfs-progress";
@@ -172,7 +174,7 @@
         } else {
             $.get("http://localhost:8080/downloadgtfs", {gtfsurl: paramVal})
                     .done(function (data) {
-                        if(data["feedStatus"] === 1){
+                        if (data["feedStatus"] === 1) {
                             $(progressID).removeClass("progress-striped active");
                             $(progressID + " .progress-bar").addClass("progress-bar-success");
 
@@ -188,19 +190,20 @@
 
     downloadGTFSFeed();
 
+    //TODO: check if any feed has failed
     $("#btn-continue").removeAttr('disabled');
 
-    function startMonitoring(){
+    function startMonitoring() {
 
         var path = "monitoring.html";
-        var parameters = {alert:'http://test', vehicle:'http://test2'};
+        var parameters = {alert: 'http://test', vehicle: 'http://test2'};
 
         var form = $('<form></form>');
 
         form.attr("method", "post");
         form.attr("action", path);
 
-        $.each(parameters, function(key, value) {
+        $.each(parameters, function (key, value) {
             var field = $('<input></input>');
 
             field.attr("type", "hidden");

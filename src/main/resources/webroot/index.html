@@ -5,12 +5,12 @@
     <meta charset="utf-8">
     <title>GTFS-RT Validator</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link href="static/css/bootstrap.css" rel="stylesheet">
-    <link rel="stylesheet" href="static/css/style.css"/>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css"/>
     <!--[if lt IE 9]>
     <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-    <link href="static/css/style.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
 </head>
 <body style="background-color: #e4e4e4">
 <div class="navbar navbar-default" style="margin-bottom: 0">
@@ -79,18 +79,15 @@
                             <div class="well">
                                 <h4>Step 1: add your the URL/file of your RT feed</h4>
                                 <hr/>
-                                <div class="form-group">
-                                    <label for="gtfsrt-vehicles">GTFS-Realtime (Vehicles)</label>
-                                    <input class="form-control" name="gtfsrt-vehicles"/>
+
+                                <div id="dynamicInput">
+                                    <div class="form-group">
+                                        <label for="gtfsrt-feed-1">GTFS-Realtime Feed 1</label>
+                                        <input class="form-control" name="gtfsrt-feed-1"/>
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label for="gtfsrt-alerts">GTFS-Realtime (Alerts)</label>
-                                    <input class="form-control" name="gtfsrt-alerts"/>
-                                </div>
-                                <div class="form-group">
-                                    <label for="gtfsrt-updates">GTFS-Realtime (Trip Updates)</label>
-                                    <input class="form-control" name="gtfsrt-updates"/>
-                                </div>
+                                <a class="btn btn-default btn-sm"  onClick="addInput();"><span class="glyphicon glyphicon-plus-sign"></span> Add Feed</a>
+                                <a class="btn btn-default btn-sm"  onClick="removeInput();"><span class="glyphicon glyphicon-minus-sign"></span> Remove Feed</a>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -118,6 +115,35 @@
 <!-- /.container -->
 <!-- script references -->
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
-<script src="static/js/bootstrap.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script>
+    var counter = 1;
+    var limit = 5;
+    function addInput(){
+        if (counter == limit)  {
+            alert("You have reached the limit of adding " + counter + " inputs");
+        }
+        else {
+            var newdiv = document.createElement('div');
+            var count = (counter + 1);
+            var HTMLString;
+
+            HTMLString = "<div class=\"form-group\"> <label for=\"gtfsrt-feed-"+ count +"\">GTFS-Realtime Feed "+ count +"</label>";
+            HTMLString += "<input class=\"form-control\" name=\"gtfsrt-feed-"+ count+ "\"/></div>";
+            newdiv.innerHTML = HTMLString;
+            $("#dynamicInput").append(newdiv);
+            counter++;
+        }
+    }
+
+    function removeInput(){
+        if (counter == 1)  {
+            alert("You must have at least one GTFS-Realtime feed")
+        }else{
+            $('#dynamicInput').children().last().remove();
+            counter = counter-1;
+        }
+    }
+</script>
 </body>
 </html>
