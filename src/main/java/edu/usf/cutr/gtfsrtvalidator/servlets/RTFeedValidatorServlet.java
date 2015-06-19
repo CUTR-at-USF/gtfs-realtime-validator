@@ -1,6 +1,5 @@
 package edu.usf.cutr.gtfsrtvalidator.servlets;
 
-import com.google.transit.realtime.GtfsRealtime.FeedEntity;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 
 import javax.servlet.ServletException;
@@ -17,9 +16,8 @@ import java.net.URL;
 public class RTFeedValidatorServlet extends HttpServlet {
 
     private static final int INVALID_FEED = 0;
-    private static final int TRIP_FEED = 1;
-    private static final int ALERT_FEED = 2;
-    private static final int UPDATE_FEED = 3;
+    private static final int VALID_FEED = 1;
+
 
     @Override
     protected void doGet(HttpServletRequest request,
@@ -51,7 +49,7 @@ public class RTFeedValidatorServlet extends HttpServlet {
                 e.printStackTrace();
             }
         }
-        System.out.println(parameter);
+
         return parameter;
     }
 
@@ -59,31 +57,22 @@ public class RTFeedValidatorServlet extends HttpServlet {
 
         FeedMessage feed;
         try {
+            System.out.println(FeedURL);
             URI FeedURI = new URI(FeedURL);
             URL url = FeedURI.toURL();
             feed = FeedMessage.parseFrom(url.openStream());
         } catch (URISyntaxException | IllegalArgumentException | IOException e ) {
+            System.out.println("Exception");
             return INVALID_FEED;
         }
 
-        FeedEntity  firstItem;
-
-        try {
-            firstItem = feed.getEntity(0);
-        } catch (ArrayIndexOutOfBoundsException e) {
-            //Empty feed
-            return INVALID_FEED;
+        if (feed.hasHeader()) {
+            System.out.println("");
+            return VALID_FEED;
         }
 
-        if (firstItem.hasTripUpdate()) {
-            return TRIP_FEED;
-        } else if (firstItem.hasAlert()) {
-            return ALERT_FEED;
-        } else if (firstItem.hasVehicle()) {
-            return UPDATE_FEED;
-        }else {
-            return INVALID_FEED;
-        }
+        System.out.println("Default");
+        return INVALID_FEED;
     }
 
 }
