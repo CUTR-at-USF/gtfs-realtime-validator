@@ -15,7 +15,7 @@ function getRtUrlList() {
     var sPageURL = window.location.search.substring(1);
     var sURLVariables = sPageURL.split('&');
     var parameterList = [];
-    var urlList = new Object();
+    var urlList = {};
     urlList.gtfsFeeds = [];
 
     //Fetches all the get parameters into parameterList array
@@ -27,7 +27,7 @@ function getRtUrlList() {
     //Takes all the get parameters and selects those with 'gtfsrt' in them
     for (var i = 0; i < parameterList.length; i++) {
         if (parameterList[i][0].indexOf("gtfsrt") != -1 && parameterList[i][1] != "") {
-            var gtfsFeed = new Object();
+            var gtfsFeed = {};
 
             //Extract the number associated with the rt feed and save it in rtParam objects index field
             //ex - gtfsrt-feed-1 would return the index of 1
@@ -49,9 +49,11 @@ function generateRealtimeProgressBar(urlList) {
     $('.progress-placeholder').html(compiledHtml);
 }
 
+var validUrlList = {};
+validUrlList.gtfsFeeds = [];
+
 //Check if the urls provided are valid gtfs-rt feeds
 function checkGtfsRtFeeds(gtfsrtUrlList) {
-    //alert(JSON.stringify(gtfsrtUrlList));
     for (var i = 0; i < gtfsrtUrlList.gtfsFeeds.length; i++) {
         var currentURL = gtfsrtUrlList.gtfsFeeds[i].url;
         var currentIndex = gtfsrtUrlList.gtfsFeeds[i].index;
@@ -65,6 +67,9 @@ function checkGtfsRtFeeds(gtfsrtUrlList) {
                         $(progressID + " .progress-bar").addClass("progress-bar-success");
 
                         $(progressID).prev().find(".status").text("(Feed Valid)");
+
+                        var gtfsFeed = {index: index, url: url};
+                        validUrlList.gtfsFeeds.push(gtfsFeed);
 
                     } else if (data["feedStatus"] === 0) {
                         //Incorrect feed type given
@@ -84,11 +89,11 @@ function downloadGTFSFeed() {
     var progressID = "#gtfs-progress";
 
     if (paramVal === null) {
-        alert("parameter is null/ undefined?")
+        alert("parameter is null/ undefined?");
         //TODO: no URL for the given feed entered. Show status
         //paramName + "-progress" to white.
     } else if (paramVal === "") {
-        alert("empty string")
+        alert("empty string");
         //TODO: no URL for the given feed entered. Show status
         // paramName + "-progress" to white.
     } else {
@@ -114,7 +119,15 @@ $("#btn-continue").removeAttr('disabled');
 
 function startMonitoring() {
     var path = "monitoring.html";
-    var parameters = {alert: 'http://test', vehicle: 'http://test2'};
+
+    var parameters = {};
+
+    //Generate parameters from a for loop
+    for (var i = 0; i < validUrlList.gtfsFeeds.length; i++) {
+        var currentURL = validUrlList.gtfsFeeds[i].url;
+        var currentIndex = validUrlList.gtfsFeeds[i].index;
+        parameters['gtfsrt' + currentIndex] = currentURL;
+    }
 
     var form = $('<form></form>');
 
@@ -131,8 +144,6 @@ function startMonitoring() {
         form.append(field);
     });
 
-    // The form needs to be a part of the document in
-    // order for us to be able to submit it.
     $(document.body).append(form);
     form.submit();
 }
