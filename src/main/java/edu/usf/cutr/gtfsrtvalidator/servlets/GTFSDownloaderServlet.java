@@ -14,6 +14,8 @@
 
 package edu.usf.cutr.gtfsrtvalidator.servlets;
 
+import edu.usf.cutr.gtfsrtvalidator.db.GTFSHibernate;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -31,9 +33,10 @@ public class GTFSDownloaderServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        String feedURL = getParamter(request, "gtfsurl");
+        String feedURL = getParameter(request, "gtfsurl");
 
         downloadFeed(feedURL);
+
 
         response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_OK);
@@ -44,23 +47,21 @@ public class GTFSDownloaderServlet extends HttpServlet {
         response.getWriter().println("{\"feedStatus\" :1}");
     }
 
-    private void downloadFeed(String fileURL) throws ServletException, IOException{
+    private void downloadFeed(String fileURL) throws ServletException, IOException {
 
         String path = GTFSDownloaderServlet.class.getProtectionDomain().getCodeSource().getLocation().getPath();
         String decodedPath = URLDecoder.decode(path, "UTF-8");
+        String saveFilePath = "";
+
         System.out.println(decodedPath);
 
-        //String basePath = new File("").getAbsolutePath();
-        //System.out.println(basePath);
-
         URL url = new URL(fileURL);
-        HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
         connection.connect();
         System.out.println(connection.getResponseCode());
         // Check if the request is handled successfully
-        if(connection.getResponseCode() / 100 == 2)
-        {
+        if (connection.getResponseCode() / 100 == 2) {
             // This should get you the size of the file to download (in bytes)
             System.out.println(connection.getContentLength());
             String fileName = "";
@@ -68,17 +69,17 @@ public class GTFSDownloaderServlet extends HttpServlet {
             String contentType = connection.getContentType();
             int contentLength = connection.getContentLength();
 
-            if (disposition != null) {
+            if (disposition == null) {
+                // extracts file name from URL
+                fileName = fileURL.substring(fileURL.lastIndexOf("/") + 1,
+                        fileURL.length());
+            } else {
                 // extracts file name from header field
                 int index = disposition.indexOf("filename=");
                 if (index > 0) {
                     fileName = disposition.substring(index + 10,
                             disposition.length() - 1);
                 }
-            } else {
-                // extracts file name from URL
-                fileName = fileURL.substring(fileURL.lastIndexOf("/") + 1,
-                        fileURL.length());
             }
 
             System.out.println("Content-Type = " + contentType);
@@ -90,7 +91,7 @@ public class GTFSDownloaderServlet extends HttpServlet {
             InputStream inputStream = connection.getInputStream();
 
             String saveDir = ".";
-            String saveFilePath = saveDir + File.separator + fileName;
+            saveFilePath = saveDir + File.separator + fileName;
 
             // opens an output stream to save into file
             FileOutputStream outputStream = new FileOutputStream(saveFilePath);
@@ -105,10 +106,13 @@ public class GTFSDownloaderServlet extends HttpServlet {
             inputStream.close();
 
             System.out.println("File downloaded");
+            GTFSHibernate.saveToDatabase(saveFilePath);
+
+            GTFSHibernate.printAllStops();
         }
     }
 
-    private String getParamter(HttpServletRequest request, String paramName){
+    private String getParameter(HttpServletRequest request, String paramName){
 
         String parameter = "";
         String value = request.getParameter(paramName);
