@@ -44,7 +44,6 @@ public class BackgroundSingleton {
             executor.scheduleAtFixedRate(new RefreshCountTask(), 0, 10, TimeUnit.SECONDS);
             backgroundProcessStarted = true;
         }
-
     }
 
     public void StopBackgrounProcess(){

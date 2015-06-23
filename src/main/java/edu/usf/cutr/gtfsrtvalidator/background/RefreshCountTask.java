@@ -40,11 +40,20 @@ public class RefreshCountTask implements Runnable {
         }
     }
 
+    public RefreshCountTask(String url){
+        try {
+            _vehiclePositionsUrl = new URL(url);
+        } catch (MalformedURLException e) {
+        }
+    }
+
     @Override
     public void run() {
         try {
             if (urlRecived) {
-                fetch();
+                //fetch();
+                System.out.println(_vehiclePositionsUrl);
+
             }
 
         } catch (Exception ex) {

@@ -14,7 +14,7 @@
 
 package edu.usf.cutr.gtfsrtvalidator.servlets;
 
-import edu.usf.cutr.gtfsrtvalidator.background.BackgroundSingleton;
+import edu.usf.cutr.gtfsrtvalidator.background.BackgroundMultiThread;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -26,8 +26,13 @@ public class TriggerBackgroundServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        BackgroundSingleton monitorTask = BackgroundSingleton.getInstance();
-        monitorTask.StartBackgrounProcess();
+        //BackgroundSingleton monitorTask = BackgroundSingleton.getInstance();
+        //monitorTask.StartBackgrounProcess();
+
+        BackgroundMultiThread.startBackgroundTask("http://api.bart.gov/gtfsrt/tripupdate.aspx");
+        BackgroundMultiThread.startBackgroundTask("http://api.bart.gov/gtfsrt/alerts.aspx");
+        BackgroundMultiThread.startBackgroundTask("http://api.bart.gov/gtfsrt/alerts.aspx");
+
     }
 
 }

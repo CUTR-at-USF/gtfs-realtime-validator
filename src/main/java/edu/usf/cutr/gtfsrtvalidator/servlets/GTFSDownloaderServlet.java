@@ -108,7 +108,7 @@ public class GTFSDownloaderServlet extends HttpServlet {
             System.out.println("File downloaded");
             GTFSHibernate.saveToDatabase(saveFilePath);
 
-            GTFSHibernate.printAllStops();
+            //GTFSHibernate.printAllStops();
         }
     }
 

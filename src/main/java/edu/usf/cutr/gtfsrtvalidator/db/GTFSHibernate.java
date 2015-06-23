@@ -47,6 +47,8 @@ public class GTFSHibernate {
 
         for (Stop stop : stops)
             System.out.println(stop.getName());
+
+
     }
 
     private static HibernateGtfsFactory createHibernateGtfsFactory(String resource) {
@@ -64,6 +66,5 @@ public class GTFSHibernate {
 
         SessionFactory sessionFactory = config.buildSessionFactory();
         return new HibernateGtfsFactory(sessionFactory);
-
     }
 }
