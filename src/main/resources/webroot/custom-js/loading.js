@@ -75,6 +75,8 @@ function checkGtfsRtFeeds(gtfsrtUrlList) {
                         var gtfsFeed = {index: index, url: url};
                         validUrlList.gtfsFeeds.push(gtfsFeed);
 
+                        validGtfsRT = true;
+                        checkStatus();
                     } else if (data["feedStatus"] === 0) {
                         //Incorrect feed type given
                         $(progressID).removeClass("progress-striped active");
@@ -86,6 +88,9 @@ function checkGtfsRtFeeds(gtfsrtUrlList) {
         }(currentURL, currentIndex));
     }
 }
+
+var validGtfs = false;
+var validGtfsRT = false;
 
 //Download the provided GTFS feed
 function downloadGTFSFeed() {
@@ -108,8 +113,17 @@ function downloadGTFSFeed() {
                     $(progressID + " .progress-bar").addClass("progress-bar-success");
 
                     $(progressID).prev().find(".status").text("(Download Successful)");
+
+                    validGtfs = true;
+                    checkStatus();
                 }
             });
+    }
+}
+
+function checkStatus(){
+    if(validGtfs && validGtfsRT) {
+        $("#btn-continue").removeAttr('disabled');
     }
 }
 
@@ -117,9 +131,6 @@ var gtfsrtUrlList = getRtUrlList();
 generateRealtimeProgressBar(gtfsrtUrlList);
 checkGtfsRtFeeds(gtfsrtUrlList);
 downloadGTFSFeed();
-
-//TODO: check if any feed has failed
-$("#btn-continue").removeAttr('disabled');
 
 function startMonitoring() {
     var path = "monitoring.html";

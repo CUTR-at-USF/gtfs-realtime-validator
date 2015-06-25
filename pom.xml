@@ -155,7 +155,6 @@
                             <mainClass>edu.usf.cutr.gtfsrtvalidator.Main</mainClass>
                         </transformer>
                     </transformers>
-                    <minimizeJar>true</minimizeJar>
                 </configuration>
 
                 <executions>

@@ -65,10 +65,16 @@
                             </div>
                         </div>
                     </div>
-                    <div align="right">
-                        <input class="btn btn-default" type="reset" value="Retry"/>
-                        <input class="btn btn-primary" id="btn-continue" onclick="startMonitoring()" value="Continue"
-                               disabled/>
+                    <div class="row">
+                        <div align="left" class="col-md-4">
+                            <input class="btn btn-default" type="button" onclick="window.history.back();" value="Back"/>
+                        </div>
+
+                        <div align="right" class="col-md-8">
+                            <input class="btn btn-default" type="button" onclick="location.reload();" value="Retry"/>
+                            <button class="btn btn-primary" id="btn-continue" onclick="startMonitoring()"
+                                   disabled>Continue</button>
+                        </div>
                     </div>
                 </div>
             </div>
