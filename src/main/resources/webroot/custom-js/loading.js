@@ -32,7 +32,11 @@ function getRtUrlList() {
             //Extract the number associated with the rt feed and save it in rtParam objects index field
             //ex - gtfsrt-feed-1 would return the index of 1
             gtfsFeed.index = parseInt(parameterList[i][0].substr(parameterList[i][0].length - 1));
-            gtfsFeed.url = parameterList[i][1];
+
+            var paramUrl = parameterList[i][1]
+            paramUrl = decodeURIComponent(decodeURIComponent((paramUrl)));
+
+            gtfsFeed.url = paramUrl;
 
             urlList.gtfsFeeds.push(gtfsFeed);
         }
