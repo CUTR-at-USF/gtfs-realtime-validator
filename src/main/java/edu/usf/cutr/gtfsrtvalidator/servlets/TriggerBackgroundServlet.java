@@ -14,24 +14,30 @@
 
 package edu.usf.cutr.gtfsrtvalidator.servlets;
 
-import edu.usf.cutr.gtfsrtvalidator.background.BackgroundMultiThread;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Enumeration;
 
 public class TriggerBackgroundServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        //BackgroundSingleton monitorTask = BackgroundSingleton.getInstance();
-        //monitorTask.StartBackgrounProcess();
 
-        BackgroundMultiThread.startBackgroundTask("http://api.bart.gov/gtfsrt/tripupdate.aspx");
-        BackgroundMultiThread.startBackgroundTask("http://api.bart.gov/gtfsrt/alerts.aspx");
-        BackgroundMultiThread.startBackgroundTask("http://api.bart.gov/gtfsrt/alerts.aspx");
+        Enumeration<String> paramNames = request.getParameterNames();
+
+        while (paramNames.hasMoreElements()) {
+            String paramName = paramNames.nextElement();
+            System.out.println("Parameter Name " + paramName);
+
+            System.out.println("Parameter Value " + request.getParameter(paramName));
+        }
+
+//        BackgroundMultiThread.startBackgroundTask("http://api.bart.gov/gtfsrt/tripupdate.aspx");
+//        BackgroundMultiThread.startBackgroundTask("http://api.bart.gov/gtfsrt/alerts.aspx");
+//        BackgroundMultiThread.startBackgroundTask("http://api.bart.gov/gtfsrt/alerts.aspx");
 
     }
 

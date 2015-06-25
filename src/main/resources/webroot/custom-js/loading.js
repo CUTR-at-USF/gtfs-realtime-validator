@@ -133,7 +133,7 @@ checkGtfsRtFeeds(gtfsrtUrlList);
 downloadGTFSFeed();
 
 function startMonitoring() {
-    var path = "monitoring.html";
+    var path = "background";
 
     var parameters = {};
 
