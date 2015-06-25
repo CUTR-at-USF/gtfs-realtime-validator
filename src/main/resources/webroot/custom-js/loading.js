@@ -133,7 +133,7 @@ checkGtfsRtFeeds(gtfsrtUrlList);
 downloadGTFSFeed();
 
 function startMonitoring() {
-    var path = "background";
+    var path = "http://localhost:8080/startBackground";
 
     var parameters = {};
 
