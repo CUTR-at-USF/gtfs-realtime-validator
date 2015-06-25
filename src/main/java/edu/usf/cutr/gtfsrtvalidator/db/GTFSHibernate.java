@@ -14,6 +14,7 @@ package edu.usf.cutr.gtfsrtvalidator.db;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
+import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.serialization.GtfsReader;
 import org.onebusaway.gtfs.services.GtfsMutableRelationalDao;
@@ -27,6 +28,19 @@ public class GTFSHibernate {
 
     private static final String KEY_CLASSPATH = "classpath:";
     private static final String KEY_FILE = "file:";
+
+    public static GtfsDaoImpl readToDatastore(String saveFilePath) throws IOException {
+
+        GtfsReader reader = new GtfsReader();
+        reader.setInputLocation(new File(saveFilePath));
+
+        GtfsDaoImpl store = new GtfsDaoImpl();
+        reader.setEntityStore(store);
+
+        reader.run();
+
+        return store;
+    }
 
     public static void saveToDatabase(String saveFilePath) throws IOException {
 

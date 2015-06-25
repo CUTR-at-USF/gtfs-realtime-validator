@@ -15,6 +15,7 @@
 package edu.usf.cutr.gtfsrtvalidator.servlets;
 
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSHibernate;
+import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -106,14 +107,13 @@ public class GTFSDownloaderServlet extends HttpServlet {
             inputStream.close();
 
             System.out.println("File downloaded");
-            GTFSHibernate.saveToDatabase(saveFilePath);
-
+            //GTFSHibernate.saveToDatabase(saveFilePath);
+            GtfsDaoImpl store = GTFSHibernate.readToDatastore(saveFilePath);
             //GTFSHibernate.printAllStops();
         }
     }
 
     private String getParameter(HttpServletRequest request, String paramName){
-
         String parameter = "";
         String value = request.getParameter(paramName);
 
@@ -129,7 +129,5 @@ public class GTFSDownloaderServlet extends HttpServlet {
         System.out.println(parameter);
         return parameter;
     }
-
-
 }
 
