@@ -85,7 +85,7 @@
                                 <div id="dynamicInput">
                                     <div class="form-group">
                                         <label for="gtfsrt-feed-1">GTFS-Realtime Feed 1</label>
-                                        <input class="form-control" name="gtfsrt-feed-1"/>
+                                        <input class="form-control" name="gtfsrt-feed-1" id="gtfsrt-feed-1"/>
                                     </div>
                                 </div>
                                 <a class="btn btn-default btn-sm"  onClick="addInput();"><span class="glyphicon glyphicon-plus-sign"></span> Add Feed</a>
@@ -98,7 +98,7 @@
                                 <hr/>
                                 <div class="form-group">
                                     <label for="gtfs">GTFS feed</label>
-                                    <input class="form-control" name="gtfs"/>
+                                    <input class="form-control" name="gtfs" id="gtfs"/>
                                 </div>
                             </div>
                         </div>
@@ -118,34 +118,10 @@
 <!-- script references -->
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
+<script src="custom-js/index.js"></script>
 <script>
-    var counter = 1;
-    var limit = 5;
-    function addInput(){
-        if (counter == limit)  {
-            alert("You have reached the limit of adding " + counter + " inputs");
-        }
-        else {
-            var newdiv = document.createElement('div');
-            var count = (counter + 1);
-            var HTMLString;
 
-            HTMLString = "<div class=\"form-group\"> <label for=\"gtfsrt-feed-"+ count +"\">GTFS-Realtime Feed "+ count +"</label>";
-            HTMLString += "<input class=\"form-control\" name=\"gtfsrt-feed-"+ count+ "\"/></div>";
-            newdiv.innerHTML = HTMLString;
-            $("#dynamicInput").append(newdiv);
-            counter++;
-        }
-    }
 
-    function removeInput(){
-        if (counter == 1)  {
-            alert("You must have at least one GTFS-Realtime feed")
-        }else{
-            $('#dynamicInput').children().last().remove();
-            counter = counter-1;
-        }
-    }
 </script>
 </body>
 </html>
