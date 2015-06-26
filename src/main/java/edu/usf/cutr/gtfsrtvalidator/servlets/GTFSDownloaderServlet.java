@@ -83,37 +83,51 @@ public class GTFSDownloaderServlet extends HttpServlet {
                 }
             }
 
-            System.out.println("Content-Type = " + contentType);
-            System.out.println("Content-Disposition = " + disposition);
-            System.out.println("Content-Length = " + contentLength);
-            System.out.println("fileName = " + fileName);
-
-            // opens input stream from the HTTP connection
-            InputStream inputStream = connection.getInputStream();
-
             String saveDir = ".";
+
+
             saveFilePath = saveDir + File.separator + fileName;
 
-            // opens an output stream to save into file
-            FileOutputStream outputStream = new FileOutputStream(saveFilePath);
+            File f = null;
+            f = new File(saveFilePath);
 
-            int bytesRead = -1;
-            byte[] buffer = new byte[BUFFER_SIZE];
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
+
+            if (f.exists() && !f.isDirectory()) {
+                System.out.println("File Already Exists");
+            } else {
+                System.out.println("File Doesn't Exist");
+
+                System.out.println("Content-Type = " + contentType);
+                System.out.println("Content-Disposition = " + disposition);
+                System.out.println("Content-Length = " + contentLength);
+                System.out.println("fileName = " + fileName);
+
+
+                // opens input stream from the HTTP connection
+                InputStream inputStream = connection.getInputStream();
+
+                // opens an output stream to save into file
+                FileOutputStream outputStream = new FileOutputStream(saveFilePath);
+
+                int bytesRead = -1;
+                byte[] buffer = new byte[BUFFER_SIZE];
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, bytesRead);
+                }
+
+                outputStream.close();
+                inputStream.close();
+                System.out.println("File downloaded");
             }
 
-            outputStream.close();
-            inputStream.close();
 
-            System.out.println("File downloaded");
             //GTFSHibernate.saveToDatabase(saveFilePath);
             GtfsDaoImpl store = GTFSHibernate.readToDatastore(saveFilePath);
             //GTFSHibernate.printAllStops();
         }
     }
 
-    private String getParameter(HttpServletRequest request, String paramName){
+    private String getParameter(HttpServletRequest request, String paramName) {
         String parameter = "";
         String value = request.getParameter(paramName);
 
