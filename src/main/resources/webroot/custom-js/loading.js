@@ -122,6 +122,8 @@ function downloadGTFSFeed() {
 }
 
 function checkStatus(){
+    localStorage.setItem("gtfsRtFeeds", JSON.stringify(validUrlList.gtfsFeeds));
+
     if(validGtfs && validGtfsRT) {
         $("#btn-continue").removeAttr('disabled');
     }
@@ -133,7 +135,7 @@ checkGtfsRtFeeds(gtfsrtUrlList);
 downloadGTFSFeed();
 
 function startMonitoring() {
-    var path = "http://localhost:8080/startBackground";
+    var path = "http://localhost:8080/monitoring.html";
 
     var parameters = {};
 
@@ -150,7 +152,7 @@ function startMonitoring() {
     form.attr("action", path);
 
     $.each(parameters, function (key, value) {
-        var field = $('<input></input>');
+        var field = $('<input/>');
 
         field.attr("type", "hidden");
         field.attr("name", key);

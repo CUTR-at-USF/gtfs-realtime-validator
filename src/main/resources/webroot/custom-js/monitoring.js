@@ -10,6 +10,21 @@
  * **********************************************************************************************************************
  */
 
+var urls = localStorage.getItem("gtfsRtFeeds");
+var jsObject = JSON.parse(urls);
+var urlArray = [];
+
+for (var gtfsFeed in jsObject) {
+    var currentUrl = jsObject[gtfsFeed]["url"];
+    urlArray.push(currentUrl);
+}
+
+
+$.post("http://localhost:8080/startBackground", {gtfsRtFeeds: urls})
+    .done(function (data) {
+        alert("done and dusted!")
+    });
+
 //function to calculate the time elapsed from entering the page.
 var start = new Date();
 

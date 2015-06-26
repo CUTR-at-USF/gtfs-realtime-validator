@@ -14,26 +14,39 @@
 
 package edu.usf.cutr.gtfsrtvalidator.servlets;
 
+import com.google.gson.Gson;
+import edu.usf.cutr.gtfsrtvalidator.json.GtfsRtFeeds;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Enumeration;
+import java.util.Arrays;
+import java.util.List;
 
 public class TriggerBackgroundServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        Enumeration<String> paramNames = request.getParameterNames();
+//        Enumeration<String> paramNames = request.getParameterNames();
+//
+//        while (paramNames.hasMoreElements()) {
+//            String paramName = paramNames.nextElement();
+//            System.out.println("Parameter Name " + paramName);
+//
+//            System.out.println("Parameter Value " + request.getParameter(paramName));
+//        }
+//        System.out.println(gtfsRtFeeds);
 
-        while (paramNames.hasMoreElements()) {
-            String paramName = paramNames.nextElement();
-            System.out.println("Parameter Name " + paramName);
+        String gtfsRtFeeds = request.getParameter("gtfsRtFeeds");
+        Gson gson = new Gson();
 
-            System.out.println("Parameter Value " + request.getParameter(paramName));
-        }
+        //Instruct GSON to parse as a Post array (which we convert into a list)
+        List<GtfsRtFeeds> posts = Arrays.asList(gson.fromJson(gtfsRtFeeds, GtfsRtFeeds[].class));
+        System.out.println(posts.get(1).toString());
+
 
 //        BackgroundMultiThread.startBackgroundTask("http://api.bart.gov/gtfsrt/tripupdate.aspx");
 //        BackgroundMultiThread.startBackgroundTask("http://api.bart.gov/gtfsrt/alerts.aspx");
