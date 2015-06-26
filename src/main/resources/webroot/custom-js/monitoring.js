@@ -22,7 +22,11 @@ for (var gtfsFeed in jsObject) {
 
 $.post("http://localhost:8080/startBackground", {gtfsRtFeeds: urls})
     .done(function (data) {
-        alert("done and dusted!")
+        alert(JSON.stringify(data));
+
+        //TODO: Loop through the data received and draw the appropriate UI elements
+
+        //TODO: Start calling for updates every x seconds
     });
 
 //function to calculate the time elapsed from entering the page.
@@ -89,7 +93,7 @@ $(function() {
         }
     });
 
-    setInterval(getVehicleCount, updateInterval);
+    //setInterval(getVehicleCount, updateInterval);
 
     function update() {
         plot.setData([ countData ]);

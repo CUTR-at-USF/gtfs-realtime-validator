@@ -15,6 +15,7 @@
 package edu.usf.cutr.gtfsrtvalidator.servlets;
 
 import com.google.gson.Gson;
+import edu.usf.cutr.gtfsrtvalidator.background.RefreshCountTask;
 import edu.usf.cutr.gtfsrtvalidator.json.GtfsRtFeeds;
 
 import javax.servlet.ServletException;
@@ -23,35 +24,46 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class TriggerBackgroundServlet extends HttpServlet {
+
+    private static HashMap<String, ScheduledExecutorService> runningTasks = new HashMap<>();
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-//        Enumeration<String> paramNames = request.getParameterNames();
-//
-//        while (paramNames.hasMoreElements()) {
-//            String paramName = paramNames.nextElement();
-//            System.out.println("Parameter Name " + paramName);
-//
-//            System.out.println("Parameter Value " + request.getParameter(paramName));
-//        }
-//        System.out.println(gtfsRtFeeds);
+        response.setContentType("application/json");
+        response.setStatus(HttpServletResponse.SC_OK);
 
         String gtfsRtFeeds = request.getParameter("gtfsRtFeeds");
+
         Gson gson = new Gson();
 
-        //Instruct GSON to parse as a Post array (which we convert into a list)
-        List<GtfsRtFeeds> posts = Arrays.asList(gson.fromJson(gtfsRtFeeds, GtfsRtFeeds[].class));
-        System.out.println(posts.get(1).toString());
+        List<GtfsRtFeeds> feeds = Arrays.asList(gson.fromJson(gtfsRtFeeds, GtfsRtFeeds[].class));
 
+        for (GtfsRtFeeds feed : feeds) {
+            startBackgroundTask(feed.getUrl());
+        }
 
-//        BackgroundMultiThread.startBackgroundTask("http://api.bart.gov/gtfsrt/tripupdate.aspx");
-//        BackgroundMultiThread.startBackgroundTask("http://api.bart.gov/gtfsrt/alerts.aspx");
-//        BackgroundMultiThread.startBackgroundTask("http://api.bart.gov/gtfsrt/alerts.aspx");
+        response.getWriter().println(gtfsRtFeeds);
 
+    }
+
+    public static ScheduledExecutorService startBackgroundTask(String url) {
+
+        if (!runningTasks.containsKey(url)) {
+            ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+            scheduler.scheduleAtFixedRate(new RefreshCountTask(url), 0, 10, TimeUnit.SECONDS);
+            runningTasks.put(url, scheduler);
+            return scheduler;
+        }else {
+            return runningTasks.get(url);
+        }
     }
 
 }
