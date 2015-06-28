@@ -16,7 +16,7 @@ package edu.usf.cutr.gtfsrtvalidator.background;
 
 import com.google.protobuf.Descriptors;
 import com.google.transit.realtime.GtfsRealtime;
-import edu.usf.cutr.gtfsrtvalidator.db.Database;
+import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,66 +25,52 @@ import java.net.URL;
 
 public class RefreshCountTask implements Runnable {
 
-    public static boolean urlRecived = true;
+    public URL _feedUrl;
 
-    public URL _tripUpdatesUrl;
-    public URL _vehiclePositionsUrl;
-
-    public RefreshCountTask(){
+    public RefreshCountTask(String url) {
         try {
-            //TODO: URLs should be taken from the users input
-            _vehiclePositionsUrl = new URL("http://developer.mbta.com/lib/GTRTFS/Alerts/VehiclePositions.pb");
-            _tripUpdatesUrl = new URL("http://developer.mbta.com/lib/GTRTFS/Alerts/TripUpdates.pb");
+            _feedUrl = new URL(url);
         } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public RefreshCountTask(String url){
-        try {
-            _vehiclePositionsUrl = new URL(url);
-        } catch (MalformedURLException e) {
+            System.out.println("URL Malformed at RefreshCountTask constructors");
         }
     }
 
     @Override
     public void run() {
+        System.out.println(_feedUrl);
+
+        int vehicleCount = 0;
+        int tripCount = 0;
+        int alertCount = 0;
+
+        GtfsRealtime.FeedMessage feedMessage = null;
+
+
         try {
-            if (urlRecived) {
-                //fetch();
-                System.out.println(_vehiclePositionsUrl);
+            InputStream in = _feedUrl.openStream();
+            feedMessage = GtfsRealtime.FeedMessage.parseFrom(in);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
+        //Loop through the entities in the feed
+        for (GtfsRealtime.FeedEntity entity : feedMessage.getEntityList()) {
+            if (entity.hasVehicle()) {
+                vehicleCount++;
             }
-
-        } catch (Exception ex) {
-            System.out.println("Error here");
-        }
-    }
-
-    public void fetch() throws IOException {
-
-        int vehicleCount = 0, tripCount = 0;
-
-        if (_tripUpdatesUrl != null) {
-            InputStream in = _tripUpdatesUrl.openStream();
-            GtfsRealtime.FeedMessage message = GtfsRealtime.FeedMessage.parseFrom(in);
-            Descriptors.FieldDescriptor fieldDesc = GtfsRealtime.FeedEntity.getDescriptor().findFieldByName(
-                    "trip_update");
-            int count = countEntities(message, fieldDesc);
-            System.out.println("trips.value " + count);
-            tripCount = count;
-        }
-        if (_vehiclePositionsUrl != null) {
-            InputStream in = _vehiclePositionsUrl.openStream();
-            GtfsRealtime.FeedMessage message = GtfsRealtime.FeedMessage.parseFrom(in);
-            Descriptors.FieldDescriptor fieldDesc = GtfsRealtime.FeedEntity.getDescriptor().findFieldByName(
-                    "vehicle");
-            int count = countEntities(message, fieldDesc);
-            System.out.println("vehicles.value " + count);
-            vehicleCount = count;
+            if (entity.hasAlert()) {
+                alertCount++;
+            }
+            if (entity.hasTripUpdate()) {
+                tripCount++;
+            }
         }
 
-        Database.setCount(vehicleCount, tripCount);
+        //System.out.println(vehicleCount + " " + tripCount + " " + alertCount);
+
+        //Store details found to the database
+        GTFSDB.setFeedDetails(_feedUrl.toString(), vehicleCount, tripCount, alertCount);
+
     }
 
     private int countEntities(GtfsRealtime.FeedMessage message, Descriptors.FieldDescriptor desc) {
