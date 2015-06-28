@@ -14,9 +14,9 @@ package edu.usf.cutr.gtfsrtvalidator.json;
 
 public class StatusMessage {
 
-    public int SUCCESS = 1;
-    public int ERROR = 2;
-    public int WARNING = 3;
+    public final transient int SUCCESS = 1;
+    public final transient int ERROR = 2;
+    public final transient int WARNING = 3;
 
     public StatusMessage(int status, String statusMessage) {
         this.setStatus(status);

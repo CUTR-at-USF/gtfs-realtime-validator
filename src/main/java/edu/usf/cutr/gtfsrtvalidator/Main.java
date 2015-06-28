@@ -16,10 +16,7 @@ package edu.usf.cutr.gtfsrtvalidator;
 
 import edu.usf.cutr.gtfsrtvalidator.background.BackgroundTask;
 import edu.usf.cutr.gtfsrtvalidator.db.Database;
-import edu.usf.cutr.gtfsrtvalidator.servlets.CountServlet;
-import edu.usf.cutr.gtfsrtvalidator.servlets.GTFSDownloaderServlet;
-import edu.usf.cutr.gtfsrtvalidator.servlets.RTFeedValidatorServlet;
-import edu.usf.cutr.gtfsrtvalidator.servlets.TriggerBackgroundServlet;
+import edu.usf.cutr.gtfsrtvalidator.servlets.*;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -47,7 +44,9 @@ public class Main {
         context.addServlet(GTFSDownloaderServlet.class, "/downloadgtfs");
 
         context.addServlet(CountServlet.class, "/count");
+        context.addServlet(FeedInfoServlet.class, "/feedInfo");
         context.addServlet(TriggerBackgroundServlet.class, "/startBackground");
+
 
         context.addServlet(DefaultServlet.class, "/");
 

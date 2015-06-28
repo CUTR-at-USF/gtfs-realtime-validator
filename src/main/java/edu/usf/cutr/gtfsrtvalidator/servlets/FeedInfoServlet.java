@@ -39,7 +39,7 @@ public class FeedInfoServlet extends HttpServlet {
         String parameter = "";
         String feedUrl = request.getParameter("gtfsurl");
 
-        if (feedUrl == "") {
+        if (feedUrl == "" || feedUrl == null) {
             StatusMessage error = new StatusMessage(1, "GTFS Feed Url not provided");
             json = gson.toJson(error);
         } else {

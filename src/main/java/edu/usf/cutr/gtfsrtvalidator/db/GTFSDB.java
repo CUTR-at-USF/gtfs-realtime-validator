@@ -90,6 +90,8 @@ public class GTFSDB {
         MonitorLog monitorLog = new MonitorLog();
         List<MonitorDetails> monitorDetails = new ArrayList<>();
 
+        System.out.println(feedUrl);
+
         try {
             PreparedStatement stmt;
 
@@ -100,6 +102,8 @@ public class GTFSDB {
 
             //stmt = con.createStatement();
             String sql = "SELECT * FROM FEED_DETAILS WHERE Feed_Url= ? ORDER BY Time_Stamp  DESC LIMIT ?";
+
+            System.out.println(sql);
 
             stmt = con.prepareStatement(sql);
             stmt.setString(1, feedUrl);
