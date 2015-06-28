@@ -97,13 +97,13 @@ public class GTFSDB {
             con.setAutoCommit(false);
 
             Statement stmt = con.createStatement();
-            //System.out.println("Opened database successfully");
+            System.out.println("Opened GTFSDB database successfully");
 
-            //stmt = con.createStatement();
             String sql = "SELECT * FROM FEED_DETAILS WHERE Feed_Url=" + feedUrl + "ORDER BY Time_Stamp  DESC LIMIT "+ Limit +"";
 
             ResultSet rs = stmt.executeQuery(sql);
-            System.out.println(stmt.toString());
+
+            System.out.println(sql);
 
             while ( rs.next() ) {
                 MonitorDetails monitor = new MonitorDetails();
