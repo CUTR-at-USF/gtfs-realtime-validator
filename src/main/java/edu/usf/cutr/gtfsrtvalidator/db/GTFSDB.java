@@ -93,7 +93,7 @@ public class GTFSDB {
         System.out.println(feedUrl);
 
         try {
-            PreparedStatement stmt;
+            Statement stmt = con.createStatement();
 
             Class.forName("org.sqlite.JDBC");
             con = DriverManager.getConnection("jdbc:sqlite:gtfsrt.db");
@@ -101,15 +101,10 @@ public class GTFSDB {
             //System.out.println("Opened database successfully");
 
             //stmt = con.createStatement();
-            String sql = "SELECT * FROM FEED_DETAILS WHERE Feed_Url= ? ORDER BY Time_Stamp  DESC LIMIT ?";
-
-            System.out.println(sql);
-
-            stmt = con.prepareStatement(sql);
-            stmt.setString(1, feedUrl);
-            stmt.setInt(2, Limit);
+            String sql = "SELECT * FROM FEED_DETAILS WHERE Feed_Url=" + feedUrl + "ORDER BY Time_Stamp  DESC LIMIT "+ Limit +"";
 
             ResultSet rs = stmt.executeQuery(sql);
+            System.out.println(stmt.toString());
 
             while ( rs.next() ) {
                 MonitorDetails monitor = new MonitorDetails();

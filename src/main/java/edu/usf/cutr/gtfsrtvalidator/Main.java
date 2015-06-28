@@ -14,29 +14,48 @@
 
 package edu.usf.cutr.gtfsrtvalidator;
 
-import edu.usf.cutr.gtfsrtvalidator.background.BackgroundTask;
 import edu.usf.cutr.gtfsrtvalidator.db.Database;
-import edu.usf.cutr.gtfsrtvalidator.servlets.*;
+import edu.usf.cutr.gtfsrtvalidator.db.Datasource;
+import edu.usf.cutr.gtfsrtvalidator.servlets.CountServlet;
+import edu.usf.cutr.gtfsrtvalidator.servlets.GTFSDownloaderServlet;
+import edu.usf.cutr.gtfsrtvalidator.servlets.RTFeedValidatorServlet;
+import edu.usf.cutr.gtfsrtvalidator.servlets.TriggerBackgroundServlet;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.DefaultServlet;
-import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.webapp.WebAppContext;
+import org.eclipse.jetty.xml.XmlConfiguration;
 
-import javax.servlet.ServletContextListener;
+import java.beans.PropertyVetoException;
+import java.io.File;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 public class Main {
     static String BASE_RESOURCE = "./target/classes/webroot";
 
+    public Main() throws SQLException, IOException, PropertyVetoException {
+        Datasource ds = Datasource.getInstance();
+        Connection connection = ds.getConnection();
+    }
+
     public static void main(String[] args) throws Exception{
+        new Main();
+
         Database.InitializeDB();
 
         Server server = new Server(8080);
 
-        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        String[] configFiles = {"etc/jetty.xml"};
+        for(String configFile : configFiles) {
+            XmlConfiguration configuration = new XmlConfiguration(new File(configFile).toURI().toURL());
+            configuration.configure(server);
+        }
+
+        WebAppContext context = new WebAppContext();
+
         context.setContextPath("/");
         context.setResourceBase(BASE_RESOURCE);
-
-        ServletContextListener myListener = new BackgroundTask();
-        //context.addEventListener(myListener);
 
         server.setHandler(context);
 
@@ -44,7 +63,7 @@ public class Main {
         context.addServlet(GTFSDownloaderServlet.class, "/downloadgtfs");
 
         context.addServlet(CountServlet.class, "/count");
-        context.addServlet(FeedInfoServlet.class, "/feedInfo");
+        context.addServlet(CountServlet.class, "/feedInfo");
         context.addServlet(TriggerBackgroundServlet.class, "/startBackground");
 
 
