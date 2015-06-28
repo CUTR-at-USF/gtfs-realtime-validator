@@ -23,13 +23,12 @@ import java.util.Date;
 import java.util.List;
 
 public class GTFSDB {
-    static Connection con = null;
     static Statement stmt = null;
 
     public static void InitializeDB(){
         try {
-            Class.forName("org.sqlite.JDBC");
-            con = DriverManager.getConnection("jdbc:sqlite:gtfsrt.db");
+            Datasource ds = Datasource.getInstance();
+            Connection con = ds.getConnection();
             System.out.println("Opened database successfully");
 
             stmt = con.createStatement();
@@ -54,8 +53,8 @@ public class GTFSDB {
         try {
             PreparedStatement stmt;
 
-            Class.forName("org.sqlite.JDBC");
-            con = DriverManager.getConnection("jdbc:sqlite:gtfsrt.db");
+            Datasource ds = Datasource.getInstance();
+            Connection con = ds.getConnection();
             con.setAutoCommit(false);
             //System.out.println("Opened database successfully");
 
@@ -93,11 +92,11 @@ public class GTFSDB {
         System.out.println(feedUrl);
 
         try {
-            Statement stmt = con.createStatement();
-
-            Class.forName("org.sqlite.JDBC");
-            con = DriverManager.getConnection("jdbc:sqlite:gtfsrt.db");
+            Datasource ds = Datasource.getInstance();
+            Connection con = ds.getConnection();
             con.setAutoCommit(false);
+
+            Statement stmt = con.createStatement();
             //System.out.println("Opened database successfully");
 
             //stmt = con.createStatement();
