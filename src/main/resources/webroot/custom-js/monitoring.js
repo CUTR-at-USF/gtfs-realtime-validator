@@ -1,13 +1,18 @@
-/**
- * **********************************************************************************************************************
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this fileexcept in compliance with the License. You may obtain a copy of the License at
+/*
+ * Copyright (C) 2015 Nipuna Gunathilake.
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
- * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations under the License.
- * **********************************************************************************************************************
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 var urls = localStorage.getItem("gtfsRtFeeds");
@@ -53,51 +58,63 @@ function getTimeElapsed(){
 
 setInterval(getTimeElapsed,1000);
 
-//function that draws the graph using Flot graph
-$(function() {
+//Get feed details
+function getFeedDetails(url) {
+    //Ajax call to the servlet to get the json with the feed details
+    $.get("http://localhost:8080/feedInfo", {gtfsurl: url}).done(function (data) {
 
-    var updateInterval = 5000;
-    var countData = [];
-
-    //TODO: Change to get number of vehicles
-    function getVehicleCount() {
-        //TODO: Add servelet to get vehicle count from the feed
-        //TODO: In the background process keep current
-        //TODO: Ajax call to the servlet to get the json with the count
-        $.get("http://localhost:8080/count").done(function (data) {
-            //var counts = $.parseJSON(data);
-
-            countData = [];
-            for(var count in data) {
-                countData.push([count, data[count].tripCountCount])
-                //alert(data[count].tripCountCount);
-            }
-
-        }).then(function(){
-            update();
-        });
-    }
-
-    var plot = $.plot("#placeholder", [ countData ], {
-        series: {
-            shadowSize: 0	// Drawing is faster without shadows
-        },
-        yaxis: {
-            min: 0,
-            max: 500
-        },
-        xaxis: {
-            show: true,
-            min: 0,
-            max: 10
-        }
+    }).then(function(){
+        update();
     });
+}
 
-    //setInterval(getVehicleCount, updateInterval);
 
-    function update() {
-        plot.setData([ countData ]);
-        plot.draw();
-    }
-
-});
+////function that draws the graph using Flot graph
+//$(function() {
+//
+//    var updateInterval = 5000;
+//    var countData = [];
+//
+//    //TODO: Change to get number of vehicles
+//    function getVehicleCount(url) {
+//        //TODO: Add servelet to get vehicle count from the feed
+//        //TODO: In the background process keep current
+//        //TODO: Ajax call to the servlet to get the json with the count
+//        $.get("http://localhost:8080/feedInfo", {gtfsurl: url}).done(function (data) {
+//            //var counts = $.parseJSON(data);
+//
+//            countData = [];
+//            for(var count in data) {
+//                alert(JSON.stringify(data));
+//                countData.push([count, data[count].tripCountCount])
+//                //alert(data[count].tripCountCount);
+//            }
+//
+//        }).then(function(){
+//            update();
+//        });
+//    }
+//
+//    var plot = $.plot("#placeholder", [ countData ], {
+//        series: {
+//            shadowSize: 0	// Drawing is faster without shadows
+//        },
+//        yaxis: {
+//            min: 0,
+//            max: 500
+//        },
+//        xaxis: {
+//            show: true,
+//            min: 0,
+//            max: 10
+//        }
+//    });
+//
+//    setInterval(getVehicleCount, updateInterval);
+//
+//    function update() {
+//        plot.setData([ countData ]);
+//        plot.draw();
+//    }
+//
+//});
