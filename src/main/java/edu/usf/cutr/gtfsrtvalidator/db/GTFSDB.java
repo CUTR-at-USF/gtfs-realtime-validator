@@ -56,7 +56,6 @@ public class GTFSDB {
             Datasource ds = Datasource.getInstance();
             Connection con = ds.getConnection();
             con.setAutoCommit(false);
-            //System.out.println("Opened database successfully");
 
             Date currentDate = new Date();
             long unixTIme = currentDate.getTime() / 1000;
@@ -77,33 +76,31 @@ public class GTFSDB {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
             System.exit(0);
         }
-        //System.out.println("Records created successfully");
     }
 
     public static synchronized MonitorLog getFeedDetails(String feedUrl) {
         return getFeedDetails(feedUrl, 11);
     }
 
-    public static synchronized MonitorLog getFeedDetails(String feedUrl, int Limit) {
+    public static synchronized MonitorLog getFeedDetails(String feedUrl, int limit) {
 
         MonitorLog monitorLog = new MonitorLog();
         List<MonitorDetails> monitorDetails = new ArrayList<>();
-
-        System.out.println(feedUrl);
 
         try {
             Datasource ds = Datasource.getInstance();
             Connection con = ds.getConnection();
             con.setAutoCommit(false);
 
-            Statement stmt = con.createStatement();
-            System.out.println("Opened GTFSDB database successfully");
+            PreparedStatement stmt;
 
-            String sql = "SELECT * FROM FEED_DETAILS WHERE Feed_Url=" + feedUrl + "ORDER BY Time_Stamp  DESC LIMIT "+ Limit +"";
+            String sql = "SELECT * FROM FEED_DETAILS WHERE Feed_Url=? ORDER BY Time_Stamp DESC LIMIT ?;";
+            stmt = con.prepareStatement(sql);
 
-            ResultSet rs = stmt.executeQuery(sql);
+            stmt.setString(1, feedUrl);
+            stmt.setInt(2, limit);
 
-            System.out.println(sql);
+            ResultSet rs = stmt.executeQuery();
 
             while ( rs.next() ) {
                 MonitorDetails monitor = new MonitorDetails();
