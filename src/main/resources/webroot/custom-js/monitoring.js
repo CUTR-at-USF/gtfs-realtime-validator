@@ -15,26 +15,26 @@
  * limitations under the License.
  */
 
+
+//Retrive the validated urls (saved to the local storage in the loading.js file) from the localStorage
 var urls = localStorage.getItem("gtfsRtFeeds");
-var jsObject = JSON.parse(urls);
-var urlArray = [];
+var gtfsFeeds = JSON.parse(urls);
 
-for (var gtfsFeed in jsObject) {
-    var currentUrl = jsObject[gtfsFeed]["url"];
-    urlArray.push(currentUrl);
-}
-
-
+//POST request sent to TriggerBackgroundServlet to start monitoring the feeds
 $.post("http://localhost:8080/startBackground", {gtfsRtFeeds: urls})
     .done(function (data) {
         alert(JSON.stringify(data));
 
         //TODO: Loop through the data received and draw the appropriate UI elements
 
-        //TODO: Start calling for updates every x seconds
+        //Start calling for updates every 10 seconds
+        for (var gtfsFeed in data) {
+            var currentUrl = gtfsFeeds[gtfsFeed]["url"];
+            setInterval(function(){getFeedDetails(currentUrl);},10000);
+        }
     });
 
-//function to calculate the time elapsed from entering the page.
+//Calculate time for display
 var start = new Date();
 
 function getTimeElapsed(){
@@ -56,14 +56,15 @@ function getTimeElapsed(){
     $("#time-elapsed").text(hours + "h "+ min + "m " + sec + "s");
 }
 
+//Call time elapsed evey 1 second
 setInterval(getTimeElapsed,1000);
+
 
 //Get feed details
 function getFeedDetails(url) {
+
     //Ajax call to the servlet to get the json with the feed details
     $.get("http://localhost:8080/feedInfo", {gtfsurl: url}).done(function (data) {
-
-    }).then(function(){
-        update();
+        console.log(JSON.stringify(data));
     });
 }
