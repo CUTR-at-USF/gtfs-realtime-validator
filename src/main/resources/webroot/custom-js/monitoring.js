@@ -16,23 +16,39 @@
  */
 
 
-//Retrive the validated urls (saved to the local storage in the loading.js file) from the localStorage
+//Retrieve the validated urls (saved to the local storage in the loading.js file) from the localStorage
 var urls = localStorage.getItem("gtfsRtFeeds");
 var gtfsFeeds = JSON.parse(urls);
+
+//This object will hold the urls returned after starting the background tasks.
+var monitoredFeeds = {};
 
 //POST request sent to TriggerBackgroundServlet to start monitoring the feeds
 $.post("http://localhost:8080/startBackground", {gtfsRtFeeds: urls})
     .done(function (data) {
-        alert(JSON.stringify(data));
+        monitoredFeeds = data;
 
-        //TODO: Loop through the data received and draw the appropriate UI elements
+        //Use the data received and draw the appropriate UI elements
+        initializeInterface(data);
 
         //Start calling for updates every 10 seconds
         for (var gtfsFeed in data) {
             var currentUrl = gtfsFeeds[gtfsFeed]["url"];
-            setInterval(function(){getFeedDetails(currentUrl);},10000);
+            var currentIndex = gtfsFeeds[gtfsFeed]["index"];
+
+            getFeedUpdates(currentUrl, currentIndex);
+            setInterval(function(){getFeedUpdates(currentUrl, currentIndex);},10000);
         }
     });
+
+function initializeInterface(gtfsFeeds){
+    var wrapper  = {gtfsFeeds: gtfsFeeds};
+    var monitorTemplateScript = $("#feed-monitor-template").html();
+    var monitorTemplate = Handlebars.compile(monitorTemplateScript);
+    var compiledHtml = monitorTemplate(wrapper);
+    $('.monitor-placeholder').html(compiledHtml);
+}
+
 
 //Calculate time for display
 var start = new Date();
@@ -56,15 +72,24 @@ function getTimeElapsed(){
     $("#time-elapsed").text(hours + "h "+ min + "m " + sec + "s");
 }
 
-//Call time elapsed evey 1 second
+//Call time elapsed to update the clock evey second
 setInterval(getTimeElapsed,1000);
 
 
 //Get feed details
-function getFeedDetails(url) {
+function getFeedUpdates(url, index) {
 
     //Ajax call to the servlet to get the json with the feed details
     $.get("http://localhost:8080/feedInfo", {gtfsurl: url}).done(function (data) {
-        console.log(JSON.stringify(data));
+        updateTables(data, index);
     });
+}
+
+function updateTables(data, index) {
+
+    var monitorTemplateScript = $("#feed-monitor-row-template").html();
+    var monitorTemplate = Handlebars.compile(monitorTemplateScript);
+    var compiledHtml = monitorTemplate(data);
+
+    $("#monitor-table-"+ index +"").html(compiledHtml);
 }

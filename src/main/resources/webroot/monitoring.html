@@ -117,47 +117,7 @@
             </div>
         </form>
 
-        <div class="col-md-12">
-            <div class="well content-well">
-                <h3>Monitor Details</h3>
-                <hr/>
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Time Stamp</th>
-                        <th colspan="2">Vehicles</th>
-                        <th colspan="2">Alerts</th>
-                        <th colspan="2">Trip Updates</th>
-                    </tr>
-                    <tr>
-                        <th></th>
-                        <th></th>
-                        <th >Error</th>
-                        <th >Warning</th>
-                        <th >Error</th>
-                        <th >Warning</th>
-                        <th >Error</th>
-                        <th >Warning</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>123456</td>
-                        <td>13</td>
-                        <td>23</td>
-
-                        <td>0</td>
-                        <td>0</td>
-
-                        <td>4</td>
-                        <td>0</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        <div class="monitor-placeholder"></div>
 
         <div class="col-md-12">
             <div class="well content-well">
@@ -193,7 +153,7 @@
                     </tr>
                     <tr>
                         <td><a href="detailed.html">3</a></td>
-                        <td><a >1243</a></td>
+                        <td><a>1243</a></td>
                         <td>Error</td>
                         <td>Short Error description</td>
                         <td>0</td>
@@ -214,6 +174,63 @@
 <script src="js/jquery-2.1.4.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
 <script src="js/jquery.flot.js"></script>
+<script src="js/handlebars.js"></script>
+
+<script id="feed-monitor-template" type="text/x-handlebars-template">
+    {{#each gtfsFeeds}}
+    <div class="col-md-12">
+        <div class="well content-well">
+            <h3>Monitor Feed - {{url}}</h3>
+            <hr/>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Time Stamp</th>
+                    <th colspan="2">Vehicles</th>
+                    <th colspan="2">Alerts</th>
+                    <th colspan="2">Trip Updates</th>
+                </tr>
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th>Error</th>
+                    <th>Warning</th>
+                    <th>Error</th>
+                    <th>Warning</th>
+                    <th>Error</th>
+                    <th>Warning</th>
+                </tr>
+                </thead>
+
+                <!-- placeholder for rows of records from the database -->
+                <tbody id="monitor-table-{{index}}">
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {{/each}}
+</script>
+
+<script id="feed-monitor-row-template" type="text/x-handlebars-template">
+    {{#each monitorDetails}}
+    <tr>
+        <td>{{itteration}}</td>
+        <td>{{timestamp}}</td>
+
+        <td>{{vehicleCount}}</td>
+        <td>{{vehicleCount}}</td>
+
+        <td>{{alertCount}}</td>
+        <td>{{alertCount}}</td>
+
+        <td>{{updateCount}}</td>
+        <td>{{updateCount}}</td>
+    </tr>
+    {{/each}}
+</script>
+
 
 <script src="custom-js/monitoring.js"></script>
 </body>
