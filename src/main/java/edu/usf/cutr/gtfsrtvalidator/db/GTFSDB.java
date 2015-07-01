@@ -30,8 +30,8 @@ public class GTFSDB {
 
     public static void InitializeDB(){
         try {
-            Datasource ds = Datasource.getInstance();
-            Connection con = ds.getConnection();
+            Class.forName("org.sqlite.JDBC");
+            Connection con = DriverManager.getConnection("jdbc:sqlite:gtfsrt.db");
             System.out.println("Opened database successfully");
 
             stmt = con.createStatement();
