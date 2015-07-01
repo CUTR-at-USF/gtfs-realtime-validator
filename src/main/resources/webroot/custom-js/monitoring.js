@@ -37,7 +37,12 @@ $.post("http://localhost:8080/startBackground", {gtfsRtFeeds: urls})
             var currentIndex = gtfsFeeds[gtfsFeed]["index"];
 
             getFeedUpdates(currentUrl, currentIndex);
-            setInterval(function(){getFeedUpdates(currentUrl, currentIndex);},10000);
+
+            //Uses an anonymous wrapper to copy the references
+            (function(url, index){
+                setInterval(function(){getFeedUpdates(url, index);},10000);
+            }(currentUrl, currentIndex));
+
         }
     });
 
@@ -78,6 +83,8 @@ setInterval(getTimeElapsed,1000);
 
 //Get feed details
 function getFeedUpdates(url, index) {
+
+    alert(url + " " + index);
 
     //Ajax call to the servlet to get the json with the feed details
     $.get("http://localhost:8080/feedInfo", {gtfsurl: url}).done(function (data) {

@@ -17,8 +17,8 @@
 
 package edu.usf.cutr.gtfsrtvalidator;
 
-import edu.usf.cutr.gtfsrtvalidator.db.Database;
 import edu.usf.cutr.gtfsrtvalidator.db.Datasource;
+import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.servlets.*;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.DefaultServlet;
@@ -28,21 +28,22 @@ import org.eclipse.jetty.xml.XmlConfiguration;
 import java.beans.PropertyVetoException;
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
 
 public class Main {
     static String BASE_RESOURCE = "./target/classes/webroot";
 
     public Main() throws SQLException, IOException, PropertyVetoException {
-        Datasource ds = Datasource.getInstance();
-        Connection connection = ds.getConnection();
+
     }
 
     public static void main(String[] args) throws Exception{
         new Main();
 
-        Database.InitializeDB();
+        GTFSDB.InitializeDB();
+
+        Datasource ds = Datasource.getInstance();
+        ds.getConnection();
 
         Server server = new Server(8080);
 
