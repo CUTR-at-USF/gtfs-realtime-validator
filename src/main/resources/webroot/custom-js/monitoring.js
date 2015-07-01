@@ -83,9 +83,6 @@ setInterval(getTimeElapsed,1000);
 
 //Get feed details
 function getFeedUpdates(url, index) {
-
-    alert(url + " " + index);
-
     //Ajax call to the servlet to get the json with the feed details
     $.get("http://localhost:8080/feedInfo", {gtfsurl: url}).done(function (data) {
         updateTables(data, index);
