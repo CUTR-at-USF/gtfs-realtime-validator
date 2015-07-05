@@ -1,0 +1,334 @@
+# API documentations for GTFS-Realtime Validator
+# This .yaml file is interperted by the swagger application in order to provide documentation for the API
+swagger: '2.0'
+info:
+  title: GTFS-Realtime Validator API
+  description: RESTful API for the GTFS-Realtime Validator program
+  version: "1.0.0"
+# the domain of the service
+host: localhost:8080
+# array of all schemes that your API supports
+schemes:
+  - http
+# will be prefixed to all paths
+basePath: /
+produces:
+  - application/json
+paths:
+  /gtfs-feeds:
+    get:
+      summary: Returns a list of gtfs-feeds that are currently available in
+        the application.
+      tags:
+        - GTFS Feeds
+      responses:
+        200:
+          description: An array of GTFS feeds
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/gtfs-feed'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Add a GTFS feed to the applications database
+      parameters:
+      - name: url
+        in: query
+        description: URL pointing to the gtfs feed
+        type: string
+        required: true
+
+      tags:
+        - GTFS Feeds
+      responses:
+        200:
+          description: Added feed object
+          schema:
+            $ref: '#/definitions/gtfs-feed'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /gtfs-feeds/{id}:
+    delete:
+      summary: Delete gtfs-feeds With the specified id
+      parameters:
+              - name: id
+                in: path
+                description: ID of the feed to be deleted.
+                required: true
+                type: string
+      tags:
+        - GTFS Feeds
+      responses:
+        200:
+          description: Deleted Item
+          schema:
+            $ref: '#/definitions/gtfs-feed'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    put:
+      summary: Update gtfs-feeds With the specified id
+      parameters:
+              - name: id
+                in: path
+                description: ID of the feed to be update.
+                required: true
+                type: string
+              - name: url
+                in: query
+                description: New url for the feed
+                required: true
+                type: string
+      tags:
+        - GTFS Feeds
+      responses:
+        200:
+          description: Updated Item
+          schema:
+            $ref: '#/definitions/gtfs-feed'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /gtfs-rt-feeds:
+    get:
+      summary: Returns an array of gtfs-rt-feed objects that are currently available in
+        the application.
+      tags:
+        - GTFS-Realtime Feeds
+      responses:
+        200:
+          description: An array of feeds
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/gtfs-rt-feed'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Add gtfs-rt feed to the monitored list.
+      parameters:
+        - name: url
+          in: query
+          description: url of the gtfs-rt-feed to be added.
+          required: true
+          type: string
+        - name: gtfs-id
+          in: query
+          description: ID of the gtfs feed to be associated with the rt feed.
+          required: true
+          type: string
+      tags:
+        - GTFS-Realtime Feeds
+      responses:
+        200:
+          description: Returns the added gtfs rt feed object
+          schema:
+            $ref: '#/definitions/gtfs-rt-feed'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /gtfs-rt-feeds/{id}:
+    delete:
+      summary: Delete gtfs-rt-feeds With the specified id
+      parameters:
+        - name: id
+          in: path
+          description: ID of the feed to be deleted.
+          required: true
+          type: string
+      tags:
+        - GTFS-Realtime Feeds
+      responses:
+        200:
+          description: Deleted Item
+          schema:
+            $ref: '#/definitions/gtfs-rt-feed'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    put:
+      summary: Update gtfs-feeds With the specified id
+      parameters:
+        - name: id
+          in: path
+          description: ID of the feed to be update.
+          required: true
+          type: string
+        - name: url
+          in: query
+          description: New url for the feed
+          required: true
+          type: string
+      tags:
+        - GTFS-Realtime Feeds
+      responses:
+        200:
+          description: Updated Item
+          schema:
+            $ref: '#/definitions/gtfs-rt-feed'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+
+  /gtfs-rt-feeds/{id}/details:
+    get:
+      summary: Returns an array of erros and warnings.
+      parameters:
+      - name: id
+        in: path
+        description: ID of the feed to be monitored.
+        required: true
+        type: string
+      - name: limit
+        in: query
+        description: limit the number of itterations checked for errors/warnings.
+        type: string
+      - name: type
+        in: query
+        description: selct between errors and warnings.
+        type: string
+        enum: [all, errors, warnings]
+      tags:
+        - GTFS-Realtime Feed Details
+      responses:
+        200:
+          description: An array of feeds
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/gtfs-rt-feed-details'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+definitions:
+  gtfs-feed:
+    properties:
+      uuid:
+        type: string
+        description: Unique identifier for the feed
+      url:
+        type: string
+        description: URL of the download location
+      agency:
+        type: string
+        description: Name of the agency
+      updated:
+        type: integer
+        format: int32
+        description: Unix time stamp of downloaded time
+
+  gtfs-rt-feed:
+    properties:
+      uuid:
+        type: string
+        description: Unique identifier for the feed
+      url:
+        type: string
+        description: URL of the download location
+      itterations:
+        type: integer
+        format: int32
+        description: Number of itterations checked
+      warning:
+        type: integer
+        format: int32
+        description: Number of warnings found
+      errors:
+        type: integer
+        format: int32
+        description: Number of errors found
+      started:
+        type: integer
+        format: int32
+        description: Unix time stamp of downloaded time
+
+  gtfs-rt-feed-details:
+    properties:
+      uuid:
+        type: string
+        description: Unique identifier for the rt feed
+      url:
+        type: string
+        description: GTFS-Realtime feed URL
+      timestamp:
+        type: integer
+        format: int32
+        description: timestamp of the feed
+      itterations:
+        type: integer
+        format: int32
+        description: The itteration
+      errors:
+        type: array
+        items:
+          $ref: '#/definitions/gtfs-rt-error'
+      warnings:
+        type: array
+        items:
+          $ref: '#/definitions/gtfs-rt-warning'
+
+  gtfs-rt-error:
+    properties:
+      itterations:
+        type: integer
+        format: int32
+        description: Number of itteration error was found on
+      error-id:
+        type: integer
+        format: int32
+        description: ID of the error found (Used as referance when debuging)
+      error-description:
+        type: string
+        description: Description of the error found
+      count:
+        type: integer
+        format: int32
+        description: Number of same error occurences in the itteration
+
+  gtfs-rt-warning:
+    properties:
+      uuid:
+        type: string
+        description: Unique identifier for the rt feed
+      itterations:
+        type: integer
+        format: int32
+        description: Number of itteration warning was found on
+      warning-id:
+        type: integer
+        format: int32
+        description: ID of the warning found (Used as referance when debuging)
+      warning-description:
+        type: string
+        description: Description of the warning found
+      count:
+        type: integer
+        format: int32
+        description: Number of same warning occurences in the itteration
+  Error:
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
