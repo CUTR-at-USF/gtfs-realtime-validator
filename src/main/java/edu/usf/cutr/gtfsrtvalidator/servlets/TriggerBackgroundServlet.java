@@ -45,6 +45,19 @@ public class TriggerBackgroundServlet extends HttpServlet {
         response.setStatus(HttpServletResponse.SC_OK);
 
         String gtfsRtFeeds = request.getParameter("gtfsRtFeeds");
+        String updateInterval = request.getParameter("updateInterval");
+
+        int interval = 10;
+
+        if (updateInterval != null) {
+            try {
+                interval = Integer.parseInt(updateInterval);
+            } catch (NumberFormatException ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        System.out.println("UPDATE INTERVAL"+ updateInterval);
 
         Gson gson = new Gson();
 
@@ -53,18 +66,16 @@ public class TriggerBackgroundServlet extends HttpServlet {
         GTFSDB.InitializeDB();
 
         for (GtfsRtFeeds feed : feeds) {
-            startBackgroundTask(feed.getUrl());
+            startBackgroundTask(feed.getUrl(), interval);
         }
-
         response.getWriter().println(gtfsRtFeeds);
-
     }
 
-    public static ScheduledExecutorService startBackgroundTask(String url) {
+    public static ScheduledExecutorService startBackgroundTask(String url, int updateInterval) {
 
         if (!runningTasks.containsKey(url)) {
             ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-            scheduler.scheduleAtFixedRate(new RefreshCountTask(url), 0, 10, TimeUnit.SECONDS);
+            scheduler.scheduleAtFixedRate(new RefreshCountTask(url), 0, updateInterval, TimeUnit.SECONDS);
             runningTasks.put(url, scheduler);
             return scheduler;
         }else {

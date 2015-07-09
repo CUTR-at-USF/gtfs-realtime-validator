@@ -150,6 +150,7 @@ var gtfsrtUrlList = getRtUrlList();
 generateRealtimeProgressBar(gtfsrtUrlList);
 checkGtfsRtFeeds(gtfsrtUrlList);
 downloadGTFSFeed();
+localStorage.setItem("updateInterval", getUrlParameter("updateInterval"));
 
 function startMonitoring() {
     var path = "http://localhost:8080/monitoring.html";

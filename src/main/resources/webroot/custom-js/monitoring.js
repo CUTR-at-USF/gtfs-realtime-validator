@@ -20,11 +20,14 @@
 var urls = localStorage.getItem("gtfsRtFeeds");
 var gtfsFeeds = JSON.parse(urls);
 
+//Retrive the update interval value
+var updateInterval = localStorage.getItem("updateInterval");
+
 //This object will hold the urls returned after starting the background tasks.
 var monitoredFeeds = {};
 
 //POST request sent to TriggerBackgroundServlet to start monitoring the feeds
-$.post("http://localhost:8080/startBackground", {gtfsRtFeeds: urls})
+$.post("http://localhost:8080/startBackground", {gtfsRtFeeds: urls, updateInterval:updateInterval})
     .done(function (data) {
         monitoredFeeds = data;
 
