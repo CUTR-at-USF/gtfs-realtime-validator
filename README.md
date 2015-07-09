@@ -61,3 +61,5 @@ A message similar to `INFO: Started @XXXms` upon successful execution.
 Once the application has been started the web interface can be accessed at `localhost:8080`
 
 From there, following the instructions should allow for starting the monitoirng of the GTFS-Realtime Feeds.
+
+*Tables for each valid RT feed will be created and updated every 10 second if the execution is succesful*
