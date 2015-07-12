@@ -20,6 +20,7 @@ package edu.usf.cutr.gtfsrtvalidator.background;
 import com.google.protobuf.Descriptors;
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
+import edu.usf.cutr.gtfsrtvalidator.validation.HeaderValidation;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,8 +57,15 @@ public class RefreshCountTask implements Runnable {
             e.printStackTrace();
         }
 
+        //get the header of the feed
+        GtfsRealtime.FeedHeader header = feedMessage.getHeader();
+        HeaderValidation.validate(header);
+
+        //System.out.println(header.getTimestamp());
+
         //Loop through the entities in the feed
         for (GtfsRealtime.FeedEntity entity : feedMessage.getEntityList()) {
+
             if (entity.hasVehicle()) {
                 vehicleCount++;
             }

@@ -49,6 +49,27 @@ public class GTFSDB {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
             System.exit(0);
         }
+
+        try {
+            Class.forName("org.sqlite.JDBC");
+            Connection con = DriverManager.getConnection("jdbc:sqlite:gtfsrt.db");
+
+            stmt = con.createStatement();
+            String sql = "CREATE TABLE IF NOT EXISTS FEED_DETAILS " +
+                    "(ID INTEGER PRIMARY KEY NOT NULL," +
+                    " Time_Stamp INTEGER, " +
+                    " Vehicle_Count INTEGER, " +
+                    " Alert_Count INTEGER, " +
+                    " Feed_Url TEXT, " +
+                    " Trip_Count INTEGER)";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            con.close();
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+
         System.out.println("Table created successfully");
     }
 

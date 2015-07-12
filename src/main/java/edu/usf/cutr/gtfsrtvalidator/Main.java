@@ -22,11 +22,9 @@ import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.servlets.*;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.DefaultServlet;
-import org.eclipse.jetty.webapp.WebAppContext;
-import org.eclipse.jetty.xml.XmlConfiguration;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 
 import java.beans.PropertyVetoException;
-import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -47,13 +45,7 @@ public class Main {
 
         Server server = new Server(8080);
 
-        String[] configFiles = {"etc/jetty.xml"};
-        for(String configFile : configFiles) {
-            XmlConfiguration configuration = new XmlConfiguration(new File(configFile).toURI().toURL());
-            configuration.configure(server);
-        }
-
-        WebAppContext context = new WebAppContext();
+        ServletContextHandler context = new ServletContextHandler();
 
         context.setContextPath("/");
         context.setResourceBase(BASE_RESOURCE);
