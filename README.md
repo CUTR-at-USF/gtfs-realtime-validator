@@ -1,4 +1,4 @@
-# GTFS-Realtime Validator
+# GTFS-Realtime Validator [![Build Status](https://travis-ci.org/CUTR-at-USF/gtfs-realtime-validator.svg?branch=master)](https://travis-ci.org/CUTR-at-USF/gtfs-realtime-validator)
 Software that validates General Transit Feed Specification (GTFS)-realtime feeds
 
 ## Building and Running the project 
