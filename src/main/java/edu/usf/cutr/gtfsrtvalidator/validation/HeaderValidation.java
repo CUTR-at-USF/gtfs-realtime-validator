@@ -32,7 +32,7 @@ public class HeaderValidation {
         if (isPosix(timestamp)) {
             System.out.println("Valid timestamp");
         } else {
-            System.out.println("Invalid timestamp");
+            System.out.println("Timestamp not in Unix format timestamp");
             //TODO: add record to database
         }
     }
@@ -48,8 +48,6 @@ public class HeaderValidation {
         } catch (ParseException e) {
             return false;
         }
-
         return min_time < timestamp && timestamp <= max_time;
-
     }
 }
