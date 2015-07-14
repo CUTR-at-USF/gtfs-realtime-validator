@@ -70,12 +70,19 @@
 <!-- script references -->
 <script src="js/jquery-2.1.4.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
+<script src="js/jsonpath.js"></script>
 
 <script>
+
     $.get("http://localhost:8080/getFeed")
             .done(function (data) {
                 var jsonString = JSON.stringify(data, null, 2);
-                alert(jsonString)
+
+                var jPath = "$.header.*";
+                var jPathSelect = JSONPath({json: data, path: jPath});
+
+                //alert(jPathSelect);
+
                 $("#error-json").html(jsonString);
             });
 </script>
