@@ -58,6 +58,7 @@ public class Main {
         context.addServlet(CountServlet.class, "/count");
         context.addServlet(FeedInfoServlet.class, "/feedInfo");
         context.addServlet(TriggerBackgroundServlet.class, "/startBackground");
+        context.addServlet(GetFeedJSON.class, "/getFeed");
 
 
         context.addServlet(DefaultServlet.class, "/");

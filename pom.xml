@@ -87,13 +87,6 @@
             <version>0.0.4</version>
         </dependency>
 
-        <!-- GTFS-Realtime Library -->
-        <!--<dependency>-->
-            <!--<groupId>org.onebusaway</groupId>-->
-            <!--<artifactId>onebusaway-gtfs-realtime-api</artifactId>-->
-            <!--<version>${gtfs_realtime_api_version}</version>-->
-        <!--</dependency>-->
-
         <!-- Core GTFS Library -->
         <dependency>
             <groupId>org.onebusaway</groupId>
@@ -124,6 +117,13 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
             <version>1.6.4</version>
+        </dependency>
+
+        <!-- protobuf-java-fromat to format protobuf message to json-->
+        <dependency>
+            <groupId>com.googlecode.protobuf-java-format</groupId>
+            <artifactId>protobuf-java-format</artifactId>
+            <version>1.2</version>
         </dependency>
 
     </dependencies>
