@@ -63,6 +63,7 @@
     <div class="row">
         <div class="col-md-12">
             <pre id="error-json"></pre>
+            <div id="googleFeed"></div>
         </div>
     </div>
 </div>
@@ -70,20 +71,49 @@
 <!-- script references -->
 <script src="js/jquery-2.1.4.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
-<script src="js/jsonpath.js"></script>
+<script src="js/jsonpath-0.8.0.js"></script>
+<script type="text/javascript" src="js/json2html.js"></script>
+<script type="text/javascript" src="js/jquery.json2html.js"></script>
+
 
 <script>
 
+
     $.get("http://localhost:8080/getFeed")
             .done(function (data) {
-                var jsonString = JSON.stringify(data, null, 2);
 
-                var jPath = "$.header.*";
-                var jPathSelect = JSONPath({json: data, path: jPath});
+                var transform =[
+                    {tag:'li','html': '${abbrivation}'}
+                ];
 
-                //alert(jPathSelect);
+                $('#googleFeed').json2html(data,transform);
 
-                $("#error-json").html(jsonString);
+
+                var o = data;  // the 'store' JSON object from above
+                var res1 = jsonPath(o, "$.entity.*");
+                var res2 = jsonPath(o, "$.entity.*", {resultType:"PATH"});
+
+                var text = "";
+
+                for (var item in res2) {
+                    var subitemArray = res2[item].split(";");
+
+                    subitemArray.shift();
+                    for(var subItem in subitemArray) {
+
+                        if (!isNaN(text)){
+                            text += "." + subitemArray[subItem];
+                        }else{
+                            text += "[" + subitemArray[subItem] + "]";
+                        }
+                    }
+                    var parsedPath = "data" + text;
+
+                    eval(parsedPath + "['color'] = '#e4e4e4'");
+                    eval(parsedPath + "['error'] = 'Timestamp error occurred'");
+                    text = "";
+                }
+                //$("#error-json").html(JSON.stringify(data, null, 2));
             });
 </script>
 </body>
