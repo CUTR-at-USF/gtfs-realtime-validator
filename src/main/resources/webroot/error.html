@@ -72,22 +72,33 @@
 <script src="js/jquery-2.1.4.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
 <script src="js/jsonpath-0.8.0.js"></script>
-<script type="text/javascript" src="js/json2html.js"></script>
-<script type="text/javascript" src="js/jquery.json2html.js"></script>
+<script src="js/handlebars.js"></script>
 
+<script id="marked-partial" type="text/x-handlebars-template">
+    {{#if color}}<li>Color!{{color}}</li>{{/if}}
+    <a href={{color}}>{{error}}</a>
+</script>
+
+<script id="gtfsrt-feed-template" type="text/x-handlebars-template">
+    {{#header}}
+    <h3>Header</h3>
+    <li>timestamp: {{timestamp}}</li>
+    <li>incrementality: {{incrementality}}</li>
+    <li>gtfs_realtime_version: {{gtfs_realtime_version}}</li>
+    <hr/>
+    {{/header}}
+
+    {{#each entity}}
+    <div>
+        {{> marked}}
+        {{id}}
+    </div>
+    {{/each}}
+</script>
 
 <script>
-
-
     $.get("http://localhost:8080/getFeed")
             .done(function (data) {
-
-                var transform =[
-                    {tag:'li','html': '${abbrivation}'}
-                ];
-
-                $('#googleFeed').json2html(data,transform);
-
 
                 var o = data;  // the 'store' JSON object from above
                 var res1 = jsonPath(o, "$.entity.*");
@@ -113,7 +124,17 @@
                     eval(parsedPath + "['error'] = 'Timestamp error occurred'");
                     text = "";
                 }
-                //$("#error-json").html(JSON.stringify(data, null, 2));
+
+                Handlebars.registerPartial("marked", $("#marked-partial").html());
+
+                var feedTemplateScript = $("#gtfsrt-feed-template").html();
+                var feedTemplate = Handlebars.compile(feedTemplateScript);
+                var compiledHtml = feedTemplate(data);
+                $('#googleFeed').html(compiledHtml);
+
+
+
+                $("#error-json").html(JSON.stringify(data, null, 2));
             });
 </script>
 </body>
