@@ -55,7 +55,6 @@ public class Main {
         context.addServlet(RTFeedValidatorServlet.class, "/validate");
         context.addServlet(GTFSDownloaderServlet.class, "/downloadgtfs");
 
-        context.addServlet(CountServlet.class, "/count");
         context.addServlet(FeedInfoServlet.class, "/feedInfo");
         context.addServlet(TriggerBackgroundServlet.class, "/startBackground");
         context.addServlet(GetFeedJSON.class, "/getFeed");
