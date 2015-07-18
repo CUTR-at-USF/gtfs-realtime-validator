@@ -28,9 +28,8 @@ import java.util.Date;
 import java.util.List;
 
 public class GTFSDB {
-    static Statement stmt = null;
 
-    Class<? extends GTFSDB> jar = this.getClass();
+    static Statement stmt = null;
 
     public static void InitializeDB(){
 
@@ -43,32 +42,17 @@ public class GTFSDB {
 
             String[] createStatements = createTableQuerry.split(";");
 
-            for (int i = 0; i < createStatements.length; i++) {
+            for (String createStatement : createStatements) {
                 Class.forName("org.sqlite.JDBC");
                 Connection con = DriverManager.getConnection("jdbc:sqlite:gtfsrt.db");
 
                 stmt = con.createStatement();
-                String sql = createStatements[i];
+                String sql = createStatement;
                 stmt.executeUpdate(sql);
                 stmt.close();
                 con.close();
             }
 
-            Class.forName("org.sqlite.JDBC");
-            Connection con = DriverManager.getConnection("jdbc:sqlite:gtfsrt.db");
-            System.out.println("Opened database successfully");
-
-            stmt = con.createStatement();
-            String sql = "CREATE TABLE IF NOT EXISTS FEED_DETAILS " +
-                    "(ID INTEGER PRIMARY KEY NOT NULL," +
-                    " Time_Stamp INTEGER, " +
-                    " Vehicle_Count INTEGER, " +
-                    " Alert_Count INTEGER, " +
-                    " Feed_Url TEXT, " +
-                    " Trip_Count INTEGER)";
-            stmt.executeUpdate(sql);
-            stmt.close();
-            con.close();
         } catch ( Exception e ) {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
             System.exit(0);
