@@ -56,3 +56,7 @@
 .panel-heading a.collapsed:after {
     content:"\e080";
 }
+
+.highlight {
+    background-color: #FFFF88;
+}
