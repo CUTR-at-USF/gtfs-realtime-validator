@@ -20,6 +20,8 @@ package edu.usf.cutr.gtfsrtvalidator.db;
 import edu.usf.cutr.gtfsrtvalidator.json.MonitorDetails;
 import edu.usf.cutr.gtfsrtvalidator.json.MonitorLog;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Date;
@@ -28,31 +30,33 @@ import java.util.List;
 public class GTFSDB {
     static Statement stmt = null;
 
+    Class<? extends GTFSDB> jar = this.getClass();
+
     public static void InitializeDB(){
+
+        String workingDir = System.getProperty("user.dir");
+        String createTablePath = workingDir + "/target/classes/createTables.sql";
+
         try {
+            byte[] encoded = Files.readAllBytes(Paths.get(createTablePath));
+            String createTableQuerry = new String(encoded, "UTF-8");
+
+            String[] createStatements = createTableQuerry.split(";");
+
+            for (int i = 0; i < createStatements.length; i++) {
+                Class.forName("org.sqlite.JDBC");
+                Connection con = DriverManager.getConnection("jdbc:sqlite:gtfsrt.db");
+
+                stmt = con.createStatement();
+                String sql = createStatements[i];
+                stmt.executeUpdate(sql);
+                stmt.close();
+                con.close();
+            }
+
             Class.forName("org.sqlite.JDBC");
             Connection con = DriverManager.getConnection("jdbc:sqlite:gtfsrt.db");
             System.out.println("Opened database successfully");
-
-            stmt = con.createStatement();
-            String sql = "CREATE TABLE IF NOT EXISTS FEED_DETAILS " +
-                    "(ID INTEGER PRIMARY KEY NOT NULL," +
-                    " Time_Stamp INTEGER, " +
-                    " Vehicle_Count INTEGER, " +
-                    " Alert_Count INTEGER, " +
-                    " Feed_Url TEXT, " +
-                    " Trip_Count INTEGER)";
-            stmt.executeUpdate(sql);
-            stmt.close();
-            con.close();
-        } catch ( Exception e ) {
-            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
-            System.exit(0);
-        }
-
-        try {
-            Class.forName("org.sqlite.JDBC");
-            Connection con = DriverManager.getConnection("jdbc:sqlite:gtfsrt.db");
 
             stmt = con.createStatement();
             String sql = "CREATE TABLE IF NOT EXISTS FEED_DETAILS " +
