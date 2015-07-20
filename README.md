@@ -1,16 +1,16 @@
-# GTFS-Realtime Validator
+# GTFS-Realtime Validator [![Build Status](https://travis-ci.org/CUTR-at-USF/gtfs-realtime-validator.svg?branch=master)](https://travis-ci.org/CUTR-at-USF/gtfs-realtime-validator)
 Software that validates General Transit Feed Specification (GTFS)-realtime feeds
 
 ## Building and Running the project 
-*Please not that this project is still under development and will not perform the intended task of 
-monitoring a GTFS-Realtime feed and login the errors.*
+*Please note that this project is still under development and will not perform the intended task of 
+monitoring a GTFS-Realtime feed and logging the errors.*
 
 *The instructions below are only to get the project up 
 and running in the current state.*
 
 ### Prerequisites 
 
-The GTFS-Realtime Validator is built using Java technologies. Maven is as the build management tool for this project.
+The GTFS-Realtime Validator is built using Java technologies. Maven is the build management tool for this project.
 An instance of the Jetty embedded server is used to run the core application.
 
 Following are the requirements to get the project up and running. 
@@ -27,7 +27,7 @@ or by cloning the git repository (recommended).
 
 #### 1.a Download zipped version of the repository
 
-Download the current snapshot of the project to your local machine using the "Download Zip" link in the project home page. 
+Download the current snapshot of the project to your local machine using the "Download Zip" link on the project home page. 
 (https://github.com/CUTR-at-USF/gtfs-realtime-validator)
 
 
@@ -39,7 +39,7 @@ With git installed on the system clone the repository to your local machine.
 
 ### 2. Build the project 
 
-Using maven the project should be built. This process would create a executable `jar`.
+Using maven the project should be built. This process would create an executable `jar`.
 
 With maven installed on the system package the project to build the executable. 
 
@@ -47,16 +47,16 @@ With maven installed on the system package the project to build the executable.
 
 ### 3. Run the application
 
-The second step would generate an executable file at the `target/` directory with all the dependencies needed to run 
+The second step would generate an executable file in the `target/` directory with all the dependencies needed to run 
 the application. 
 
 Execute the file created in order to start up the application 
 
 `java -jar target/gtfs-rt-validator-1.0-SNAPSHOT.jar`
 
-A message similar to `INFO: Started @XXXms` upon successful execution. 
+A message similar to `INFO: Started @XXXms` appears upon successful execution. 
 
-### 4. View the applicaiton 
+### 4. View the application 
 
 Once the application has been started the web interface can be accessed at `localhost:8080`
 
