@@ -19,7 +19,7 @@ package edu.usf.cutr.gtfsrtvalidator.helper;
 
 import java.util.Date;
 
-public class TimeStamp {
+public class TimeStampHelper {
     public static long getCurrentTimestamp() {
         return (long) Math.ceil((double) new Date().getTime() / 1000);
     }

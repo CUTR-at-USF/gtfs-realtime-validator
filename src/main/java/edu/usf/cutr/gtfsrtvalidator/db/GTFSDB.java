@@ -17,6 +17,7 @@
 
 package edu.usf.cutr.gtfsrtvalidator.db;
 
+import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
 import edu.usf.cutr.gtfsrtvalidator.json.MonitorDetails;
 import edu.usf.cutr.gtfsrtvalidator.json.MonitorLog;
 
@@ -137,5 +138,32 @@ public class GTFSDB {
         }
 
         return monitorLog;
+    }
+
+    public static void setGTFSFeed(String url, String fileLocation) {
+        try {
+            PreparedStatement stmt;
+
+            Datasource ds = Datasource.getInstance();
+            Connection con = ds.getConnection();
+            con.setAutoCommit(false);
+
+            Date currentDate = new Date();
+            long unixTIme = currentDate.getTime() / 1000;
+
+            stmt = con.prepareStatement("INSERT INTO GtfsFeed (feedUrl, fileLocation, downloadTimestamp)VALUES (?,?,?)");
+            stmt.setString(1, url);
+            stmt.setString(2, fileLocation);
+            stmt.setLong(3, TimeStampHelper.getCurrentTimestamp());
+
+            stmt.executeUpdate();
+
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
     }
 }

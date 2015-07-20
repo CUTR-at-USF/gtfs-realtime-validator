@@ -17,6 +17,7 @@
 
 package edu.usf.cutr.gtfsrtvalidator.servlets;
 
+import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSHibernate;
 import edu.usf.cutr.gtfsrtvalidator.helper.GetFile;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
@@ -127,6 +128,7 @@ public class GTFSDownloaderServlet extends HttpServlet {
                 success = true;
             }
 
+            GTFSDB.setGTFSFeed(fileURL, saveFilePath);
             GtfsDaoImpl store = GTFSHibernate.readToDatastore(saveFilePath);
         }
 
