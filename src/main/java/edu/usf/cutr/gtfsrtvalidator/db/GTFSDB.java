@@ -32,7 +32,7 @@ public class GTFSDB {
 
     static Statement stmt = null;
 
-    public static void InitializeDB(){
+    public static void InitializeDB() {
 
         String workingDir = System.getProperty("user.dir");
         String createTablePath = workingDir + "/target/classes/createTables.sql";
@@ -54,8 +54,8 @@ public class GTFSDB {
                 con.close();
             }
 
-        } catch ( Exception e ) {
-            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
         }
 
@@ -85,8 +85,8 @@ public class GTFSDB {
             stmt.close();
             con.commit();
             con.close();
-        } catch ( Exception e ) {
-            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
         }
     }
@@ -115,7 +115,7 @@ public class GTFSDB {
 
             ResultSet rs = stmt.executeQuery();
 
-            while ( rs.next() ) {
+            while (rs.next()) {
                 MonitorDetails monitor = new MonitorDetails();
 
                 monitor.setVehicleCount(rs.getInt("Vehicle_Count"));
@@ -132,24 +132,21 @@ public class GTFSDB {
             stmt.close();
             con.commit();
             con.close();
-        } catch ( Exception e ) {
-            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
         }
 
         return monitorLog;
     }
 
-    public static void setGTFSFeed(String url, String fileLocation) {
+    public static void setGtfsFeed(String url, String fileLocation) {
         try {
             PreparedStatement stmt;
 
             Datasource ds = Datasource.getInstance();
             Connection con = ds.getConnection();
             con.setAutoCommit(false);
-
-            Date currentDate = new Date();
-            long unixTIme = currentDate.getTime() / 1000;
 
             stmt = con.prepareStatement("INSERT INTO GtfsFeed (feedUrl, fileLocation, downloadTimestamp)VALUES (?,?,?)");
             stmt.setString(1, url);
@@ -161,8 +158,35 @@ public class GTFSDB {
             stmt.close();
             con.commit();
             con.close();
-        } catch ( Exception e ) {
-            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        }
+    }
+
+    public static void setGtfsRtFeed(String url, int gtfsFeedID) {
+        try {
+            PreparedStatement stmt;
+
+            Datasource ds = Datasource.getInstance();
+            Connection con = ds.getConnection();
+            con.setAutoCommit(false);
+
+            Date currentDate = new Date();
+            long unixTIme = currentDate.getTime() / 1000;
+
+            stmt = con.prepareStatement("INSERT INTO GtfsRtFeed (feedURL, gtfsFeedID, startTime) VALUES (?,?,?)");
+            stmt.setString(1, url);
+            stmt.setInt(2, gtfsFeedID);
+            stmt.setLong(3, TimeStampHelper.getCurrentTimestamp());
+
+            stmt.executeUpdate();
+
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
         }
     }

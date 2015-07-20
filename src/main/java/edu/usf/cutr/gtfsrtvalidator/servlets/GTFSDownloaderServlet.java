@@ -128,7 +128,7 @@ public class GTFSDownloaderServlet extends HttpServlet {
                 success = true;
             }
 
-            GTFSDB.setGTFSFeed(fileURL, saveFilePath);
+            GTFSDB.setGtfsFeed(fileURL, saveFilePath);
             GtfsDaoImpl store = GTFSHibernate.readToDatastore(saveFilePath);
         }
 
