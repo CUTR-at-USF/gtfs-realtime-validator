@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS "GtfsFeed" (
   "feedID" INTEGER PRIMARY KEY AUTOINCREMENT,
   "feedUrl" TEXT,
-  "fileLocatoin" TEXT,
+  "fileLocation" TEXT,
   "downloadTimestamp" INTEGER
 );
 
