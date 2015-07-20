@@ -18,6 +18,7 @@
 package edu.usf.cutr.gtfsrtvalidator.servlets;
 
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSHibernate;
+import edu.usf.cutr.gtfsrtvalidator.helper.GetFile;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 
 import javax.servlet.ServletException;
@@ -39,7 +40,7 @@ public class GTFSDownloaderServlet extends HttpServlet {
 
         String feedURL = getParameter(request, "gtfsurl");
 
-        downloadFeed(feedURL);
+        boolean downloadFeed = downloadFeed(feedURL);
 
 
         response.setContentType("application/json");
@@ -47,11 +48,16 @@ public class GTFSDownloaderServlet extends HttpServlet {
 
         //Creates simple json object giving the feed type
         //Should be changed to a java object if more complexities occur.
-        //TODO: Change according to the status
-        response.getWriter().println("{\"feedStatus\" :1}");
+        if (downloadFeed) {
+            response.getWriter().println("{\"feedStatus\" :1}");
+        } else {
+            response.getWriter().println("{\"feedStatus\" :0}");
+        }
+
     }
 
-    private void downloadFeed(String fileURL) throws ServletException, IOException {
+    private boolean downloadFeed(String fileURL) throws ServletException, IOException {
+        boolean success = false;
 
         String path = GTFSDownloaderServlet.class.getProtectionDomain().getCodeSource().getLocation().getPath();
         String decodedPath = URLDecoder.decode(path, "UTF-8");
@@ -81,30 +87,27 @@ public class GTFSDownloaderServlet extends HttpServlet {
                 // extracts file name from header field
                 int index = disposition.indexOf("filename=");
                 if (index > 0) {
-                    fileName = disposition.substring(index + 10,
-                            disposition.length() - 1);
+                    fileName = disposition.substring(index + 10, disposition.length() - 1);
                 }
             }
 
-            String saveDir = ".";
+            //get the location of the executed jar file
+            GetFile jarInfo = new GetFile();
 
+            //remove file.jar from the path to get the folder where the jar is
+            File jarLocation = jarInfo.getJarLocation().getParentFile();
+            String saveDir = jarLocation.toString();
 
             saveFilePath = saveDir + File.separator + fileName;
 
-            File f = null;
-            f = new File(saveFilePath);
+            File f = new File(saveFilePath);
 
 
             if (f.exists() && !f.isDirectory()) {
                 System.out.println("File Already Exists");
+                success = true;
             } else {
                 System.out.println("File Doesn't Exist");
-
-                System.out.println("Content-Type = " + contentType);
-                System.out.println("Content-Disposition = " + disposition);
-                System.out.println("Content-Length = " + contentLength);
-                System.out.println("fileName = " + fileName);
-
 
                 // opens input stream from the HTTP connection
                 InputStream inputStream = connection.getInputStream();
@@ -121,13 +124,13 @@ public class GTFSDownloaderServlet extends HttpServlet {
                 outputStream.close();
                 inputStream.close();
                 System.out.println("File downloaded");
+                success = true;
             }
 
-
-            //GTFSHibernate.saveToDatabase(saveFilePath);
             GtfsDaoImpl store = GTFSHibernate.readToDatastore(saveFilePath);
-            //GTFSHibernate.printAllStops();
         }
+
+        return success;
     }
 
     private String getParameter(HttpServletRequest request, String paramName) {
