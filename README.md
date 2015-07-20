@@ -56,7 +56,7 @@ Execute the file created in order to start up the application
 
 A message similar to `INFO: Started @XXXms` appears upon successful execution. 
 
-### 4. View the applicaiton 
+### 4. View the application 
 
 Once the application has been started the web interface can be accessed at `localhost:8080`
 
