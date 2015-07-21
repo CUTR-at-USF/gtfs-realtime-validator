@@ -23,25 +23,22 @@ import edu.usf.cutr.gtfsrtvalidator.servlets.*;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-
-import java.beans.PropertyVetoException;
-import java.io.IOException;
-import java.sql.SQLException;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.servlet.ServletContainer;
 
 public class Main {
     static String BASE_RESOURCE = "./target/classes/webroot";
 
-    public Main() throws SQLException, IOException, PropertyVetoException {
-
-    }
-
     public static void main(String[] args) throws Exception{
-        new Main();
-
         GTFSDB.InitializeDB();
-
         Datasource ds = Datasource.getInstance();
         ds.getConnection();
+
+        ResourceConfig config = new ResourceConfig();
+        config.packages("edu.usf.cutr.gtfsrtvalidator.api.model");
+        ServletHolder jerseyServlet = new ServletHolder(new ServletContainer(config));
+
 
         Server server = new Server(8080);
 
@@ -61,6 +58,8 @@ public class Main {
 
 
         context.addServlet(DefaultServlet.class, "/");
+
+        context.addServlet(jerseyServlet, "/api/*");
 
         server.start();
         server.join();
