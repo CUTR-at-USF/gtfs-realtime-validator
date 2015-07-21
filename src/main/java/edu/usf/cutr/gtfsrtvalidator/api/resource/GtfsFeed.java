@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Nipuna Gunathilake.
+ * Copyright (C) 2011 Nipuna Gunathilake.
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package edu.usf.cutr.gtfsrtvalidator.servlets;
+package edu.usf.cutr.gtfsrtvalidator.api.resource;
 
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSHibernate;
@@ -23,44 +23,44 @@ import edu.usf.cutr.gtfsrtvalidator.helper.GetFile;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
 
-@SuppressWarnings("serial")
-public class GTFSDownloaderServlet extends HttpServlet {
+@Path("/gtfs-feed")
+public class GtfsFeed {
 
     private static final int BUFFER_SIZE = 4096;
 
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getGtfsFeed(@QueryParam("gtfsurl") String feedUrl){
 
-        String feedURL = getParameter(request, "gtfsurl");
-
-        boolean downloadFeed = downloadFeed(feedURL);
-
-
-        response.setContentType("application/json");
-        response.setStatus(HttpServletResponse.SC_OK);
-
-        //Creates simple json object giving the feed type
-        //Should be changed to a java object if more complexities occur.
-        if (downloadFeed) {
-            response.getWriter().println("{\"feedStatus\" :1}");
-        } else {
-            response.getWriter().println("{\"feedStatus\" :0}");
+        try {
+            downloadFeed(feedUrl);
+        } catch (ServletException | IOException e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.BAD_REQUEST).entity("Invalid GTFS-Feed URL").build();
         }
+
+        return Response.ok("{status: Success}").build();
 
     }
 
     private boolean downloadFeed(String fileURL) throws ServletException, IOException {
         boolean success = false;
 
-        String path = GTFSDownloaderServlet.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        String path = GtfsFeed.class.getProtectionDomain().getCodeSource().getLocation().getPath();
         String decodedPath = URLDecoder.decode(path, "UTF-8");
         String saveFilePath = "";
 
@@ -135,21 +135,4 @@ public class GTFSDownloaderServlet extends HttpServlet {
         return success;
     }
 
-    public static String getParameter(HttpServletRequest request, String paramName) {
-        String parameter = "";
-        String value = request.getParameter(paramName);
-
-        if (!(value == null || "".equals(value))) {
-            parameter = value;
-
-            try {
-                parameter = java.net.URLDecoder.decode(parameter, "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-        }
-        System.out.println(parameter);
-        return parameter;
-    }
 }
-
