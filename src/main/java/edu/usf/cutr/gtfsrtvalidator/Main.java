@@ -24,8 +24,6 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.servlet.ServletContainer;
 
 public class Main {
     static String BASE_RESOURCE = "./target/classes/webroot";
@@ -35,15 +33,8 @@ public class Main {
         Datasource ds = Datasource.getInstance();
         ds.getConnection();
 
-        ResourceConfig config = new ResourceConfig();
-        config.packages("edu.usf.cutr.gtfsrtvalidator.api.model");
-        ServletHolder jerseyServlet = new ServletHolder(new ServletContainer(config));
-
-
         Server server = new Server(8080);
-
         ServletContextHandler context = new ServletContextHandler();
-
         context.setContextPath("/");
         context.setResourceBase(BASE_RESOURCE);
 
@@ -51,15 +42,16 @@ public class Main {
 
         context.addServlet(RTFeedValidatorServlet.class, "/validate");
         context.addServlet(GTFSDownloaderServlet.class, "/downloadgtfs");
-
         context.addServlet(FeedInfoServlet.class, "/feedInfo");
         context.addServlet(TriggerBackgroundServlet.class, "/startBackground");
         context.addServlet(GetFeedJSON.class, "/getFeed");
 
-
         context.addServlet(DefaultServlet.class, "/");
 
-        context.addServlet(jerseyServlet, "/api/*");
+        ServletHolder jerseyServlet = context.addServlet(org.glassfish.jersey.servlet.ServletContainer.class, "/api/*");
+        jerseyServlet.setInitOrder(1);
+        jerseyServlet.setInitParameter("jersey.config.server.provider.packages", "edu.usf.cutr.gtfsrtvalidator.api.resource");
+
 
         server.start();
         server.join();
