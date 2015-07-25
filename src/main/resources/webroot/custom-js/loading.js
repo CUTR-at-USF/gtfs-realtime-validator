@@ -36,8 +36,8 @@ function getRtUrlList() {
     urlList.gtfsFeeds = [];
 
     //Fetches all the get parameters into parameterList array
-    for (var i = 0; i < sURLVariables.length; i++) {
-        var getParameter = sURLVariables[i].split('=');
+    for (var j = 0; j < sURLVariables.length; j++) {
+        var getParameter = sURLVariables[j].split('=');
         parameterList.push(getParameter);
     }
 
@@ -50,7 +50,7 @@ function getRtUrlList() {
             //ex - gtfsrt-feed-1 would return the index of 1
             gtfsFeed.index = parseInt(parameterList[i][0].substr(parameterList[i][0].length - 1));
 
-            var paramUrl = parameterList[i][1]
+            var paramUrl = parameterList[i][1];
             paramUrl = decodeURIComponent(decodeURIComponent((paramUrl)));
 
             gtfsFeed.url = paramUrl;
@@ -116,12 +116,15 @@ function downloadGTFSFeed() {
 
     if (paramVal === null) {
         alert("parameter is null/ undefined?");
-        //TODO: no URL for the given feed entered. Show status
-        //paramName + "-progress" to white.
+        //No URL for the given feed entered. Show status
+        $(progressID + " .progress-bar").addClass("progress-bar-danger");
+        $(progressID).prev().find(".status").text("(No GTFS URL Given)");
     } else if (paramVal === "") {
         alert("empty string");
-        //TODO: no URL for the given feed entered. Show status
-        // paramName + "-progress" to white.
+        //No URL for the given feed entered. Show status
+        $(progressID + " .progress-bar").addClass("progress-bar-danger");
+        $(progressID).prev().find(".status").text("(No GTFS URL Given)");
+
     } else {
         $.get("http://localhost:8080/downloadgtfs", {gtfsurl: paramVal})
             .done(function (data) {
