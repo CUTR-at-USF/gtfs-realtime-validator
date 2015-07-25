@@ -141,6 +141,36 @@ paths:
             $ref: '#/definitions/Error'
 
   /gtfs-rt-feeds/{id}:
+     get:
+        summary: Returns an array of erros and warnings.
+        parameters:
+        - name: id
+          in: path
+          description: ID of the feed to be monitored.
+          required: true
+          type: string
+        - name: limit
+          in: query
+          description: limit the number of itterations checked for errors/warnings.
+          type: string
+        - name: type
+          in: query
+          description: selct between errors and warnings.
+          type: string
+          enum: [all, errors, warnings]
+        tags:
+          - GTFS-Realtime Feeds
+        responses:
+          200:
+            description: An array of feeds
+            schema:
+              type: array
+              items:
+                $ref: '#/definitions/gtfs-rt-feed-details'
+          default:
+            description: Unexpected error
+            schema:
+              $ref: '#/definitions/Error'
     delete:
       summary: Delete gtfs-rt-feeds With the specified id
       parameters:
@@ -180,39 +210,6 @@ paths:
           description: Updated Item
           schema:
             $ref: '#/definitions/gtfs-rt-feed'
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
-
-
-  /gtfs-rt-feeds/{id}/details:
-    get:
-      summary: Returns an array of erros and warnings.
-      parameters:
-      - name: id
-        in: path
-        description: ID of the feed to be monitored.
-        required: true
-        type: string
-      - name: limit
-        in: query
-        description: limit the number of itterations checked for errors/warnings.
-        type: string
-      - name: type
-        in: query
-        description: selct between errors and warnings.
-        type: string
-        enum: [all, errors, warnings]
-      tags:
-        - GTFS-Realtime Feed Details
-      responses:
-        200:
-          description: An array of feeds
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/gtfs-rt-feed-details'
         default:
           description: Unexpected error
           schema:
