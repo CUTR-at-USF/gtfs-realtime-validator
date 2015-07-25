@@ -112,6 +112,10 @@ var validGtfsRT = false;
 //Download the provided GTFS feed
 function downloadGTFSFeed() {
     var paramVal = getUrlParameter("gtfs");
+    alert(paramVal);
+    paramVal = decodeURIComponent(paramVal);
+    alert(paramVal);
+
     var progressID = "#gtfs-progress";
 
     if (paramVal === null) {
@@ -126,18 +130,45 @@ function downloadGTFSFeed() {
         $(progressID).prev().find(".status").text("(No GTFS URL Given)");
 
     } else {
-        $.get("http://localhost:8080/downloadgtfs", {gtfsurl: paramVal})
-            .done(function (data) {
-                if (data["feedStatus"] === 1) {
-                    $(progressID).removeClass("progress-striped active");
-                    $(progressID + " .progress-bar").addClass("progress-bar-success");
 
-                    $(progressID).prev().find(".status").text("(Download Successful)");
+        function success(data){
+            if (data["feedStatus"] === 1) {
+                $(progressID).removeClass("progress-striped active");
+                $(progressID + " .progress-bar").addClass("progress-bar-success");
 
-                    validGtfs = true;
-                    checkStatus();
-                }
-            });
+                $(progressID).prev().find(".status").text("(Download Successful)");
+
+                validGtfs = true;
+                checkStatus();
+            }
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "http://localhost:8080/api/gtfs-feed",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            data: {gtfsurl: paramVal},
+            success: success,
+            dataType: 'json'
+        });
+
+
+
+        //$.post("http://localhost:8080/api/gtfs-feed", {gtfsurl: paramVal})
+        //    .done(function (data) {
+        //        if (data["feedStatus"] === 1) {
+        //            $(progressID).removeClass("progress-striped active");
+        //            $(progressID + " .progress-bar").addClass("progress-bar-success");
+        //
+        //            $(progressID).prev().find(".status").text("(Download Successful)");
+        //
+        //            validGtfs = true;
+        //            checkStatus();
+        //        }
+        //    });
     }
 }
 

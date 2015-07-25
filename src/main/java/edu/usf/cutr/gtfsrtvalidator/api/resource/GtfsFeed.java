@@ -17,16 +17,14 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.resource;
 
+import com.google.gson.Gson;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSHibernate;
 import edu.usf.cutr.gtfsrtvalidator.helper.GetFile;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 
 import javax.servlet.ServletException;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.File;
@@ -42,10 +40,20 @@ public class GtfsFeed {
 
     private static final int BUFFER_SIZE = 4096;
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getGtfsFeed(@QueryParam("gtfsurl") String feedUrl){
+    //TODO: DELETE {id} remove feed with the given id
+    //TODO: PUT update feed with {id}
 
+    //TODO: GET return list of available gtfs-feeds
+
+
+    //Add gtfs feed to local storage and database
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public Response getGtfsFeed(@FormParam("gtfsurl") String feedUrl) {
+
+        //TODO:remove println
+        System.out.println(feedUrl);
         try {
             downloadFeed(feedUrl);
         } catch (ServletException | IOException e) {
@@ -53,8 +61,15 @@ public class GtfsFeed {
             return Response.status(Response.Status.BAD_REQUEST).entity("Invalid GTFS-Feed URL").build();
         }
 
-        return Response.ok("{status: Success}").build();
+        Gson gson = new Gson();
+        SuccessMessage success = new SuccessMessage();
+        success.feedStatus = 1;
+        String s = gson.toJson(success);
+        return Response.ok(s).build();
+    }
 
+    class SuccessMessage{
+        int feedStatus;
     }
 
     private boolean downloadFeed(String fileURL) throws ServletException, IOException {
@@ -62,7 +77,7 @@ public class GtfsFeed {
 
         String path = GtfsFeed.class.getProtectionDomain().getCodeSource().getLocation().getPath();
         String decodedPath = URLDecoder.decode(path, "UTF-8");
-        String saveFilePath = "";
+        String saveFilePath;
 
         System.out.println(decodedPath);
 
