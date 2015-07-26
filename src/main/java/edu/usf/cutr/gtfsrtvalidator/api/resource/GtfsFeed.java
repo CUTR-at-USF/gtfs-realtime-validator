@@ -50,10 +50,8 @@ public class GtfsFeed {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public Response getGtfsFeed(@FormParam("gtfsurl") String feedUrl) {
+    public Response postGtfsFeed(@FormParam("gtfsurl") String feedUrl) {
 
-        //TODO:remove println
-        System.out.println(feedUrl);
         try {
             downloadFeed(feedUrl);
         } catch (ServletException | IOException e) {
