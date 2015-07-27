@@ -17,6 +17,7 @@
 
 package edu.usf.cutr.gtfsrtvalidator.db;
 
+import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsRtFeedModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
 import edu.usf.cutr.gtfsrtvalidator.json.MonitorDetails;
 import edu.usf.cutr.gtfsrtvalidator.json.MonitorLog;
@@ -88,6 +89,43 @@ public class GTFSDB {
         } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
+        }
+    }
+
+    public static GtfsRtFeedModel getFeedFromID(int id) {
+        try {
+            PreparedStatement stmt;
+            GtfsRtFeedModel gtfsFeed = new GtfsRtFeedModel();
+
+            Datasource ds = Datasource.getInstance();
+            Connection con = ds.getConnection();
+            con.setAutoCommit(false);
+
+            String sql = "SELECT * FROM GtfsRtFeed WHERE rtFeedID=?;";
+            stmt = con.prepareStatement(sql);
+            stmt.setInt(1, id);
+
+            ResultSet rs = stmt.executeQuery();
+
+            //If record alerady exists, return that item
+
+            if (rs.next()) {
+                System.out.println("the record exists");
+                gtfsFeed.setGtfsUrl(rs.getString("feedURL"));
+                gtfsFeed.setGtfsId(rs.getInt("gtfsFeedID"));
+                gtfsFeed.setStartTime(rs.getLong("startTime"));
+            } else {
+                return null;
+            }
+
+            //rtFeedInDB = rs.isBeforeFirst();
+            stmt.close();
+            con.commit();
+            con.close();
+            return  gtfsFeed;
+
+        } catch (Exception ex) {
+            return null;
         }
     }
 

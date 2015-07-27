@@ -27,6 +27,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.beans.PropertyVetoException;
@@ -48,17 +49,6 @@ public class GtfsRtFeed {
     private static final int VALID_FEED = 1;
     PreparedStatement stmt;
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getGtfsRtFeed(){
-
-        GtfsRtFeedModel feedInfo = new GtfsRtFeedModel();
-        feedInfo.setStartTime(121334);
-        feedInfo.setGtfsId(1);
-        feedInfo.setGtfsUrl("http://www.google.com");
-
-        return Response.ok(feedInfo).build();
-    }
 
     public Response generateError(String errorMessage) {
         return Response
@@ -148,7 +138,42 @@ public class GtfsRtFeed {
     }
 
 
-    //TODO: GET feed to retrive all rt-feeds
+    //GET feed to retrive all RT-feeds
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getRtFeeds(){
+        List<GtfsRtFeedModel> gtfsFeeds = new ArrayList<>();
+        try {
+            Datasource ds = Datasource.getInstance();
+            Connection con = ds.getConnection();
+            con.setAutoCommit(false);
+
+            String sql = "SELECT * FROM GtfsRtFeed";
+            stmt = con.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery();
+
+            GtfsRtFeedModel gtfsFeed = new GtfsRtFeedModel();
+
+            while (rs.next()) {
+                gtfsFeed.setGtfsUrl(rs.getString("feedURL"));
+                gtfsFeed.setGtfsId(rs.getInt("gtfsFeedID"));
+                gtfsFeed.setStartTime(rs.getLong("startTime"));
+
+                gtfsFeeds.add(gtfsFeed);
+            }
+
+            stmt.close();
+            con.commit();
+            con.close();
+
+        } catch (SQLException | PropertyVetoException | IOException e) {
+            e.printStackTrace();
+        }
+        GenericEntity<List<GtfsRtFeedModel>> feedList = new GenericEntity<List<GtfsRtFeedModel>>(gtfsFeeds){};
+        return Response.ok(feedList).build();
+    }
+
+
 
     //INFO: @Path("{id : \\d+}") //support digit only
     //TODO: GET {id} return information about the feed with {id}
