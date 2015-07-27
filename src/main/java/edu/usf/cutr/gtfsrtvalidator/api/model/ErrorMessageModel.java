@@ -20,14 +20,20 @@ package edu.usf.cutr.gtfsrtvalidator.api.model;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class TestModel {
-    private String hello;
+public class ErrorMessageModel {
+    private String message;
 
-    public String getHello() {
-        return hello;
+    public ErrorMessageModel(){}
+
+    public ErrorMessageModel(String errorMessage) {
+        setMessage(errorMessage);
     }
 
-    public void setHello(String hello) {
-        this.hello = hello;
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

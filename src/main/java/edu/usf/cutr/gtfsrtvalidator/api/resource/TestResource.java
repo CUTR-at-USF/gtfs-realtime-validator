@@ -17,7 +17,7 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.resource;
 
-import edu.usf.cutr.gtfsrtvalidator.api.model.TestModel;
+import edu.usf.cutr.gtfsrtvalidator.api.model.ErrorMessageModel;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -27,9 +27,9 @@ public class TestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public String getTest() {
-        TestModel hello = new TestModel();
-        hello.setHello("heyyyY!");
-        return hello.getHello();
+        ErrorMessageModel hello = new ErrorMessageModel();
+        hello.setMessage("heyyyY!");
+        return hello.getMessage();
     }
 
     @POST

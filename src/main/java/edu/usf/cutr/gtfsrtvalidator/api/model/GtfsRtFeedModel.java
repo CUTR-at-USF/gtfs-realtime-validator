@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package edu.usf.cutr.gtfsrtvalidator.api.resource;
+package edu.usf.cutr.gtfsrtvalidator.api.model;
 
 import javax.xml.bind.annotation.XmlRootElement;
 

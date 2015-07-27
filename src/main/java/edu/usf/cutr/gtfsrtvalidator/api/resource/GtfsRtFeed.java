@@ -17,7 +17,9 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.resource;
 
-import com.google.gson.Gson;
+import com.google.transit.realtime.GtfsRealtime;
+import edu.usf.cutr.gtfsrtvalidator.api.model.ErrorMessageModel;
+import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsRtFeedModel;
 import edu.usf.cutr.gtfsrtvalidator.db.Datasource;
 import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
 
@@ -29,12 +31,22 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.beans.PropertyVetoException;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Path("/gtfs-rt-feed")
 public class GtfsRtFeed {
+
+    private static final int INVALID_FEED = 0;
+    private static final int VALID_FEED = 1;
+    PreparedStatement stmt;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -44,26 +56,75 @@ public class GtfsRtFeed {
         feedInfo.setStartTime(121334);
         feedInfo.setGtfsId(1);
         feedInfo.setGtfsUrl("http://www.google.com");
-        Gson gson = new Gson();
 
         return Response.ok(feedInfo).build();
+    }
+
+    public Response generateError(String errorMessage) {
+        return Response
+                .status(Response.Status.BAD_REQUEST)
+                .type(MediaType.APPLICATION_JSON)
+                .entity(new ErrorMessageModel(errorMessage)).build();
     }
 
     //Add new gtfs-rt feed to monitored list
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     public Response postGtfsRtFeed(GtfsRtFeedModel feedInfo) {
-
-        System.out.println(feedInfo.toString());
-        //TODO: Check if url exists in DB
-        //TODO: If yes, return that item
-
         feedInfo.setGtfsId(1);
         feedInfo.setStartTime(TimeStampHelper.getCurrentTimestamp());
+
+        //Validate URL for GTFS feed and the GTFS ID.
+        if (feedInfo.getGtfsUrl() == null) {
+            generateError("GTFS-RT URL is required");
+        }else if (feedInfo.getGtfsId() == 0) {
+            generateError("GTFS Feed id is required");
+        }
+
+        //Checks if the GTFS-RT feed returns valid protobuf
+        if (checkFeedType(feedInfo.getGtfsUrl()) == INVALID_FEED) {
+            generateError("The GTFS-RT URL given is not a valid feed");
+        }
+
+        //Check if url exists in DB
+        try {
+            Datasource ds = Datasource.getInstance();
+            Connection con = ds.getConnection();
+            con.setAutoCommit(false);
+
+            String sql = "SELECT * FROM GtfsRtFeed WHERE gtfsFeedID=? AND feedURL=?;";
+            stmt = con.prepareStatement(sql);
+
+            stmt.setInt(1, feedInfo.getGtfsId());
+            stmt.setString(2, feedInfo.getGtfsUrl());
+
+            ResultSet rs = stmt.executeQuery();
+
+            //If record alerady exists, return that item
+            if (rs.isBeforeFirst()) {
+                GtfsRtFeedModel gtfsFeed = new GtfsRtFeedModel();
+                if (rs.next()) {
+                    System.out.println("the record exists");
+                    gtfsFeed.setGtfsUrl(rs.getString("feedURL"));
+                    gtfsFeed.setGtfsId(rs.getInt("gtfsFeedID"));
+                    gtfsFeed.setStartTime(rs.getLong("startTime"));
+
+                    return Response.ok(gtfsFeed).build();
+                }
+
+            }
+            //rtFeedInDB = rs.isBeforeFirst();
+
+            stmt.close();
+            con.commit();
+            con.close();
+
+        } catch (SQLException | PropertyVetoException | IOException e) {
+            e.printStackTrace();
+        }
+
         //If not, create the gtfs-rt feed in the DB and return the feed
         try {
-            PreparedStatement stmt;
-
             Datasource ds = Datasource.getInstance();
             Connection con = ds.getConnection();
             con.setAutoCommit(false);
@@ -83,19 +144,7 @@ public class GtfsRtFeed {
             e.printStackTrace();
         }
 
-//
-//        try {
-//
-//        } catch (ServletException | IOException e) {
-//            e.printStackTrace();
-//            return Response.status(Response.Status.BAD_REQUEST).entity("Invalid GTFS-Feed URL").build();
-//        }
-//
-        Gson gson = new Gson();
-//        SuccessMessage success = new SuccessMessage();
-//        success.feedStatus = 1;
-        String s = gson.toJson("test");
-        return Response.ok(s).build();
+        return Response.ok(feedInfo).build();
     }
 
 
@@ -104,4 +153,20 @@ public class GtfsRtFeed {
     //INFO: @Path("{id : \\d+}") //support digit only
     //TODO: GET {id} return information about the feed with {id}
     //TODO: DELETE {id} remove feed with {id}
+
+    private int checkFeedType(String FeedURL) {
+        GtfsRealtime.FeedMessage feed;
+        try {
+            System.out.println(FeedURL);
+            URI FeedURI = new URI(FeedURL);
+            URL url = FeedURI.toURL();
+            feed = GtfsRealtime.FeedMessage.parseFrom(url.openStream());
+        } catch (URISyntaxException | IllegalArgumentException | IOException e ) {
+            return INVALID_FEED;
+        }
+        if (feed.hasHeader()) {
+            return VALID_FEED;
+        }
+        return INVALID_FEED;
+    }
 }
