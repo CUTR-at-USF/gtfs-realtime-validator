@@ -99,9 +99,7 @@ public class GtfsRtFeed {
 
                     return Response.ok(gtfsFeed).build();
                 }
-
             }
-            //rtFeedInDB = rs.isBeforeFirst();
 
             stmt.close();
             con.commit();

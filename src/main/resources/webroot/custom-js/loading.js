@@ -63,74 +63,86 @@ function getRtUrlList() {
             urlList.gtfsFeeds.push(gtfsFeed);
         }
     }
-
     return urlList;
 }
 
 
 //TODO: remove once RESTful api is imlemented
 //Check if the urls provided are valid gtfs-rt feeds
-function checkGtfsRtFeeds(gtfsrtUrlList) {
-    for (var i = 0; i < gtfsrtUrlList.gtfsFeeds.length; i++) {
-        var currentURL = gtfsrtUrlList.gtfsFeeds[i].url;
-        var currentIndex = gtfsrtUrlList.gtfsFeeds[i].index;
-
-        (function (url, index) {
-            $.get("http://localhost:8080/validate", {gtfsrturl: currentURL})
-                .done(function (data) {
-                    var progressID = "#gtfsrt-progress-" + index;
-                    if (data["feedStatus"] === 1) {
-                        $(progressID).removeClass("progress-striped active");
-                        $(progressID + " .progress-bar").addClass("progress-bar-success");
-
-                        $(progressID).prev().find(".status").text("(Feed Valid)");
-
-                        var gtfsFeed = {index: index, url: url};
-                        validUrlList.gtfsFeeds.push(gtfsFeed);
-
-                        validGtfsRT = true;
-                        checkStatus();
-                    } else if (data["feedStatus"] === 0) {
-                        //Incorrect feed type given
-                        $(progressID).removeClass("progress-striped active");
-                        $(progressID + " .progress-bar").addClass("progress-bar-danger");
-
-                        $(progressID).prev().find(".status").text("(Invalid type)");
-                    }
-                });
-        }(currentURL, currentIndex));
-    }
-}
+//function checkGtfsRtFeeds(gtfsrtUrlList) {
+//    for (var i = 0; i < gtfsrtUrlList.gtfsFeeds.length; i++) {
+//        var currentURL = gtfsrtUrlList.gtfsFeeds[i].url;
+//        var currentIndex = gtfsrtUrlList.gtfsFeeds[i].index;
+//
+//        (function (url, index) {
+//            $.get("http://localhost:8080/validate", {gtfsrturl: currentURL})
+//                .done(function (data) {
+//                    var progressID = "#gtfsrt-progress-" + index;
+//                    if (data["feedStatus"] === 1) {
+//                        $(progressID).removeClass("progress-striped active");
+//                        $(progressID + " .progress-bar").addClass("progress-bar-success");
+//
+//                        $(progressID).prev().find(".status").text("(Feed Valid)");
+//
+//                        var gtfsFeed = {index: index, url: url};
+//                        validUrlList.gtfsFeeds.push(gtfsFeed);
+//
+//                        validGtfsRT = true;
+//                        checkStatus();
+//                    } else if (data["feedStatus"] === 0) {
+//                        //Incorrect feed type given
+//                        $(progressID).removeClass("progress-striped active");
+//                        $(progressID + " .progress-bar").addClass("progress-bar-danger");
+//
+//                        $(progressID).prev().find(".status").text("(Invalid type)");
+//                    }
+//                });
+//        }(currentURL, currentIndex));
+//    }
+//}
 
 //Check if the urls provided are valid gtfs-rt feeds
 function monitorGtfsRtFeeds(gtfsrtUrlList, gtfsFeedId) {
+    alert("monitor called");
     for (var i = 0; i < gtfsrtUrlList.gtfsFeeds.length; i++) {
+
+        alert("inside for");
         var currentURL = gtfsrtUrlList.gtfsFeeds[i].url;
         var currentIndex = gtfsrtUrlList.gtfsFeeds[i].index;
 
         (function (url, index) {
-            $.get("http://localhost:8080/validate", {gtfsrturl: currentURL})
-                .done(function (data) {
-                    var progressID = "#gtfsrt-progress-" + index;
-                    if (data["feedStatus"] === 1) {
-                        $(progressID).removeClass("progress-striped active");
-                        $(progressID + " .progress-bar").addClass("progress-bar-success");
 
-                        $(progressID).prev().find(".status").text("(Feed Valid)");
+            var progressID = "#gtfsrt-progress-" + index;
 
-                        var gtfsFeed = {index: index, url: url};
-                        validUrlList.gtfsFeeds.push(gtfsFeed);
+            //POST request to api/gtfs-rt to add
+            function success(data){
+                if (data["gtfsUrl"] != null) {
+                    $(progressID).removeClass("progress-striped active");
+                    $(progressID + " .progress-bar").addClass("progress-bar-success");
 
-                        validGtfsRT = true;
-                        checkStatus();
-                    } else if (data["feedStatus"] === 0) {
-                        //Incorrect feed type given
-                        $(progressID).removeClass("progress-striped active");
-                        $(progressID + " .progress-bar").addClass("progress-bar-danger");
+                    $(progressID).prev().find(".status").text("(Download Successful)");
 
-                        $(progressID).prev().find(".status").text("(Invalid type)");
-                    }
-                });
+                    validGtfsRT = true;
+
+                    //gtfsRtfeeds can only be started with a valid id
+                    checkStatus();
+                }
+            }
+
+            var jsonData = {"gtfsUrl":url,"gtfsFeedId":index};
+
+            $.ajax({
+                type: "POST",
+                url: "http://localhost:8080/api/gtfs-rt-feed",
+                headers: {
+                    'Accept': '*/*',
+                    'Content-Type': 'application/json'
+                },
+                data: JSON.stringify(jsonData),
+                success: success,
+                dataType: 'json'
+            });
+
         }(currentURL, currentIndex));
     }
 }
@@ -158,10 +170,7 @@ function downloadGTFSFeed() {
     } else {
 
         function success(data){
-            alert(JSON.stringify(data));
-            alert(data["feedID"]);
-
-            if (data["feedStatus"] === 1) {
+            if (data["feedId"] != null) {
                 $(progressID).removeClass("progress-striped active");
                 $(progressID + " .progress-bar").addClass("progress-bar-success");
 
@@ -170,7 +179,6 @@ function downloadGTFSFeed() {
                 validGtfs = true;
 
                 //gtfsRtfeeds can only be started with a valid id
-                checkGtfsRtFeeds(gtfsrtUrlList);
                 monitorGtfsRtFeeds(gtfsrtUrlList, data["feedId"]);
                 checkStatus();
             }

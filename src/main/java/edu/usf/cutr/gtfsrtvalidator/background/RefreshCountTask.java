@@ -19,7 +19,6 @@ package edu.usf.cutr.gtfsrtvalidator.background;
 
 import com.google.protobuf.Descriptors;
 import com.google.transit.realtime.GtfsRealtime;
-import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsRtFeedModel;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.validation.HeaderValidation;
 
@@ -31,16 +30,6 @@ import java.net.URL;
 public class RefreshCountTask implements Runnable {
 
     public URL _feedUrl;
-
-    //Get URL from GTFS-feedID
-    public RefreshCountTask(int feedID) {
-        try {
-            GtfsRtFeedModel gtfsFeed = GTFSDB.getFeedFromID(feedID);
-            _feedUrl = new URL(gtfsFeed.getGtfsUrl());
-        } catch (MalformedURLException e) {
-            System.out.println("URL Malformed at RefreshCountTask constructors");
-        }
-    }
 
     public RefreshCountTask(String url) {
         try {
@@ -88,12 +77,10 @@ public class RefreshCountTask implements Runnable {
             }
         }
 
+        //System.out.println(vehicleCount + " " + tripCount + " " + alertCount);
+
         //Store details found to the database
         GTFSDB.setFeedDetails(_feedUrl.toString(), vehicleCount, tripCount, alertCount);
-
-        //TODO: save data to new database
-        //TODO: save binary blob to database
-
 
     }
 

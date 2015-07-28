@@ -118,6 +118,7 @@ public class GtfsFeed {
 
                 if(f.exists() && !f.isDirectory()){
                     System.out.println("File in db exists in filesystem");
+                    gtfsModel = gtfsFeed;
                 }else{
                     //Remove db records and download data
                     System.out.println("File Doesn't Exist in FileSystem");
