@@ -17,12 +17,10 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.resource;
 
-import com.google.gson.Gson;
 import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedModel;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSHibernate;
 import edu.usf.cutr.gtfsrtvalidator.helper.GetFile;
-import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 
 import javax.servlet.ServletException;
@@ -54,25 +52,17 @@ public class GtfsFeed {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response postGtfsFeed(@FormParam("gtfsurl") String feedUrl) {
 
+        GtfsFeedModel downloadedFeed = null;
+
         try {
-            downloadFeed(feedUrl);
+            downloadedFeed = downloadFeed(feedUrl);
         } catch (ServletException | IOException e) {
             e.printStackTrace();
             return Response.status(Response.Status.BAD_REQUEST).entity("Invalid GTFS-Feed URL").build();
         }
 
-
-        //TODO: return gtfs item on success
-
-        Gson gson = new Gson();
-        SuccessMessage success = new SuccessMessage();
-        success.feedStatus = 1;
-        String s = gson.toJson(success);
-        return Response.ok(s).build();
-    }
-
-    class SuccessMessage{
-        int feedStatus;
+        //Return gtfs item on success
+        return Response.ok(downloadedFeed).build();
     }
 
     private GtfsFeedModel downloadFeed(String fileURL) throws ServletException, IOException {
@@ -119,18 +109,47 @@ public class GtfsFeed {
 
             saveFilePath = saveDir + File.separator + fileName;
 
-            File f = new File(saveFilePath);
 
+            GtfsFeedModel gtfsFeed = GTFSDB.getGtfsFeedFromUrl(fileURL);
 
-            if (f.exists() && !f.isDirectory()) {
-                System.out.println("File Already Exists");
+            if (gtfsFeed != null ) {
+                System.out.println("URL exists in database");
+                File f = new File(gtfsFeed.getFeedLocation());
 
-                //TODO: return object
-                gtfsModel = new GtfsFeedModel();
-                //gtfsModel.setGtfsUrl();
-                gtfsModel.setStartTime(TimeStampHelper.getCurrentTimestamp());
-//                gtfsModel.setFeedId();
-                gtfsModel.setFeedLocation(saveFilePath);
+                if(f.exists() && !f.isDirectory()){
+                    System.out.println("File in db exists in filesystem");
+                }else{
+                    //Remove db records and download data
+                    System.out.println("File Doesn't Exist in FileSystem");
+                    GTFSDB.removeGtfsFeedFromUrl(fileURL);
+                    System.out.println("DB entry deleted");
+
+                    InputStream inputStream = connection.getInputStream();
+                    FileOutputStream outputStream = new FileOutputStream(saveFilePath);
+
+                    int bytesRead = -1;
+                    byte[] buffer = new byte[BUFFER_SIZE];
+                    while ((bytesRead = inputStream.read(buffer)) != -1) {
+                        outputStream.write(buffer, 0, bytesRead);
+                    }
+
+                    outputStream.close();
+                    inputStream.close();
+                    System.out.println("File downloaded to file system");
+
+                    //Create GTFS feed row in database
+                    GTFSDB.setGtfsFeed(fileURL, saveFilePath);
+
+                    //Get the newly created GTFSfeed model from url
+                    gtfsFeed = GTFSDB.getGtfsFeedFromUrl(fileURL);
+
+                    //Return GTFS Model object
+                    gtfsModel = new GtfsFeedModel();
+                    gtfsModel.setGtfsUrl(gtfsFeed.getGtfsUrl());
+                    gtfsModel.setStartTime(gtfsFeed.getStartTime());
+                    gtfsModel.setFeedId(gtfsFeed.getFeedId());
+                    gtfsModel.setFeedLocation(gtfsFeed.getFeedLocation());
+                }
 
             } else {
                 System.out.println("File Doesn't Exist");
@@ -150,11 +169,18 @@ public class GtfsFeed {
                 outputStream.close();
                 inputStream.close();
                 System.out.println("File downloaded");
-                //TODO: return object
-                gtfsModel = new GtfsFeedModel();
+
+                //Create GTFS feed row in database
+                GTFSDB.setGtfsFeed(fileURL, saveFilePath);
+
+                //Get the newly created GTFSfeed model from url
+                gtfsFeed = GTFSDB.getGtfsFeedFromUrl(fileURL);
+
+                //Return GTFS Model object
+                gtfsModel = gtfsFeed;
+
             }
 
-            GTFSDB.setGtfsFeed(fileURL, saveFilePath);
             GtfsDaoImpl store = GTFSHibernate.readToDatastore(saveFilePath);
         }
 

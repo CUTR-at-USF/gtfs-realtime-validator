@@ -30,7 +30,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.beans.PropertyVetoException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -38,7 +37,6 @@ import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -109,7 +107,7 @@ public class GtfsRtFeed {
             con.commit();
             con.close();
 
-        } catch (SQLException | PropertyVetoException | IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -130,7 +128,7 @@ public class GtfsRtFeed {
             con.commit();
             con.close();
 
-        } catch (SQLException | PropertyVetoException | IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -166,7 +164,7 @@ public class GtfsRtFeed {
             con.commit();
             con.close();
 
-        } catch (SQLException | PropertyVetoException | IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         GenericEntity<List<GtfsRtFeedModel>> feedList = new GenericEntity<List<GtfsRtFeedModel>>(gtfsFeeds){};

@@ -158,6 +158,9 @@ function downloadGTFSFeed() {
     } else {
 
         function success(data){
+            alert(JSON.stringify(data));
+            alert(data["feedID"]);
+
             if (data["feedStatus"] === 1) {
                 $(progressID).removeClass("progress-striped active");
                 $(progressID + " .progress-bar").addClass("progress-bar-success");

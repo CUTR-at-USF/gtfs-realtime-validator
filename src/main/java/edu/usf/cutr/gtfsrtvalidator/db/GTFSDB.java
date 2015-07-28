@@ -17,6 +17,7 @@
 
 package edu.usf.cutr.gtfsrtvalidator.db;
 
+import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsRtFeedModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
 import edu.usf.cutr.gtfsrtvalidator.json.MonitorDetails;
@@ -178,7 +179,7 @@ public class GTFSDB {
         return monitorLog;
     }
 
-    public static void setGtfsFeed(String url, String fileLocation) {
+    public static synchronized void setGtfsFeed(String url, String fileLocation) {
         try {
             PreparedStatement stmt;
 
@@ -226,6 +227,75 @@ public class GTFSDB {
         } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
+        }
+    }
+
+    public static synchronized GtfsFeedModel getGtfsFeedFromUrl(String fileURL) {
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+
+        try {
+            PreparedStatement stmt;
+            GtfsFeedModel gtfsFeed = new GtfsFeedModel();
+
+            con.setAutoCommit(false);
+
+            String sql = "SELECT * FROM GtfsFeed WHERE feedUrl=?;";
+            stmt = con.prepareStatement(sql);
+            stmt.setString(1, fileURL);
+
+            ResultSet rs = stmt.executeQuery();
+
+            //If record alerady exists, return that item
+
+            if (rs.next()) {
+                gtfsFeed.setGtfsUrl(rs.getString("feedURL"));
+                gtfsFeed.setFeedId(rs.getInt("feedID"));
+                gtfsFeed.setStartTime(rs.getLong("downloadTimestamp"));
+                gtfsFeed.setFeedLocation(rs.getString("fileLocation"));
+            } else {
+                return null;
+            }
+
+            //rtFeedInDB = rs.isBeforeFirst();
+            stmt.close();
+            con.commit();
+            con.close();
+            return  gtfsFeed;
+
+        } catch (Exception ex) {
+            return null;
+        } finally {
+            try {
+                con.close();
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void removeGtfsFeedFromUrl(String fileURL) {
+        try {
+            PreparedStatement stmt;
+            GtfsFeedModel gtfsFeed = new GtfsFeedModel();
+
+            Datasource ds = Datasource.getInstance();
+            Connection con = ds.getConnection();
+            con.setAutoCommit(false);
+
+            String sql = "DELETE FROM GtfsFeed WHERE feedUrl=?;";
+            stmt = con.prepareStatement(sql);
+            stmt.setString(1, fileURL);
+
+            stmt.executeUpdate();
+
+            //rtFeedInDB = rs.isBeforeFirst();
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception ex) {
+
         }
     }
 }

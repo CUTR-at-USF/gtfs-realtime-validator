@@ -68,16 +68,25 @@ public class Datasource {
 
     }
 
-    public static Datasource getInstance() throws IOException, SQLException, PropertyVetoException {
+    public static Datasource getInstance() {
         if (datasource == null) {
-            datasource = new Datasource();
+            try {
+                datasource = new Datasource();
+            } catch (IOException | SQLException | PropertyVetoException e) {
+                e.printStackTrace();
+            }
             return datasource;
         } else {
             return datasource;
         }
     }
 
-    public Connection getConnection() throws SQLException {
-        return this.cpds.getConnection();
+    public Connection getConnection() {
+        try {
+            return this.cpds.getConnection();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
