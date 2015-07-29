@@ -20,13 +20,12 @@ package edu.usf.cutr.gtfsrtvalidator.api.resource;
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.api.model.ErrorMessageModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsRtFeedModel;
+import edu.usf.cutr.gtfsrtvalidator.background.RefreshCountTask;
 import edu.usf.cutr.gtfsrtvalidator.db.Datasource;
+import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -38,7 +37,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Path("/gtfs-rt-feed")
 public class GtfsRtFeed {
@@ -96,7 +99,7 @@ public class GtfsRtFeed {
                     gtfsFeed.setGtfsUrl(rs.getString("feedURL"));
                     gtfsFeed.setGtfsId(rs.getInt("gtfsFeedID"));
                     gtfsFeed.setStartTime(rs.getLong("startTime"));
-
+                    gtfsFeed.setGtfsRtId(rs.getInt("rtFeedID"));
                     return Response.ok(gtfsFeed).build();
                 }
             }
@@ -169,12 +172,26 @@ public class GtfsRtFeed {
         return Response.ok(feedList).build();
     }
 
+    private static HashMap<String, ScheduledExecutorService> runningTasks = new HashMap<>();
 
+    @PUT
+    @Path("/{id}/monitor")
+    public String getID(@PathParam("id") int id) {
+        int interval = 10;
+
+        //Get URL from id
+        GtfsRtFeedModel gtfsRtFeed = GTFSDB.getGtfsRtFeedById(id);
+
+        System.out.println("URL is" + gtfsRtFeed.getGtfsUrl());
+
+        startBackgroundTask(gtfsRtFeed.getGtfsUrl(), interval);
+
+        return "monitoring started";
+    }
 
     //INFO: @Path("{id : \\d+}") //support digit only
     //TODO: GET {id} return information about the feed with {id}
     //TODO: DELETE {id} remove feed with {id}
-
     private int checkFeedType(String FeedURL) {
         GtfsRealtime.FeedMessage feed;
         try {
@@ -189,5 +206,17 @@ public class GtfsRtFeed {
             return VALID_FEED;
         }
         return INVALID_FEED;
+    }
+
+    public static ScheduledExecutorService startBackgroundTask(String url, int updateInterval) {
+
+        if (!runningTasks.containsKey(url)) {
+            ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+            scheduler.scheduleAtFixedRate(new RefreshCountTask(url), 0, updateInterval, TimeUnit.SECONDS);
+            runningTasks.put(url, scheduler);
+            return scheduler;
+        }else {
+            return runningTasks.get(url);
+        }
     }
 }

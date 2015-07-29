@@ -24,6 +24,7 @@ public class GtfsRtFeedModel {
     private String gtfsUrl;
     private int gtfsId;
     private long startTime;
+    private int gtfsRtId;
 
     public GtfsRtFeedModel(){}
 
@@ -49,5 +50,13 @@ public class GtfsRtFeedModel {
 
     public void setStartTime(long startTime) {
         this.startTime = startTime;
+    }
+
+    public int getGtfsRtId() {
+        return gtfsRtId;
+    }
+
+    public void setGtfsRtId(int gtfsRtId) {
+        this.gtfsRtId = gtfsRtId;
     }
 }

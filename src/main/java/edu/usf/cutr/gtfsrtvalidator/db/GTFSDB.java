@@ -65,11 +65,11 @@ public class GTFSDB {
     }
 
     public static synchronized void setFeedDetails(String url, int vehicle, int trip, int alert) {
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
         try {
             PreparedStatement stmt;
 
-            Datasource ds = Datasource.getInstance();
-            Connection con = ds.getConnection();
             con.setAutoCommit(false);
 
             Date currentDate = new Date();
@@ -90,16 +90,23 @@ public class GTFSDB {
         } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
+        } finally {
+            try {
+                con.close();
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    public static GtfsRtFeedModel getFeedFromID(int id) {
+    public static synchronized GtfsRtFeedModel getFeedFromID(int id) {
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
         try {
             PreparedStatement stmt;
             GtfsRtFeedModel gtfsFeed = new GtfsRtFeedModel();
 
-            Datasource ds = Datasource.getInstance();
-            Connection con = ds.getConnection();
             con.setAutoCommit(false);
 
             String sql = "SELECT * FROM GtfsRtFeed WHERE rtFeedID=?;";
@@ -127,6 +134,13 @@ public class GTFSDB {
 
         } catch (Exception ex) {
             return null;
+        } finally {
+            try {
+                con.close();
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -139,9 +153,10 @@ public class GTFSDB {
         MonitorLog monitorLog = new MonitorLog();
         List<MonitorDetails> monitorDetails = new ArrayList<>();
 
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+
         try {
-            Datasource ds = Datasource.getInstance();
-            Connection con = ds.getConnection();
             con.setAutoCommit(false);
 
             PreparedStatement stmt;
@@ -174,17 +189,26 @@ public class GTFSDB {
         } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
+        } finally {
+            try {
+                con.close();
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
 
         return monitorLog;
     }
 
     public static synchronized void setGtfsFeed(String url, String fileLocation) {
+
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+
         try {
             PreparedStatement stmt;
 
-            Datasource ds = Datasource.getInstance();
-            Connection con = ds.getConnection();
             con.setAutoCommit(false);
 
             stmt = con.prepareStatement("INSERT INTO GtfsFeed (feedUrl, fileLocation, downloadTimestamp)VALUES (?,?,?)");
@@ -200,15 +224,22 @@ public class GTFSDB {
         } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
+        } finally {
+            try {
+                con.close();
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    public static void setGtfsRtFeed(String url, int gtfsFeedID) {
+    public static synchronized void setGtfsRtFeed(String url, int gtfsFeedID) {
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
         try {
             PreparedStatement stmt;
 
-            Datasource ds = Datasource.getInstance();
-            Connection con = ds.getConnection();
             con.setAutoCommit(false);
 
             Date currentDate = new Date();
@@ -227,7 +258,55 @@ public class GTFSDB {
         } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
+        } finally {
+            try {
+                con.close();
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
+    }
+
+    public static synchronized GtfsRtFeedModel getGtfsRtFeedById(int gtfsFeedID) {
+
+        GtfsRtFeedModel feedModel = new GtfsRtFeedModel();
+
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+        try {
+            PreparedStatement stmt;
+
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("SELECT * FROM GtfsRtFeed WHERE rtFeedID = ?");
+            stmt.setInt(1, gtfsFeedID);
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                feedModel.setGtfsRtId(rs.getInt("rtFeedID"));
+                feedModel.setGtfsUrl(rs.getString("feedURL"));
+                feedModel.setGtfsId(rs.getInt("gtfsFeedID"));
+                feedModel.setStartTime(rs.getLong("startTime"));
+            }
+
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return feedModel;
     }
 
     public static synchronized GtfsFeedModel getGtfsFeedFromUrl(String fileURL) {
@@ -275,13 +354,13 @@ public class GTFSDB {
         }
     }
 
-    public static void removeGtfsFeedFromUrl(String fileURL) {
+    public static synchronized void removeGtfsFeedFromUrl(String fileURL) {
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
         try {
             PreparedStatement stmt;
             GtfsFeedModel gtfsFeed = new GtfsFeedModel();
 
-            Datasource ds = Datasource.getInstance();
-            Connection con = ds.getConnection();
             con.setAutoCommit(false);
 
             String sql = "DELETE FROM GtfsFeed WHERE feedUrl=?;";
@@ -295,7 +374,14 @@ public class GTFSDB {
             con.commit();
             con.close();
         } catch (Exception ex) {
-
+            ex.printStackTrace();
+        } finally {
+            try {
+                con.close();
+            } catch (SQLException e)
+            {
+                e.printStackTrace();
+            }
         }
     }
 }

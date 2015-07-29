@@ -19,7 +19,6 @@ package edu.usf.cutr.gtfsrtvalidator.servlets;
 
 import com.google.gson.Gson;
 import edu.usf.cutr.gtfsrtvalidator.background.RefreshCountTask;
-import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.json.GtfsRtFeeds;
 
 import javax.servlet.ServletException;
@@ -57,15 +56,12 @@ public class TriggerBackgroundServlet extends HttpServlet {
             }
         }
 
-        System.out.println("UPDATE INTERVAL"+ updateInterval);
-
         Gson gson = new Gson();
 
         List<GtfsRtFeeds> feeds = Arrays.asList(gson.fromJson(gtfsRtFeeds, GtfsRtFeeds[].class));
 
-        GTFSDB.InitializeDB();
-
         for (GtfsRtFeeds feed : feeds) {
+            System.out.println("GTFS-RT feed URL is: " + feed.getUrl());
             startBackgroundTask(feed.getUrl(), interval);
         }
         response.getWriter().println(gtfsRtFeeds);

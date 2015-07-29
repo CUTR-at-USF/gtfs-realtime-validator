@@ -66,47 +66,9 @@ function getRtUrlList() {
     return urlList;
 }
 
-
-//TODO: remove once RESTful api is imlemented
-//Check if the urls provided are valid gtfs-rt feeds
-//function checkGtfsRtFeeds(gtfsrtUrlList) {
-//    for (var i = 0; i < gtfsrtUrlList.gtfsFeeds.length; i++) {
-//        var currentURL = gtfsrtUrlList.gtfsFeeds[i].url;
-//        var currentIndex = gtfsrtUrlList.gtfsFeeds[i].index;
-//
-//        (function (url, index) {
-//            $.get("http://localhost:8080/validate", {gtfsrturl: currentURL})
-//                .done(function (data) {
-//                    var progressID = "#gtfsrt-progress-" + index;
-//                    if (data["feedStatus"] === 1) {
-//                        $(progressID).removeClass("progress-striped active");
-//                        $(progressID + " .progress-bar").addClass("progress-bar-success");
-//
-//                        $(progressID).prev().find(".status").text("(Feed Valid)");
-//
-//                        var gtfsFeed = {index: index, url: url};
-//                        validUrlList.gtfsFeeds.push(gtfsFeed);
-//
-//                        validGtfsRT = true;
-//                        checkStatus();
-//                    } else if (data["feedStatus"] === 0) {
-//                        //Incorrect feed type given
-//                        $(progressID).removeClass("progress-striped active");
-//                        $(progressID + " .progress-bar").addClass("progress-bar-danger");
-//
-//                        $(progressID).prev().find(".status").text("(Invalid type)");
-//                    }
-//                });
-//        }(currentURL, currentIndex));
-//    }
-//}
-
 //Check if the urls provided are valid gtfs-rt feeds
 function monitorGtfsRtFeeds(gtfsrtUrlList, gtfsFeedId) {
-    alert("monitor called");
     for (var i = 0; i < gtfsrtUrlList.gtfsFeeds.length; i++) {
-
-        alert("inside for");
         var currentURL = gtfsrtUrlList.gtfsFeeds[i].url;
         var currentIndex = gtfsrtUrlList.gtfsFeeds[i].index;
 
@@ -117,12 +79,24 @@ function monitorGtfsRtFeeds(gtfsrtUrlList, gtfsFeedId) {
             //POST request to api/gtfs-rt to add
             function success(data){
                 if (data["gtfsUrl"] != null) {
+
                     $(progressID).removeClass("progress-striped active");
                     $(progressID + " .progress-bar").addClass("progress-bar-success");
 
                     $(progressID).prev().find(".status").text("(Download Successful)");
 
+                    //data["gtfsRtId"]
+
                     validGtfsRT = true;
+
+                    var gtfsFeed = {};
+
+                    gtfsFeed.url = url;
+                    gtfsFeed.feedId = data["gtfsRtId"];
+
+                    validUrlList.gtfsFeeds.push(gtfsFeed);
+
+                    localStorage.setItem("gtfsRtFeeds", JSON.stringify(validUrlList.gtfsFeeds));
 
                     //gtfsRtfeeds can only be started with a valid id
                     checkStatus();
@@ -150,25 +124,19 @@ function monitorGtfsRtFeeds(gtfsrtUrlList, gtfsFeedId) {
 //Download the provided GTFS feed
 function downloadGTFSFeed() {
     var paramVal = getUrlParameter("gtfs");
-    alert(paramVal);
     paramVal = decodeURIComponent(paramVal);
-    alert(paramVal);
 
     var progressID = "#gtfs-progress";
 
     if (paramVal === null) {
-        alert("parameter is null/ undefined?");
         //No URL for the given feed entered. Show status
         $(progressID + " .progress-bar").addClass("progress-bar-danger");
         $(progressID).prev().find(".status").text("(No GTFS URL Given)");
     } else if (paramVal === "") {
-        alert("empty string");
         //No URL for the given feed entered. Show status
         $(progressID + " .progress-bar").addClass("progress-bar-danger");
         $(progressID).prev().find(".status").text("(No GTFS URL Given)");
-
     } else {
-
         function success(data){
             if (data["feedId"] != null) {
                 $(progressID).removeClass("progress-striped active");
@@ -207,8 +175,6 @@ function generateRealtimeProgressBar(urlList) {
 }
 
 function checkStatus(){
-    localStorage.setItem("gtfsRtFeeds", JSON.stringify(validUrlList.gtfsFeeds));
-
     if(validGtfs && validGtfsRT) {
         $("#btn-continue").removeAttr('disabled');
     }
@@ -230,7 +196,7 @@ function startMonitoring() {
     //Generate parameters from a for loop
     for (var i = 0; i < validUrlList.gtfsFeeds.length; i++) {
         var currentURL = validUrlList.gtfsFeeds[i].url;
-        var currentIndex = validUrlList.gtfsFeeds[i].index;
+        var currentIndex = validUrlList.gtfsFeeds[i].feedId;
         parameters['gtfsrt' + currentIndex] = currentURL;
     }
 
