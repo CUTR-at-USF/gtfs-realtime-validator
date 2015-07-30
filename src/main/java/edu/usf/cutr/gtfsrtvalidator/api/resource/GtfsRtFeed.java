@@ -36,7 +36,6 @@ import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -59,6 +58,7 @@ public class GtfsRtFeed {
                 .entity(new ErrorMessageModel(errorMessage)).build();
     }
 
+    //TODO: Currently returns null if running for the first time.
     //Add new gtfs-rt feed to monitored list
     @POST
     @Produces(MediaType.APPLICATION_JSON)
@@ -78,69 +78,11 @@ public class GtfsRtFeed {
             generateError("The GTFS-RT URL given is not a valid feed");
         }
 
-        //Check if url exists in DB
-        Datasource ds = Datasource.getInstance();
-        Connection con = ds.getConnection();
-        try {
-            con.setAutoCommit(false);
-
-            String sql = "SELECT * FROM GtfsRtFeed WHERE gtfsFeedID=? AND feedURL=?;";
-            stmt = con.prepareStatement(sql);
-
-            stmt.setInt(1, feedInfo.getGtfsId());
-            stmt.setString(2, feedInfo.getGtfsUrl());
-
-            ResultSet rs = stmt.executeQuery();
-
-            //If record alerady exists, return that item
-            if (rs.isBeforeFirst()) {
-                GtfsRtFeedModel gtfsFeed = new GtfsRtFeedModel();
-                if (rs.next()) {
-                    System.out.println("the record exists");
-                    gtfsFeed.setGtfsUrl(rs.getString("feedURL"));
-                    gtfsFeed.setGtfsId(rs.getInt("gtfsFeedID"));
-                    gtfsFeed.setStartTime(rs.getLong("startTime"));
-                    gtfsFeed.setGtfsRtId(rs.getInt("rtFeedID"));
-                    return Response.ok(gtfsFeed).build();
-                }
-            }
-
-            stmt.close();
-            con.commit();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                con.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-
-        //If not, create the gtfs-rt feed in the DB and return the feed
-        con = ds.getConnection();
-        try {
-            con.setAutoCommit(false);
-
-            stmt = con.prepareStatement("INSERT INTO GtfsRtFeed (feedUrl, gtfsFeedID, startTime)VALUES (?,?,?)");
-            stmt.setString(1, feedInfo.getGtfsUrl());
-            stmt.setInt(2, feedInfo.getGtfsId());
-            stmt.setLong(3, feedInfo.getStartTime());
-
-            stmt.executeUpdate();
-
-            stmt.close();
-            con.commit();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                con.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+        if(GTFSDB.getGtfsRtFeed(feedInfo.getGtfsId(), feedInfo.getGtfsUrl()) != null){
+            feedInfo = GTFSDB.getGtfsRtFeed(feedInfo.getGtfsId(), feedInfo.getGtfsUrl());
+        }else {
+            //If not, create the gtfs-rt feed in the DB and return the feed
+            GTFSDB.setGtfsRtFeed(feedInfo.getGtfsUrl(), feedInfo.getGtfsId());
         }
 
         return Response.ok(feedInfo).build();

@@ -416,4 +416,50 @@ public class GTFSDB {
             }
         }
     }
+
+    public static GtfsRtFeedModel getGtfsRtFeed(int gtfsId, String gtfsUrl) {
+
+        boolean entryExists = false;
+
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+        PreparedStatement stmt;
+        try {
+            con.setAutoCommit(false);
+
+            String sql = "SELECT * FROM GtfsRtFeed WHERE gtfsFeedID=? AND feedURL=?;";
+            stmt = con.prepareStatement(sql);
+
+            stmt.setInt(1, gtfsId);
+            stmt.setString(2, gtfsUrl);
+
+            ResultSet rs = stmt.executeQuery();
+
+            //If record alerady exists, return that item
+            if (rs.isBeforeFirst()) {
+                GtfsRtFeedModel gtfsFeed = new GtfsRtFeedModel();
+                if (rs.next()) {
+                    System.out.println("the record exists");
+                    gtfsFeed.setGtfsUrl(rs.getString("feedURL"));
+                    gtfsFeed.setGtfsId(rs.getInt("gtfsFeedID"));
+                    gtfsFeed.setStartTime(rs.getLong("startTime"));
+                    gtfsFeed.setGtfsRtId(rs.getInt("rtFeedID"));
+                    return gtfsFeed;
+                }
+            }
+
+            stmt.close();
+            con.commit();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                con.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
 }
