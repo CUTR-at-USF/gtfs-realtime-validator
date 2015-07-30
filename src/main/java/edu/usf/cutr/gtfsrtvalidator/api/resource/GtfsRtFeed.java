@@ -36,6 +36,7 @@ import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -78,9 +79,9 @@ public class GtfsRtFeed {
         }
 
         //Check if url exists in DB
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
         try {
-            Datasource ds = Datasource.getInstance();
-            Connection con = ds.getConnection();
             con.setAutoCommit(false);
 
             String sql = "SELECT * FROM GtfsRtFeed WHERE gtfsFeedID=? AND feedURL=?;";
@@ -106,16 +107,20 @@ public class GtfsRtFeed {
 
             stmt.close();
             con.commit();
-            con.close();
 
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            try {
+                con.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
 
         //If not, create the gtfs-rt feed in the DB and return the feed
+        con = ds.getConnection();
         try {
-            Datasource ds = Datasource.getInstance();
-            Connection con = ds.getConnection();
             con.setAutoCommit(false);
 
             stmt = con.prepareStatement("INSERT INTO GtfsRtFeed (feedUrl, gtfsFeedID, startTime)VALUES (?,?,?)");
@@ -127,10 +132,15 @@ public class GtfsRtFeed {
 
             stmt.close();
             con.commit();
-            con.close();
 
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            try {
+                con.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
 
         return Response.ok(feedInfo).build();
@@ -174,6 +184,20 @@ public class GtfsRtFeed {
 
     private static HashMap<String, ScheduledExecutorService> runningTasks = new HashMap<>();
 
+    @GET
+    @Path("/test")
+    public String test() {
+        GTFSDB.setRtFeedInfo();
+        GTFSDB.setRtFeedInfo();
+        GTFSDB.setRtFeedInfo();
+        GTFSDB.setRtFeedInfo();
+        GTFSDB.setRtFeedInfo();
+        GTFSDB.setRtFeedInfo();
+        GTFSDB.setRtFeedInfo();
+        GTFSDB.setRtFeedInfo();
+        return "monitoring started";
+    }
+
     @PUT
     @Path("/{id}/monitor")
     public String getID(@PathParam("id") int id) {
@@ -185,6 +209,8 @@ public class GtfsRtFeed {
         System.out.println("URL is" + gtfsRtFeed.getGtfsUrl());
 
         startBackgroundTask(gtfsRtFeed.getGtfsUrl(), interval);
+
+        //startBackgroundTask("http://api.bart.gov/gtfsrt/tripupdate.aspx", interval);
 
         return "monitoring started";
     }
@@ -208,7 +234,7 @@ public class GtfsRtFeed {
         return INVALID_FEED;
     }
 
-    public static ScheduledExecutorService startBackgroundTask(String url, int updateInterval) {
+    public synchronized static ScheduledExecutorService startBackgroundTask(String url, int updateInterval) {
 
         if (!runningTasks.containsKey(url)) {
             ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);

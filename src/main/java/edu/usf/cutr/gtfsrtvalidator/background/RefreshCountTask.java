@@ -19,6 +19,7 @@ package edu.usf.cutr.gtfsrtvalidator.background;
 
 import com.google.protobuf.Descriptors;
 import com.google.transit.realtime.GtfsRealtime;
+import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.validation.HeaderValidation;
 
 import java.io.IOException;
@@ -78,6 +79,8 @@ public class RefreshCountTask implements Runnable {
 
         //Store details found to the database
         //GTFSDB.setFeedDetails(_feedUrl.toString(), vehicleCount, tripCount, alertCount);
+
+        GTFSDB.setRtFeedInfo();
     }
 
     private int countEntities(GtfsRealtime.FeedMessage message, Descriptors.FieldDescriptor desc) {

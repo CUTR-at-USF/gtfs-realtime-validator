@@ -26,47 +26,17 @@ var updateInterval = localStorage.getItem("updateInterval");
 //This object will hold the urls returned after starting the background tasks.
 var monitoredFeeds = {};
 
-
-
 //TODO: PUT request to start monitoring of the given gtfsRtFeed ID /api/gtfs-rt-feed/{id}/start
 for (var gtfsFeed in gtfsFeeds) {
     if(gtfsFeeds.hasOwnProperty(gtfsFeed)){
-        alert(JSON.stringify(gtfsFeeds[gtfsFeed]));
         $.ajax({
             url: "http://localhost:8080/api/gtfs-rt-feed/"+ gtfsFeeds[gtfsFeed]["feedId"] +"/monitor",
             type: 'PUT',
             success: function(data) {
-                alert(data);
             }
         });
     }
 }
-
-
-//TODO: Remove method once REST implementation is done
-//POST request sent to TriggerBackgroundServlet to start monitoring the feeds
-//$.post("http://localhost:8080/startBackground", {gtfsRtFeeds: urls, updateInterval:updateInterval})
-//    .done(function (data) {
-//        monitoredFeeds = data;
-//
-//        //Use the data received and draw the appropriate UI elements
-//        initializeInterface(data);
-//
-//        //Start calling for updates every 10 seconds
-//        for (var gtfsFeed in data) {
-//            //alert(JSON.stringify(data));
-//            var currentUrl = gtfsFeeds[gtfsFeed]["url"];
-//            var currentIndex = gtfsFeeds[gtfsFeed]["index"];
-//
-//            getFeedUpdates(currentUrl, currentIndex);
-//
-//            //Uses an anonymous wrapper to copy the references
-//            (function(url, index){
-//                setInterval(function(){getFeedUpdates(url, index);},10000);
-//            }(currentUrl, currentIndex));
-//
-//        }
-//    });
 
 function initializeInterface(gtfsFeeds){
     var wrapper  = {gtfsFeeds: gtfsFeeds};

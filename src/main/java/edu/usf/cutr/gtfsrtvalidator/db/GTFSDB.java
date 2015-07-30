@@ -87,13 +87,12 @@ public class GTFSDB {
             stmt.close();
             con.commit();
             con.close();
-        } catch (Exception e) {
+        } catch (SQLException e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
         } finally {
             try {
                 con.close();
-
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -127,6 +126,8 @@ public class GTFSDB {
             }
 
             //rtFeedInDB = rs.isBeforeFirst();
+
+            rs.close();
             stmt.close();
             con.commit();
             con.close();
@@ -147,7 +148,6 @@ public class GTFSDB {
     public static synchronized MonitorLog getFeedDetails(String feedUrl) {
         return getFeedDetails(feedUrl, 11);
     }
-
     public static synchronized MonitorLog getFeedDetails(String feedUrl, int limit) {
 
         MonitorLog monitorLog = new MonitorLog();
@@ -183,6 +183,7 @@ public class GTFSDB {
 
             monitorLog.setMonitorDetails(monitorDetails);
 
+            rs.close();
             stmt.close();
             con.commit();
             con.close();
@@ -291,6 +292,7 @@ public class GTFSDB {
                 feedModel.setStartTime(rs.getLong("startTime"));
             }
 
+            rs.close();
             stmt.close();
             con.commit();
             con.close();
@@ -300,7 +302,6 @@ public class GTFSDB {
         } finally {
             try {
                 con.close();
-
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -337,6 +338,8 @@ public class GTFSDB {
             }
 
             //rtFeedInDB = rs.isBeforeFirst();
+
+            rs.close();
             stmt.close();
             con.commit();
             con.close();
@@ -380,6 +383,35 @@ public class GTFSDB {
                 con.close();
             } catch (SQLException e)
             {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static synchronized void setRtFeedInfo() {
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+
+        try {
+            PreparedStatement stmt;
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("INSERT INTO GtfsRtFeedIteration (feedProtobuf)VALUES (?)");
+            stmt.setString(1, "teststring");
+
+            stmt.executeUpdate();
+
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
+
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
