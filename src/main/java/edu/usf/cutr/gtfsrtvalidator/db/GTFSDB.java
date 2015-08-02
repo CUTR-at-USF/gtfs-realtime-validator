@@ -62,87 +62,6 @@ public class GTFSDB {
         System.out.println("Table created successfully");
     }
 
-    //TODO: Remove Old methods for FEED_Table
-    public static synchronized void setFeedDetails(String url, int vehicle, int trip, int alert) {
-        Datasource ds = Datasource.getInstance();
-        Connection con = ds.getConnection();
-        try {
-            PreparedStatement stmt;
-
-            con.setAutoCommit(false);
-
-            Date currentDate = new Date();
-            long unixTIme = currentDate.getTime() / 1000;
-
-            stmt = con.prepareStatement("INSERT INTO FEED_DETAILS (Time_Stamp, Trip_Count, Alert_Count, Vehicle_Count, Feed_Url) VALUES ( ? , ? , ? , ?, ?);");
-            stmt.setLong(1, unixTIme);
-            stmt.setInt(2, vehicle);
-            stmt.setInt(3, alert);
-            stmt.setInt(4, trip);
-            stmt.setString(5, url);
-
-            stmt.executeUpdate();
-
-            stmt.close();
-            con.commit();
-            con.close();
-        } catch (SQLException e) {
-            System.err.println(e.getClass().getName() + ": " + e.getMessage());
-            System.exit(0);
-        } finally {
-            try {
-                con.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-    public static synchronized GtfsRtFeedModel getFeedFromID(int id) {
-        Datasource ds = Datasource.getInstance();
-        Connection con = ds.getConnection();
-        try {
-            PreparedStatement stmt;
-            GtfsRtFeedModel gtfsFeed = new GtfsRtFeedModel();
-
-            con.setAutoCommit(false);
-
-            String sql = "SELECT * FROM GtfsRtFeed WHERE rtFeedID=?;";
-            stmt = con.prepareStatement(sql);
-            stmt.setInt(1, id);
-
-            ResultSet rs = stmt.executeQuery();
-
-            //If record alerady exists, return that item
-
-            if (rs.next()) {
-                System.out.println("the record exists");
-                gtfsFeed.setGtfsUrl(rs.getString("feedURL"));
-                gtfsFeed.setGtfsId(rs.getInt("gtfsFeedID"));
-                gtfsFeed.setStartTime(rs.getLong("startTime"));
-            } else {
-                return null;
-            }
-
-            //rtFeedInDB = rs.isBeforeFirst();
-
-            rs.close();
-            stmt.close();
-            con.commit();
-            con.close();
-            return  gtfsFeed;
-
-        } catch (Exception ex) {
-            return null;
-        } finally {
-            try {
-                con.close();
-
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
     //TODO: Add get gtfs feed from id method
     public static synchronized void setGtfsFeed(String url, String fileLocation) {
 
@@ -279,7 +198,6 @@ public class GTFSDB {
             }
         }
     }
-
 
     public static synchronized void setGtfsRtFeed(String url, int gtfsFeedID) {
         Datasource ds = Datasource.getInstance();
