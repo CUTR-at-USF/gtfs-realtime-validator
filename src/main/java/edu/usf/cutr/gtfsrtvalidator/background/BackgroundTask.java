@@ -23,17 +23,19 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsRtFeedModel;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
 import edu.usf.cutr.gtfsrtvalidator.validation.HeaderValidation;
+import edu.usf.cutr.gtfsrtvalidator.validation.EntityValidation;
 import org.apache.commons.io.IOUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.List;
 
-public class RefreshCountTask implements Runnable {
+public class BackgroundTask implements Runnable {
 
     private GtfsRtFeedModel currentFeed = null;
 
-    public RefreshCountTask(String url) {
+    public BackgroundTask(String url) {
         GtfsRtFeedModel searchFeed = new GtfsRtFeedModel();
         searchFeed.setGtfsUrl(url);
         currentFeed = GTFSDB.getGtfsRtFeed(searchFeed);
@@ -69,7 +71,14 @@ public class RefreshCountTask implements Runnable {
         //get the header of the feed
         assert feedMessage != null;
         GtfsRealtime.FeedHeader header = feedMessage.getHeader();
+
+        //validation rules for all headers
         HeaderValidation.validate(header);
+
+        List<GtfsRealtime.FeedEntity> entityList = feedMessage.getEntityList();
+
+        EntityValidation entityValidation = new EntityValidation();
+        entityValidation.validate(entityList);
 
         GtfsFeedIterationModel feedIteration = new GtfsFeedIterationModel();
         feedIteration.setFeedprotobuf(gtfsRtProtobuf);

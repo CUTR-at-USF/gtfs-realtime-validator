@@ -18,7 +18,7 @@
 package edu.usf.cutr.gtfsrtvalidator.servlets;
 
 import com.google.gson.Gson;
-import edu.usf.cutr.gtfsrtvalidator.background.RefreshCountTask;
+import edu.usf.cutr.gtfsrtvalidator.background.BackgroundTask;
 import edu.usf.cutr.gtfsrtvalidator.json.GtfsRtFeeds;
 
 import javax.servlet.ServletException;
@@ -71,7 +71,7 @@ public class TriggerBackgroundServlet extends HttpServlet {
 
         if (!runningTasks.containsKey(url)) {
             ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-            scheduler.scheduleAtFixedRate(new RefreshCountTask(url), 0, updateInterval, TimeUnit.SECONDS);
+            scheduler.scheduleAtFixedRate(new BackgroundTask(url), 0, updateInterval, TimeUnit.SECONDS);
             runningTasks.put(url, scheduler);
             return scheduler;
         }else {

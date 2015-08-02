@@ -29,6 +29,14 @@ public class HeaderValidation {
 
     public static void validate(GtfsRealtime.FeedHeader header) {
         long timestamp = header.getTimestamp();
+
+        //w001: Check if timestamp is populated
+        if (timestamp == 0) {
+            System.out.println("Timestamp not present");
+            return; //the method returns as checking the POSIX isn't needed if there is no timestamp
+        }
+
+        //e001: Check if the timestamp is in POSIX format
         if (isPosix(timestamp)) {
             System.out.println("Valid timestamp");
         } else {

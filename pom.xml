@@ -149,10 +149,17 @@
             <artifactId>jersey-media-moxy</artifactId>
             <version>2.19</version>
         </dependency>
+
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>11.0.2</version>
         </dependency>
     </dependencies>
 

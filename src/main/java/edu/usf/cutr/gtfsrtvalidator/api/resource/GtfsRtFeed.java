@@ -20,7 +20,7 @@ package edu.usf.cutr.gtfsrtvalidator.api.resource;
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.api.model.ErrorMessageModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsRtFeedModel;
-import edu.usf.cutr.gtfsrtvalidator.background.RefreshCountTask;
+import edu.usf.cutr.gtfsrtvalidator.background.BackgroundTask;
 import edu.usf.cutr.gtfsrtvalidator.db.Datasource;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
@@ -166,7 +166,7 @@ public class GtfsRtFeed {
 
         if (!runningTasks.containsKey(url)) {
             ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-            scheduler.scheduleAtFixedRate(new RefreshCountTask(url), 0, updateInterval, TimeUnit.SECONDS);
+            scheduler.scheduleAtFixedRate(new BackgroundTask(url), 0, updateInterval, TimeUnit.SECONDS);
             runningTasks.put(url, scheduler);
             return scheduler;
         }else {
