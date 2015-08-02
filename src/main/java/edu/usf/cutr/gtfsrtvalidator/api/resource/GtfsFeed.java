@@ -106,8 +106,10 @@ public class GtfsFeed {
 
             saveFilePath = saveDir + File.separator + fileName;
 
+            GtfsFeedModel searchFeed = new GtfsFeedModel();
+            searchFeed.setGtfsUrl(fileURL);
 
-            GtfsFeedModel gtfsFeed = GTFSDB.getGtfsFeedFromUrl(fileURL);
+            GtfsFeedModel gtfsFeed = GTFSDB.readGtfsFeed(searchFeed);
 
             if (gtfsFeed != null ) {
                 System.out.println("URL exists in database");
@@ -142,7 +144,7 @@ public class GtfsFeed {
                     GTFSDB.createGtfsFeed(gtfsFeed);
 
                     //Get the newly created GTFSfeed model from url
-                    gtfsFeed = GTFSDB.getGtfsFeedFromUrl(fileURL);
+                    gtfsFeed = GTFSDB.readGtfsFeed(gtfsFeed);
 
                     //Return GTFS Model object
                     gtfsModel = gtfsFeed;
@@ -175,7 +177,7 @@ public class GtfsFeed {
                 GTFSDB.createGtfsFeed(gtfsFeed);
 
                 //Get the newly created GTFSfeed model from url
-                gtfsFeed = GTFSDB.getGtfsFeedFromUrl(fileURL);
+                gtfsFeed = GTFSDB.readGtfsFeed(gtfsFeed);
 
                 //Return GTFS Model object
                 gtfsModel = gtfsFeed;

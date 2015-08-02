@@ -27,6 +27,11 @@ public class GtfsFeedModel {
     private long startTime;
     private String feedLocation;
 
+    public static String FEEDID = "feedId";
+    public static String FEEDURL = "feedUrl";
+    public static String FILELOCATION = "fileLocation";
+    public static String TIMESTAMP = "downloadTimestamp";
+
     public GtfsFeedModel(){}
 
     public String getGtfsUrl() {

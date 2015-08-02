@@ -25,6 +25,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.*;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 public class GTFSDB {
 
@@ -58,7 +61,6 @@ public class GTFSDB {
     }
 
     //region Gtfs-Feed related database CURD functions
-    //TODO: Add get gtfs feed from id method
     public static synchronized int createGtfsFeed(GtfsFeedModel gtfsFeed) {
         Datasource ds = Datasource.getInstance();
         Connection con = ds.getConnection();
@@ -129,7 +131,7 @@ public class GTFSDB {
             }
         }
     }
-    public static synchronized GtfsFeedModel getGtfsFeedFromUrl(String fileURL) {
+    public static synchronized GtfsFeedModel readGtfsFeed(GtfsFeedModel searchFeed) {
         Datasource ds = Datasource.getInstance();
         Connection con = ds.getConnection();
 
@@ -139,9 +141,44 @@ public class GTFSDB {
 
             con.setAutoCommit(false);
 
-            String sql = "SELECT * FROM GtfsFeed WHERE feedUrl=?;";
-            stmt = con.prepareStatement(sql);
-            stmt.setString(1, fileURL);
+            StringBuilder sqlBuilder = new StringBuilder("SELECT * FROM GtfsFeed");
+
+            Map<String, String> params = new HashMap<>();
+            if (searchFeed.getGtfsUrl() != null && searchFeed.getGtfsUrl().length() != 0) {
+                params.put(GtfsFeedModel.FEEDURL, searchFeed.getGtfsUrl());
+            }
+            if (searchFeed.getFeedLocation() != null && searchFeed.getFeedLocation().length() != 0) {
+                params.put(GtfsFeedModel.FILELOCATION, searchFeed.getFeedLocation());
+            }
+
+            Set<String> colSet = params.keySet();
+            if (!colSet.isEmpty()) {
+                StringBuilder whereClause = new StringBuilder(" WHERE");
+                String andOp = "";
+                for (String colName : colSet) {
+                    whereClause.append(andOp);
+                    whereClause.append(" ");
+                    whereClause.append(colName);
+                    whereClause.append("=? ");
+                    andOp = " AND ";
+                }
+                sqlBuilder.append(whereClause);
+            }
+
+            stmt = con.prepareStatement(sqlBuilder.toString());
+
+            int paramPos = 1;
+            for (String colName : colSet) {
+                if (colName.equals(GtfsFeedModel.FEEDURL)) {
+                    stmt.setString(paramPos, params.get(colName));
+                }
+
+                if (colName.equals(GtfsFeedModel.FILELOCATION)) {
+                    stmt.setString(paramPos, params.get(colName));
+                }
+
+                paramPos++;
+            }
 
             ResultSet rs = stmt.executeQuery();
 
@@ -156,6 +193,48 @@ public class GTFSDB {
             }
 
             //rtFeedInDB = rs.isBeforeFirst();
+            rs.close();
+            stmt.close();
+            con.commit();
+            con.close();
+            return  gtfsFeed;
+
+        } catch (Exception ex) {
+            return null;
+        } finally {
+            try {
+                con.close();
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    public static synchronized GtfsFeedModel readGtfsFeed(int feedId) {
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+
+        try {
+            PreparedStatement stmt;
+            GtfsFeedModel gtfsFeed = new GtfsFeedModel();
+
+            con.setAutoCommit(false);
+
+            String sql = "SELECT * FROM GtfsFeed WHERE feedID = ?;";
+            stmt = con.prepareStatement(sql);
+            stmt.setInt(1, feedId);
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                gtfsFeed.setGtfsUrl(rs.getString("feedURL"));
+                gtfsFeed.setFeedId(rs.getInt("feedID"));
+                gtfsFeed.setStartTime(rs.getLong("downloadTimestamp"));
+                gtfsFeed.setFeedLocation(rs.getString("fileLocation"));
+            } else {
+                return null;
+            }
+
             rs.close();
             stmt.close();
             con.commit();
