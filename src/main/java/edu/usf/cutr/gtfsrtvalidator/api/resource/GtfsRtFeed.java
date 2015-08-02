@@ -126,20 +126,6 @@ public class GtfsRtFeed {
 
     private static HashMap<String, ScheduledExecutorService> runningTasks = new HashMap<>();
 
-    @GET
-    @Path("/test")
-    public String test() {
-        GTFSDB.setRtFeedInfo();
-        GTFSDB.setRtFeedInfo();
-        GTFSDB.setRtFeedInfo();
-        GTFSDB.setRtFeedInfo();
-        GTFSDB.setRtFeedInfo();
-        GTFSDB.setRtFeedInfo();
-        GTFSDB.setRtFeedInfo();
-        GTFSDB.setRtFeedInfo();
-        return "monitoring started";
-    }
-
     @PUT
     @Path("/{id}/monitor")
     public String getID(@PathParam("id") int id) {

@@ -17,6 +17,7 @@
 
 package edu.usf.cutr.gtfsrtvalidator.db;
 
+import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedIterationModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsRtFeedModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
@@ -408,11 +409,11 @@ public class GTFSDB {
         try {
             con.setAutoCommit(false);
 
-            String sql = "SELECT * FROM GtfsRtFeed WHERE gtfsFeedID=? AND feedURL=?;";
+            String sql = "SELECT * FROM GtfsRtFeed WHERE feedURL=?;";
             stmt = con.prepareStatement(sql);
 
-            stmt.setInt(1, gtfsRtFeed.getGtfsId());
-            stmt.setString(2, gtfsRtFeed.getGtfsUrl());
+            //stmt.setInt(1, gtfsRtFeed.getGtfsId());
+            stmt.setString(1, gtfsRtFeed.getGtfsUrl());
 
             ResultSet rs = stmt.executeQuery();
 
@@ -475,7 +476,7 @@ public class GTFSDB {
     //endregion
 
     //region CURD: Rt-feed-Info
-    public static synchronized void setRtFeedInfo() {
+    public static synchronized void setRtFeedInfo(GtfsFeedIterationModel feedIteration) {
         Datasource ds = Datasource.getInstance();
         Connection con = ds.getConnection();
 
@@ -483,8 +484,10 @@ public class GTFSDB {
             PreparedStatement stmt;
             con.setAutoCommit(false);
 
-            stmt = con.prepareStatement("INSERT INTO GtfsRtFeedIteration (feedProtobuf)VALUES (?)");
-            stmt.setString(1, "teststring");
+            stmt = con.prepareStatement("INSERT INTO GtfsRtFeedIteration (feedProtobuf, rtFeedID, IterationTimestamp)VALUES (?, ?, ?)");
+            stmt.setBytes(1, feedIteration.getFeedprotobuf());
+            stmt.setInt(2, feedIteration.getRtFeedId());
+            stmt.setLong(3, feedIteration.getTimeStamp());
 
             stmt.executeUpdate();
 

@@ -17,84 +17,64 @@
 
 package edu.usf.cutr.gtfsrtvalidator.background;
 
-import com.google.protobuf.Descriptors;
 import com.google.transit.realtime.GtfsRealtime;
+import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedIterationModel;
+import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsRtFeedModel;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
+import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
 import edu.usf.cutr.gtfsrtvalidator.validation.HeaderValidation;
+import org.apache.commons.io.IOUtils;
 
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 public class RefreshCountTask implements Runnable {
 
-    public URL _feedUrl;
+    private GtfsRtFeedModel currentFeed = null;
 
     public RefreshCountTask(String url) {
-        try {
-            _feedUrl = new URL(url);
-        } catch (MalformedURLException e) {
-            System.out.println("URL Malformed at RefreshCountTask constructors");
-        }
+        GtfsRtFeedModel searchFeed = new GtfsRtFeedModel();
+        searchFeed.setGtfsUrl(url);
+        currentFeed = GTFSDB.getGtfsRtFeed(searchFeed);
     }
 
     @Override
     public void run() {
-        System.out.println(_feedUrl);
-
-        int vehicleCount = 0;
-        int tripCount = 0;
-        int alertCount = 0;
-
-        GtfsRealtime.FeedMessage feedMessage = null;
-
+        URL _feedUrl = null;
+        System.out.println(currentFeed.getGtfsUrl());
 
         try {
+            _feedUrl = new URL(currentFeed.getGtfsUrl());
+            System.out.println(_feedUrl.toString());
+        } catch (Exception e) {
+            System.out.println("Malformed Url");
+            e.printStackTrace();
+        }
+
+        GtfsRealtime.FeedMessage feedMessage = null;
+        byte[] gtfsRtProtobuf = null;
+
+        try {
+            assert _feedUrl != null;
             InputStream in = _feedUrl.openStream();
-            feedMessage = GtfsRealtime.FeedMessage.parseFrom(in);
-        } catch (IOException e) {
+            gtfsRtProtobuf = IOUtils.toByteArray(in);
+            InputStream is = new ByteArrayInputStream(gtfsRtProtobuf);
+            feedMessage = GtfsRealtime.FeedMessage.parseFrom(is);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
             e.printStackTrace();
         }
 
         //get the header of the feed
+        assert feedMessage != null;
         GtfsRealtime.FeedHeader header = feedMessage.getHeader();
         HeaderValidation.validate(header);
 
-        //System.out.println(header.getTimestamp());
-
-        //Loop through the entities in the feed
-        for (GtfsRealtime.FeedEntity entity : feedMessage.getEntityList()) {
-
-            if (entity.hasVehicle()) {
-                vehicleCount++;
-            }
-            if (entity.hasAlert()) {
-                alertCount++;
-            }
-            if (entity.hasTripUpdate()) {
-                tripCount++;
-            }
-        }
-
-        //Store details found to the database
-        //GTFSDB.setFeedDetails(_feedUrl.toString(), vehicleCount, tripCount, alertCount);
-
-        GTFSDB.setRtFeedInfo();
+        GtfsFeedIterationModel feedIteration = new GtfsFeedIterationModel();
+        feedIteration.setFeedprotobuf(gtfsRtProtobuf);
+        feedIteration.setTimeStamp(TimeStampHelper.getCurrentTimestamp());
+        feedIteration.setRtFeedId(currentFeed.getGtfsRtId());
+        GTFSDB.setRtFeedInfo(feedIteration);
     }
-
-    private int countEntities(GtfsRealtime.FeedMessage message, Descriptors.FieldDescriptor desc) {
-        int count = 0;
-        for (int i = 0; i < message.getEntityCount(); ++i) {
-
-            GtfsRealtime.FeedEntity entity = message.getEntity(i);
-            if (!entity.hasField(desc)) {
-                continue;
-            }
-            count++;
-        }
-        return count;
-    }
-
-
 }
