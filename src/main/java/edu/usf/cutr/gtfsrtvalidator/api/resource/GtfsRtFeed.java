@@ -78,11 +78,11 @@ public class GtfsRtFeed {
             generateError("The GTFS-RT URL given is not a valid feed");
         }
 
-        if(GTFSDB.getGtfsRtFeed(feedInfo.getGtfsId(), feedInfo.getGtfsUrl()) != null){
-            feedInfo = GTFSDB.getGtfsRtFeed(feedInfo.getGtfsId(), feedInfo.getGtfsUrl());
+        if(GTFSDB.getGtfsRtFeed(feedInfo) != null){
+            feedInfo = GTFSDB.getGtfsRtFeed(feedInfo);
         }else {
             //If not, create the gtfs-rt feed in the DB and return the feed
-            GTFSDB.setGtfsRtFeed(feedInfo.getGtfsUrl(), feedInfo.getGtfsId());
+            GTFSDB.createGtfsRtFeed(feedInfo);
         }
 
         return Response.ok(feedInfo).build();
@@ -146,7 +146,7 @@ public class GtfsRtFeed {
         int interval = 10;
 
         //Get URL from id
-        GtfsRtFeedModel gtfsRtFeed = GTFSDB.getGtfsRtFeedById(id);
+        GtfsRtFeedModel gtfsRtFeed = GTFSDB.getGtfsRtFeed(id);
 
         System.out.println("URL is" + gtfsRtFeed.getGtfsUrl());
 

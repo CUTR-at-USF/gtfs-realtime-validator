@@ -121,7 +121,7 @@ public class GtfsFeed {
                 }else{
                     //Remove db records and download data
                     System.out.println("File Doesn't Exist in FileSystem");
-                    GTFSDB.removeGtfsFeedFromUrl(fileURL);
+                    GTFSDB.deleteGtfsFeed(gtfsFeed.getFeedId());
                     System.out.println("DB entry deleted");
 
                     InputStream inputStream = connection.getInputStream();
