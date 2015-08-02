@@ -29,7 +29,7 @@ import java.util.Date;
 public class GTFSDB {
 
     public static void InitializeDB() {
-        Statement stmt = null;
+        Statement stmt;
         String workingDir = System.getProperty("user.dir");
         String createTablePath = workingDir + "/target/classes/createTables.sql";
 
@@ -44,8 +44,7 @@ public class GTFSDB {
                 Connection con = DriverManager.getConnection("jdbc:sqlite:gtfsrt.db");
 
                 stmt = con.createStatement();
-                String sql = createStatement;
-                stmt.executeUpdate(sql);
+                stmt.executeUpdate(createStatement);
                 stmt.close();
                 con.close();
             }
@@ -60,7 +59,46 @@ public class GTFSDB {
 
     //region Gtfs-Feed related database CURD functions
     //TODO: Add get gtfs feed from id method
-    public static synchronized void createGtfsFeed(GtfsFeedModel gtfsFeed) {
+    public static synchronized int createGtfsFeed(GtfsFeedModel gtfsFeed) {
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+
+        int createdId = 0;
+
+        try {
+            PreparedStatement stmt;
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("INSERT INTO GtfsFeed (feedUrl, fileLocation, downloadTimestamp)VALUES (?,?,?)", Statement.RETURN_GENERATED_KEYS);
+            stmt.setString(1, gtfsFeed.getGtfsUrl());
+            stmt.setString(2, gtfsFeed.getFeedLocation());
+            stmt.setLong(3, TimeStampHelper.getCurrentTimestamp());
+
+            stmt.executeUpdate();
+
+            //Get the id of the created feed
+            ResultSet rs = stmt.getGeneratedKeys();
+            if (rs != null && rs.next()) {
+                createdId = rs.getInt(1);
+            }
+
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return createdId;
+    }
+    public static synchronized void updateGtfsFeed(GtfsFeedModel gtfsFeed) {
         Datasource ds = Datasource.getInstance();
         Connection con = ds.getConnection();
 
@@ -68,10 +106,12 @@ public class GTFSDB {
             PreparedStatement stmt;
             con.setAutoCommit(false);
 
-            stmt = con.prepareStatement("INSERT INTO GtfsFeed (feedUrl, fileLocation, downloadTimestamp)VALUES (?,?,?)");
+            stmt = con.prepareStatement("UPDATE GtfsFeed SET feedUrl = ?, fileLocation = ?, downloadTimestamp = ? " +
+                    "WHERE feedID = ?");
             stmt.setString(1, gtfsFeed.getGtfsUrl());
             stmt.setString(2, gtfsFeed.getFeedLocation());
-            stmt.setLong(3, TimeStampHelper.getCurrentTimestamp());
+            stmt.setLong(3, gtfsFeed.getStartTime());
+            stmt.setInt(4, gtfsFeed.getFeedId());
 
             stmt.executeUpdate();
 
