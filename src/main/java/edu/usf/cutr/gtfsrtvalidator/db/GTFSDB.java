@@ -20,15 +20,11 @@ package edu.usf.cutr.gtfsrtvalidator.db;
 import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsRtFeedModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
-import edu.usf.cutr.gtfsrtvalidator.json.MonitorDetails;
-import edu.usf.cutr.gtfsrtvalidator.json.MonitorLog;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 public class GTFSDB {
 
@@ -95,63 +91,7 @@ public class GTFSDB {
             }
         }
     }
-    //TODO: Remove method
-    public static synchronized MonitorLog getFeedDetails(String feedUrl) {
-        return getFeedDetails(feedUrl, 11);
-    }
-    public static synchronized MonitorLog getFeedDetails(String feedUrl, int limit) {
 
-        MonitorLog monitorLog = new MonitorLog();
-        List<MonitorDetails> monitorDetails = new ArrayList<>();
-
-        Datasource ds = Datasource.getInstance();
-        Connection con = ds.getConnection();
-
-        try {
-            con.setAutoCommit(false);
-
-            PreparedStatement stmt;
-
-            String sql = "SELECT * FROM FEED_DETAILS WHERE Feed_Url=? ORDER BY Time_Stamp DESC LIMIT ?;";
-            stmt = con.prepareStatement(sql);
-
-            stmt.setString(1, feedUrl);
-            stmt.setInt(2, limit);
-
-            ResultSet rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                MonitorDetails monitor = new MonitorDetails();
-
-                monitor.setVehicleCount(rs.getInt("Vehicle_Count"));
-                monitor.setUpdateCount(rs.getInt("Trip_Count"));
-                monitor.setAlertCount(rs.getInt("Alert_Count"));
-
-                monitor.setTimestamp(rs.getLong("Time_Stamp"));
-
-                monitorDetails.add(monitor);
-            }
-
-            monitorLog.setMonitorDetails(monitorDetails);
-
-            rs.close();
-            stmt.close();
-            con.commit();
-            con.close();
-        } catch (Exception e) {
-            System.err.println(e.getClass().getName() + ": " + e.getMessage());
-            System.exit(0);
-        } finally {
-            try {
-                con.close();
-
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return monitorLog;
-    }
     public static synchronized GtfsFeedModel getGtfsFeedFromUrl(String fileURL) {
         Datasource ds = Datasource.getInstance();
         Connection con = ds.getConnection();
