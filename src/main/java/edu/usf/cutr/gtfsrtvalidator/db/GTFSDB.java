@@ -145,8 +145,7 @@ public class GTFSDB {
 
             ResultSet rs = stmt.executeQuery();
 
-            //If record alerady exists, return that item
-
+            //If record exists, return that item
             if (rs.next()) {
                 gtfsFeed.setGtfsUrl(rs.getString("feedURL"));
                 gtfsFeed.setFeedId(rs.getInt("feedID"));
@@ -157,7 +156,6 @@ public class GTFSDB {
             }
 
             //rtFeedInDB = rs.isBeforeFirst();
-
             rs.close();
             stmt.close();
             con.commit();
@@ -170,6 +168,33 @@ public class GTFSDB {
             try {
                 con.close();
 
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    public static synchronized void deleteGtfsFeed(int feedId) {
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+
+        try {
+            PreparedStatement stmt;
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("DELETE FROM GtfsFeed WHERE feedID = ?");
+            stmt.setInt(1, feedId);
+
+            stmt.executeUpdate();
+
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
