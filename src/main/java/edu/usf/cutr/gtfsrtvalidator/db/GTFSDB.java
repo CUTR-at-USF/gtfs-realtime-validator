@@ -58,20 +58,19 @@ public class GTFSDB {
         System.out.println("Table created successfully");
     }
 
+    //region Gtfs-Feed related database CURD functions
     //TODO: Add get gtfs feed from id method
-    public static synchronized void setGtfsFeed(String url, String fileLocation) {
-
+    public static synchronized void createGtfsFeed(GtfsFeedModel gtfsFeed) {
         Datasource ds = Datasource.getInstance();
         Connection con = ds.getConnection();
 
         try {
             PreparedStatement stmt;
-
             con.setAutoCommit(false);
 
             stmt = con.prepareStatement("INSERT INTO GtfsFeed (feedUrl, fileLocation, downloadTimestamp)VALUES (?,?,?)");
-            stmt.setString(1, url);
-            stmt.setString(2, fileLocation);
+            stmt.setString(1, gtfsFeed.getGtfsUrl());
+            stmt.setString(2, gtfsFeed.getFeedLocation());
             stmt.setLong(3, TimeStampHelper.getCurrentTimestamp());
 
             stmt.executeUpdate();
@@ -85,13 +84,11 @@ public class GTFSDB {
         } finally {
             try {
                 con.close();
-
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
     }
-
     public static synchronized GtfsFeedModel getGtfsFeedFromUrl(String fileURL) {
         Datasource ds = Datasource.getInstance();
         Connection con = ds.getConnection();
@@ -138,7 +135,9 @@ public class GTFSDB {
             }
         }
     }
+    //endregion
 
+    //region Gtfs-Realtime-Feed related database CURD functions
     public static synchronized void setGtfsRtFeed(String url, int gtfsFeedID) {
         Datasource ds = Datasource.getInstance();
         Connection con = ds.getConnection();
@@ -318,5 +317,6 @@ public class GTFSDB {
             }
         }
     }
+    //endregion
 
 }
