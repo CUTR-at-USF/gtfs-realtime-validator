@@ -23,7 +23,6 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsRtFeedModel;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
 import edu.usf.cutr.gtfsrtvalidator.validation.EntityValidation;
-import edu.usf.cutr.gtfsrtvalidator.validation.HeaderValidation;
 import org.apache.commons.io.IOUtils;
 
 import java.io.ByteArrayInputStream;
@@ -37,7 +36,7 @@ public class BackgroundTask implements Runnable {
 
     //Entity list kept under the gtfsfeed id.
     //Used to check errors with different feeds for the same transit agency.
-    HashMap<Integer, List<TimeFeedEntity>> feedEntityList;
+    HashMap<Integer, List<TimeFeedEntity>> feedEntityList = new HashMap<>();
 
     private GtfsRtFeedModel currentFeed = null;
 
@@ -52,7 +51,6 @@ public class BackgroundTask implements Runnable {
 
         try {
             gtfsRtFeedUrl = new URL(currentFeed.getGtfsUrl());
-            System.out.println(gtfsRtFeedUrl.toString());
         } catch (Exception e) {
             System.out.println("Malformed Url");
             e.printStackTrace();
@@ -77,12 +75,12 @@ public class BackgroundTask implements Runnable {
         GtfsRealtime.FeedHeader header = feedMessage.getHeader();
 
         //validation rules for all headers
-        HeaderValidation.validate(header);
+        //HeaderValidation.validate(header);
 
         List<GtfsRealtime.FeedEntity> entityList = feedMessage.getEntityList();
 
         EntityValidation entityValidation = new EntityValidation();
-        entityValidation.validate(entityList);
+        //entityValidation.validate(entityList);
 
         GtfsFeedIterationModel feedIteration = new GtfsFeedIterationModel();
         feedIteration.setFeedprotobuf(gtfsRtProtobuf);
@@ -90,29 +88,35 @@ public class BackgroundTask implements Runnable {
         feedIteration.setRtFeedId(currentFeed.getGtfsRtId());
         GTFSDB.setRtFeedInfo(feedIteration);
 
+        System.out.println("Entities in current feed:\t" + entityList.size());
 
-        //Save all entities under the gtfs-rt ID
-        List<TimeFeedEntity> currentEntityList = feedEntityList.get(currentFeed.getGtfsId());
-        if (currentEntityList != null) {
-            //Add entities to existing list
-            List<TimeFeedEntity> timeFeedEntityList = getTimeFeedEntities(entityList);
-            currentEntityList.addAll(timeFeedEntityList);
+        try {
+            //Save all entities under the gtfs-rt ID
+            int gtfsId = currentFeed.getGtfsId();
+            if (feedEntityList.containsKey(gtfsId)) {
+                List<TimeFeedEntity> currentEntityList = feedEntityList.get(currentFeed.getGtfsId());
+                //Add entities to existing list
+                List<TimeFeedEntity> timeFeedEntityList = getTimeFeedEntities(entityList);
+                currentEntityList.addAll(timeFeedEntityList);
 
-            //Clean the entities to a given timestamp
-            List<TimeFeedEntity> cleanedList = cleanList(currentEntityList);
-            feedEntityList.put(currentFeed.getGtfsId(), currentEntityList);
+                //Clean the entities to a given timestamp
+                List<TimeFeedEntity> cleanedList = cleanList(currentEntityList);
+                feedEntityList.put(currentFeed.getGtfsId(), cleanedList);
 
-        } else {
-            List<TimeFeedEntity> timeFeedEntityList = getTimeFeedEntities(entityList);
+            } else {
+                List<TimeFeedEntity> timeFeedEntityList = getTimeFeedEntities(entityList);
 
-            //Create list and add entities
-            feedEntityList.put(currentFeed.getGtfsId(), timeFeedEntityList);
-        }
+                //Create list and add entities
+                feedEntityList.put(currentFeed.getGtfsId(), timeFeedEntityList);
+            }
 
-        //Loop through all the entities in the feeds check for associating errors
-        for (TimeFeedEntity entity : feedEntityList.get(currentFeed.getGtfsId())) {
-            entity.getEntity();
-            //Run checks that compare entities of same GTFS-feed but from differed rt-feeds
+            //Loop through all the entities in the feeds check for associating errors
+            for (TimeFeedEntity entity : feedEntityList.get(currentFeed.getGtfsId())) {
+                entity.getEntity();
+                //Run checks that compare entities of same GTFS-feed but from differed rt-feeds
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
 
     }
@@ -136,6 +140,7 @@ public class BackgroundTask implements Runnable {
                 cleanedEntityList.add(entity);
             }
         }
+        System.out.println("Entities in cleaned feed:\t" + cleanedEntityList.size());
         return cleanedEntityList;
     }
 
