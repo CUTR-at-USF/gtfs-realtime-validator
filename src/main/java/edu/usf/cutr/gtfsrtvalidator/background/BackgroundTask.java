@@ -32,10 +32,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 public class BackgroundTask implements Runnable {
 
-    //Entity list kept under the gtfsfeed id.
+    //Entity list kept under the gtfsFeed id.
     //Used to check errors with different feeds for the same transit agency.
     HashMap<Integer, List<TimeFeedEntity>> feedEntityList = new HashMap<>();
 
@@ -111,7 +112,7 @@ public class BackgroundTask implements Runnable {
             feedEntityList.put(currentFeed.getGtfsId(), timeFeedEntityList);
         }
 
-        //ArrayLists to hold all the entities catagorized by type
+        //ArrayLists to hold all the entities categorized by type
         List<GtfsRealtime.TripUpdate> tripUpdates = new ArrayList<>();
         List<GtfsRealtime.Alert> alerts = new ArrayList<>();
         List<GtfsRealtime.VehiclePosition> vehiclePositions = new ArrayList<>();
@@ -144,10 +145,10 @@ public class BackgroundTask implements Runnable {
                 boolean matchingTrips = false;
                 for (GtfsRealtime.VehiclePosition vehiclePosition : vehiclePositions) {
 
-                    if (trip.getTrip().getTripId() == vehiclePosition.getTrip().getTripId()) {
+                    if (Objects.equals(trip.getTrip().getTripId(), vehiclePosition.getTrip().getTripId())) {
                         matchingTrips = true;
                         break;
-                    }else if (trip.getVehicle().getId() == vehiclePosition.getVehicle().getId()) {
+                    }else if (Objects.equals(trip.getVehicle().getId(), vehiclePosition.getVehicle().getId())) {
                         matchingTrips = true;
                         break;
                     }
@@ -161,10 +162,10 @@ public class BackgroundTask implements Runnable {
                 boolean matchingTrips = false;
                 for (GtfsRealtime.TripUpdate trip : tripUpdates) {
 
-                    if (trip.getTrip().getTripId() == vehiclePosition.getTrip().getTripId()) {
+                    if (Objects.equals(trip.getTrip().getTripId(), vehiclePosition.getTrip().getTripId())) {
                         matchingTrips = true;
                         break;
-                    }else if (trip.getVehicle().getId() == vehiclePosition.getVehicle().getId()) {
+                    }else if (Objects.equals(trip.getVehicle().getId(), vehiclePosition.getVehicle().getId())) {
                         matchingTrips = true;
                         break;
                     }
