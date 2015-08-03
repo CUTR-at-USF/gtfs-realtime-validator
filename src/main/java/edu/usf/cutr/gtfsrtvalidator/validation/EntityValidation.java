@@ -38,7 +38,7 @@ public class EntityValidation {
                 //w002: vehicle_id should be populated in trip_update
                 if (tripUpdate.getVehicle().getId() == null) {
                     System.out.println("Vehicle id not present");
-                    return; //the method returns as checking the POSIX isn't needed if there is no timestamp
+                    return;
                 }
             }
         }
@@ -55,12 +55,12 @@ public class EntityValidation {
 
             boolean sorted = Ordering.natural().isOrdered(stopSequanceList);
             if (sorted) {
-                System.out.println("StopSequanceList is in order");
+                //System.out.println("StopSequenceList is in order");
             }else {
-                System.out.println("StopSequanceList is not in order");
+                //System.out.println("StopSequenceList is not in order");
             }
         }
+
+        System.out.println(tripUpdateList.size());
     }
-
-
 }

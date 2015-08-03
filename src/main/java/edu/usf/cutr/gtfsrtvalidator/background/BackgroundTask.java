@@ -35,6 +35,7 @@ public class BackgroundTask implements Runnable {
 
     private GtfsRtFeedModel currentFeed = null;
 
+    //TODO: Accept the gtfs feed id and save entities of the same feed in an array
     public BackgroundTask(String url) {
         GtfsRtFeedModel searchFeed = new GtfsRtFeedModel();
         searchFeed.setGtfsUrl(url);
@@ -85,5 +86,8 @@ public class BackgroundTask implements Runnable {
         feedIteration.setTimeStamp(TimeStampHelper.getCurrentTimestamp());
         feedIteration.setRtFeedId(currentFeed.getGtfsRtId());
         GTFSDB.setRtFeedInfo(feedIteration);
+
+        //TODO: Loop through all the entities in the feeds check for associating errors
+        //TODO: *Check the timestamp differences to avoid comparing older entities*
     }
 }

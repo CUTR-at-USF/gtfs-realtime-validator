@@ -162,6 +162,7 @@ public class GtfsRtFeed {
         return INVALID_FEED;
     }
 
+    //TODO: Provide GTFS feed with the start background task method
     public synchronized static ScheduledExecutorService startBackgroundTask(String url, int updateInterval) {
 
         if (!runningTasks.containsKey(url)) {
