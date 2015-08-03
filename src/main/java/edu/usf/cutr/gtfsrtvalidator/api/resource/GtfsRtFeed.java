@@ -131,16 +131,15 @@ public class GtfsRtFeed {
     public String getID(@PathParam("id") int id) {
         int interval = 10;
 
-        //Get URL from id
+        //Get RtFeedModel from id
         GtfsRtFeedModel gtfsRtFeed = GTFSDB.getGtfsRtFeed(id);
 
-        System.out.println("URL is" + gtfsRtFeed.getGtfsUrl());
+        //Extract the Url and gtfsId to start the background process
+        System.out.println("URL is: " + gtfsRtFeed.getGtfsUrl());
+        System.out.println("GtfsId is: " + gtfsRtFeed.getGtfsUrl());
+        startBackgroundTask(gtfsRtFeed, interval);
 
-        startBackgroundTask(gtfsRtFeed.getGtfsUrl(), interval);
-
-        //startBackgroundTask("http://api.bart.gov/gtfsrt/tripupdate.aspx", interval);
-
-        return "monitoring started";
+        return "Monitoring started for: " + gtfsRtFeed.getGtfsUrl();
     }
 
     //INFO: @Path("{id : \\d+}") //support digit only
@@ -162,16 +161,18 @@ public class GtfsRtFeed {
         return INVALID_FEED;
     }
 
-    //TODO: Provide GTFS feed with the start background task method
-    public synchronized static ScheduledExecutorService startBackgroundTask(String url, int updateInterval) {
+    public synchronized static ScheduledExecutorService startBackgroundTask(GtfsRtFeedModel gtfsRtFeed, int updateInterval) {
 
-        if (!runningTasks.containsKey(url)) {
+        String rtFeedUrl = gtfsRtFeed.getGtfsUrl();
+
+
+        if (!runningTasks.containsKey(rtFeedUrl)) {
             ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-            scheduler.scheduleAtFixedRate(new BackgroundTask(url), 0, updateInterval, TimeUnit.SECONDS);
-            runningTasks.put(url, scheduler);
+            scheduler.scheduleAtFixedRate(new BackgroundTask(gtfsRtFeed), 0, updateInterval, TimeUnit.SECONDS);
+            runningTasks.put(rtFeedUrl, scheduler);
             return scheduler;
         }else {
-            return runningTasks.get(url);
+            return runningTasks.get(rtFeedUrl);
         }
     }
 }

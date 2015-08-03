@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Nipuna Gunathilake.
+ * Copyright (C) 2011 Nipuna Gunathilake.
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,27 +29,30 @@ import org.apache.commons.io.IOUtils;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
 
 public class BackgroundTask implements Runnable {
 
+    //Entity list kept under the gtfsfeed id.
+    //Used to check errors with different feeds for the same transit agency.
+    private HashMap<Integer, List<GtfsRealtime.FeedEntity>> feedEntityList;
+
     private GtfsRtFeedModel currentFeed = null;
 
-    //TODO: Accept the gtfs feed id and save entities of the same feed in an array
-    public BackgroundTask(String url) {
-        GtfsRtFeedModel searchFeed = new GtfsRtFeedModel();
-        searchFeed.setGtfsUrl(url);
-        currentFeed = GTFSDB.getGtfsRtFeed(searchFeed);
+    public BackgroundTask(GtfsRtFeedModel gtfsRtFeed) {
+        //Accept the gtfs feed id and save entities of the same feed in an array
+        currentFeed = gtfsRtFeed;
     }
 
     @Override
     public void run() {
-        URL _feedUrl = null;
-        System.out.println(currentFeed.getGtfsUrl());
+        URL gtfsRtFeedUrl = null;
+
 
         try {
-            _feedUrl = new URL(currentFeed.getGtfsUrl());
-            System.out.println(_feedUrl.toString());
+            gtfsRtFeedUrl = new URL(currentFeed.getGtfsUrl());
+            System.out.println(gtfsRtFeedUrl.toString());
         } catch (Exception e) {
             System.out.println("Malformed Url");
             e.printStackTrace();
@@ -59,8 +62,8 @@ public class BackgroundTask implements Runnable {
         byte[] gtfsRtProtobuf = null;
 
         try {
-            assert _feedUrl != null;
-            InputStream in = _feedUrl.openStream();
+            assert gtfsRtFeedUrl != null;
+            InputStream in = gtfsRtFeedUrl.openStream();
             gtfsRtProtobuf = IOUtils.toByteArray(in);
             InputStream is = new ByteArrayInputStream(gtfsRtProtobuf);
             feedMessage = GtfsRealtime.FeedMessage.parseFrom(is);
@@ -87,7 +90,19 @@ public class BackgroundTask implements Runnable {
         feedIteration.setRtFeedId(currentFeed.getGtfsRtId());
         GTFSDB.setRtFeedInfo(feedIteration);
 
+        //Save all entities under the gtfs-rt ID
+        List<GtfsRealtime.FeedEntity> currentEntityList = feedEntityList.get(currentFeed.getGtfsId());
+        if (currentEntityList != null) {
+            //Add entities to existing list
+            currentEntityList.addAll(entityList);
+            feedEntityList.put(currentFeed.getGtfsId(), currentEntityList);
+        } else {
+            //Create list and add entities
+            feedEntityList.put(currentFeed.getGtfsId(), entityList);
+        }
+
         //TODO: Loop through all the entities in the feeds check for associating errors
+
         //TODO: *Check the timestamp differences to avoid comparing older entities*
     }
 }
