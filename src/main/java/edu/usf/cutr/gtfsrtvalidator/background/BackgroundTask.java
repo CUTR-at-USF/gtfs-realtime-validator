@@ -23,6 +23,7 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsRtFeedModel;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
 import edu.usf.cutr.gtfsrtvalidator.validation.EntityValidation;
+import edu.usf.cutr.gtfsrtvalidator.validation.HeaderValidation;
 import org.apache.commons.io.IOUtils;
 
 import java.io.ByteArrayInputStream;
@@ -74,13 +75,14 @@ public class BackgroundTask implements Runnable {
         assert feedMessage != null;
         GtfsRealtime.FeedHeader header = feedMessage.getHeader();
 
-        //validation rules for all headers
-        //HeaderValidation.validate(header);
+        //Validation rules for all headers
+        HeaderValidation.validate(header);
 
         List<GtfsRealtime.FeedEntity> entityList = feedMessage.getEntityList();
 
+        //Validation rules for entity
         EntityValidation entityValidation = new EntityValidation();
-        //entityValidation.validate(entityList);
+        entityValidation.validate(entityList);
 
         GtfsFeedIterationModel feedIteration = new GtfsFeedIterationModel();
         feedIteration.setFeedprotobuf(gtfsRtProtobuf);
@@ -90,34 +92,89 @@ public class BackgroundTask implements Runnable {
 
         System.out.println("Entities in current feed:\t" + entityList.size());
 
-        try {
-            //Save all entities under the gtfs-rt ID
-            int gtfsId = currentFeed.getGtfsId();
-            if (feedEntityList.containsKey(gtfsId)) {
-                List<TimeFeedEntity> currentEntityList = feedEntityList.get(currentFeed.getGtfsId());
-                //Add entities to existing list
-                List<TimeFeedEntity> timeFeedEntityList = getTimeFeedEntities(entityList);
-                currentEntityList.addAll(timeFeedEntityList);
+        //Save all entities under the gtfs-rt ID
+        int gtfsId = currentFeed.getGtfsId();
+        if (feedEntityList.containsKey(gtfsId)) {
+            List<TimeFeedEntity> currentEntityList = feedEntityList.get(currentFeed.getGtfsId());
+            //Add entities to existing list
+            List<TimeFeedEntity> timeFeedEntityList = getTimeFeedEntities(entityList);
+            currentEntityList.addAll(timeFeedEntityList);
 
-                //Clean the entities to a given timestamp
-                List<TimeFeedEntity> cleanedList = cleanList(currentEntityList);
-                feedEntityList.put(currentFeed.getGtfsId(), cleanedList);
+            //Clean the entities to a given timestamp
+            List<TimeFeedEntity> cleanedList = cleanList(currentEntityList);
+            feedEntityList.put(currentFeed.getGtfsId(), cleanedList);
 
-            } else {
-                List<TimeFeedEntity> timeFeedEntityList = getTimeFeedEntities(entityList);
+        } else {
+            List<TimeFeedEntity> timeFeedEntityList = getTimeFeedEntities(entityList);
 
-                //Create list and add entities
-                feedEntityList.put(currentFeed.getGtfsId(), timeFeedEntityList);
-            }
-
-            //Loop through all the entities in the feeds check for associating errors
-            for (TimeFeedEntity entity : feedEntityList.get(currentFeed.getGtfsId())) {
-                entity.getEntity();
-                //Run checks that compare entities of same GTFS-feed but from differed rt-feeds
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
+            //Create list and add entities
+            feedEntityList.put(currentFeed.getGtfsId(), timeFeedEntityList);
         }
+
+        //ArrayLists to hold all the entities catagorized by type
+        List<GtfsRealtime.TripUpdate> tripUpdates = new ArrayList<>();
+        List<GtfsRealtime.Alert> alerts = new ArrayList<>();
+        List<GtfsRealtime.VehiclePosition> vehiclePositions = new ArrayList<>();
+
+        //Loop through all the entities in the feeds check for associating errors
+        for (TimeFeedEntity entity : feedEntityList.get(currentFeed.getGtfsId())) {
+            GtfsRealtime.FeedEntity currentFeedEntity = entity.getEntity();
+
+            //Run checks that compare entities of same GTFS-feed but from differed rt-feeds
+
+            if(currentFeedEntity.hasTripUpdate()){
+                GtfsRealtime.TripUpdate tripUpdate = currentFeedEntity.getTripUpdate();
+                tripUpdates.add(tripUpdate);
+            }if(currentFeedEntity.hasVehicle()){
+                GtfsRealtime.VehiclePosition vehicle = currentFeedEntity.getVehicle();
+                vehiclePositions.add(vehicle);
+
+            }if(currentFeedEntity.hasAlert()){
+                GtfsRealtime.Alert alert = currentFeedEntity.getAlert();
+                alerts.add(alert);
+            }
+        }
+
+        //w003: If both vehicle positions and trip updates are provided, VehicleDescriptor or TripDescriptor values
+        // should match between the two feeds.
+
+        //Should be optimized since this would be costly with a higher number of feeds
+        if(!tripUpdates.isEmpty() && !vehiclePositions.isEmpty()) {
+            for (GtfsRealtime.TripUpdate trip : tripUpdates) {
+                boolean matchingTrips = false;
+                for (GtfsRealtime.VehiclePosition vehiclePosition : vehiclePositions) {
+
+                    if (trip.getTrip().getTripId() == vehiclePosition.getTrip().getTripId()) {
+                        matchingTrips = true;
+                        break;
+                    }else if (trip.getVehicle().getId() == vehiclePosition.getVehicle().getId()) {
+                        matchingTrips = true;
+                        break;
+                    }
+                }
+                if (!matchingTrips) {
+                    System.out.println("No matching entity for" + trip.toString());
+                }
+            }
+
+            for (GtfsRealtime.VehiclePosition vehiclePosition : vehiclePositions) {
+                boolean matchingTrips = false;
+                for (GtfsRealtime.TripUpdate trip : tripUpdates) {
+
+                    if (trip.getTrip().getTripId() == vehiclePosition.getTrip().getTripId()) {
+                        matchingTrips = true;
+                        break;
+                    }else if (trip.getVehicle().getId() == vehiclePosition.getVehicle().getId()) {
+                        matchingTrips = true;
+                        break;
+                    }
+                }
+                if (!matchingTrips) {
+                    System.out.println("No matching entity for" + vehiclePosition.toString());
+                }
+            }
+        }
+
 
     }
 
@@ -144,7 +201,7 @@ public class BackgroundTask implements Runnable {
         return cleanedEntityList;
     }
 
-    class TimeFeedEntity{
+    class TimeFeedEntity {
         public TimeFeedEntity(GtfsRealtime.FeedEntity entity, long timestamp) {
             this.entity = entity;
             this.timestamp = timestamp;
