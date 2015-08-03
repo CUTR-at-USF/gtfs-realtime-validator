@@ -41,7 +41,6 @@ public class Main {
         server.setHandler(context);
 
         context.addServlet(RTFeedValidatorServlet.class, "/validate");
-        context.addServlet(TriggerBackgroundServlet.class, "/startBackground");
         context.addServlet(GetFeedJSON.class, "/getFeed");
 
         context.addServlet(DefaultServlet.class, "/");
