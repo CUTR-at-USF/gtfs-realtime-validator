@@ -22,13 +22,14 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedIterationModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsRtFeedModel;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
-import edu.usf.cutr.gtfsrtvalidator.validation.HeaderValidation;
 import edu.usf.cutr.gtfsrtvalidator.validation.EntityValidation;
+import edu.usf.cutr.gtfsrtvalidator.validation.HeaderValidation;
 import org.apache.commons.io.IOUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -36,7 +37,7 @@ public class BackgroundTask implements Runnable {
 
     //Entity list kept under the gtfsfeed id.
     //Used to check errors with different feeds for the same transit agency.
-    private HashMap<Integer, List<GtfsRealtime.FeedEntity>> feedEntityList;
+    HashMap<Integer, List<TimeFeedEntity>> feedEntityList;
 
     private GtfsRtFeedModel currentFeed = null;
 
@@ -48,7 +49,6 @@ public class BackgroundTask implements Runnable {
     @Override
     public void run() {
         URL gtfsRtFeedUrl = null;
-
 
         try {
             gtfsRtFeedUrl = new URL(currentFeed.getGtfsUrl());
@@ -90,19 +90,79 @@ public class BackgroundTask implements Runnable {
         feedIteration.setRtFeedId(currentFeed.getGtfsRtId());
         GTFSDB.setRtFeedInfo(feedIteration);
 
+
         //Save all entities under the gtfs-rt ID
-        List<GtfsRealtime.FeedEntity> currentEntityList = feedEntityList.get(currentFeed.getGtfsId());
+        List<TimeFeedEntity> currentEntityList = feedEntityList.get(currentFeed.getGtfsId());
         if (currentEntityList != null) {
             //Add entities to existing list
-            currentEntityList.addAll(entityList);
+            List<TimeFeedEntity> timeFeedEntityList = getTimeFeedEntities(entityList);
+            currentEntityList.addAll(timeFeedEntityList);
+
+            //Clean the entities to a given timestamp
+            List<TimeFeedEntity> cleanedList = cleanList(currentEntityList);
             feedEntityList.put(currentFeed.getGtfsId(), currentEntityList);
+
         } else {
+            List<TimeFeedEntity> timeFeedEntityList = getTimeFeedEntities(entityList);
+
             //Create list and add entities
-            feedEntityList.put(currentFeed.getGtfsId(), entityList);
+            feedEntityList.put(currentFeed.getGtfsId(), timeFeedEntityList);
         }
 
-        //TODO: Loop through all the entities in the feeds check for associating errors
+        //Loop through all the entities in the feeds check for associating errors
+        for (TimeFeedEntity entity : feedEntityList.get(currentFeed.getGtfsId())) {
+            entity.getEntity();
+            //Run checks that compare entities of same GTFS-feed but from differed rt-feeds
+        }
 
-        //TODO: *Check the timestamp differences to avoid comparing older entities*
     }
+
+    private List<TimeFeedEntity> getTimeFeedEntities(List<GtfsRealtime.FeedEntity> entityList) {
+        long timestamp = TimeStampHelper.getCurrentTimestamp();
+        List<TimeFeedEntity> timeFeedEntityList = new ArrayList<>();
+        for (GtfsRealtime.FeedEntity entity : entityList) {
+            TimeFeedEntity timeEntity = new TimeFeedEntity(entity, timestamp);
+            timeFeedEntityList.add(timeEntity);
+        }
+        return timeFeedEntityList;
+    }
+
+    //Check the timestamp differences to avoid comparing older entities
+    private List<TimeFeedEntity> cleanList(List<TimeFeedEntity> currentEntityList) {
+        List<TimeFeedEntity> cleanedEntityList = new ArrayList<>();
+        for (TimeFeedEntity entity : currentEntityList) {
+            //Checks if the feed was uploaded within the last 15 seconds
+            if (TimeStampHelper.getCurrentTimestamp() - entity.getTimestamp() < 15) {
+                cleanedEntityList.add(entity);
+            }
+        }
+        return cleanedEntityList;
+    }
+
+    class TimeFeedEntity{
+        public TimeFeedEntity(GtfsRealtime.FeedEntity entity, long timestamp) {
+            this.entity = entity;
+            this.timestamp = timestamp;
+        }
+
+        private GtfsRealtime.FeedEntity entity;
+        private long timestamp;
+
+        public long getTimestamp() {
+            return timestamp;
+        }
+
+        public void setTimestamp(int timestamp) {
+            this.timestamp = timestamp;
+        }
+
+        public GtfsRealtime.FeedEntity getEntity() {
+            return entity;
+        }
+
+        public void setEntity(GtfsRealtime.FeedEntity entity) {
+            this.entity = entity;
+        }
+    }
+
 }
