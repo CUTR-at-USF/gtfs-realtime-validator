@@ -40,9 +40,7 @@ public class Main {
 
         server.setHandler(context);
 
-        context.addServlet(RTFeedValidatorServlet.class, "/validate");
         context.addServlet(GetFeedJSON.class, "/getFeed");
-
         context.addServlet(DefaultServlet.class, "/");
 
         ServletHolder jerseyServlet = context.addServlet(org.glassfish.jersey.servlet.ServletContainer.class, "/api/*");

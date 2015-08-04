@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package edu.usf.cutr.gtfsrtvalidator.prototype;
+package edu.usf.cutr.gtfsrtvalidator.helper;
 
  import com.google.transit.realtime.GtfsRealtime;
 import com.googlecode.protobuf.format.JsonFormat;
