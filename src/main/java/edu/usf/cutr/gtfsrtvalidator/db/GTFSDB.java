@@ -17,9 +17,7 @@
 
 package edu.usf.cutr.gtfsrtvalidator.db;
 
-import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedIterationModel;
-import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedModel;
-import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsRtFeedModel;
+import edu.usf.cutr.gtfsrtvalidator.api.model.*;
 import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
 
 import java.nio.file.Files;
@@ -60,7 +58,7 @@ public class GTFSDB {
         System.out.println("Table created successfully");
     }
 
-    //region CURD: Gtfs-Feed related database
+    //region CURD: Gtfs-Feed
     //Create
     public static synchronized int createGtfsFeed(GtfsFeedModel gtfsFeed) {
         Datasource ds = Datasource.getInstance();
@@ -501,6 +499,141 @@ public class GTFSDB {
             try {
                 con.close();
 
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    //endregion
+
+    //region CURD: Message Log
+    //Create
+    public static synchronized void setMessageLog(MessageLogModel messageLog) {
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+
+        try {
+            PreparedStatement stmt;
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("INSERT INTO MessageLog (itterationID, errorID)VALUES (?, ?)");
+            stmt.setInt(1, messageLog.getIterationId());
+            stmt.setString(2, messageLog.getErrorId());
+
+            stmt.executeUpdate();
+
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    //Update
+    public static synchronized void updateMessageLog(MessageLogModel messageLog) {
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+
+        try {
+            PreparedStatement stmt;
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("UPDATE MessageLog SET itterationID = ?, errorID = ?" +
+                    "WHERE messageID = ?");
+            stmt.setInt(1, messageLog.getIterationId());
+            stmt.setString(2, messageLog.getErrorId());
+            stmt.setInt(3, messageLog.getMessageId());
+
+            stmt.executeUpdate();
+
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    //Read
+    public static synchronized MessageLogModel getMessageLog(int messageId) {
+
+        MessageLogModel messageLogModel = new MessageLogModel();
+
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+        try {
+            PreparedStatement stmt;
+
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("SELECT * FROM MessageLog WHERE messageID = ?");
+            stmt.setInt(1, messageId);
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                messageLogModel.setErrorId(rs.getString(MessageLogModel.ERROR_ID));
+                messageLogModel.setIterationId(rs.getInt(MessageLogModel.ITERATION_ID));
+                messageLogModel.setMessageId(rs.getInt(MessageLogModel.MESSAGE_ID));
+            }
+
+            rs.close();
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return messageLogModel;
+    }
+
+    //Delete
+    public static synchronized void deleteMessageLog(int messageId) {
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+
+        try {
+            PreparedStatement stmt;
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("DELETE FROM MessageLog WHERE messageID = ?");
+            stmt.setInt(1, messageId);
+
+            stmt.executeUpdate();
+
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
