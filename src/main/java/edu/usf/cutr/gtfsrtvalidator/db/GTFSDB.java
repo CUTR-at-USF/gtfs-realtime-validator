@@ -474,7 +474,7 @@ public class GTFSDB {
     //endregion
 
     //region CURD: Rt-feed-Info
-    public static synchronized void setRtFeedInfo(GtfsFeedIterationModel feedIteration) {
+    public static synchronized void createRtFeedInfo(GtfsFeedIterationModel feedIteration) {
         Datasource ds = Datasource.getInstance();
         Connection con = ds.getConnection();
 
@@ -508,7 +508,7 @@ public class GTFSDB {
 
     //region CURD: Message Log
     //Create
-    public static synchronized void setMessageLog(MessageLogModel messageLog) {
+    public static synchronized void createMessageLog(MessageLogModel messageLog) {
         Datasource ds = Datasource.getInstance();
         Connection con = ds.getConnection();
 
@@ -642,7 +642,7 @@ public class GTFSDB {
     //endregion
 
     //region CURD: Occurrence
-    public static synchronized void setOccurrence(OccurrenceModel occurrence) {
+    public static synchronized void createOccurrence(OccurrenceModel occurrence) {
         Datasource ds = Datasource.getInstance();
         Connection con = ds.getConnection();
 
