@@ -640,4 +640,141 @@ public class GTFSDB {
         }
     }
     //endregion
+
+    //region CURD: Occurrence
+    public static synchronized void setOccurrence(OccurrenceModel occurrence) {
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+
+        try {
+            PreparedStatement stmt;
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("INSERT INTO Occurrence (messageID, elementPath, elementValue)VALUES (?,?,?)");
+            stmt.setInt(1, occurrence.getMessageId());
+            stmt.setString(2, occurrence.getElementPath());
+            stmt.setString(3, occurrence.getElementValue());
+
+            stmt.executeUpdate();
+
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    //Update
+    public static synchronized void updateOccurrence(OccurrenceModel occurrence) {
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+
+        try {
+            PreparedStatement stmt;
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("UPDATE Occurrence SET messageID = ?, elementPath = ?, elementValue = ?" +
+                    "WHERE messageID = ?");
+            stmt.setInt(1, occurrence.getMessageId());
+            stmt.setString(2, occurrence.getElementPath());
+            stmt.setString(3, occurrence.getElementValue());
+            stmt.setInt(4, occurrence.getOccurrenceId());
+
+            stmt.executeUpdate();
+
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    //Read
+    public static synchronized OccurrenceModel getOccurrence(int occurrenceId) {
+
+        OccurrenceModel occurrenceModel = new OccurrenceModel();
+
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+        try {
+            PreparedStatement stmt;
+
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("SELECT * FROM Occurrence WHERE occurrenceID = ?");
+            stmt.setInt(1, occurrenceId);
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                occurrenceModel.setMessageId(rs.getInt(OccurrenceModel.MESSAGE_ID));
+                occurrenceModel.setElementPath(rs.getString(OccurrenceModel.ELEMENT_PATH));
+                occurrenceModel.setElementValue(rs.getString(OccurrenceModel.ELEMENT_VALUE));
+            }
+
+            rs.close();
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return occurrenceModel;
+    }
+
+    //Delete
+    public static synchronized void deleteOccurrence(int occurenceId) {
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+
+        try {
+            PreparedStatement stmt;
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("DELETE FROM Occurrence WHERE occurrenceID = ?");
+            stmt.setInt(1, occurenceId);
+
+            stmt.executeUpdate();
+
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    //endregion
+
 }
