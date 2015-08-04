@@ -21,11 +21,11 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 
 public class DBHelper {
-    public static void saveError(ErrorModel errorModel) {
-        GTFSDB.createMessageLog(errorModel.getErrorMessage());
+    public static void saveError(ErrorListHelperModel errorListHelperModel) {
+        GTFSDB.createMessageLog(errorListHelperModel.getErrorMessage());
 
-        for (OccurrenceModel occurrence : errorModel.getOccurrenceList()) {
-            occurrence.setMessageId(errorModel.getErrorMessage().getMessageId());
+        for (OccurrenceModel occurrence : errorListHelperModel.getOccurrenceList()) {
+            occurrence.setMessageId(errorListHelperModel.getErrorMessage().getMessageId());
             GTFSDB.createOccurrence(occurrence);
         }
     }

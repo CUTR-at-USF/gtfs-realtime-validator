@@ -22,7 +22,7 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedIterationModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsRtFeedModel;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.helper.DBHelper;
-import edu.usf.cutr.gtfsrtvalidator.helper.ErrorModel;
+import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
 import edu.usf.cutr.gtfsrtvalidator.validation.EntityValidation;
 import edu.usf.cutr.gtfsrtvalidator.validation.HeaderValidation;
@@ -88,7 +88,7 @@ public class BackgroundTask implements Runnable {
         GtfsRealtime.FeedHeader header = feedMessage.getHeader();
 
         //Validation rules for all headers
-        ErrorModel headerErrors = HeaderValidation.validate(header);
+        ErrorListHelperModel headerErrors = HeaderValidation.validate(header);
         if (headerErrors != null) {
             //Use returned id to save errors to database
             headerErrors.getErrorMessage().setIterationId(iterationId);

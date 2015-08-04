@@ -20,12 +20,12 @@ package edu.usf.cutr.gtfsrtvalidator.db;
 import edu.usf.cutr.gtfsrtvalidator.api.model.*;
 import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class GTFSDB {
 
@@ -33,6 +33,8 @@ public class GTFSDB {
         Statement stmt;
         String workingDir = System.getProperty("user.dir");
         String createTablePath = workingDir + "/target/classes/createTables.sql";
+
+        String ruleCsvPath = workingDir + "/target/classes/RuleList";
 
         try {
             byte[] encoded = Files.readAllBytes(Paths.get(createTablePath));
@@ -53,6 +55,36 @@ public class GTFSDB {
         } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
+        }
+
+        BufferedReader br = null;
+        String line = "";
+        String cvsSplitBy = ";";
+
+        try {
+            List<ErrorModel> allErrors = getAllErrors();
+            List<String> existingErrors = new ArrayList<>();
+
+            for (ErrorModel error : allErrors) {
+                existingErrors.add(error.getErrorId());
+            }
+
+            br = new BufferedReader(new FileReader(ruleCsvPath));
+            while ((line = br.readLine()) != null) {
+                line = line.replaceAll("\"", "");
+                String[] rule = line.split(cvsSplitBy);
+                System.out.println("Rule ID: " + rule[0] + " Description: " + rule[1]);
+
+                ErrorModel error = new ErrorModel(rule[0], rule[1]);
+
+                System.out.println(existingErrors.toString());
+
+                if (!existingErrors.contains(rule[0])) {
+                    GTFSDB.createError(error);
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
 
         System.out.println("Table created successfully");
@@ -200,7 +232,7 @@ public class GTFSDB {
             stmt.close();
             con.commit();
             con.close();
-            return  gtfsFeed;
+            return gtfsFeed;
 
         } catch (Exception ex) {
             return null;
@@ -213,6 +245,7 @@ public class GTFSDB {
             }
         }
     }
+
     public static synchronized GtfsFeedModel readGtfsFeed(int feedId) {
         Datasource ds = Datasource.getInstance();
         Connection con = ds.getConnection();
@@ -242,7 +275,7 @@ public class GTFSDB {
             stmt.close();
             con.commit();
             con.close();
-            return  gtfsFeed;
+            return gtfsFeed;
 
         } catch (Exception ex) {
             return null;
@@ -400,6 +433,7 @@ public class GTFSDB {
 
         return feedModel;
     }
+
     public static GtfsRtFeedModel getGtfsRtFeed(GtfsRtFeedModel gtfsRtFeed) {
         Datasource ds = Datasource.getInstance();
         Connection con = ds.getConnection();
@@ -785,4 +819,77 @@ public class GTFSDB {
     }
     //endregion
 
+    //region CURD: Error
+    //create
+    private static void createError(ErrorModel error) {
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+
+        try {
+            PreparedStatement stmt;
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("INSERT INTO Error (errorID, errorDescription) VALUES (?,?)");
+            stmt.setString(1, error.getErrorId());
+            stmt.setString(2, error.getErrorDescription());
+
+            stmt.executeUpdate();
+
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    //read
+    //Read
+    public static synchronized List<ErrorModel> getAllErrors() {
+        List<ErrorModel> errorList = new ArrayList<>();
+
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+        try {
+            PreparedStatement stmt;
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("SELECT * FROM Error");
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                ErrorModel errorModel = new ErrorModel();
+                errorModel.setErrorId(rs.getString(ErrorModel.ERROR_ID));
+                errorModel.setErrorDescription(rs.getString(ErrorModel.ERROR_DESCRIPTION));
+
+                errorList.add(errorModel);
+            }
+
+            rs.close();
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return errorList;
+    }
+
+    //endregion
 }

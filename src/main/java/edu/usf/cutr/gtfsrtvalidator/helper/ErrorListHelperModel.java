@@ -22,7 +22,7 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 
 import java.util.List;
 
-public class ErrorModel {
+public class ErrorListHelperModel {
     private MessageLogModel errorMessage;
     private List<OccurrenceModel> occurrenceList;
 

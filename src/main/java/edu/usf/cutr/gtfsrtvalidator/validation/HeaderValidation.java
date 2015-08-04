@@ -20,7 +20,7 @@ package edu.usf.cutr.gtfsrtvalidator.validation;
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
-import edu.usf.cutr.gtfsrtvalidator.helper.ErrorModel;
+import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -32,14 +32,14 @@ public class HeaderValidation {
 
     public static final String START_DATE = "2012/01/01";
 
-    public static ErrorModel validate(GtfsRealtime.FeedHeader header) {
+    public static ErrorListHelperModel validate(GtfsRealtime.FeedHeader header) {
         long timestamp = header.getTimestamp();
 
         //w001: Check if timestamp is populated
         if (timestamp == 0) {
             System.out.println("Timestamp not present");
             
-            ErrorModel errorMessage = new ErrorModel();
+            ErrorListHelperModel errorMessage = new ErrorListHelperModel();
 
             MessageLogModel messageLogModel = new MessageLogModel();
             messageLogModel.setErrorId("w001");
