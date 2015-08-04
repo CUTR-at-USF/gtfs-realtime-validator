@@ -474,7 +474,9 @@ public class GTFSDB {
     //endregion
 
     //region CURD: Rt-feed-Info
-    public static synchronized void createRtFeedInfo(GtfsFeedIterationModel feedIteration) {
+    public static synchronized int createRtFeedInfo(GtfsFeedIterationModel feedIteration) {
+        int createdId = 0;
+
         Datasource ds = Datasource.getInstance();
         Connection con = ds.getConnection();
 
@@ -482,12 +484,17 @@ public class GTFSDB {
             PreparedStatement stmt;
             con.setAutoCommit(false);
 
-            stmt = con.prepareStatement("INSERT INTO GtfsRtFeedIteration (feedProtobuf, rtFeedID, IterationTimestamp)VALUES (?, ?, ?)");
+            stmt = con.prepareStatement("INSERT INTO GtfsRtFeedIteration (feedProtobuf, rtFeedID, IterationTimestamp)VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
             stmt.setBytes(1, feedIteration.getFeedprotobuf());
             stmt.setInt(2, feedIteration.getRtFeedId());
             stmt.setLong(3, feedIteration.getTimeStamp());
 
             stmt.executeUpdate();
+
+            ResultSet rs = stmt.getGeneratedKeys();
+            if (rs != null && rs.next()) {
+                createdId = rs.getInt(1);
+            }
 
             stmt.close();
             con.commit();
@@ -503,6 +510,7 @@ public class GTFSDB {
                 e.printStackTrace();
             }
         }
+        return createdId;
     }
     //endregion
 

@@ -21,6 +21,8 @@ import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedIterationModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsRtFeedModel;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
+import edu.usf.cutr.gtfsrtvalidator.helper.DBHelper;
+import edu.usf.cutr.gtfsrtvalidator.helper.ErrorModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
 import edu.usf.cutr.gtfsrtvalidator.validation.EntityValidation;
 import edu.usf.cutr.gtfsrtvalidator.validation.HeaderValidation;
@@ -72,24 +74,34 @@ public class BackgroundTask implements Runnable {
             e.printStackTrace();
         }
 
+        GtfsFeedIterationModel feedIteration = new GtfsFeedIterationModel();
+        feedIteration.setFeedprotobuf(gtfsRtProtobuf);
+        feedIteration.setTimeStamp(TimeStampHelper.getCurrentTimestamp());
+        feedIteration.setRtFeedId(currentFeed.getGtfsRtId());
+
+        //Return id from feed iteration
+        int iterationId = GTFSDB.createRtFeedInfo(feedIteration);
+
+
         //get the header of the feed
         assert feedMessage != null;
         GtfsRealtime.FeedHeader header = feedMessage.getHeader();
 
         //Validation rules for all headers
-        HeaderValidation.validate(header);
+        ErrorModel headerErrors = HeaderValidation.validate(header);
+        if (headerErrors != null) {
+            //Use returned id to save errors to database
+            headerErrors.getErrorMessage().setIterationId(iterationId);
+
+            //Save the captured errors to the database
+            DBHelper.saveError(headerErrors);
+        }
 
         List<GtfsRealtime.FeedEntity> entityList = feedMessage.getEntityList();
 
         //Validation rules for entity
         EntityValidation entityValidation = new EntityValidation();
         entityValidation.validate(entityList);
-
-        GtfsFeedIterationModel feedIteration = new GtfsFeedIterationModel();
-        feedIteration.setFeedprotobuf(gtfsRtProtobuf);
-        feedIteration.setTimeStamp(TimeStampHelper.getCurrentTimestamp());
-        feedIteration.setRtFeedId(currentFeed.getGtfsRtId());
-        GTFSDB.setRtFeedInfo(feedIteration);
 
         System.out.println("Entities in current feed:\t" + entityList.size());
 

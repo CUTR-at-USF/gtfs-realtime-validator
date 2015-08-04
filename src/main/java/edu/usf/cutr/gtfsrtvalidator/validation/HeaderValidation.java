@@ -18,22 +18,42 @@
 package edu.usf.cutr.gtfsrtvalidator.validation;
 
 import com.google.transit.realtime.GtfsRealtime;
+import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
+import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
+import edu.usf.cutr.gtfsrtvalidator.helper.ErrorModel;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class HeaderValidation {
 
     public static final String START_DATE = "2012/01/01";
 
-    public static void validate(GtfsRealtime.FeedHeader header) {
+    public static ErrorModel validate(GtfsRealtime.FeedHeader header) {
         long timestamp = header.getTimestamp();
 
         //w001: Check if timestamp is populated
         if (timestamp == 0) {
             System.out.println("Timestamp not present");
-            return; //the method returns as checking the POSIX isn't needed if there is no timestamp
+            
+            ErrorModel errorMessage = new ErrorModel();
+
+            MessageLogModel messageLogModel = new MessageLogModel();
+            messageLogModel.setErrorId("w001");
+
+            List<OccurrenceModel> errorOccurrenceList = new ArrayList<>();
+            OccurrenceModel errorOccurrence = new OccurrenceModel();
+            errorOccurrence.setElementPath("$.header.timestamp");
+            errorOccurrence.setElementValue(String.valueOf(timestamp));
+            errorOccurrenceList.add(errorOccurrence);
+
+            errorMessage.setErrorMessage(messageLogModel);
+            errorMessage.setOccurrenceList(errorOccurrenceList);
+
+            return errorMessage; //the method returns as checking the POSIX isn't needed if there is no timestamp
         }
 
         //e001: Check if the timestamp is in POSIX format
@@ -43,6 +63,8 @@ public class HeaderValidation {
             System.out.println("Timestamp not in Unix format timestamp");
             //TODO: add record to database
         }
+
+        return null;
     }
 
     //Checks if the value is a valid Unix date object
