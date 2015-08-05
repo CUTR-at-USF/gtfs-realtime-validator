@@ -52,3 +52,12 @@ CREATE TABLE IF NOT EXISTS FEED_DETAILS
   Feed_Url TEXT,
   Trip_Count INTEGER
 );
+
+CREATE VIEW IF NOT EXISTS errorCount AS
+  SELECT rtFeedID, feedURL, gtfsFeedID, errorItteration.* FROM GtfsRtFeed
+    JOIN
+    (SELECT IterationID, IterationTimestamp, Message.errorCount FROM GtfsRtFeedIteration
+      left JOIN
+      (SELECT COUNT(errorID) AS "errorCount", itterationID
+       FROM MessageLog)`Message`
+        ON GtfsRtFeedIteration.IterationID = Message.itterationID)`errorItteration`
