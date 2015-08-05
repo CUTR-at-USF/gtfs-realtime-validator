@@ -20,6 +20,7 @@ package edu.usf.cutr.gtfsrtvalidator.api.resource;
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.api.model.ErrorMessageModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsRtFeedModel;
+import edu.usf.cutr.gtfsrtvalidator.api.model.ViewErrorCountModel;
 import edu.usf.cutr.gtfsrtvalidator.background.BackgroundTask;
 import edu.usf.cutr.gtfsrtvalidator.db.Datasource;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
@@ -148,35 +149,12 @@ public class GtfsRtFeed {
     @GET
     @Path("{id : \\d+}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getRtFeedDetails(){
-        List<GtfsRtFeedModel> gtfsFeeds = new ArrayList<>();
-        try {
-            Datasource ds = Datasource.getInstance();
-            Connection con = ds.getConnection();
-            con.setAutoCommit(false);
+    public Response getRtFeedDetails(@PathParam("id") int id){
+        List<ViewErrorCountModel> gtfsFeeds;
 
-            String sql = "SELECT * FROM GtfsRtFeed";
-            stmt = con.prepareStatement(sql);
-            ResultSet rs = stmt.executeQuery();
+        gtfsFeeds = GTFSDB.getErrors(id, 10);
 
-            GtfsRtFeedModel gtfsFeed = new GtfsRtFeedModel();
-
-            while (rs.next()) {
-                gtfsFeed.setGtfsUrl(rs.getString("feedURL"));
-                gtfsFeed.setGtfsId(rs.getInt("gtfsFeedID"));
-                gtfsFeed.setStartTime(rs.getLong("startTime"));
-
-                gtfsFeeds.add(gtfsFeed);
-            }
-
-            stmt.close();
-            con.commit();
-            con.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        GenericEntity<List<GtfsRtFeedModel>> feedList = new GenericEntity<List<GtfsRtFeedModel>>(gtfsFeeds){};
+        GenericEntity<List<ViewErrorCountModel>> feedList = new GenericEntity<List<ViewErrorCountModel>>(gtfsFeeds){};
         return Response.ok(feedList).build();
     }
 
