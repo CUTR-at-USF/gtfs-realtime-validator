@@ -73,12 +73,7 @@ public class GTFSDB {
             while ((line = br.readLine()) != null) {
                 line = line.replaceAll("\"", "");
                 String[] rule = line.split(cvsSplitBy);
-                System.out.println("Rule ID: " + rule[0] + " Description: " + rule[1]);
-
                 ErrorModel error = new ErrorModel(rule[0], rule[1]);
-
-                System.out.println(existingErrors.toString());
-
                 if (!existingErrors.contains(rule[0])) {
                     GTFSDB.createError(error);
                 }
@@ -851,7 +846,6 @@ public class GTFSDB {
         }
     }
 
-    //read
     //Read
     public static synchronized List<ErrorModel> getAllErrors() {
         List<ErrorModel> errorList = new ArrayList<>();
@@ -892,4 +886,53 @@ public class GTFSDB {
     }
 
     //endregion
+
+    //region VIEW errorCount
+    //Read
+    public static synchronized List<ViewErrorCountModel> getErrors(int feedId, int limit) {
+        List<ViewErrorCountModel> errorList = new ArrayList<>();
+
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+        try {
+            PreparedStatement stmt;
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("SELECT * FROM errorCount WHERE gtfsFeedID = ? LIMIT ?");
+            stmt.setInt(1, feedId);
+            stmt.setInt(2, limit);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                ViewErrorCountModel errorModel = new ViewErrorCountModel();
+
+                errorModel.setGtfsId(rs.getInt(ViewErrorCountModel.GTFS_ID));
+                errorModel.setIterationId(rs.getInt(ViewErrorCountModel.ITERATION_ID));
+                errorModel.setErrorCount(rs.getInt(ViewErrorCountModel.ERROR_COUNT));
+                errorModel.setFeedUrl(rs.getString(ViewErrorCountModel.FEED_URL));
+                errorModel.setGtfsRtId(rs.getInt(ViewErrorCountModel.GTFS_ID));
+                errorModel.setIterationTime(rs.getLong(ViewErrorCountModel.ITERATION_TIME));
+
+                errorList.add(errorModel);
+            }
+
+            rs.close();
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return errorList;
+    }
+    //endregion
+
 }
