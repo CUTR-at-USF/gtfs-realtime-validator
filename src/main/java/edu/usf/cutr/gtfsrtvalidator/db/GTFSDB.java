@@ -890,6 +890,8 @@ public class GTFSDB {
     //region VIEW errorCount
     //Read
     public static synchronized List<ViewErrorCountModel> getErrors(int feedId, int limit) {
+        System.out.println(feedId);
+
         List<ViewErrorCountModel> errorList = new ArrayList<>();
 
         Datasource ds = Datasource.getInstance();
@@ -898,7 +900,7 @@ public class GTFSDB {
             PreparedStatement stmt;
             con.setAutoCommit(false);
 
-            stmt = con.prepareStatement("SELECT * FROM errorCount WHERE gtfsFeedID = ? LIMIT ?");
+            stmt = con.prepareStatement("SELECT * FROM errorCount WHERE rtFeedID = ? ORDER BY IterationID DESC LIMIT ?");
             stmt.setInt(1, feedId);
             stmt.setInt(2, limit);
             ResultSet rs = stmt.executeQuery();
@@ -907,10 +909,10 @@ public class GTFSDB {
                 ViewErrorCountModel errorModel = new ViewErrorCountModel();
 
                 errorModel.setGtfsId(rs.getInt(ViewErrorCountModel.GTFS_ID));
+                errorModel.setGtfsRtId(rs.getInt(ViewErrorCountModel.RT_FEED_ID));
                 errorModel.setIterationId(rs.getInt(ViewErrorCountModel.ITERATION_ID));
                 errorModel.setErrorCount(rs.getInt(ViewErrorCountModel.ERROR_COUNT));
                 errorModel.setFeedUrl(rs.getString(ViewErrorCountModel.FEED_URL));
-                errorModel.setGtfsRtId(rs.getInt(ViewErrorCountModel.GTFS_ID));
                 errorModel.setIterationTime(rs.getLong(ViewErrorCountModel.ITERATION_TIME));
 
                 errorList.add(errorModel);

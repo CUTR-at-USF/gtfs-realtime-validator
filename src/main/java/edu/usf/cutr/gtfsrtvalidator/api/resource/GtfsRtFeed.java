@@ -51,7 +51,6 @@ public class GtfsRtFeed {
     private static final int VALID_FEED = 1;
     PreparedStatement stmt;
 
-
     public Response generateError(String errorMessage) {
         return Response
                 .status(Response.Status.BAD_REQUEST)
@@ -85,10 +84,8 @@ public class GtfsRtFeed {
             //If not, create the gtfs-rt feed in the DB and return the feed
             GTFSDB.createGtfsRtFeed(feedInfo);
         }
-
         return Response.ok(feedInfo).build();
     }
-
 
     //GET feed to retrive all RT-feeds
     @GET
@@ -129,7 +126,7 @@ public class GtfsRtFeed {
 
     @PUT
     @Path("/{id}/monitor")
-    public String getID(@PathParam("id") int id) {
+    public Response getID(@PathParam("id") int id) {
         int interval = 10;
 
         //Get RtFeedModel from id
@@ -140,12 +137,10 @@ public class GtfsRtFeed {
         System.out.println("GtfsId is: " + gtfsRtFeed.getGtfsUrl());
         startBackgroundTask(gtfsRtFeed, interval);
 
-        return "Monitoring started for: " + gtfsRtFeed.getGtfsUrl();
+        return Response.ok(gtfsRtFeed).build();
     }
 
-    //INFO: @Path("{id : \\d+}") //support digit only
-    //TODO: GET {id} return information about the feed with {id}
-    //GET feed to retrive all RT-feeds
+    //GET {id} return information about the feed with {id}
     @GET
     @Path("{id : \\d+}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -153,7 +148,7 @@ public class GtfsRtFeed {
         List<ViewErrorCountModel> gtfsFeeds;
 
         gtfsFeeds = GTFSDB.getErrors(id, 10);
-
+        System.out.println("ID of feed" + id);
         GenericEntity<List<ViewErrorCountModel>> feedList = new GenericEntity<List<ViewErrorCountModel>>(gtfsFeeds){};
         return Response.ok(feedList).build();
     }
@@ -176,9 +171,7 @@ public class GtfsRtFeed {
     }
 
     public synchronized static ScheduledExecutorService startBackgroundTask(GtfsRtFeedModel gtfsRtFeed, int updateInterval) {
-
         String rtFeedUrl = gtfsRtFeed.getGtfsUrl();
-
 
         if (!runningTasks.containsKey(rtFeedUrl)) {
             ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);

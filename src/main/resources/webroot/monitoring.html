@@ -177,10 +177,9 @@
 <script src="js/handlebars.js"></script>
 
 <script id="feed-monitor-template" type="text/x-handlebars-template">
-    {{#each gtfsFeeds}}
     <div class="col-md-12">
         <div class="well content-well">
-            <h3>Monitor Feed - {{url}}</h3>
+            <h3>Monitor Feed - {{gtfsUrl}} {{gtfsRtId}}</h3>
             <hr/>
             <table class="table">
                 <thead>
@@ -204,22 +203,21 @@
                 </thead>
 
                 <!-- placeholder for rows of records from the database -->
-                <tbody id="monitor-table-{{index}}">
+                <tbody id="monitor-table-{{gtfsRtId}}">
 
                 </tbody>
             </table>
         </div>
     </div>
-    {{/each}}
 </script>
 
 <script id="feed-monitor-row-template" type="text/x-handlebars-template">
-    {{#each monitorDetails}}
+    {{#each this}}
     <tr>
-        <td>{{itteration}}</td>
-        <td>{{timestamp}}</td>
+        <td><a href="error.html?={{iterationId}}">{{iterationId}}</a></td>
+        <td>{{iterationTime}}</td>
 
-        <td>{{vehicleCount}}</td>
+        <td>{{errorCount}}</td>
         <td>{{vehicleCount}}</td>
 
         <td>{{alertCount}}</td>

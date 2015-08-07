@@ -20,30 +20,45 @@
 var urls = localStorage.getItem("gtfsRtFeeds");
 var gtfsFeeds = JSON.parse(urls);
 
-//Retrive the update interval value
+//Retrieve the update interval value
 var updateInterval = localStorage.getItem("updateInterval");
 
-//This object will hold the urls returned after starting the background tasks.
-var monitoredFeeds = {};
-
-//TODO: PUT request to start monitoring of the given gtfsRtFeed ID /api/gtfs-rt-feed/{id}/start
+//PUT request to start monitoring of the given gtfsRtFeed ID /api/gtfs-rt-feed/{id}/monitor
 for (var gtfsFeed in gtfsFeeds) {
     if(gtfsFeeds.hasOwnProperty(gtfsFeed)){
         $.ajax({
             url: "http://localhost:8080/api/gtfs-rt-feed/"+ gtfsFeeds[gtfsFeed]["feedId"] +"/monitor",
             type: 'PUT',
             success: function(data) {
+                initializeInterface(data);
+                refresh(data["gtfsRtId"]);
+                setInterval(function() { refresh(data["gtfsRtId"]) }, 3000);
             }
         });
     }
 }
 
+function refresh(id){
+    $.get("http://localhost:8080/api/gtfs-rt-feed/"+ id).done(function(data){
+        updateTables(id, data);
+    });
+}
+
 function initializeInterface(gtfsFeeds){
-    var wrapper  = {gtfsFeeds: gtfsFeeds};
+    //var wrapper  = {gtfsFeeds: gtfsFeeds};
     var monitorTemplateScript = $("#feed-monitor-template").html();
     var monitorTemplate = Handlebars.compile(monitorTemplateScript);
-    var compiledHtml = monitorTemplate(wrapper);
-    $('.monitor-placeholder').html(compiledHtml);
+    var compiledHtml = monitorTemplate(gtfsFeeds);
+    $('.monitor-placeholder').append(compiledHtml);
+}
+
+function updateTables(index, data) {
+
+    var monitorTemplateScript = $("#feed-monitor-row-template").html();
+    var monitorTemplate = Handlebars.compile(monitorTemplateScript);
+    var compiledHtml = monitorTemplate(data);
+
+    $("#monitor-table-"+ index +"").html(compiledHtml);
 }
 
 //Calculate time for display
@@ -70,25 +85,3 @@ function getTimeElapsed(){
 
 //Call time elapsed to update the clock evey second
 setInterval(getTimeElapsed,1000);
-
-//TODO: get feed details from GET request to /api/gtfs-rt-feed/{id}
-//Get feed details
-function getFeedUpdates(url, index) {
-    //Ajax call to the servlet to get the json with the feed details
-    $.get("http://localhost:8080/feedInfo", {gtfsurl: url}).done(function (data) {
-        updateTables(data, index);
-    });
-
-    //TODO: Replace feedInfo with {id}
-
-
-}
-
-function updateTables(data, index) {
-
-    var monitorTemplateScript = $("#feed-monitor-row-template").html();
-    var monitorTemplate = Handlebars.compile(monitorTemplateScript);
-    var compiledHtml = monitorTemplate(data);
-
-    $("#monitor-table-"+ index +"").html(compiledHtml);
-}
