@@ -20,6 +20,7 @@ package edu.usf.cutr.gtfsrtvalidator.api.resource;
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.api.model.ErrorMessageModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsRtFeedModel;
+import edu.usf.cutr.gtfsrtvalidator.api.model.MessageDetailsModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.ViewErrorCountModel;
 import edu.usf.cutr.gtfsrtvalidator.background.BackgroundTask;
 import edu.usf.cutr.gtfsrtvalidator.db.Datasource;
@@ -151,6 +152,15 @@ public class GtfsRtFeed {
         System.out.println("ID of feed" + id);
         GenericEntity<List<ViewErrorCountModel>> feedList = new GenericEntity<List<ViewErrorCountModel>>(gtfsFeeds){};
         return Response.ok(feedList).build();
+    }
+
+    @GET
+    @Path("/{id}/{message}")
+    public Response getMessageDetails(@PathParam("id") int id, @PathParam("message") int messageId) {
+        String s = messageId + " is the messageID";
+        List<MessageDetailsModel> messageList = GTFSDB.getMessageDetails(messageId);
+        System.out.println(messageList.toString());
+        return Response.ok(s).build();
     }
 
     //TODO: DELETE {id} remove feed with {id}

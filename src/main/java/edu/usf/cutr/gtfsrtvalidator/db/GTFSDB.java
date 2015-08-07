@@ -937,4 +937,54 @@ public class GTFSDB {
     }
     //endregion
 
+    //region VIEW messageDetails
+    //Read
+    public static synchronized List<MessageDetailsModel> getMessageDetails(int messageId) {
+        List<MessageDetailsModel> messageDetailList = new ArrayList<>();
+
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+        try {
+            PreparedStatement stmt;
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("SELECT * FROM messageDetails WHERE IterationID = ?");
+            stmt.setInt(1, messageId);
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                MessageDetailsModel messageDetail = new MessageDetailsModel();
+
+                messageDetail.setFeedProtobuf(rs.getBytes(MessageDetailsModel.FEED_PROTOCOL_BUFFER));
+                messageDetail.setMessageId(rs.getInt(MessageDetailsModel.MESSAGE_ID));
+                messageDetail.setIterationId(rs.getInt(MessageDetailsModel.ITERATION_ID));
+                messageDetail.setErrorDescription(rs.getString(MessageDetailsModel.ERROR_DESC));
+                messageDetail.setErrorId(rs.getString(MessageDetailsModel.ERROR_ID));
+                messageDetail.setOccurrenceId(rs.getInt(MessageDetailsModel.OCCURRENCE_ID));
+                messageDetail.setElementPath(rs.getString(MessageDetailsModel.ELEMENT_PATH));
+                messageDetail.setElementValue(rs.getString(MessageDetailsModel.ELEMENT_VALUE));
+
+                messageDetailList.add(messageDetail);
+            }
+
+            rs.close();
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return messageDetailList;
+    }
+    //endregion
+
 }

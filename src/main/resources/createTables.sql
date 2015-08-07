@@ -60,4 +60,39 @@ CREATE VIEW IF NOT EXISTS errorCount AS
       left JOIN
       (SELECT COUNT(errorID) AS "errorCount", itterationID
        FROM MessageLog)`Message`
-        ON GtfsRtFeedIteration.IterationID = Message.itterationID)`errorItteration`
+        ON GtfsRtFeedIteration.IterationID = Message.itterationID)`errorItteration`;
+
+CREATE VIEW IF NOT EXISTS detailedError AS
+  SELECT
+    GtfsFeed.*,
+    GtfsRtFeed.rtFeedID,
+    GtfsRtFeed.feedURL,
+    GtfsRtFeedIteration.IterationID,
+    GtfsRtFeedIteration.IterationTimestamp,
+    GtfsRtFeedIteration.feedProtobuf,
+    MessageLog.messageID,
+    MessageLog.errorID,
+    Error.errorDescription,
+    Occurrence.elementPath,
+    Occurrence.elementValue
+  FROM GtfsFeed
+    JOIN GtfsRtFeed
+      ON GtfsFeed.feedID = GtfsRtFeed.gtfsFeedID
+    JOIN GtfsRtFeedIteration
+      ON GtfsRtFeed.rtFeedID = GtfsRtFeedIteration.rtFeedID
+    LEFT JOIN MessageLog
+      ON GtfsRtFeedIteration.IterationID = MessageLog.itterationID
+    LEFT JOIN Error
+      ON Error.errorID = MessageLog.errorID
+    LEFT JOIN Occurrence
+      ON MessageLog.messageID = Occurrence.messageID;
+
+CREATE VIEW IF NOT EXISTS messageDetails AS
+  SELECT *
+  FROM GtfsRtFeedIteration
+    LEFT JOIN MessageLog
+      ON GtfsRtFeedIteration.IterationID = MessageLog.itterationID
+    LEFT JOIN Error
+      ON Error.errorID = MessageLog.errorID
+    LEFT JOIN Occurrence
+      ON MessageLog.messageID = Occurrence.messageID;
