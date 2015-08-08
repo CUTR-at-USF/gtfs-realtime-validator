@@ -17,6 +17,9 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.model;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class ViewErrorCountModel {
 
     public static final String RT_FEED_ID = "rtFeedId";

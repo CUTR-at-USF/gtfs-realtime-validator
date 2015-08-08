@@ -19,21 +19,29 @@ package edu.usf.cutr.gtfsrtvalidator.api.model;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.transit.realtime.GtfsRealtime;
+import com.googlecode.protobuf.format.JsonFormat;
 
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class GtfsFeedIterationModel {
-    public static String ITERATIONID = "IterationId";
-    public static String ITERATIONTIMESTAMP = "IterationTimestamp";
-    public static String FEEDPROTOBUF = "feedProtobuf";
-    public static String RTFEEDID = "rtFeedID";
+public class GtfsFeedIterationString {
+
+    public GtfsFeedIterationString() {}
+
+    public GtfsFeedIterationString(edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedIterationModel iterationModel) {
+        setFeedprotobuf(iterationModel.getFeedprotobuf());
+        setTimeStamp(iterationModel.getTimeStamp());
+        setIterationId(iterationModel.getIterationId());
+        setRtFeedId(iterationModel.getRtFeedId());
+    }
 
     private int IterationId;
     private long timeStamp;
-    private byte[] Feedprotobuf;
+    private String feedprotobuf;
     private int rtFeedId;
 
+    @XmlElement
     public int getRtFeedId() {
         return rtFeedId;
     }
@@ -42,6 +50,7 @@ public class GtfsFeedIterationModel {
         this.rtFeedId = rtFeedId;
     }
 
+    @XmlElement
     public int getIterationId() {
         return IterationId;
     }
@@ -50,6 +59,7 @@ public class GtfsFeedIterationModel {
         IterationId = iterationId;
     }
 
+    @XmlElement
     public long getTimeStamp() {
         return timeStamp;
     }
@@ -58,22 +68,27 @@ public class GtfsFeedIterationModel {
         this.timeStamp = timeStamp;
     }
 
-    public byte[] getFeedprotobuf() {
-        return Feedprotobuf;
-    }
-
-    public String getFeedprotobufString() {
-        String s = "";
-        try {
-            GtfsRealtime.FeedMessage feedMessage = GtfsRealtime.FeedMessage.parseFrom(Feedprotobuf);
-            s = feedMessage.toString();
-        } catch (InvalidProtocolBufferException e) {
-            e.printStackTrace();
-        }
-        return s;
+    @XmlElement
+    public String getFeedprotobuf() {
+        return feedprotobuf;
     }
 
     public void setFeedprotobuf(byte[] feedprotobuf) {
-        Feedprotobuf = feedprotobuf;
+        String s = "";
+
+        if (feedprotobuf == null) {
+            return;
+        }
+
+        try {
+            GtfsRealtime.FeedMessage feedMessage = GtfsRealtime.FeedMessage.parseFrom(feedprotobuf);
+            s = JsonFormat.printToString(feedMessage);
+            s.replace('\\', ' ');
+            System.out.println(s);
+        } catch (InvalidProtocolBufferException e) {
+            e.printStackTrace();
+        }
+
+        this.feedprotobuf = s;
     }
 }

@@ -20,10 +20,12 @@ package edu.usf.cutr.gtfsrtvalidator.api.model.combined;
 import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MessageOccurrenceModel {
+@XmlRootElement
+public class CombinedMessageOccurrenceModel {
     MessageLogModel messageLogModel = new MessageLogModel();
     List<OccurrenceModel> occurrenceModels = new ArrayList<>();
 

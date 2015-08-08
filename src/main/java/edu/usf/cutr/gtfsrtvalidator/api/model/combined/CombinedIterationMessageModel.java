@@ -17,27 +17,32 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.model.combined;
 
-import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedIterationModel;
+import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedIterationString;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
-public class IterationMessageModel {
-    private GtfsFeedIterationModel gtfsFeedIterationModel;
-    private List<MessageOccurrenceModel> messageOccurrenceList;
+@XmlRootElement
+public class CombinedIterationMessageModel {
 
-    public GtfsFeedIterationModel getGtfsFeedIterationModel() {
+    public CombinedIterationMessageModel() {}
+
+    private GtfsFeedIterationString gtfsFeedIterationModel;
+    private List<CombinedMessageOccurrenceModel> messageOccurrenceList;
+
+    public GtfsFeedIterationString getGtfsFeedIterationModel() {
         return gtfsFeedIterationModel;
     }
 
-    public void setGtfsFeedIterationModel(GtfsFeedIterationModel gtfsFeedIterationModel) {
+    public void setGtfsFeedIterationModel(GtfsFeedIterationString gtfsFeedIterationModel) {
         this.gtfsFeedIterationModel = gtfsFeedIterationModel;
     }
 
-    public List<MessageOccurrenceModel> getMessageOccurrenceList() {
+    public List<CombinedMessageOccurrenceModel> getMessageOccurrenceList() {
         return messageOccurrenceList;
     }
 
-    public void setMessageOccurrenceList(List<MessageOccurrenceModel> messageOccurrenceList) {
+    public void setMessageOccurrenceList(List<CombinedMessageOccurrenceModel> messageOccurrenceList) {
         this.messageOccurrenceList = messageOccurrenceList;
     }
 
@@ -50,21 +55,3 @@ public class IterationMessageModel {
     }
 }
 
-/*
-gtfsIteration{
-        gtfsId:
-        gtfsUrl:
-        protobuf:
-
-        errorMessage[{
-        messageId:
-        errorId:
-        errorDescription:
-
-        errorOccurences[{
-        occurenceId:
-        occurencePath:
-        occurenceValue:
-        }]
-        }]
-}*/

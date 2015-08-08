@@ -17,6 +17,9 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.model;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class ErrorModel {
 
     public static final String ERROR_ID = "errorId";

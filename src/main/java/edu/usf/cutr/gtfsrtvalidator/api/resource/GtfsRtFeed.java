@@ -19,11 +19,12 @@ package edu.usf.cutr.gtfsrtvalidator.api.resource;
 
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.api.model.*;
-import edu.usf.cutr.gtfsrtvalidator.api.model.combined.IterationMessageModel;
-import edu.usf.cutr.gtfsrtvalidator.api.model.combined.MessageOccurrenceModel;
+import edu.usf.cutr.gtfsrtvalidator.api.model.combined.CombinedIterationMessageModel;
+import edu.usf.cutr.gtfsrtvalidator.api.model.combined.CombinedMessageOccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.background.BackgroundTask;
 import edu.usf.cutr.gtfsrtvalidator.db.Datasource;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
+import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedIterationString;
 import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
 
 import javax.ws.rs.*;
@@ -155,13 +156,16 @@ public class GtfsRtFeed {
 
     @GET
     @Path("/{id}/{iteration}")
+    @Produces(MediaType.APPLICATION_JSON)
     public Response getMessageDetails(@PathParam("id") int id, @PathParam("iteration") int iterationId) {
-        IterationMessageModel messageList = new IterationMessageModel();
+        CombinedIterationMessageModel messageList = new CombinedIterationMessageModel();
         GtfsFeedIterationModel iterationModel = GTFSDB.getIteration(iterationId);
 
-        messageList.setGtfsFeedIterationModel(iterationModel);
+        GtfsFeedIterationString iterationString = new GtfsFeedIterationString(iterationModel);
 
-        List<MessageOccurrenceModel> messageOccurrenceModelList = new ArrayList<>();
+        messageList.setGtfsFeedIterationModel(iterationString);
+
+        List<CombinedMessageOccurrenceModel> combinedMessageOccurrenceModelList = new ArrayList<>();
 
         //Get a message list
         List<MessageLogModel> messageLogModels = GTFSDB.getMessageListForIteration(iterationId);
@@ -171,14 +175,14 @@ public class GtfsRtFeed {
             List<OccurrenceModel> occurrenceModels = GTFSDB.getOccurrenceListForMessage(messageLog.getMessageId());
 
             //Add both to the returned list
-            MessageOccurrenceModel messageOccurrence = new MessageOccurrenceModel();
+            CombinedMessageOccurrenceModel messageOccurrence = new CombinedMessageOccurrenceModel();
             messageOccurrence.setMessageLogModel(messageLog);
             messageOccurrence.setOccurrenceModels(occurrenceModels);
 
-            messageOccurrenceModelList.add(messageOccurrence);
+            combinedMessageOccurrenceModelList.add(messageOccurrence);
         }
 
-        messageList.setMessageOccurrenceList(messageOccurrenceModelList);
+        messageList.setMessageOccurrenceList(combinedMessageOccurrenceModelList);
 
         return Response.ok(messageList).build();
     }
