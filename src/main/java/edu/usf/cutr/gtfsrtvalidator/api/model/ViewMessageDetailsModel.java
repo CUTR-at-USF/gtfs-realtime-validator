@@ -19,7 +19,7 @@ package edu.usf.cutr.gtfsrtvalidator.api.model;
 
 import java.util.Arrays;
 
-public class MessageDetailsModel {
+public class ViewMessageDetailsModel {
     public static final String FEED_PROTOCOL_BUFFER = "feedProtobuf";
     public static final String MESSAGE_ID = "messageId";
     public static final String ITERATION_ID = "itterationId";

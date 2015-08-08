@@ -609,7 +609,6 @@ public class GTFSDB {
 
     //Read
     public static synchronized MessageLogModel getMessageLog(int messageId) {
-
         MessageLogModel messageLogModel = new MessageLogModel();
 
         Datasource ds = Datasource.getInstance();
@@ -648,6 +647,49 @@ public class GTFSDB {
         return messageLogModel;
     }
 
+    public static synchronized List<MessageLogModel> getMessageListForIteration(int iterationId) {
+        List<MessageLogModel> messageLogModelList = new ArrayList<>();
+
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+        try {
+            PreparedStatement stmt;
+
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("SELECT * FROM MessageLog WHERE itterationID = ?");
+            stmt.setInt(1, iterationId);
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                MessageLogModel messageLogModel = new MessageLogModel();
+
+                messageLogModel.setErrorId(rs.getString(MessageLogModel.ERROR_ID));
+                messageLogModel.setIterationId(rs.getInt(MessageLogModel.ITERATION_ID));
+                messageLogModel.setMessageId(rs.getInt(MessageLogModel.MESSAGE_ID));
+
+                messageLogModelList.add(messageLogModel);
+            }
+
+            rs.close();
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return messageLogModelList;
+    }
+
     //Delete
     public static synchronized void deleteMessageLog(int messageId) {
         Datasource ds = Datasource.getInstance();
@@ -679,6 +721,7 @@ public class GTFSDB {
     //endregion
 
     //region CURD: Occurrence
+    //Create
     public static synchronized void createOccurrence(OccurrenceModel occurrence) {
         Datasource ds = Datasource.getInstance();
         Connection con = ds.getConnection();
@@ -784,6 +827,51 @@ public class GTFSDB {
         return occurrenceModel;
     }
 
+    //Read list from messageId
+    public static synchronized List<OccurrenceModel> getOccurrenceListForMessage(int messageId) {
+
+        List<OccurrenceModel> occurrenceModelList = new ArrayList<>();
+
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+        try {
+            PreparedStatement stmt;
+
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("SELECT * FROM Occurrence WHERE messageID = ?");
+            stmt.setInt(1, messageId);
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                OccurrenceModel occurrence = new OccurrenceModel();
+
+                occurrence.setMessageId(rs.getInt(OccurrenceModel.MESSAGE_ID));
+                occurrence.setElementPath(rs.getString(OccurrenceModel.ELEMENT_PATH));
+                occurrence.setElementValue(rs.getString(OccurrenceModel.ELEMENT_VALUE));
+
+                occurrenceModelList.add(occurrence);
+            }
+
+            rs.close();
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return occurrenceModelList;
+    }
+
     //Delete
     public static synchronized void deleteOccurrence(int occurenceId) {
         Datasource ds = Datasource.getInstance();
@@ -887,6 +975,49 @@ public class GTFSDB {
 
     //endregion
 
+    //region CURD: Iteration
+    //Read
+    public static synchronized GtfsFeedIterationModel getIteration(int iterationId) {
+
+        GtfsFeedIterationModel gtfsIteration = new GtfsFeedIterationModel();
+
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+        try {
+            PreparedStatement stmt;
+
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("SELECT * FROM GtfsRtFeedIteration WHERE IterationID = ?");
+            stmt.setInt(1, iterationId);
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                gtfsIteration.setRtFeedId(rs.getInt(GtfsFeedIterationModel.RTFEEDID));
+                gtfsIteration.setTimeStamp(rs.getLong(GtfsFeedIterationModel.ITERATIONTIMESTAMP));
+                gtfsIteration.setFeedprotobuf(rs.getBytes(GtfsFeedIterationModel.FEEDPROTOBUF));
+                gtfsIteration.setIterationId(rs.getInt(GtfsFeedIterationModel.ITERATIONID));
+            }
+
+            rs.close();
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return gtfsIteration;
+    }
+    //endregion
+
     //region VIEW errorCount
     //Read
     public static synchronized List<ViewErrorCountModel> getErrors(int feedId, int limit) {
@@ -939,8 +1070,8 @@ public class GTFSDB {
 
     //region VIEW messageDetails
     //Read
-    public static synchronized List<MessageDetailsModel> getMessageDetails(int messageId) {
-        List<MessageDetailsModel> messageDetailList = new ArrayList<>();
+    public static synchronized List<ViewMessageDetailsModel> getViewMessageDetails(int iterationId) {
+        List<ViewMessageDetailsModel> messageDetailList = new ArrayList<>();
 
         Datasource ds = Datasource.getInstance();
         Connection con = ds.getConnection();
@@ -949,21 +1080,21 @@ public class GTFSDB {
             con.setAutoCommit(false);
 
             stmt = con.prepareStatement("SELECT * FROM messageDetails WHERE IterationID = ?");
-            stmt.setInt(1, messageId);
+            stmt.setInt(1, iterationId);
 
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                MessageDetailsModel messageDetail = new MessageDetailsModel();
+                ViewMessageDetailsModel messageDetail = new ViewMessageDetailsModel();
 
-                messageDetail.setFeedProtobuf(rs.getBytes(MessageDetailsModel.FEED_PROTOCOL_BUFFER));
-                messageDetail.setMessageId(rs.getInt(MessageDetailsModel.MESSAGE_ID));
-                messageDetail.setIterationId(rs.getInt(MessageDetailsModel.ITERATION_ID));
-                messageDetail.setErrorDescription(rs.getString(MessageDetailsModel.ERROR_DESC));
-                messageDetail.setErrorId(rs.getString(MessageDetailsModel.ERROR_ID));
-                messageDetail.setOccurrenceId(rs.getInt(MessageDetailsModel.OCCURRENCE_ID));
-                messageDetail.setElementPath(rs.getString(MessageDetailsModel.ELEMENT_PATH));
-                messageDetail.setElementValue(rs.getString(MessageDetailsModel.ELEMENT_VALUE));
+                //messageDetail.setFeedProtobuf(rs.getBytes(ViewMessageDetailsModel.FEED_PROTOCOL_BUFFER));
+                messageDetail.setMessageId(rs.getInt(ViewMessageDetailsModel.MESSAGE_ID));
+                messageDetail.setIterationId(rs.getInt(ViewMessageDetailsModel.ITERATION_ID));
+                messageDetail.setErrorDescription(rs.getString(ViewMessageDetailsModel.ERROR_DESC));
+                messageDetail.setErrorId(rs.getString(ViewMessageDetailsModel.ERROR_ID));
+                messageDetail.setOccurrenceId(rs.getInt(ViewMessageDetailsModel.OCCURRENCE_ID));
+                messageDetail.setElementPath(rs.getString(ViewMessageDetailsModel.ELEMENT_PATH));
+                messageDetail.setElementValue(rs.getString(ViewMessageDetailsModel.ELEMENT_VALUE));
 
                 messageDetailList.add(messageDetail);
             }

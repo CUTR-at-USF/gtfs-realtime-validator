@@ -18,10 +18,9 @@
 package edu.usf.cutr.gtfsrtvalidator.api.resource;
 
 import com.google.transit.realtime.GtfsRealtime;
-import edu.usf.cutr.gtfsrtvalidator.api.model.ErrorMessageModel;
-import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsRtFeedModel;
-import edu.usf.cutr.gtfsrtvalidator.api.model.MessageDetailsModel;
-import edu.usf.cutr.gtfsrtvalidator.api.model.ViewErrorCountModel;
+import edu.usf.cutr.gtfsrtvalidator.api.model.*;
+import edu.usf.cutr.gtfsrtvalidator.api.model.combined.IterationMessageModel;
+import edu.usf.cutr.gtfsrtvalidator.api.model.combined.MessageOccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.background.BackgroundTask;
 import edu.usf.cutr.gtfsrtvalidator.db.Datasource;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
@@ -155,12 +154,33 @@ public class GtfsRtFeed {
     }
 
     @GET
-    @Path("/{id}/{message}")
-    public Response getMessageDetails(@PathParam("id") int id, @PathParam("message") int messageId) {
-        String s = messageId + " is the messageID";
-        List<MessageDetailsModel> messageList = GTFSDB.getMessageDetails(messageId);
-        System.out.println(messageList.toString());
-        return Response.ok(s).build();
+    @Path("/{id}/{iteration}")
+    public Response getMessageDetails(@PathParam("id") int id, @PathParam("iteration") int iterationId) {
+        IterationMessageModel messageList = new IterationMessageModel();
+        GtfsFeedIterationModel iterationModel = GTFSDB.getIteration(iterationId);
+
+        messageList.setGtfsFeedIterationModel(iterationModel);
+
+        List<MessageOccurrenceModel> messageOccurrenceModelList = new ArrayList<>();
+
+        //Get a message list
+        List<MessageLogModel> messageLogModels = GTFSDB.getMessageListForIteration(iterationId);
+
+        //For each message get the occurrences
+        for (MessageLogModel messageLog : messageLogModels) {
+            List<OccurrenceModel> occurrenceModels = GTFSDB.getOccurrenceListForMessage(messageLog.getMessageId());
+
+            //Add both to the returned list
+            MessageOccurrenceModel messageOccurrence = new MessageOccurrenceModel();
+            messageOccurrence.setMessageLogModel(messageLog);
+            messageOccurrence.setOccurrenceModels(occurrenceModels);
+
+            messageOccurrenceModelList.add(messageOccurrence);
+        }
+
+        messageList.setMessageOccurrenceList(messageOccurrenceModelList);
+
+        return Response.ok(messageList).build();
     }
 
     //TODO: DELETE {id} remove feed with {id}
