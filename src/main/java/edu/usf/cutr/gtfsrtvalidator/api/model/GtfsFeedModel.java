@@ -65,5 +65,15 @@ public class GtfsFeedModel {
     public void setFeedLocation(String feedLocation) {
         this.feedLocation = feedLocation;
     }
+
+    @Override
+    public String toString() {
+        return "GtfsFeedModel{" +
+                "gtfsUrl='" + gtfsUrl + '\'' +
+                ", feedId=" + feedId +
+                ", startTime=" + startTime +
+                ", feedLocation='" + feedLocation + '\'' +
+                '}';
+    }
 }
 
