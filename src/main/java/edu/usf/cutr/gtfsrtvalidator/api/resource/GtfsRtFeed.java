@@ -64,7 +64,7 @@ public class GtfsRtFeed {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     public Response postGtfsRtFeed(GtfsRtFeedModel feedInfo) {
-        feedInfo.setGtfsId(1);
+        //feedInfo.setGtfsId(1);
         feedInfo.setStartTime(TimeStampHelper.getCurrentTimestamp());
 
         //Validate URL for GTFS feed and the GTFS ID.
@@ -134,8 +134,6 @@ public class GtfsRtFeed {
         GtfsRtFeedModel gtfsRtFeed = GTFSDB.getGtfsRtFeed(id);
 
         //Extract the Url and gtfsId to start the background process
-        System.out.println("URL is: " + gtfsRtFeed.getGtfsUrl());
-        System.out.println("GtfsId is: " + gtfsRtFeed.getGtfsUrl());
         startBackgroundTask(gtfsRtFeed, interval);
 
         return Response.ok(gtfsRtFeed).build();
@@ -149,7 +147,6 @@ public class GtfsRtFeed {
         List<ViewErrorCountModel> gtfsFeeds;
 
         gtfsFeeds = GTFSDB.getErrors(id, 10);
-        System.out.println("ID of feed" + id);
         GenericEntity<List<ViewErrorCountModel>> feedList = new GenericEntity<List<ViewErrorCountModel>>(gtfsFeeds){};
         return Response.ok(feedList).build();
     }

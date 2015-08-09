@@ -171,44 +171,9 @@ public class GTFSDB {
 
             con.setAutoCommit(false);
 
-            StringBuilder sqlBuilder = new StringBuilder("SELECT * FROM GtfsFeed");
-
-            Map<String, String> params = new HashMap<>();
-            if (searchFeed.getGtfsUrl() != null && searchFeed.getGtfsUrl().length() != 0) {
-                params.put(GtfsFeedModel.FEEDURL, searchFeed.getGtfsUrl());
-            }
-            if (searchFeed.getFeedLocation() != null && searchFeed.getFeedLocation().length() != 0) {
-                params.put(GtfsFeedModel.FILELOCATION, searchFeed.getFeedLocation());
-            }
-
-            Set<String> colSet = params.keySet();
-            if (!colSet.isEmpty()) {
-                StringBuilder whereClause = new StringBuilder(" WHERE");
-                String andOp = "";
-                for (String colName : colSet) {
-                    whereClause.append(andOp);
-                    whereClause.append(" ");
-                    whereClause.append(colName);
-                    whereClause.append("=? ");
-                    andOp = " AND ";
-                }
-                sqlBuilder.append(whereClause);
-            }
-
-            stmt = con.prepareStatement(sqlBuilder.toString());
-
-            int paramPos = 1;
-            for (String colName : colSet) {
-                if (colName.equals(GtfsFeedModel.FEEDURL)) {
-                    stmt.setString(paramPos, params.get(colName));
-                }
-
-                if (colName.equals(GtfsFeedModel.FILELOCATION)) {
-                    stmt.setString(paramPos, params.get(colName));
-                }
-
-                paramPos++;
-            }
+            stmt = con.prepareStatement("SELECT * FROM GtfsFeed WHERE feedUrl = ? AND fileLocation = ?");
+            stmt.setString(1, searchFeed.getGtfsUrl());
+            stmt.setString(2, searchFeed.getFeedLocation());
 
             ResultSet rs = stmt.executeQuery();
 
@@ -222,7 +187,6 @@ public class GTFSDB {
                 return null;
             }
 
-            //rtFeedInDB = rs.isBeforeFirst();
             rs.close();
             stmt.close();
             con.commit();
@@ -430,21 +394,25 @@ public class GTFSDB {
     }
 
     public static GtfsRtFeedModel getGtfsRtFeed(GtfsRtFeedModel gtfsRtFeed) {
+
+        System.out.println(gtfsRtFeed);
+
         Datasource ds = Datasource.getInstance();
         Connection con = ds.getConnection();
         PreparedStatement stmt;
         try {
             con.setAutoCommit(false);
 
-            String sql = "SELECT * FROM GtfsRtFeed WHERE feedURL=?;";
+            String sql = "SELECT * FROM GtfsRtFeed WHERE feedURL=? AND gtfsFeedID = ?;";
             stmt = con.prepareStatement(sql);
 
             //stmt.setInt(1, gtfsRtFeed.getGtfsId());
             stmt.setString(1, gtfsRtFeed.getGtfsUrl());
+            stmt.setInt(2, gtfsRtFeed.getGtfsId());
 
             ResultSet rs = stmt.executeQuery();
 
-            //If record alerady exists, return that item
+            //If record already exists, return that item
             if (rs.isBeforeFirst()) {
                 GtfsRtFeedModel gtfsFeed = new GtfsRtFeedModel();
                 if (rs.next()) {
@@ -1021,8 +989,6 @@ public class GTFSDB {
     //region VIEW errorCount
     //Read
     public static synchronized List<ViewErrorCountModel> getErrors(int feedId, int limit) {
-        System.out.println(feedId);
-
         List<ViewErrorCountModel> errorList = new ArrayList<>();
 
         Datasource ds = Datasource.getInstance();

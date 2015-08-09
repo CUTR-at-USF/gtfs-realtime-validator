@@ -32,7 +32,7 @@ for (var gtfsFeed in gtfsFeeds) {
             success: function(data) {
                 initializeInterface(data);
                 refresh(data["gtfsRtId"]);
-                setInterval(function() { refresh(data["gtfsRtId"]) }, 3000);
+                setInterval(function() { refresh(data["gtfsRtId"]) }, 10000);
             }
         });
     }

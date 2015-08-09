@@ -59,4 +59,14 @@ public class GtfsRtFeedModel {
     public void setGtfsRtId(int gtfsRtId) {
         this.gtfsRtId = gtfsRtId;
     }
+
+    @Override
+    public String toString() {
+        return "GtfsRtFeedModel{" +
+                "gtfsUrl='" + gtfsUrl + '\'' +
+                ", gtfsId=" + gtfsId +
+                ", startTime=" + startTime +
+                ", gtfsRtId=" + gtfsRtId +
+                '}';
+    }
 }

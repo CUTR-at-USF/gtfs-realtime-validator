@@ -20,13 +20,16 @@ package edu.usf.cutr.gtfsrtvalidator.background;
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedIterationModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsRtFeedModel;
+import edu.usf.cutr.gtfsrtvalidator.api.resource.GtfsFeed;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.helper.DBHelper;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
+import edu.usf.cutr.gtfsrtvalidator.validation.EntityGtfsFeedValidation;
 import edu.usf.cutr.gtfsrtvalidator.validation.EntityValidation;
 import edu.usf.cutr.gtfsrtvalidator.validation.HeaderValidation;
 import org.apache.commons.io.IOUtils;
+import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -51,6 +54,15 @@ public class BackgroundTask implements Runnable {
 
     @Override
     public void run() {
+
+        GtfsDaoImpl gtfsData = GtfsFeed.GtfsDaoMap.get(currentFeed.getGtfsId());
+
+//        System.out.println(gtfsData.getAllRoutes().size());
+
+//        for (Route route : gtfsData.getAllRoutes()) {
+//            System.out.println("route: " + route.getLongName());
+//        }
+
         URL gtfsRtFeedUrl = null;
 
         try {
@@ -103,7 +115,11 @@ public class BackgroundTask implements Runnable {
         EntityValidation entityValidation = new EntityValidation();
         entityValidation.validate(entityList);
 
-        System.out.println("Entities in current feed:\t" + entityList.size());
+
+        System.out.println("Starttt");
+        EntityGtfsFeedValidation.checkTripIds(gtfsData, entityList);
+
+        //System.out.println("Entities in current feed:\t" + entityList.size());
 
         //Save all entities under the gtfs-rt ID
         int gtfsId = currentFeed.getGtfsId();
@@ -135,14 +151,16 @@ public class BackgroundTask implements Runnable {
 
             //Run checks that compare entities of same GTFS-feed but from differed rt-feeds
 
-            if(currentFeedEntity.hasTripUpdate()){
+            if (currentFeedEntity.hasTripUpdate()) {
                 GtfsRealtime.TripUpdate tripUpdate = currentFeedEntity.getTripUpdate();
                 tripUpdates.add(tripUpdate);
-            }if(currentFeedEntity.hasVehicle()){
+            }
+            if (currentFeedEntity.hasVehicle()) {
                 GtfsRealtime.VehiclePosition vehicle = currentFeedEntity.getVehicle();
                 vehiclePositions.add(vehicle);
 
-            }if(currentFeedEntity.hasAlert()){
+            }
+            if (currentFeedEntity.hasAlert()) {
                 GtfsRealtime.Alert alert = currentFeedEntity.getAlert();
                 alerts.add(alert);
             }
@@ -152,7 +170,7 @@ public class BackgroundTask implements Runnable {
         // should match between the two feeds.
 
         //Should be optimized since this would be costly with a higher number of feeds
-        if(!tripUpdates.isEmpty() && !vehiclePositions.isEmpty()) {
+        if (!tripUpdates.isEmpty() && !vehiclePositions.isEmpty()) {
             for (GtfsRealtime.TripUpdate trip : tripUpdates) {
                 boolean matchingTrips = false;
                 for (GtfsRealtime.VehiclePosition vehiclePosition : vehiclePositions) {
@@ -160,7 +178,7 @@ public class BackgroundTask implements Runnable {
                     if (Objects.equals(trip.getTrip().getTripId(), vehiclePosition.getTrip().getTripId())) {
                         matchingTrips = true;
                         break;
-                    }else if (Objects.equals(trip.getVehicle().getId(), vehiclePosition.getVehicle().getId())) {
+                    } else if (Objects.equals(trip.getVehicle().getId(), vehiclePosition.getVehicle().getId())) {
                         matchingTrips = true;
                         break;
                     }
@@ -177,7 +195,7 @@ public class BackgroundTask implements Runnable {
                     if (Objects.equals(trip.getTrip().getTripId(), vehiclePosition.getTrip().getTripId())) {
                         matchingTrips = true;
                         break;
-                    }else if (Objects.equals(trip.getVehicle().getId(), vehiclePosition.getVehicle().getId())) {
+                    } else if (Objects.equals(trip.getVehicle().getId(), vehiclePosition.getVehicle().getId())) {
                         matchingTrips = true;
                         break;
                     }

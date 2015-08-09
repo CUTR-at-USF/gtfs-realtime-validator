@@ -103,7 +103,7 @@ function monitorGtfsRtFeeds(gtfsrtUrlList, gtfsFeedId) {
                 }
             }
 
-            var jsonData = {"gtfsUrl":url,"gtfsFeedId":index};
+            var jsonData = {"gtfsUrl":url,"gtfsId":gtfsFeedId};
 
             $.ajax({
                 type: "POST",

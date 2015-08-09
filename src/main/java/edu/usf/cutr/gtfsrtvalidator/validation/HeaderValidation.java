@@ -58,7 +58,7 @@ public class HeaderValidation {
 
         //e001: Check if the timestamp is in POSIX format
         if (isPosix(timestamp)) {
-            System.out.println("Valid timestamp");
+            //System.out.println("Valid timestamp");
         } else {
             System.out.println("Timestamp not in Unix format timestamp");
             //TODO: add record to database
