@@ -33,6 +33,7 @@ import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,87 +55,54 @@ public class BackgroundTask implements Runnable {
 
     @Override
     public void run() {
+        GtfsRealtime.FeedMessage feedMessage;
+        GtfsFeedIterationModel feedIteration;
 
+        //Get the GTFS feed from the GtfsDaoMap using the gtfsFeedId of the current feed.
         GtfsDaoImpl gtfsData = GtfsFeed.GtfsDaoMap.get(currentFeed.getGtfsId());
 
-//        System.out.println(gtfsData.getAllRoutes().size());
-
-//        for (Route route : gtfsData.getAllRoutes()) {
-//            System.out.println("route: " + route.getLongName());
-//        }
-
-        URL gtfsRtFeedUrl = null;
-
+        URL gtfsRtFeedUrl;
         try {
             gtfsRtFeedUrl = new URL(currentFeed.getGtfsUrl());
-        } catch (Exception e) {
+        } catch (MalformedURLException e) {
             System.out.println("Malformed Url");
             e.printStackTrace();
+            return;
         }
-
-        GtfsRealtime.FeedMessage feedMessage = null;
-        byte[] gtfsRtProtobuf = null;
 
         try {
-            assert gtfsRtFeedUrl != null;
+            //Get the GTFS-RT feedMessage for this method
             InputStream in = gtfsRtFeedUrl.openStream();
-            gtfsRtProtobuf = IOUtils.toByteArray(in);
+            byte[] gtfsRtProtobuf = IOUtils.toByteArray(in);
             InputStream is = new ByteArrayInputStream(gtfsRtProtobuf);
             feedMessage = GtfsRealtime.FeedMessage.parseFrom(is);
+
+            //Create new feedIteration object and save the iteration to the database
+            feedIteration = new GtfsFeedIterationModel(TimeStampHelper.getCurrentTimestamp(), gtfsRtProtobuf, currentFeed.getGtfsRtId());
+            int iterationId = GTFSDB.createRtFeedInfo(feedIteration);
+            feedIteration.setIterationId(iterationId);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println("The URL: " + gtfsRtFeedUrl + " does not contain valid Gtfs-Rt data");
             e.printStackTrace();
+            return;
         }
-
-        GtfsFeedIterationModel feedIteration = new GtfsFeedIterationModel();
-        feedIteration.setFeedprotobuf(gtfsRtProtobuf);
-        feedIteration.setTimeStamp(TimeStampHelper.getCurrentTimestamp());
-        feedIteration.setRtFeedId(currentFeed.getGtfsRtId());
-
-        //Return id from feed iteration
-        int iterationId = GTFSDB.createRtFeedInfo(feedIteration);
-
-
-        //get the header of the feed
-        assert feedMessage != null;
-        GtfsRealtime.FeedHeader header = feedMessage.getHeader();
-
-        //Validation rules for all headers
-        ErrorListHelperModel headerErrors = HeaderValidation.validate(header);
-        if (headerErrors != null) {
-            //Use returned id to save errors to database
-            headerErrors.getErrorMessage().setIterationId(iterationId);
-
-            //Save the captured errors to the database
-            DBHelper.saveError(headerErrors);
-        }
-
-        List<GtfsRealtime.FeedEntity> entityList = feedMessage.getEntityList();
-
-        //Validation rules for entity
-        EntityValidation entityValidation = new EntityValidation();
-        entityValidation.validate(entityList);
-
-
-        System.out.println("Starttt");
-        EntityGtfsFeedValidation.checkTripIds(gtfsData, entityList);
-
-        //System.out.println("Entities in current feed:\t" + entityList.size());
 
         //Save all entities under the gtfs-rt ID
-        int gtfsId = currentFeed.getGtfsId();
-        if (feedEntityList.containsKey(gtfsId)) {
+        List<GtfsRealtime.FeedEntity> currentFeedEntityList = feedMessage.getEntityList();
+
+        if (feedEntityList.containsKey(currentFeed.getGtfsId())) {
             List<TimeFeedEntity> currentEntityList = feedEntityList.get(currentFeed.getGtfsId());
+
             //Add entities to existing list
-            List<TimeFeedEntity> timeFeedEntityList = getTimeFeedEntities(entityList);
+            List<TimeFeedEntity> timeFeedEntityList = getTimeFeedEntities(currentFeedEntityList);
             currentEntityList.addAll(timeFeedEntityList);
 
-            //Clean the entities to a given timestamp
+            //Remove items that are older than a given timestamp
             List<TimeFeedEntity> cleanedList = cleanList(currentEntityList);
             feedEntityList.put(currentFeed.getGtfsId(), cleanedList);
 
         } else {
-            List<TimeFeedEntity> timeFeedEntityList = getTimeFeedEntities(entityList);
+            List<TimeFeedEntity> timeFeedEntityList = getTimeFeedEntities(currentFeedEntityList);
 
             //Create list and add entities
             feedEntityList.put(currentFeed.getGtfsId(), timeFeedEntityList);
@@ -145,11 +113,9 @@ public class BackgroundTask implements Runnable {
         List<GtfsRealtime.Alert> alerts = new ArrayList<>();
         List<GtfsRealtime.VehiclePosition> vehiclePositions = new ArrayList<>();
 
-        //Loop through all the entities in the feeds check for associating errors
+        //Take all entities for the GTFS feed and put the entities to correct ArrayList
         for (TimeFeedEntity entity : feedEntityList.get(currentFeed.getGtfsId())) {
             GtfsRealtime.FeedEntity currentFeedEntity = entity.getEntity();
-
-            //Run checks that compare entities of same GTFS-feed but from differed rt-feeds
 
             if (currentFeedEntity.hasTripUpdate()) {
                 GtfsRealtime.TripUpdate tripUpdate = currentFeedEntity.getTripUpdate();
@@ -166,6 +132,33 @@ public class BackgroundTask implements Runnable {
             }
         }
 
+        //region Rules for header errors
+        //get the header of the feed
+        GtfsRealtime.FeedHeader header = feedMessage.getHeader();
+
+        //Validation rules for all headers
+        ErrorListHelperModel headerErrors = HeaderValidation.validate(header);
+        if (headerErrors != null) {
+            //Use returned id to save errors to database
+            headerErrors.getErrorMessage().setIterationId(feedIteration.getIterationId());
+
+            //Save the captured errors to the database
+            DBHelper.saveError(headerErrors);
+        }
+        //endregion
+
+        //region Rules for all errors in the current feed
+        //---------------------------------------------------------------------------------------
+        //Validation rules for entity
+        EntityValidation entityValidation = new EntityValidation();
+        entityValidation.validate(currentFeedEntityList);
+
+        EntityGtfsFeedValidation.checkTripIds(gtfsData, currentFeedEntityList);
+        //---------------------------------------------------------------------------------------
+        //endregion
+
+        //region Rules for all errors in all feeds
+        //---------------------------------------------------------------------------------------
         //w003: If both vehicle positions and trip updates are provided, VehicleDescriptor or TripDescriptor values
         // should match between the two feeds.
 
@@ -205,19 +198,11 @@ public class BackgroundTask implements Runnable {
                 }
             }
         }
-
+        //---------------------------------------------------------------------------------------
+        //endregion
 
     }
 
-    private List<TimeFeedEntity> getTimeFeedEntities(List<GtfsRealtime.FeedEntity> entityList) {
-        long timestamp = TimeStampHelper.getCurrentTimestamp();
-        List<TimeFeedEntity> timeFeedEntityList = new ArrayList<>();
-        for (GtfsRealtime.FeedEntity entity : entityList) {
-            TimeFeedEntity timeEntity = new TimeFeedEntity(entity, timestamp);
-            timeFeedEntityList.add(timeEntity);
-        }
-        return timeFeedEntityList;
-    }
 
     //Check the timestamp differences to avoid comparing older entities
     private List<TimeFeedEntity> cleanList(List<TimeFeedEntity> currentEntityList) {
@@ -258,4 +243,13 @@ public class BackgroundTask implements Runnable {
         }
     }
 
+    private List<TimeFeedEntity> getTimeFeedEntities(List<GtfsRealtime.FeedEntity> entityList) {
+        long timestamp = TimeStampHelper.getCurrentTimestamp();
+        List<TimeFeedEntity> timeFeedEntityList = new ArrayList<>();
+        for (GtfsRealtime.FeedEntity entity : entityList) {
+            TimeFeedEntity timeEntity = new TimeFeedEntity(entity, timestamp);
+            timeFeedEntityList.add(timeEntity);
+        }
+        return timeFeedEntityList;
+    }
 }
