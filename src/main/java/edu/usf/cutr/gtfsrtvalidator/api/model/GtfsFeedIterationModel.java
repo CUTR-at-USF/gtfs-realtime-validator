@@ -17,13 +17,18 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.model;
 
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.transit.realtime.GtfsRealtime;
-
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class GtfsFeedIterationModel {
+    public GtfsFeedIterationModel(long timeStamp, byte[] feedprotobuf, int rtFeedId) {
+        this.timeStamp = timeStamp;
+        Feedprotobuf = feedprotobuf;
+        this.rtFeedId = rtFeedId;
+    }
+
+    public GtfsFeedIterationModel(){};
+
     public static String ITERATIONID = "IterationId";
     public static String ITERATIONTIMESTAMP = "IterationTimestamp";
     public static String FEEDPROTOBUF = "feedProtobuf";
@@ -60,17 +65,6 @@ public class GtfsFeedIterationModel {
 
     public byte[] getFeedprotobuf() {
         return Feedprotobuf;
-    }
-
-    public String getFeedprotobufString() {
-        String s = "";
-        try {
-            GtfsRealtime.FeedMessage feedMessage = GtfsRealtime.FeedMessage.parseFrom(Feedprotobuf);
-            s = feedMessage.toString();
-        } catch (InvalidProtocolBufferException e) {
-            e.printStackTrace();
-        }
-        return s;
     }
 
     public void setFeedprotobuf(byte[] feedprotobuf) {
