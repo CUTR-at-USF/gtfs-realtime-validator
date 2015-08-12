@@ -21,6 +21,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class MessageLogModel {
+
+    public MessageLogModel(){};
+
+    public MessageLogModel(String errorId) {
+        this.errorId = errorId;
+    }
+
     public static final String MESSAGE_ID = "messageId";
     public static final String ITERATION_ID = "itterationID";
     public static final String ERROR_ID = "errorId";

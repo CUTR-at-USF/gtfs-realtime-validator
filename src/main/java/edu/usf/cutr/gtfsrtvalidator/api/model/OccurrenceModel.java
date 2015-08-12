@@ -21,6 +21,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class OccurrenceModel {
+    public OccurrenceModel(String elementPath, String elementValue) {
+        this.elementPath = elementPath;
+        this.elementValue = elementValue;
+    }
+
+    public OccurrenceModel() {
+    }
 
     public static final String OCCURRENCE_ID = "occurrenceId";
     public static final String MESSAGE_ID = "messageId";

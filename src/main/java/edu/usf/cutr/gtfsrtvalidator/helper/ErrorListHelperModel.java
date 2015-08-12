@@ -26,6 +26,13 @@ public class ErrorListHelperModel {
     private MessageLogModel errorMessage;
     private List<OccurrenceModel> occurrenceList;
 
+    public ErrorListHelperModel(){}
+
+    public ErrorListHelperModel(MessageLogModel errorMessage, List<OccurrenceModel> occurrenceList) {
+        this.errorMessage = errorMessage;
+        this.occurrenceList = occurrenceList;
+    }
+
     public MessageLogModel getErrorMessage() {
         return errorMessage;
     }

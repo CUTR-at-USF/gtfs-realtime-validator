@@ -56,11 +56,17 @@ public class BackgroundTask implements Runnable {
     @Override
     public void run() {
         GtfsRealtime.FeedMessage feedMessage;
+        GtfsRealtime.FeedHeader feedHeader;
+        List<GtfsRealtime.FeedEntity> currentFeedEntityList;
+        GtfsDaoImpl gtfsData;
+
+        //Holds data needed in the database under each iteration
         GtfsFeedIterationModel feedIteration;
 
         //Get the GTFS feed from the GtfsDaoMap using the gtfsFeedId of the current feed.
-        GtfsDaoImpl gtfsData = GtfsFeed.GtfsDaoMap.get(currentFeed.getGtfsId());
+        gtfsData = GtfsFeed.GtfsDaoMap.get(currentFeed.getGtfsId());
 
+        //Parse the URL from the string provided
         URL gtfsRtFeedUrl;
         try {
             gtfsRtFeedUrl = new URL(currentFeed.getGtfsUrl());
@@ -87,8 +93,11 @@ public class BackgroundTask implements Runnable {
             return;
         }
 
+        //get the header of the feed
+        feedHeader = feedMessage.getHeader();
+
         //Save all entities under the gtfs-rt ID
-        List<GtfsRealtime.FeedEntity> currentFeedEntityList = feedMessage.getEntityList();
+        currentFeedEntityList = feedMessage.getEntityList();
 
         if (feedEntityList.containsKey(currentFeed.getGtfsId())) {
             List<TimeFeedEntity> currentEntityList = feedEntityList.get(currentFeed.getGtfsId());
@@ -133,15 +142,11 @@ public class BackgroundTask implements Runnable {
         }
 
         //region Rules for header errors
-        //get the header of the feed
-        GtfsRealtime.FeedHeader header = feedMessage.getHeader();
 
         //Validation rules for all headers
-        ErrorListHelperModel headerErrors = HeaderValidation.validate(header);
+        HeaderValidation validateHeaders = new HeaderValidation();
+        ErrorListHelperModel headerErrors = validateHeaders.validate(feedIteration.getIterationId(), gtfsData, feedHeader, currentFeedEntityList);
         if (headerErrors != null) {
-            //Use returned id to save errors to database
-            headerErrors.getErrorMessage().setIterationId(feedIteration.getIterationId());
-
             //Save the captured errors to the database
             DBHelper.saveError(headerErrors);
         }

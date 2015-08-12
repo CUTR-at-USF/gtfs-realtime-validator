@@ -21,6 +21,8 @@ import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
+import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedValidator;
+import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -28,32 +30,26 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class HeaderValidation {
+public class HeaderValidation implements FeedValidator{
 
     public static final String START_DATE = "2012/01/01";
 
-    public static ErrorListHelperModel validate(GtfsRealtime.FeedHeader header) {
+    @Override
+    public ErrorListHelperModel validate(int feedIteration, GtfsDaoImpl gtfsData, GtfsRealtime.FeedHeader header, List<GtfsRealtime.FeedEntity> entities) {
         long timestamp = header.getTimestamp();
 
         //w001: Check if timestamp is populated
         if (timestamp == 0) {
             System.out.println("Timestamp not present");
-            
-            ErrorListHelperModel errorMessage = new ErrorListHelperModel();
 
-            MessageLogModel messageLogModel = new MessageLogModel();
-            messageLogModel.setErrorId("w001");
+            MessageLogModel messageLogModel = new MessageLogModel("w001");
 
             List<OccurrenceModel> errorOccurrenceList = new ArrayList<>();
-            OccurrenceModel errorOccurrence = new OccurrenceModel();
-            errorOccurrence.setElementPath("$.header.timestamp");
-            errorOccurrence.setElementValue(String.valueOf(timestamp));
+            OccurrenceModel errorOccurrence = new OccurrenceModel("$.header.timestamp", String.valueOf(timestamp));
             errorOccurrenceList.add(errorOccurrence);
 
-            errorMessage.setErrorMessage(messageLogModel);
-            errorMessage.setOccurrenceList(errorOccurrenceList);
-
-            return errorMessage; //the method returns as checking the POSIX isn't needed if there is no timestamp
+            //the method returns as checking the POSIX isn't needed if there is no timestamp
+            return new ErrorListHelperModel(messageLogModel, errorOccurrenceList);
         }
 
         //e001: Check if the timestamp is in POSIX format
@@ -61,7 +57,15 @@ public class HeaderValidation {
             //System.out.println("Valid timestamp");
         } else {
             System.out.println("Timestamp not in Unix format timestamp");
-            //TODO: add record to database
+
+            MessageLogModel messageLogModel = new MessageLogModel("e001");
+
+            List<OccurrenceModel> errorOccurrenceList = new ArrayList<>();
+            OccurrenceModel errorOccurrence = new OccurrenceModel("$.header.timestamp", String.valueOf(timestamp));
+            errorOccurrenceList.add(errorOccurrence);
+
+            //the method returns as checking the POSIX isn't needed if there is no timestamp
+            return new ErrorListHelperModel(messageLogModel, errorOccurrenceList);
         }
 
         return null;
