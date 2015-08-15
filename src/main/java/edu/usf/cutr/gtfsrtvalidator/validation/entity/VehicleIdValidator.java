@@ -21,6 +21,7 @@ import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
+import edu.usf.cutr.gtfsrtvalidator.helper.ValidationRules;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 
@@ -35,13 +36,12 @@ import java.util.List;
 
 public class VehicleIdValidator implements FeedEntityValidator {
 
-
     @Override
     public ErrorListHelperModel validate(GtfsDaoImpl gtfsData, List<GtfsRealtime.FeedEntity> entityList) {
         int entityId = 0;
 
-        //TODO: remove magic strings w002
-        MessageLogModel messageLogModel = new MessageLogModel("w002");
+        MessageLogModel messageLogModel = new MessageLogModel(ValidationRules.W002.getErrorId());
+
         List<OccurrenceModel> errorOccurrenceList = new ArrayList<>();
         for (GtfsRealtime.FeedEntity entity : entityList) {
             if (entity.hasTripUpdate()) {
@@ -49,12 +49,9 @@ public class VehicleIdValidator implements FeedEntityValidator {
                 GtfsRealtime.TripUpdate tripUpdate = entity.getTripUpdate();
                 //w002: vehicle_id should be populated in trip_update
                 if (tripUpdate.getVehicle().getId() == null) {
-
-
                     OccurrenceModel errorOccurrence = new OccurrenceModel("$.entity["+ entityId +"].trip_update", null);
                     errorOccurrenceList.add(errorOccurrence);
-                    //TODO: use description remove magic string
-                    System.out.println("Vehicle id not present");
+                    System.out.println(ValidationRules.W002.getErrorDescription());
                 }
             }
             entityId++;

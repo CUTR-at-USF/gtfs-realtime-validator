@@ -22,6 +22,7 @@ import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
+import edu.usf.cutr.gtfsrtvalidator.helper.ValidationRules;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 
@@ -36,7 +37,7 @@ public class StopTimeSequanceValidator implements FeedEntityValidator {
     @Override
     public ErrorListHelperModel validate(GtfsDaoImpl gtfsDao, List<GtfsRealtime.FeedEntity> entities) {
 
-        MessageLogModel messageLogModel = new MessageLogModel("e002");
+        MessageLogModel messageLogModel = new MessageLogModel(ValidationRules.E002.getErrorId());
         List<OccurrenceModel> errorOccurrenceList = new ArrayList<>();
 
         List<GtfsRealtime.FeedEntity> tripUpdateList = new ArrayList<>();
