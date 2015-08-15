@@ -17,8 +17,11 @@
 
 package edu.usf.cutr.gtfsrtvalidator.validation;
 
-import com.google.common.collect.Ordering;
 import com.google.transit.realtime.GtfsRealtime;
+import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
+import edu.usf.cutr.gtfsrtvalidator.validation.entity.VehicleIdValidator;
+import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
+import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,40 +30,17 @@ public class EntityValidation {
 
     List<GtfsRealtime.FeedEntity> tripUpdateList = new ArrayList<>();
 
-    public void validate(List<GtfsRealtime.FeedEntity> entityList) {
+    public List<ErrorListHelperModel> validateFeedEntities(GtfsDaoImpl gtfsFeed, List<GtfsRealtime.FeedEntity> entityList) {
+        List<ErrorListHelperModel> messageList = new ArrayList<>();
 
-        for (GtfsRealtime.FeedEntity entity : entityList) {
-            if (entity.hasTripUpdate()) {
+        //TODO: validateFeedEntities all rules
+        FeedEntityValidator vehicleIdValidator = new VehicleIdValidator();
 
-                tripUpdateList.add(entity);
+        //TODO: for each validator get messegelist and save to database
+        messageList.add(vehicleIdValidator.validate(gtfsFeed, entityList));
 
-                GtfsRealtime.TripUpdate tripUpdate = entity.getTripUpdate();
-                //w002: vehicle_id should be populated in trip_update
-                if (tripUpdate.getVehicle().getId() == null) {
-                    System.out.println("Vehicle id not present");
-                    return;
-                }
-            }
-        }
 
-        for (GtfsRealtime.FeedEntity tripUpdateEntity : tripUpdateList) {
-            List<GtfsRealtime.TripUpdate.StopTimeUpdate> stopTimeUpdateList = tripUpdateEntity.getTripUpdate().getStopTimeUpdateList();
 
-            //e02 stop_time_updates for a given trip_id must be sorted by increasing stop_sequence
-            List<Integer> stopSequanceList = new ArrayList<>();
-            for (GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate : stopTimeUpdateList) {
-                stopTimeUpdate.getStopSequence();
-                stopSequanceList.add(stopTimeUpdate.getStopSequence());
-            }
-
-            boolean sorted = Ordering.natural().isOrdered(stopSequanceList);
-            if (sorted) {
-                //System.out.println("StopSequenceList is in order");
-            }else {
-                //System.out.println("StopSequenceList is not in order");
-            }
-        }
-
-        System.out.println(tripUpdateList.size());
+        return messageList;
     }
 }

@@ -199,8 +199,8 @@ public class GtfsFeed {
             //Store GtfsDaoImpl to Map
             GtfsDaoMap.put(gtfsModel.getFeedId(), store);
 
-            //GtfsDaoImpl store use the Hibernate database instead
-            //GTFSHibernate.readToDatastore(saveFilePath);
+            //TODO: Run all GTFS related tests
+            //TODO: Save errors to Database
         }
 
         return gtfsModel;

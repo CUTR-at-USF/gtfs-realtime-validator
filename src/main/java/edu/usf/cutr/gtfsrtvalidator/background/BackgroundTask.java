@@ -156,7 +156,7 @@ public class BackgroundTask implements Runnable {
         //---------------------------------------------------------------------------------------
         //Validation rules for entity
         EntityValidation entityValidation = new EntityValidation();
-        entityValidation.validate(currentFeedEntityList);
+        entityValidation.validateFeedEntities(gtfsData, currentFeedEntityList);
 
         EntityGtfsFeedValidation.checkTripIds(gtfsData, currentFeedEntityList);
         //---------------------------------------------------------------------------------------
