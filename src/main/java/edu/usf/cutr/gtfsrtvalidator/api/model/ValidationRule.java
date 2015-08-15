@@ -20,7 +20,7 @@ package edu.usf.cutr.gtfsrtvalidator.api.model;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class ErrorModel {
+public class ValidationRule {
 
     public static final String ERROR_ID = "errorId";
     public static final String ERROR_DESCRIPTION = "errorDescription";
@@ -28,9 +28,9 @@ public class ErrorModel {
     private String errorId;
     private String errorDescription;
 
-    public ErrorModel() {}
+    public ValidationRule() {}
 
-    public ErrorModel(String errorId, String errorDescription) {
+    public ValidationRule(String errorId, String errorDescription) {
         this.setErrorId(errorId);
         this.setErrorDescription(errorDescription);
     }

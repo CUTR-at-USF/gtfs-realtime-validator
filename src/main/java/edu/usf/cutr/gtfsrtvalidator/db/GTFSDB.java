@@ -19,13 +19,15 @@ package edu.usf.cutr.gtfsrtvalidator.db;
 
 import edu.usf.cutr.gtfsrtvalidator.api.model.*;
 import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
+import edu.usf.cutr.gtfsrtvalidator.helper.ValidationRules;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GTFSDB {
 
@@ -57,32 +59,38 @@ public class GTFSDB {
             System.exit(0);
         }
 
-        BufferedReader br = null;
-        String line = "";
-        String cvsSplitBy = ";";
+        //Use reflection to get the list of rules from the ValidataionRules class
+        Field[] fields = ValidationRules.class.getDeclaredFields();
+
+        List<ValidationRule> rulesInClass = new ArrayList<>();
+        for (Field field : fields) {
+            if (Modifier.isStatic(field.getModifiers())) {
+                Class classType = field.getType();
+                if (classType == ValidationRule.class) {
+                    ValidationRule rule = new ValidationRule();
+                    try {
+                        Object value = field.get(rule);
+                        rule = (ValidationRule)value;
+                        System.out.println(rule.getErrorDescription());
+                        rulesInClass.add(rule);
+                    } catch (IllegalAccessException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+        }
+
+        GTFSDB.deleteAllRules();
 
         try {
-            List<ErrorModel> allErrors = getAllErrors();
-            List<String> existingErrors = new ArrayList<>();
-
-            for (ErrorModel error : allErrors) {
-                existingErrors.add(error.getErrorId());
-            }
-
-            br = new BufferedReader(new FileReader(ruleCsvPath));
-            while ((line = br.readLine()) != null) {
-                line = line.replaceAll("\"", "");
-                String[] rule = line.split(cvsSplitBy);
-                ErrorModel error = new ErrorModel(rule[0], rule[1]);
-                if (!existingErrors.contains(rule[0])) {
-                    GTFSDB.createError(error);
-                }
+            for (ValidationRule rule : rulesInClass) {
+                GTFSDB.createError(rule);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
         }
 
-        System.out.println("Table created successfully");
+        System.out.println("Table initialized successfully");
     }
 
     //region CURD: Gtfs-Feed
@@ -872,7 +880,7 @@ public class GTFSDB {
 
     //region CURD: Error
     //create
-    private static void createError(ErrorModel error) {
+    private static void createError(ValidationRule error) {
         Datasource ds = Datasource.getInstance();
         Connection con = ds.getConnection();
 
@@ -903,8 +911,8 @@ public class GTFSDB {
     }
 
     //Read
-    public static synchronized List<ErrorModel> getAllErrors() {
-        List<ErrorModel> errorList = new ArrayList<>();
+    public static synchronized List<ValidationRule> getAllErrors() {
+        List<ValidationRule> errorList = new ArrayList<>();
 
         Datasource ds = Datasource.getInstance();
         Connection con = ds.getConnection();
@@ -916,11 +924,11 @@ public class GTFSDB {
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                ErrorModel errorModel = new ErrorModel();
-                errorModel.setErrorId(rs.getString(ErrorModel.ERROR_ID));
-                errorModel.setErrorDescription(rs.getString(ErrorModel.ERROR_DESCRIPTION));
+                ValidationRule validationRule = new ValidationRule();
+                validationRule.setErrorId(rs.getString(ValidationRule.ERROR_ID));
+                validationRule.setErrorDescription(rs.getString(ValidationRule.ERROR_DESCRIPTION));
 
-                errorList.add(errorModel);
+                errorList.add(validationRule);
             }
 
             rs.close();
@@ -939,6 +947,34 @@ public class GTFSDB {
         }
 
         return errorList;
+    }
+
+    //Delete All
+    public static void deleteAllRules(){
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+
+        try {
+            PreparedStatement stmt;
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("DELETE FROM Error");
+
+            stmt.executeUpdate();
+
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     //endregion

@@ -19,35 +19,16 @@ package edu.usf.cutr.gtfsrtvalidator;
 
 import edu.usf.cutr.gtfsrtvalidator.db.Datasource;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
-import edu.usf.cutr.gtfsrtvalidator.helper.ValidationRule;
-import edu.usf.cutr.gtfsrtvalidator.helper.ValidationRules;
 import edu.usf.cutr.gtfsrtvalidator.servlets.GetFeedJSON;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-
 public class Main {
     static String BASE_RESOURCE = "./target/classes/webroot";
 
     public static void main(String[] args) throws Exception{
-
-        Field[] fields = ValidationRules.class.getDeclaredFields();
-
-        for (Field field : fields) {
-            if (Modifier.isStatic(field.getModifiers())) {
-                Class classType = field.getType();
-                if (classType == ValidationRule.class) {
-                    ValidationRule rule = new ValidationRule();
-                    Object value = field.get(rule);
-                    rule = (ValidationRule)value;
-                }
-            }
-        }
-
         GTFSDB.InitializeDB();
         Datasource ds = Datasource.getInstance();
         ds.getConnection();

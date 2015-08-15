@@ -16,6 +16,7 @@
  */
 
 package edu.usf.cutr.gtfsrtvalidator.helper;
+import edu.usf.cutr.gtfsrtvalidator.api.model.ValidationRule;
 
 public class ValidationRules {
     //region Warnings
