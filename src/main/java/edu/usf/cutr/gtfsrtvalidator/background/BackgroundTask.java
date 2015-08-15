@@ -25,7 +25,8 @@ import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.helper.DBHelper;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
-import edu.usf.cutr.gtfsrtvalidator.validation.EntityGtfsFeedValidation;
+import edu.usf.cutr.gtfsrtvalidator.validation.entity.CheckTripId;
+import edu.usf.cutr.gtfsrtvalidator.validation.entity.StopTimeSequanceValidator;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.VehicleIdValidator;
 import edu.usf.cutr.gtfsrtvalidator.validation.header.HeaderValidation;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
@@ -146,29 +147,23 @@ public class BackgroundTask implements Runnable {
 
         //Validation rules for all headers
         HeaderValidation validateHeaders = new HeaderValidation();
-        ErrorListHelperModel headerErrors = validateHeaders.validate(gtfsData, feedMessage);
-        headerErrors.getErrorMessage().setIterationId(feedIteration.getIterationId());
-        if (!headerErrors.getOccurrenceList().isEmpty()) {
-            //Save the captured errors to the database
-            DBHelper.saveError(headerErrors);
-        }
+        validateEntity(feedMessage, gtfsData, feedIteration, validateHeaders);
         //endregion
 
         //region Rules for all errors in the current feed
         //---------------------------------------------------------------------------------------
-        //Validation rules for entity
         FeedEntityValidator vehicleIdValidator = new VehicleIdValidator();
+        validateEntity(feedMessage, gtfsData, feedIteration, vehicleIdValidator);
 
-        ErrorListHelperModel errorList = vehicleIdValidator.validate(gtfsData, feedMessage);
-        errorList.getErrorMessage().setIterationId(feedIteration.getIterationId());
-        if (!errorList.getOccurrenceList().isEmpty()) {
-            //Save the captured errors to the database
-            DBHelper.saveError(headerErrors);
-        }
+        FeedEntityValidator stopTimeSequanceValidator = new StopTimeSequanceValidator();
+        validateEntity(feedMessage, gtfsData, feedIteration, stopTimeSequanceValidator);
+        //---------------------------------------------------------------------------------------
+        //endregion
 
-        //messageList.add(vehicleIdValidator.validate(gtfsFeed, entityList));
-
-        EntityGtfsFeedValidation.checkTripIds(gtfsData, currentFeedEntityList);
+        //region Rules for all errors in the current feed + GTFS feed
+        //---------------------------------------------------------------------------------------
+        FeedEntityValidator checkTripId = new CheckTripId();
+        validateEntity(feedMessage, gtfsData, feedIteration, checkTripId);
         //---------------------------------------------------------------------------------------
         //endregion
 
@@ -216,6 +211,15 @@ public class BackgroundTask implements Runnable {
         //---------------------------------------------------------------------------------------
         //endregion
 
+    }
+
+    private void validateEntity(GtfsRealtime.FeedMessage feedMessage, GtfsDaoImpl gtfsData, GtfsFeedIterationModel feedIteration, FeedEntityValidator vehicleIdValidator) {
+        ErrorListHelperModel errorList = vehicleIdValidator.validate(gtfsData, feedMessage);
+        errorList.getErrorMessage().setIterationId(feedIteration.getIterationId());
+        if (!errorList.getOccurrenceList().isEmpty()) {
+            //Save the captured errors to the database
+            DBHelper.saveError(errorList);
+        }
     }
 
     //Check the timestamp differences to avoid comparing older entities
