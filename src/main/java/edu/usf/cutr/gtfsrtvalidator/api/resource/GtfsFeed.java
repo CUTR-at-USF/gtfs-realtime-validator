@@ -23,7 +23,6 @@ import edu.usf.cutr.gtfsrtvalidator.helper.GetFile;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.onebusaway.gtfs.serialization.GtfsReader;
 
-import javax.servlet.ServletException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -32,8 +31,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -53,37 +52,45 @@ public class GtfsFeed {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public Response postGtfsFeed(@FormParam("gtfsurl") String feedUrl) {
+    public Response postGtfsFeed(@FormParam("gtfsurl") String gtfsFeedUrl) {
 
         GtfsFeedModel downloadedFeed;
-
-        try {
-            downloadedFeed = downloadFeed(feedUrl);
-        } catch (ServletException | IOException e) {
-            e.printStackTrace();
-            return Response.status(Response.Status.BAD_REQUEST).entity("Invalid GTFS-Feed URL").build();
-        }
+        downloadedFeed = downloadFeed(gtfsFeedUrl);
 
         //Return gtfs item on success
         return Response.ok(downloadedFeed).build();
     }
 
-    private GtfsFeedModel downloadFeed(String fileURL) throws ServletException, IOException {
+    private GtfsFeedModel downloadFeed(String gtfsFeedUrl) {
         GtfsFeedModel gtfsModel = null;
 
-        String path = GtfsFeed.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-        String decodedPath = URLDecoder.decode(path, "UTF-8");
         String saveFilePath;
+        URL url;
 
-        System.out.println(decodedPath);
+        try {
+            url = new URL(gtfsFeedUrl);
+        } catch (MalformedURLException ex) {
+            System.out.println("Invalid URL");
+            return null;
+        }
 
-        URL url = new URL(fileURL);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        boolean connectionSuccessful;
+        HttpURLConnection connection;
 
-        connection.connect();
-        System.out.println(connection.getResponseCode());
-        //Check if the request is handled successfully
-        if (connection.getResponseCode() / 100 == 2) {
+        try {
+            connection = (HttpURLConnection) url.openConnection();
+            connection.connect();
+            System.out.println(connection.getResponseCode());
+
+            //Check if the request is handled successfully
+            connectionSuccessful = connection.getResponseCode() / 100 == 2;
+        } catch (IOException ex) {
+            System.out.println("Can't read from URL");
+            return null;
+        }
+
+
+        if (connectionSuccessful) {
             //This gets you the size of the file to download (in bytes)
             System.out.println(connection.getContentLength());
             String fileName = "";
@@ -91,8 +98,8 @@ public class GtfsFeed {
 
             if (disposition == null) {
                 //Extracts file name from URL
-                fileName = fileURL.substring(fileURL.lastIndexOf("/") + 1,
-                        fileURL.length());
+                fileName = gtfsFeedUrl.substring(gtfsFeedUrl.lastIndexOf("/") + 1,
+                        gtfsFeedUrl.length());
             } else {
                 //Extracts file name from header field
                 int index = disposition.indexOf("filename=");
@@ -111,7 +118,7 @@ public class GtfsFeed {
             saveFilePath = saveDir + File.separator + fileName;
 
             GtfsFeedModel searchFeed = new GtfsFeedModel();
-            searchFeed.setGtfsUrl(fileURL);
+            searchFeed.setGtfsUrl(gtfsFeedUrl);
 
             GtfsFeedModel gtfsFeed = GTFSDB.readGtfsFeed(searchFeed);
 
@@ -128,22 +135,11 @@ public class GtfsFeed {
                     GTFSDB.deleteGtfsFeed(gtfsFeed.getFeedId());
                     System.out.println("DB entry deleted");
 
-                    InputStream inputStream = connection.getInputStream();
-                    FileOutputStream outputStream = new FileOutputStream(saveFilePath);
-
-                    int bytesRead;
-                    byte[] buffer = new byte[BUFFER_SIZE];
-                    while ((bytesRead = inputStream.read(buffer)) != -1) {
-                        outputStream.write(buffer, 0, bytesRead);
-                    }
-
-                    outputStream.close();
-                    inputStream.close();
-                    System.out.println("File downloaded to file system");
+                    downloadGtfsFeed(saveFilePath, connection);
 
                     gtfsFeed = new GtfsFeedModel();
                     gtfsFeed.setFeedLocation(saveFilePath);
-                    gtfsFeed.setGtfsUrl(fileURL);
+                    gtfsFeed.setGtfsUrl(gtfsFeedUrl);
 
                     //Create GTFS feed row in database
                     int feedId = GTFSDB.createGtfsFeed(gtfsFeed);
@@ -157,26 +153,12 @@ public class GtfsFeed {
 
             } else {
                 System.out.println("File Doesn't Exist");
+                downloadGtfsFeed(saveFilePath, connection);
 
-                // opens input stream from the HTTP connection
-                InputStream inputStream = connection.getInputStream();
-
-                // opens an output stream to save into file
-                FileOutputStream outputStream = new FileOutputStream(saveFilePath);
-
-                int bytesRead;
-                byte[] buffer = new byte[BUFFER_SIZE];
-                while ((bytesRead = inputStream.read(buffer)) != -1) {
-                    outputStream.write(buffer, 0, bytesRead);
-                }
-
-                outputStream.close();
-                inputStream.close();
-                System.out.println("File downloaded");
 
                 gtfsFeed = new GtfsFeedModel();
                 gtfsFeed.setFeedLocation(saveFilePath);
-                gtfsFeed.setGtfsUrl(fileURL);
+                gtfsFeed.setGtfsUrl(gtfsFeedUrl);
 
                 //Create GTFS feed row in database
                 GTFSDB.createGtfsFeed(gtfsFeed);
@@ -188,22 +170,47 @@ public class GtfsFeed {
 
             }
 
-            //Read GTFS data into a GtfsDaoImpl
-            GtfsReader reader = new GtfsReader();
-            reader.setInputLocation(new File(gtfsFeed.getFeedLocation()));
+            try {
+                //Read GTFS data into a GtfsDaoImpl
+                GtfsReader reader = new GtfsReader();
+                reader.setInputLocation(new File(gtfsFeed.getFeedLocation()));
 
-            GtfsDaoImpl store = new GtfsDaoImpl();
-            reader.setEntityStore(store);
-            reader.run();
+                GtfsDaoImpl store = new GtfsDaoImpl();
+                reader.setEntityStore(store);
+                reader.run();
 
-            //Store GtfsDaoImpl to Map
-            GtfsDaoMap.put(gtfsModel.getFeedId(), store);
+                //Store GtfsDaoImpl to Map
+                GtfsDaoMap.put(gtfsModel.getFeedId(), store);
 
-            //TODO: Run all GTFS related tests
-            //TODO: Save errors to Database
+                //TODO: Run all GTFS related tests
+                //TODO: Save errors to Database
+            } catch (Exception ex) {
+                System.out.println("Unable to read from downloaded GTFS feed");
+            }
         }
 
         return gtfsModel;
+    }
+
+    private void downloadGtfsFeed(String saveFilePath, HttpURLConnection connection) {
+        try {
+            // opens input stream from the HTTP connection
+            InputStream inputStream = connection.getInputStream();
+
+            // opens an output stream to save into file
+            FileOutputStream outputStream = new FileOutputStream(saveFilePath);
+
+            int bytesRead;
+            byte[] buffer = new byte[BUFFER_SIZE];
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+
+            outputStream.close();
+            inputStream.close();
+        } catch (IOException ex) {
+            System.out.println("Downloading GTFS Feed Failed");
+        }
     }
 
 }

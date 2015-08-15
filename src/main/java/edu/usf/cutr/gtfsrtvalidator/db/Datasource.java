@@ -22,7 +22,6 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.apache.log4j.Logger;
 
 import java.beans.PropertyVetoException;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -38,12 +37,16 @@ public class Datasource {
     private static Datasource datasource;
     private static Logger log = Logger.getLogger(Datasource.class);
 
-    private Datasource() throws IOException, SQLException, PropertyVetoException {
+    private Datasource() {
         // load datasource properties
         log.info("Reading datasource.properties from classpath");
 
         cpds = new ComboPooledDataSource();
-        cpds.setDriverClass("org.sqlite.JDBC");
+        try {
+            cpds.setDriverClass("org.sqlite.JDBC");
+        } catch (PropertyVetoException e) {
+            e.printStackTrace();
+        }
         cpds.setJdbcUrl("jdbc:sqlite:gtfsrt.db");
         cpds.setInitialPoolSize(10);
         cpds.setAcquireIncrement(10);
@@ -60,21 +63,21 @@ public class Datasource {
             testStatement = testConnection.createStatement();
             testStatement.executeQuery("select 1+1 from FEED_DETAILS");
         } catch (SQLException e) {
-            throw e;
+            e.printStackTrace();
         } finally {
-            testStatement.close();
-            testConnection.close();
+            try {
+                testStatement.close();
+                testConnection.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
     }
 
     public static Datasource getInstance() {
         if (datasource == null) {
-            try {
-                datasource = new Datasource();
-            } catch (IOException | SQLException | PropertyVetoException e) {
-                e.printStackTrace();
-            }
+            datasource = new Datasource();
             return datasource;
         } else {
             return datasource;

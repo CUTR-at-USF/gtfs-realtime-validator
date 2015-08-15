@@ -28,7 +28,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 public class Main {
     static String BASE_RESOURCE = "./target/classes/webroot";
 
-    public static void main(String[] args) throws Exception{
+    public static void main(String[] args){
         GTFSDB.InitializeDB();
         Datasource ds = Datasource.getInstance();
         ds.getConnection();
@@ -48,7 +48,12 @@ public class Main {
         jerseyServlet.setInitParameter("jersey.config.server.provider.classnames", "org.glassfish.jersey.moxy.json.MoxyJsonFeature");
         jerseyServlet.setInitParameter("jersey.config.server.provider.packages", "edu.usf.cutr.gtfsrtvalidator.api.resource");
 
-        server.start();
-        server.join();
+        try {
+            server.start();
+            server.join();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 }
