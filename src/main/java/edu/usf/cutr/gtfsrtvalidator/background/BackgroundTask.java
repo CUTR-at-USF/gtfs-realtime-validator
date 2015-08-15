@@ -26,8 +26,9 @@ import edu.usf.cutr.gtfsrtvalidator.helper.DBHelper;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
 import edu.usf.cutr.gtfsrtvalidator.validation.EntityGtfsFeedValidation;
-import edu.usf.cutr.gtfsrtvalidator.validation.EntityValidation;
-import edu.usf.cutr.gtfsrtvalidator.validation.HeaderValidation;
+import edu.usf.cutr.gtfsrtvalidator.validation.entity.VehicleIdValidator;
+import edu.usf.cutr.gtfsrtvalidator.validation.header.HeaderValidation;
+import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.apache.commons.io.IOUtils;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 
@@ -145,8 +146,9 @@ public class BackgroundTask implements Runnable {
 
         //Validation rules for all headers
         HeaderValidation validateHeaders = new HeaderValidation();
-        ErrorListHelperModel headerErrors = validateHeaders.validate(feedIteration.getIterationId(), gtfsData, feedHeader, currentFeedEntityList);
-        if (headerErrors != null) {
+        ErrorListHelperModel headerErrors = validateHeaders.validate(gtfsData, feedMessage);
+        headerErrors.getErrorMessage().setIterationId(feedIteration.getIterationId());
+        if (!headerErrors.getOccurrenceList().isEmpty()) {
             //Save the captured errors to the database
             DBHelper.saveError(headerErrors);
         }
@@ -155,8 +157,16 @@ public class BackgroundTask implements Runnable {
         //region Rules for all errors in the current feed
         //---------------------------------------------------------------------------------------
         //Validation rules for entity
-        EntityValidation entityValidation = new EntityValidation();
-        entityValidation.validateFeedEntities(gtfsData, currentFeedEntityList);
+        FeedEntityValidator vehicleIdValidator = new VehicleIdValidator();
+
+        ErrorListHelperModel errorList = vehicleIdValidator.validate(gtfsData, feedMessage);
+        errorList.getErrorMessage().setIterationId(feedIteration.getIterationId());
+        if (!errorList.getOccurrenceList().isEmpty()) {
+            //Save the captured errors to the database
+            DBHelper.saveError(headerErrors);
+        }
+
+        //messageList.add(vehicleIdValidator.validate(gtfsFeed, entityList));
 
         EntityGtfsFeedValidation.checkTripIds(gtfsData, currentFeedEntityList);
         //---------------------------------------------------------------------------------------
@@ -207,7 +217,6 @@ public class BackgroundTask implements Runnable {
         //endregion
 
     }
-
 
     //Check the timestamp differences to avoid comparing older entities
     private List<TimeFeedEntity> cleanList(List<TimeFeedEntity> currentEntityList) {

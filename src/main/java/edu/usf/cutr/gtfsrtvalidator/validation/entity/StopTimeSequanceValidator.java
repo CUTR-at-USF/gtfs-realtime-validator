@@ -35,14 +35,15 @@ import java.util.List;
  */
 public class StopTimeSequanceValidator implements FeedEntityValidator {
     @Override
-    public ErrorListHelperModel validate(GtfsDaoImpl gtfsDao, List<GtfsRealtime.FeedEntity> entities) {
+    public ErrorListHelperModel validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
+        List<GtfsRealtime.FeedEntity> entityList = feedMessage.getEntityList();
 
         MessageLogModel messageLogModel = new MessageLogModel(ValidationRules.E002.getErrorId());
         List<OccurrenceModel> errorOccurrenceList = new ArrayList<>();
 
         List<GtfsRealtime.FeedEntity> tripUpdateList = new ArrayList<>();
 
-        for (GtfsRealtime.FeedEntity entity : entities) {
+        for (GtfsRealtime.FeedEntity entity : entityList) {
             if (entity.hasTripUpdate()) {
                 tripUpdateList.add(entity);
             }

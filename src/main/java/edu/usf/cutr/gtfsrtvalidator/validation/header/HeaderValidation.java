@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-package edu.usf.cutr.gtfsrtvalidator.validation;
+package edu.usf.cutr.gtfsrtvalidator.validation.header;
 
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
-import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedValidator;
+import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 
 import java.text.ParseException;
@@ -30,13 +30,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class HeaderValidation implements FeedValidator{
+public class HeaderValidation implements FeedEntityValidator{
 
     public static final String START_DATE = "2012/01/01";
 
     @Override
-    public ErrorListHelperModel validate(int feedIteration, GtfsDaoImpl gtfsData, GtfsRealtime.FeedHeader header, List<GtfsRealtime.FeedEntity> entities) {
-        long timestamp = header.getTimestamp();
+    public ErrorListHelperModel validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
+        long timestamp = feedMessage.getHeader().getTimestamp();
 
         //w001: Check if timestamp is populated
         if (timestamp == 0) {

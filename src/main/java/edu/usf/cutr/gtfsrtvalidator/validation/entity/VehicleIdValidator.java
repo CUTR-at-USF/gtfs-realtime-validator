@@ -37,7 +37,8 @@ import java.util.List;
 public class VehicleIdValidator implements FeedEntityValidator {
 
     @Override
-    public ErrorListHelperModel validate(GtfsDaoImpl gtfsData, List<GtfsRealtime.FeedEntity> entityList) {
+    public ErrorListHelperModel validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
+        List<GtfsRealtime.FeedEntity> entityList = feedMessage.getEntityList();
         int entityId = 0;
 
         MessageLogModel messageLogModel = new MessageLogModel(ValidationRules.W002.getErrorId());
