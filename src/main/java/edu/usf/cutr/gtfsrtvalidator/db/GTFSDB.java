@@ -19,7 +19,7 @@ package edu.usf.cutr.gtfsrtvalidator.db;
 
 import edu.usf.cutr.gtfsrtvalidator.api.model.*;
 import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
-import edu.usf.cutr.gtfsrtvalidator.helper.ValidationRules;
+import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;

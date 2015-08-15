@@ -21,7 +21,7 @@ import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
-import edu.usf.cutr.gtfsrtvalidator.helper.ValidationRules;
+import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.onebusaway.gtfs.model.Trip;

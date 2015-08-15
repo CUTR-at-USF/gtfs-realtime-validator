@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package edu.usf.cutr.gtfsrtvalidator.helper;
+package edu.usf.cutr.gtfsrtvalidator.validation;
 import edu.usf.cutr.gtfsrtvalidator.api.model.ValidationRule;
 
 public class ValidationRules {
