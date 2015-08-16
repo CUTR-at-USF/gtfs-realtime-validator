@@ -61,7 +61,7 @@ public class Datasource {
         try {
             testConnection = cpds.getConnection();
             testStatement = testConnection.createStatement();
-            testStatement.executeQuery("select 1+1 from FEED_DETAILS");
+            testStatement.executeQuery("select 1+1 from GtfsFeed");
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {

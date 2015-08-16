@@ -916,6 +916,358 @@ public class GTFSDB {
     }
     //endregion
 
+    //region CURD: Gtfs Message Log
+    //Create
+    public static synchronized void createGtfsMessageLog(MessageLogModel messageLog) {
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+
+        try {
+            PreparedStatement stmt;
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("INSERT INTO GtfsMessageLog (errorID)VALUES (?)");
+            stmt.setString(1, messageLog.getErrorId());
+
+            stmt.executeUpdate();
+
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    //Update
+    public static synchronized void updateGtfsMessageLog(MessageLogModel messageLog) {
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+
+        try {
+            PreparedStatement stmt;
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("UPDATE GtfsMessageLog SET errorID = ?" +
+                    "WHERE messageID = ?");
+            stmt.setString(1, messageLog.getErrorId());
+            stmt.setInt(2, messageLog.getMessageId());
+
+            stmt.executeUpdate();
+
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    //Read
+    public static synchronized MessageLogModel getGtfsMessageLog(int messageId) {
+        MessageLogModel messageLogModel = new MessageLogModel();
+
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+        try {
+            PreparedStatement stmt;
+
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("SELECT * FROM GtfsMessageLog WHERE messageID = ?");
+            stmt.setInt(1, messageId);
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                messageLogModel.setErrorId(rs.getString(MessageLogModel.ERROR_ID));
+                messageLogModel.setMessageId(rs.getInt(MessageLogModel.MESSAGE_ID));
+            }
+
+            rs.close();
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return messageLogModel;
+    }
+
+    public static synchronized List<MessageLogModel> getGtfsMessageList() {
+        List<MessageLogModel> messageLogModelList = new ArrayList<>();
+
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+        try {
+            PreparedStatement stmt;
+            con.setAutoCommit(false);
+            stmt = con.prepareStatement("SELECT * FROM GtfsMessageLog");
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                MessageLogModel messageLogModel = new MessageLogModel();
+
+                messageLogModel.setErrorId(rs.getString(MessageLogModel.ERROR_ID));
+                messageLogModel.setMessageId(rs.getInt(MessageLogModel.MESSAGE_ID));
+
+                messageLogModelList.add(messageLogModel);
+            }
+
+            rs.close();
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return messageLogModelList;
+    }
+
+    //Delete
+    public static synchronized void deleteGtfsMessageLog(int messageId) {
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+
+        try {
+            PreparedStatement stmt;
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("DELETE FROM GtfsMessageLog WHERE messageID = ?");
+            stmt.setInt(1, messageId);
+
+            stmt.executeUpdate();
+
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    //endregion
+
+    //region CURD: Gtfs Occurrence
+    //Create
+    public static synchronized void createGtfsOccurrence(OccurrenceModel occurrence) {
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+
+        try {
+            PreparedStatement stmt;
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("INSERT INTO GtfsOccurrence (messageID, elementPath, elementValue)VALUES (?,?,?)");
+            stmt.setInt(1, occurrence.getMessageId());
+            stmt.setString(2, occurrence.getElementPath());
+            stmt.setString(3, occurrence.getElementValue());
+
+            stmt.executeUpdate();
+
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    //Update
+    public static synchronized void updateGtfsOccurrence(OccurrenceModel occurrence) {
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+
+        try {
+            PreparedStatement stmt;
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("UPDATE GtfsOccurrence SET messageID = ?, elementPath = ?, elementValue = ?" +
+                    "WHERE messageID = ?");
+            stmt.setInt(1, occurrence.getMessageId());
+            stmt.setString(2, occurrence.getElementPath());
+            stmt.setString(3, occurrence.getElementValue());
+            stmt.setInt(4, occurrence.getOccurrenceId());
+
+            stmt.executeUpdate();
+
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    //Read
+    public static synchronized OccurrenceModel getGtfsOccurrence(int occurrenceId) {
+
+        OccurrenceModel occurrenceModel = new OccurrenceModel();
+
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+        try {
+            PreparedStatement stmt;
+
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("SELECT * FROM GtfsOccurrence WHERE occurrenceID = ?");
+            stmt.setInt(1, occurrenceId);
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                occurrenceModel.setMessageId(rs.getInt(OccurrenceModel.MESSAGE_ID));
+                occurrenceModel.setElementPath(rs.getString(OccurrenceModel.ELEMENT_PATH));
+                occurrenceModel.setElementValue(rs.getString(OccurrenceModel.ELEMENT_VALUE));
+            }
+
+            rs.close();
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return occurrenceModel;
+    }
+
+    //Read list from messageId
+    public static synchronized List<OccurrenceModel> getGtfsOccurrenceListForMessage(int messageId) {
+
+        List<OccurrenceModel> occurrenceModelList = new ArrayList<>();
+
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+        try {
+            PreparedStatement stmt;
+
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("SELECT * FROM GtfsOccurrence WHERE messageID = ?");
+            stmt.setInt(1, messageId);
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                OccurrenceModel occurrence = new OccurrenceModel();
+
+                occurrence.setMessageId(rs.getInt(OccurrenceModel.MESSAGE_ID));
+                occurrence.setElementPath(rs.getString(OccurrenceModel.ELEMENT_PATH));
+                occurrence.setElementValue(rs.getString(OccurrenceModel.ELEMENT_VALUE));
+
+                occurrenceModelList.add(occurrence);
+            }
+
+            rs.close();
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return occurrenceModelList;
+    }
+
+    //Delete
+    public static synchronized void deleteGtfsOccurrence(int occurenceId) {
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+
+        try {
+            PreparedStatement stmt;
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("DELETE FROM GtfsOccurrence WHERE occurrenceID = ?");
+            stmt.setInt(1, occurenceId);
+
+            stmt.executeUpdate();
+
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    //endregion
+
     //region CURD: Error
     //create
     private static void createError(ValidationRule error) {

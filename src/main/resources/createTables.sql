@@ -44,13 +44,18 @@ CREATE TABLE IF NOT EXISTS "Occurrence" (
   FOREIGN KEY (messageID) REFERENCES MessageLog(messageID)
 );
 
-CREATE TABLE IF NOT EXISTS FEED_DETAILS
-(ID INTEGER PRIMARY KEY NOT NULL,
-  Time_Stamp INTEGER,
-  Vehicle_Count INTEGER,
-  Alert_Count INTEGER,
-  Feed_Url TEXT,
-  Trip_Count INTEGER
+CREATE TABLE IF NOT EXISTS "GtfsMessageLog" (
+  "messageID" INTEGER PRIMARY KEY AUTOINCREMENT,
+  "errorID" TEXT,
+  FOREIGN KEY (errorID) REFERENCES Error(errorID)
+);
+
+CREATE TABLE IF NOT EXISTS "GtfsOccurrence" (
+  "occurrenceID" INTEGER PRIMARY KEY AUTOINCREMENT,
+  "messageID" INTEGER,
+  "elementPath" TEXT,
+  "elementValue" TEXT,
+  FOREIGN KEY (messageID) REFERENCES MessageLog(messageID)
 );
 
 CREATE VIEW IF NOT EXISTS errorCount AS
