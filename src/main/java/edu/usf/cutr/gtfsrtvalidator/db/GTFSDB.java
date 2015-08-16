@@ -36,8 +36,6 @@ public class GTFSDB {
         String workingDir = System.getProperty("user.dir");
         String createTablePath = workingDir + "/target/classes/createTables.sql";
 
-        String ruleCsvPath = workingDir + "/target/classes/RuleList";
-
         try {
             byte[] encoded = Files.readAllBytes(Paths.get(createTablePath));
             String createTableQuerry = new String(encoded, "UTF-8");
