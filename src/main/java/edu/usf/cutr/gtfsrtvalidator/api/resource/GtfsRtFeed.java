@@ -79,8 +79,8 @@ public class GtfsRtFeed {
             generateError("The GTFS-RT URL given is not a valid feed");
         }
 
-        if(GTFSDB.getGtfsRtFeed(feedInfo) != null){
-            feedInfo = GTFSDB.getGtfsRtFeed(feedInfo);
+        if(GTFSDB.readGtfsRtFeed(feedInfo) != null){
+            feedInfo = GTFSDB.readGtfsRtFeed(feedInfo);
         }else {
             //If not, create the gtfs-rt feed in the DB and return the feed
             GTFSDB.createGtfsRtFeed(feedInfo);
@@ -131,7 +131,7 @@ public class GtfsRtFeed {
         int interval = 10;
 
         //Get RtFeedModel from id
-        GtfsRtFeedModel gtfsRtFeed = GTFSDB.getGtfsRtFeed(id);
+        GtfsRtFeedModel gtfsRtFeed = GTFSDB.readGtfsRtFeed(id);
 
         //Extract the Url and gtfsId to start the background process
         startBackgroundTask(gtfsRtFeed, interval);

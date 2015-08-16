@@ -24,6 +24,7 @@ import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.onebusaway.gtfs.serialization.GtfsReader;
 
 import javax.ws.rs.*;
+import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.File;
@@ -33,7 +34,9 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Path("/gtfs-feed")
@@ -42,10 +45,27 @@ public class GtfsFeed {
     private static final int BUFFER_SIZE = 4096;
     public static Map<Integer, GtfsDaoImpl> GtfsDaoMap = new HashMap<>();
 
-    //TODO: DELETE {id} remove feed with the given id
-    //TODO: PUT update feed with {id}
+    //DELETE {id} remove feed with the given id
+    @DELETE
+    @Path("/{id}")
+    public Response deleteGtfsFeed(@PathParam("id") String id){
+        GTFSDB.deleteGtfsFeed(Integer.parseInt(id));
+        return Response.accepted().build();
+    }
 
-    //TODO: GET return list of available gtfs-feeds
+    //GET return list of available gtfs-feeds
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getGtfsFeeds(){
+        List<GtfsFeedModel> gtfsFeeds = new ArrayList<>();
+        try {
+            gtfsFeeds = GTFSDB.readAllGtfsFeeds();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        GenericEntity<List<GtfsFeedModel>> feedList = new GenericEntity<List<GtfsFeedModel>>(gtfsFeeds){};
+        return Response.ok(feedList).build();
+    }
 
 
     //Add gtfs feed to local storage and database

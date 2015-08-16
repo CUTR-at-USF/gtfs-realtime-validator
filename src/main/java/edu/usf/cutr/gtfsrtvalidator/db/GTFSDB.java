@@ -256,6 +256,46 @@ public class GTFSDB {
         }
     }
 
+    public static synchronized List<GtfsFeedModel> readAllGtfsFeeds() {
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+
+        try {
+            PreparedStatement stmt;
+            List<GtfsFeedModel> gtfsFeedModelList = new ArrayList<>();
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("SELECT * FROM GtfsFeed");
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                GtfsFeedModel gtfsFeed = new GtfsFeedModel();
+
+                gtfsFeed.setGtfsUrl(rs.getString("feedURL"));
+                gtfsFeed.setFeedId(rs.getInt("feedID"));
+                gtfsFeed.setStartTime(rs.getLong("downloadTimestamp"));
+                gtfsFeed.setFeedLocation(rs.getString("fileLocation"));
+
+                gtfsFeedModelList.add(gtfsFeed);
+            }
+
+            rs.close();
+            stmt.close();
+            con.commit();
+            con.close();
+            return gtfsFeedModelList;
+
+        } catch (Exception ex) {
+            return null;
+        } finally {
+            try {
+                con.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     //Delete
     public static synchronized void deleteGtfsFeed(int feedId) {
         Datasource ds = Datasource.getInstance();
@@ -360,7 +400,7 @@ public class GTFSDB {
     }
 
     //Read
-    public static synchronized GtfsRtFeedModel getGtfsRtFeed(int gtfsFeedID) {
+    public static synchronized GtfsRtFeedModel readGtfsRtFeed(int gtfsFeedID) {
 
         GtfsRtFeedModel feedModel = new GtfsRtFeedModel();
 
@@ -401,7 +441,7 @@ public class GTFSDB {
         return feedModel;
     }
 
-    public static GtfsRtFeedModel getGtfsRtFeed(GtfsRtFeedModel gtfsRtFeed) {
+    public static GtfsRtFeedModel readGtfsRtFeed(GtfsRtFeedModel gtfsRtFeed) {
 
         System.out.println(gtfsRtFeed);
 
