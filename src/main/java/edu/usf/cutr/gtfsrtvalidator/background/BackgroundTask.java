@@ -33,6 +33,7 @@ import edu.usf.cutr.gtfsrtvalidator.validation.header.HeaderValidation;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.apache.commons.io.IOUtils;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
+import org.onebusway.gtfs_realtime.exporter.GtfsRealtimeLibrary;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -61,95 +62,103 @@ public class BackgroundTask implements Runnable {
     @Override
     public void run() {
 
-        GtfsRealtime.FeedMessage feedMessage;
-        List<GtfsRealtime.FeedEntity> currentFeedEntityList;
-        GtfsDaoImpl gtfsData;
-
-        //Holds data needed in the database under each iteration
-        GtfsFeedIterationModel feedIteration;
-
-        //Get the GTFS feed from the GtfsDaoMap using the gtfsFeedId of the current feed.
-        gtfsData = GtfsFeed.GtfsDaoMap.get(currentFeed.getGtfsId());
-
-        //region Get gtfsFeed Iteration
-        //---------------------------------------------------------------------------------------
-        //Parse the URL from the string provided
-        URL gtfsRtFeedUrl;
         try {
-            gtfsRtFeedUrl = new URL(currentFeed.getGtfsUrl());
-        } catch (MalformedURLException e) {
-            System.out.println("Malformed Url");
-            e.printStackTrace();
-            return;
+            GtfsRealtime.FeedMessage feedMessage;
+            GtfsDaoImpl gtfsData;
+
+            //Holds data needed in the database under each iteration
+            GtfsFeedIterationModel feedIteration;
+
+            //Get the GTFS feed from the GtfsDaoMap using the gtfsFeedId of the current feed.
+            gtfsData = GtfsFeed.GtfsDaoMap.get(currentFeed.getGtfsId());
+
+            //region Get gtfsFeed Iteration
+            //---------------------------------------------------------------------------------------
+            //Parse the URL from the string provided
+            URL gtfsRtFeedUrl;
+            try {
+                gtfsRtFeedUrl = new URL(currentFeed.getGtfsUrl());
+            } catch (MalformedURLException e) {
+                System.out.println("Malformed Url");
+                e.printStackTrace();
+                return;
+            }
+
+            try {
+                //Get the GTFS-RT feedMessage for this method
+                InputStream in = gtfsRtFeedUrl.openStream();
+                byte[] gtfsRtProtobuf = IOUtils.toByteArray(in);
+                InputStream is = new ByteArrayInputStream(gtfsRtProtobuf);
+                feedMessage = GtfsRealtime.FeedMessage.parseFrom(is);
+
+                //Create new feedIteration object and save the iteration to the database
+                feedIteration = new GtfsFeedIterationModel(TimeStampHelper.getCurrentTimestamp(), gtfsRtProtobuf, currentFeed.getGtfsRtId());
+                int iterationId = GTFSDB.createRtFeedInfo(feedIteration);
+                feedIteration.setIterationId(iterationId);
+            } catch (Exception e) {
+                System.out.println("The URL: " + gtfsRtFeedUrl + " does not contain valid Gtfs-Rt data");
+                e.printStackTrace();
+                return;
+            }
+            //---------------------------------------------------------------------------------------
+            //endregion
+
+            //region Get all entities for a GTFS feed
+            //---------------------------------------------------------------------------------------
+            gtfsFeedHash.put(feedIteration.getRtFeedId(), feedMessage);
+            feedEntityList.put(currentFeed.getGtfsId(), gtfsFeedHash);
+
+            HashMap<Integer, GtfsRealtime.FeedMessage> feedEntityInstance = feedEntityList.get(currentFeed.getGtfsId());
+
+            List<GtfsRealtime.FeedEntity> allEntitiesArrayList = new ArrayList<>();
+
+            for (Map.Entry<Integer, GtfsRealtime.FeedMessage> allFeeds : feedEntityInstance.entrySet()) {
+                int key = allFeeds.getKey();
+                GtfsRealtime.FeedMessage message = feedEntityInstance.get(key);
+                allEntitiesArrayList.addAll(message.getEntityList());
+            }
+
+            GtfsRealtime.FeedMessage.Builder feedMessageBuilder = GtfsRealtimeLibrary.createFeedMessageBuilder();
+            feedMessageBuilder.addAllEntity(allEntitiesArrayList);
+
+            GtfsRealtime.FeedMessage combinedFeed = feedMessageBuilder.build();
+            //---------------------------------------------------------------------------------------
+            //endregion
+
+            //region Rules for all errors in all RT feeds in for One GTFS feed
+            //---------------------------------------------------------------------------------------
+            VehicleTripDescriptorValidator vehicleTripDescriptorValidator = new VehicleTripDescriptorValidator();
+            validateEntity(combinedFeed, gtfsData, feedIteration, vehicleTripDescriptorValidator);
+            //---------------------------------------------------------------------------------------
+            //endregion
+
+            //region Rules for header errors
+            //---------------------------------------------------------------------------------------
+            //Validation rules for all headers
+            HeaderValidation validateHeaders = new HeaderValidation();
+            validateEntity(feedMessage, gtfsData, feedIteration, validateHeaders);
+            //---------------------------------------------------------------------------------------
+            //endregion
+
+            //region Rules for all errors in the current feed
+            //---------------------------------------------------------------------------------------
+            FeedEntityValidator vehicleIdValidator = new VehicleIdValidator();
+            validateEntity(feedMessage, gtfsData, feedIteration, vehicleIdValidator);
+
+            FeedEntityValidator stopTimeSequenceValidator = new StopTimeSequanceValidator();
+            validateEntity(feedMessage, gtfsData, feedIteration, stopTimeSequenceValidator);
+            //---------------------------------------------------------------------------------------
+            //endregion
+
+            //region Rules for all errors in the current feed + GTFS feed
+            //---------------------------------------------------------------------------------------
+            FeedEntityValidator checkTripId = new CheckTripId();
+            validateEntity(feedMessage, gtfsData, feedIteration, checkTripId);
+            //---------------------------------------------------------------------------------------
+            //endregion
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
-
-        try {
-            //Get the GTFS-RT feedMessage for this method
-            InputStream in = gtfsRtFeedUrl.openStream();
-            byte[] gtfsRtProtobuf = IOUtils.toByteArray(in);
-            InputStream is = new ByteArrayInputStream(gtfsRtProtobuf);
-            feedMessage = GtfsRealtime.FeedMessage.parseFrom(is);
-
-            //Create new feedIteration object and save the iteration to the database
-            feedIteration = new GtfsFeedIterationModel(TimeStampHelper.getCurrentTimestamp(), gtfsRtProtobuf, currentFeed.getGtfsRtId());
-            int iterationId = GTFSDB.createRtFeedInfo(feedIteration);
-            feedIteration.setIterationId(iterationId);
-        } catch (Exception e) {
-            System.out.println("The URL: " + gtfsRtFeedUrl + " does not contain valid Gtfs-Rt data");
-            e.printStackTrace();
-            return;
-        }
-        //---------------------------------------------------------------------------------------
-        //endregion
-
-        //region Get all entities for a GTFS feed
-        //---------------------------------------------------------------------------------------
-        gtfsFeedHash.put(feedIteration.getRtFeedId(), feedMessage);
-        feedEntityList.put(currentFeed.getGtfsId(), gtfsFeedHash);
-
-        HashMap<Integer, GtfsRealtime.FeedMessage> feedEntityInstance = feedEntityList.get(currentFeed.getGtfsId());
-
-        List<GtfsRealtime.FeedEntity> allEntitiesArrayList = new ArrayList<>();
-
-        for (Map.Entry<Integer, GtfsRealtime.FeedMessage> allFeeds : feedEntityInstance.entrySet()) {
-            int key = allFeeds.getKey();
-            GtfsRealtime.FeedMessage message = feedEntityInstance.get(key);
-            allEntitiesArrayList.addAll(message.getEntityList());
-        }
-        //---------------------------------------------------------------------------------------
-        //endregion
-
-        //region Rules for all errors in all feeds
-        //---------------------------------------------------------------------------------------
-        VehicleTripDescriptorValidator vehicleTripDescriptorValidator = new VehicleTripDescriptorValidator();
-        validateEntity(feedMessage, gtfsData, feedIteration, vehicleTripDescriptorValidator);
-        //---------------------------------------------------------------------------------------
-        //endregion
-
-        //region Rules for header errors
-        //---------------------------------------------------------------------------------------
-        //Validation rules for all headers
-        HeaderValidation validateHeaders = new HeaderValidation();
-        validateEntity(feedMessage, gtfsData, feedIteration, validateHeaders);
-        //---------------------------------------------------------------------------------------
-        //endregion
-
-        //region Rules for all errors in the current feed
-        //---------------------------------------------------------------------------------------
-        FeedEntityValidator vehicleIdValidator = new VehicleIdValidator();
-        validateEntity(feedMessage, gtfsData, feedIteration, vehicleIdValidator);
-
-        FeedEntityValidator stopTimeSequenceValidator = new StopTimeSequanceValidator();
-        validateEntity(feedMessage, gtfsData, feedIteration, stopTimeSequenceValidator);
-        //---------------------------------------------------------------------------------------
-        //endregion
-
-        //region Rules for all errors in the current feed + GTFS feed
-        //---------------------------------------------------------------------------------------
-        FeedEntityValidator checkTripId = new CheckTripId();
-        validateEntity(feedMessage, gtfsData, feedIteration, checkTripId);
-        //---------------------------------------------------------------------------------------
-        //endregion
     }
 
     private void validateEntity(GtfsRealtime.FeedMessage feedMessage, GtfsDaoImpl gtfsData, GtfsFeedIterationModel feedIteration, FeedEntityValidator feedEntityValidator) {
@@ -163,52 +172,4 @@ public class BackgroundTask implements Runnable {
         }
     }
 
-    //Check the timestamp differences to avoid comparing older entities
-    private List<TimeFeedEntity> cleanList(List<TimeFeedEntity> currentEntityList) {
-        List<TimeFeedEntity> cleanedEntityList = new ArrayList<>();
-        for (TimeFeedEntity entity : currentEntityList) {
-            //Checks if the feed was uploaded within the last 15 seconds
-            if (TimeStampHelper.getCurrentTimestamp() - entity.getTimestamp() < 15) {
-                cleanedEntityList.add(entity);
-            }
-        }
-        System.out.println("Entities in cleaned feed:\t" + cleanedEntityList.size());
-        return cleanedEntityList;
-    }
-
-    class TimeFeedEntity {
-        public TimeFeedEntity(GtfsRealtime.FeedEntity entity, long timestamp) {
-            this.entity = entity;
-            this.timestamp = timestamp;
-        }
-
-        private GtfsRealtime.FeedEntity entity;
-        private long timestamp;
-
-        public long getTimestamp() {
-            return timestamp;
-        }
-
-        public void setTimestamp(int timestamp) {
-            this.timestamp = timestamp;
-        }
-
-        public GtfsRealtime.FeedEntity getEntity() {
-            return entity;
-        }
-
-        public void setEntity(GtfsRealtime.FeedEntity entity) {
-            this.entity = entity;
-        }
-    }
-
-    private List<TimeFeedEntity> getTimeFeedEntities(List<GtfsRealtime.FeedEntity> entityList) {
-        long timestamp = TimeStampHelper.getCurrentTimestamp();
-        List<TimeFeedEntity> timeFeedEntityList = new ArrayList<>();
-        for (GtfsRealtime.FeedEntity entity : entityList) {
-            TimeFeedEntity timeEntity = new TimeFeedEntity(entity, timestamp);
-            timeFeedEntityList.add(timeEntity);
-        }
-        return timeFeedEntityList;
-    }
 }
