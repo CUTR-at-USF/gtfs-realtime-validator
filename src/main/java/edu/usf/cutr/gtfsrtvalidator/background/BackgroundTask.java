@@ -25,6 +25,7 @@ import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.helper.DBHelper;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
+import edu.usf.cutr.gtfsrtvalidator.validation.entity.LocationTypeReferenceValidator;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.CheckTripId;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.StopTimeSequanceValidator;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.VehicleIdValidator;
@@ -154,6 +155,10 @@ public class BackgroundTask implements Runnable {
             //---------------------------------------------------------------------------------------
             FeedEntityValidator checkTripId = new CheckTripId();
             validateEntity(feedMessage, gtfsData, feedIteration, checkTripId);
+
+            //e010
+            FeedEntityValidator locationTypeReferenceValidator = new LocationTypeReferenceValidator();
+            validateEntity(feedMessage, gtfsData, feedIteration, locationTypeReferenceValidator);
             //---------------------------------------------------------------------------------------
             //endregion
         } catch (Exception ex) {

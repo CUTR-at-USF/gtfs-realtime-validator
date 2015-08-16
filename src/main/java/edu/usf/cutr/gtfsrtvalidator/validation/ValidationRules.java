@@ -60,6 +60,15 @@ public class ValidationRules {
      */
     public static final ValidationRule E010 = new ValidationRule("e010",
             "If location_type is used in stops.txt, all stops referenced in stop_times.txt must have location_type of 0");
+
+    /**
+     * Type: Error (Implicitly stated in the GTFS specifications)
+     * Description: All stop_ids referenced in GTFS-rt feeds must have the "location_type" = 0
+     * Affected Feed Type(s): TripUpdate, VehiclePostion
+     * Reference(s): https://developers.google.com/transit/gtfs/reference?hl=en#stop_timestxt
+     */
+    public static final ValidationRule E011 = new ValidationRule("e011",
+            "All stop_ids referenced in GTFS-rt feeds must have the location_type = 0");
     //---------------------------------------------------------------------------------------
     //endregion
 }
