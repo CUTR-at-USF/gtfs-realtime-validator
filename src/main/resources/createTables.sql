@@ -46,7 +46,9 @@ CREATE TABLE IF NOT EXISTS "Occurrence" (
 
 CREATE TABLE IF NOT EXISTS "GtfsMessageLog" (
   "messageID" INTEGER PRIMARY KEY AUTOINCREMENT,
+  "itterationID" INTEGER,
   "errorID" TEXT,
+  FOREIGN KEY (itterationID) REFERENCES GtfsFeed(feedID) ,
   FOREIGN KEY (errorID) REFERENCES Error(errorID)
 );
 

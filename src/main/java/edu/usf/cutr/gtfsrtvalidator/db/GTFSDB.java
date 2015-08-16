@@ -926,8 +926,9 @@ public class GTFSDB {
             PreparedStatement stmt;
             con.setAutoCommit(false);
 
-            stmt = con.prepareStatement("INSERT INTO GtfsMessageLog (errorID)VALUES (?)");
+            stmt = con.prepareStatement("INSERT INTO GtfsMessageLog (errorID, itterationID)VALUES (?, ?)");
             stmt.setString(1, messageLog.getErrorId());
+            stmt.setInt(2, messageLog.getIterationId());
 
             stmt.executeUpdate();
 
