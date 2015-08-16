@@ -31,7 +31,7 @@ public class ValidationRules {
     //---------------------------------------------------------------------------------------
     //endregion
 
-    //region Warnings
+    //region Errors
     //---------------------------------------------------------------------------------------
     public static final ValidationRule E001 = new ValidationRule("e001",
             "All timestamps must be in POSIX time (i.e., number of seconds since January 1st 1970 00:00:00 UTC)");
@@ -51,6 +51,15 @@ public class ValidationRules {
             "If a GTFS block (defined by block_id in trips.txt) contains multiple references to the same stopId (i.e., the bus visits the same stopId more than once in the same block), but in different trips, then in the GTFS-rt data the tripId for each TripUpdate.TripDescriptor must be provided. In this case, the bus wouldn't visit the same stopId more than once in the same trip.");
     public static final ValidationRule E009 = new ValidationRule("e009",
             "If a GTFS trip contains multiple references to the same stopId (i.e., the bus visits the same stopId more than once in the SAME trip), then in the GTFS-rt data the stop_sequence for each TripUpdate.StopTimeUpdate must be provided.");
+
+    /**
+     * Issue: https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/8
+     * Description: If location_type is used in stops.txt, all stops referenced in stop_times.txt must have location_type of 0
+     * Affected Feed Type(s): GTFS feed
+     * Reference(s): https://developers.google.com/transit/gtfs/reference?hl=en#stop_timestxt
+     */
+    public static final ValidationRule E010 = new ValidationRule("e010",
+            "If location_type is used in stops.txt, all stops referenced in stop_times.txt must have location_type of 0");
     //---------------------------------------------------------------------------------------
     //endregion
 }

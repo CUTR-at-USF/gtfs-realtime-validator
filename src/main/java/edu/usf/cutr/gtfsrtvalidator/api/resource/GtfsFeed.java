@@ -19,7 +19,11 @@ package edu.usf.cutr.gtfsrtvalidator.api.resource;
 
 import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedModel;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
+import edu.usf.cutr.gtfsrtvalidator.helper.DBHelper;
+import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.GetFile;
+import edu.usf.cutr.gtfsrtvalidator.validation.gtfs.StopLocationTypeValidator;
+import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.GtfsFeedValidator;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.onebusaway.gtfs.serialization.GtfsReader;
 
@@ -41,7 +45,6 @@ import java.util.Map;
 
 @Path("/gtfs-feed")
 public class GtfsFeed {
-
     private static final int BUFFER_SIZE = 4096;
     public static Map<Integer, GtfsDaoImpl> GtfsDaoMap = new HashMap<>();
 
@@ -66,7 +69,6 @@ public class GtfsFeed {
         GenericEntity<List<GtfsFeedModel>> feedList = new GenericEntity<List<GtfsFeedModel>>(gtfsFeeds){};
         return Response.ok(feedList).build();
     }
-
 
     //Add gtfs feed to local storage and database
     @POST
@@ -108,7 +110,6 @@ public class GtfsFeed {
             System.out.println("Can't read from URL");
             return null;
         }
-
 
         if (connectionSuccessful) {
             //This gets you the size of the file to download (in bytes)
@@ -170,11 +171,9 @@ public class GtfsFeed {
                     //Return GTFS Model object
                     gtfsModel = gtfsFeed;
                 }
-
             } else {
                 System.out.println("File Doesn't Exist");
                 downloadGtfsFeed(saveFilePath, connection);
-
 
                 gtfsFeed = new GtfsFeedModel();
                 gtfsFeed.setFeedLocation(saveFilePath);
@@ -187,29 +186,42 @@ public class GtfsFeed {
                 gtfsFeed = GTFSDB.readGtfsFeed(gtfsFeed);
                 //Return GTFS Model object
                 gtfsModel = gtfsFeed;
-
             }
 
-            try {
-                //Read GTFS data into a GtfsDaoImpl
-                GtfsReader reader = new GtfsReader();
-                reader.setInputLocation(new File(gtfsFeed.getFeedLocation()));
+            if (gtfsFeed != null) {
+                try {
+                    //Read GTFS data into a GtfsDaoImpl
+                    GtfsReader reader = new GtfsReader();
+                    reader.setInputLocation(new File(gtfsFeed.getFeedLocation()));
 
-                GtfsDaoImpl store = new GtfsDaoImpl();
-                reader.setEntityStore(store);
-                reader.run();
+                    GtfsDaoImpl store = new GtfsDaoImpl();
+                    reader.setEntityStore(store);
+                    reader.run();
 
-                //Store GtfsDaoImpl to Map
-                GtfsDaoMap.put(gtfsModel.getFeedId(), store);
+                    //Store GtfsDaoImpl to Map
+                    GtfsDaoMap.put(gtfsModel.getFeedId(), store);
 
-                //TODO: Run all GTFS related tests
-                //TODO: Save errors to Database
-            } catch (Exception ex) {
-                System.out.println("Unable to read from downloaded GTFS feed");
+                    StopLocationTypeValidator StopLocationTypeValidator = new StopLocationTypeValidator();
+                    validateGtfs(gtfsModel.getFeedId(), store, StopLocationTypeValidator);
+
+                } catch (Exception ex) {
+                    System.out.println("Unable to read from downloaded GTFS feed");
+                }
             }
         }
-
         return gtfsModel;
+    }
+
+    //helper method to validate GTFS feed according to a given rule
+    private void validateGtfs(int gtfsId, GtfsDaoImpl gtfsData, GtfsFeedValidator feedEntityValidator) {
+        ErrorListHelperModel errorList = feedEntityValidator.validate(gtfsData);
+
+        if (errorList != null && !errorList.getOccurrenceList().isEmpty()) {
+            //Set Gtfs feed id
+            errorList.getErrorMessage().setIterationId(gtfsId);
+            //Save the captured errors to the database
+            DBHelper.saveGtfsError(errorList);
+        }
     }
 
     private void downloadGtfsFeed(String saveFilePath, HttpURLConnection connection) {
@@ -232,5 +244,4 @@ public class GtfsFeed {
             System.out.println("Downloading GTFS Feed Failed");
         }
     }
-
 }
