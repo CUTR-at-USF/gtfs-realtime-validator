@@ -80,7 +80,7 @@ public class BackgroundTask implements Runnable {
             try {
                 gtfsRtFeedUrl = new URL(currentFeed.getGtfsUrl());
             } catch (MalformedURLException e) {
-                System.out.println("Malformed Url");
+                System.out.println("Malformed Url: " + currentFeed.getGtfsUrl());
                 e.printStackTrace();
                 return;
             }

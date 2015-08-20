@@ -83,7 +83,7 @@ public class GtfsRtFeed {
             feedInfo = GTFSDB.readGtfsRtFeed(feedInfo);
         }else {
             //If not, create the gtfs-rt feed in the DB and return the feed
-            GTFSDB.createGtfsRtFeed(feedInfo);
+            feedInfo.setGtfsRtId(GTFSDB.createGtfsRtFeed(feedInfo));
         }
         return Response.ok(feedInfo).build();
     }
