@@ -102,8 +102,6 @@ public class GtfsFeed {
         try {
             connection = (HttpURLConnection) url.openConnection();
             connection.connect();
-            System.out.println(connection.getResponseCode());
-
             //Check if the request is handled successfully
             connectionSuccessful = connection.getResponseCode() / 100 == 2;
         } catch (IOException ex) {
@@ -113,7 +111,6 @@ public class GtfsFeed {
 
         if (connectionSuccessful) {
             //This gets you the size of the file to download (in bytes)
-            System.out.println(connection.getContentLength());
             String fileName = "";
             String disposition = connection.getHeaderField("Content-Disposition");
 
