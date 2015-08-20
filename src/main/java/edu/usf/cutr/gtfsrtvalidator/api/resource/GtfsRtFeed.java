@@ -59,7 +59,6 @@ public class GtfsRtFeed {
                 .entity(new ErrorMessageModel(errorMessage)).build();
     }
 
-    //TODO: Currently returns null if running for the first time.
     //Add new gtfs-rt feed to monitored list
     @POST
     @Produces(MediaType.APPLICATION_JSON)
@@ -127,14 +126,12 @@ public class GtfsRtFeed {
 
     @PUT
     @Path("/{id}/monitor")
-    public Response getID(@PathParam("id") int id) {
-        int interval = 10;
-
+    public Response getID(@PathParam("id") int id, @QueryParam("updateInterval") int updateInterval) {
         //Get RtFeedModel from id
         GtfsRtFeedModel gtfsRtFeed = GTFSDB.readGtfsRtFeed(id);
 
         //Extract the Url and gtfsId to start the background process
-        startBackgroundTask(gtfsRtFeed, interval);
+        startBackgroundTask(gtfsRtFeed, updateInterval);
 
         return Response.ok(gtfsRtFeed).build();
     }
