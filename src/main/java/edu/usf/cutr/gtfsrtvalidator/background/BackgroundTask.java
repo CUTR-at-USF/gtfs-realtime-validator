@@ -98,7 +98,7 @@ public class BackgroundTask implements Runnable {
                 feedIteration.setIterationId(iterationId);
             } catch (Exception e) {
                 System.out.println("The URL: " + gtfsRtFeedUrl + " does not contain valid Gtfs-Rt data");
-                e.printStackTrace();
+                //e.printStackTrace();
                 return;
             }
             //---------------------------------------------------------------------------------------
