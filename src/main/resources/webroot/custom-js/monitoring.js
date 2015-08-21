@@ -19,6 +19,9 @@
 //Retrieve the validated urls (saved to the local storage in the loading.js file) from the localStorage
 var urls = localStorage.getItem("gtfsRtFeeds");
 var gtfsFeeds = JSON.parse(urls);
+var iterations = 0;
+var setIntervalGetFeeds;
+var setIntervalClock;
 
 //Retrieve the update interval value
 var updateInterval = localStorage.getItem("updateInterval");
@@ -32,7 +35,7 @@ for (var gtfsFeed in gtfsFeeds) {
             success: function(data) {
                 initializeInterface(data);
                 refresh(data["gtfsRtId"]);
-                setInterval(function() { refresh(data["gtfsRtId"]) }, 10000);
+                setIntervalGetFeeds = setInterval(function() { refresh(data["gtfsRtId"]) }, 10000);
             }
         });
     }
@@ -40,6 +43,7 @@ for (var gtfsFeed in gtfsFeeds) {
 
 function refresh(id){
     $.get("http://localhost:8080/api/gtfs-rt-feed/"+ id).done(function(data){
+        $("#iterations").text(++iterations);
         updateTables(id, data);
     });
 }
@@ -84,4 +88,14 @@ function getTimeElapsed(){
 }
 
 //Call time elapsed to update the clock evey second
-setInterval(getTimeElapsed,1000);
+setIntervalClock = setInterval(getTimeElapsed,1000);
+
+function stopMonitor(){
+    clearInterval(setIntervalClock);
+    clearInterval(setIntervalGetFeeds);
+}
+
+function startMonitor(){
+    setInterval(getTimeElapsed,1000);
+
+}
