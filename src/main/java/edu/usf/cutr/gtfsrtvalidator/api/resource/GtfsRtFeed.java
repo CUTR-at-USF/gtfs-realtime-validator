@@ -126,7 +126,7 @@ public class GtfsRtFeed {
 
     @PUT
     @Path("/{id}/monitor")
-    public Response getID(@PathParam("id") int id, @QueryParam("updateInterval") int updateInterval) {
+    public Response getID(@PathParam("id") int id, @DefaultValue("10") @QueryParam("updateInterval") int updateInterval) {
         //Get RtFeedModel from id
         GtfsRtFeedModel gtfsRtFeed = GTFSDB.readGtfsRtFeed(id);
 

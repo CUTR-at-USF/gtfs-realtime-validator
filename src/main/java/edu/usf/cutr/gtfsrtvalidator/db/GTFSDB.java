@@ -440,9 +440,6 @@ public class GTFSDB {
     }
 
     public static GtfsRtFeedModel readGtfsRtFeed(GtfsRtFeedModel gtfsRtFeed) {
-
-        System.out.println(gtfsRtFeed);
-
         Datasource ds = Datasource.getInstance();
         Connection con = ds.getConnection();
         PreparedStatement stmt;
@@ -462,7 +459,6 @@ public class GTFSDB {
             if (rs.isBeforeFirst()) {
                 GtfsRtFeedModel gtfsFeed = new GtfsRtFeedModel();
                 if (rs.next()) {
-                    System.out.println("the record exists");
                     gtfsFeed.setGtfsUrl(rs.getString("feedURL"));
                     gtfsFeed.setGtfsId(rs.getInt("gtfsFeedID"));
                     gtfsFeed.setStartTime(rs.getLong("startTime"));
