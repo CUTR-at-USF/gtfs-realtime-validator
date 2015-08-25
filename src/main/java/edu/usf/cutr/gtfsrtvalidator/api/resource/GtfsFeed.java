@@ -116,7 +116,8 @@ public class GtfsFeed {
             System.out.println(connection.getResponseCode());
         } catch (IOException ex) {
             System.out.println("Can't read from GTFS URL");
-            return null;
+            ErrorMessageModel errorMessageModel = new ErrorMessageModel("Can't read content", "Can't read content from the GTFS URL");
+            return Response.ok(errorMessageModel).build();
         }
 
         if (connectionSuccessful) {
@@ -213,6 +214,8 @@ public class GtfsFeed {
 
                 } catch (Exception ex) {
                     System.out.println("Unable to read from downloaded GTFS feed");
+                    ErrorMessageModel errorMessageModel = new ErrorMessageModel("Can't read content", "Can't read content from the GTFS URL");
+                    return Response.ok(errorMessageModel).build();
                 }
             }
         }else {

@@ -152,12 +152,11 @@ function downloadGTFSFeed() {
             }else{
                 //data["title"];
                 //data["message"];
-                //data["type"];
 
                 $(progressID).removeClass("progress-striped active");
                 $(progressID + " .progress-bar").addClass("progress-bar-warning");
 
-                $(progressID).prev().find(".status").text(data["title"]);
+                $(progressID).prev().find(".status").text("(" + data["title"] + ")");
 
                 validGtfs = false;
             }
