@@ -22,13 +22,19 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class ErrorMessageModel {
     private String type;
-    private String message;
     private String title;
+    private String message;
 
     public ErrorMessageModel(){}
 
     public ErrorMessageModel(String errorMessage) {
         setMessage(errorMessage);
+    }
+
+    public ErrorMessageModel(String type, String title, String message) {
+        this.type = type;
+        this.message = message;
+        this.title = title;
     }
 
     public String getMessage() {
