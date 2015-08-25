@@ -21,7 +21,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class ErrorMessageModel {
-    private String type;
     private String title;
     private String message;
 
@@ -31,10 +30,9 @@ public class ErrorMessageModel {
         setMessage(errorMessage);
     }
 
-    public ErrorMessageModel(String type, String title, String message) {
-        this.type = type;
-        this.message = message;
+    public ErrorMessageModel(String title, String message) {
         this.title = title;
+        this.message = message;
     }
 
     public String getMessage() {
@@ -43,14 +41,6 @@ public class ErrorMessageModel {
 
     public void setMessage(String message) {
         this.message = message;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     public String getTitle() {

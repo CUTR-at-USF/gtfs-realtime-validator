@@ -17,6 +17,7 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.resource;
 
+import edu.usf.cutr.gtfsrtvalidator.api.model.ErrorMessageModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedModel;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.helper.DBHelper;
@@ -76,14 +77,17 @@ public class GtfsFeed {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response postGtfsFeed(@FormParam("gtfsurl") String gtfsFeedUrl) {
 
-        GtfsFeedModel downloadedFeed;
-        downloadedFeed = downloadFeed(gtfsFeedUrl);
+        Response downloadedFeedResponse;
+        downloadedFeedResponse = downloadFeed(gtfsFeedUrl);
+
+        //Retrun the Response from the downloadFeed method
+        return downloadedFeedResponse;
 
         //Return gtfs item on success
-        return Response.ok(downloadedFeed).build();
+        //return Response.ok(downloadedFeedResponse).build();
     }
 
-    private GtfsFeedModel downloadFeed(String gtfsFeedUrl) {
+    private Response downloadFeed(String gtfsFeedUrl) {
 
         GtfsFeedModel gtfsModel = null;
 
@@ -94,7 +98,9 @@ public class GtfsFeed {
             url = new URL(gtfsFeedUrl);
         } catch (MalformedURLException ex) {
             System.out.println("Invalid URL");
-            return null;
+
+            ErrorMessageModel errorMessageModel = new ErrorMessageModel("Malformed URL", "Malformed URL for the GTFS feed");
+            return Response.ok(errorMessageModel).build();
         }
 
         boolean connectionSuccessful;
@@ -212,7 +218,7 @@ public class GtfsFeed {
         }else {
             System.out.println("Connection response not 2**");
         }
-        return gtfsModel;
+        return Response.ok(gtfsModel).build();
     }
 
     //helper method to validate GTFS feed according to a given rule
