@@ -94,11 +94,11 @@ public class GtfsFeed {
         String saveFilePath;
         URL url;
 
+        //Tries to convert gtfsFeedUrl String and URL
         try {
             url = new URL(gtfsFeedUrl);
         } catch (MalformedURLException ex) {
             System.out.println("Invalid URL");
-
             ErrorMessageModel errorMessageModel = new ErrorMessageModel("Malformed URL", "Malformed URL for the GTFS feed");
             return Response.ok(errorMessageModel).build();
         }

@@ -177,9 +177,8 @@ public class GTFSDB {
 
             con.setAutoCommit(false);
 
-            stmt = con.prepareStatement("SELECT * FROM GtfsFeed WHERE feedUrl = ? AND fileLocation = ?");
+            stmt = con.prepareStatement("SELECT * FROM GtfsFeed WHERE feedUrl = ?");
             stmt.setString(1, searchFeed.getGtfsUrl());
-            stmt.setString(2, searchFeed.getFeedLocation());
 
             ResultSet rs = stmt.executeQuery();
 
