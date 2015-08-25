@@ -84,6 +84,7 @@ public class GtfsFeed {
     }
 
     private GtfsFeedModel downloadFeed(String gtfsFeedUrl) {
+
         GtfsFeedModel gtfsModel = null;
 
         String saveFilePath;
@@ -101,11 +102,14 @@ public class GtfsFeed {
 
         try {
             connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
             connection.connect();
             //Check if the request is handled successfully
             connectionSuccessful = connection.getResponseCode() / 100 == 2;
+
+            System.out.println(connection.getResponseCode());
         } catch (IOException ex) {
-            System.out.println("Can't read from URL");
+            System.out.println("Can't read from GTFS URL");
             return null;
         }
 
@@ -205,6 +209,8 @@ public class GtfsFeed {
                     System.out.println("Unable to read from downloaded GTFS feed");
                 }
             }
+        }else {
+            System.out.println("Connection response not 2**");
         }
         return gtfsModel;
     }
