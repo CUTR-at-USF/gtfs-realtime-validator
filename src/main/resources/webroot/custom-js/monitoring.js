@@ -25,6 +25,8 @@ var setIntervalClock;
 
 //Retrieve the update interval value
 var updateInterval = localStorage.getItem("updateInterval");
+updateInterval = updateInterval*1000;
+alert(updateInterval);
 
 //PUT request to start monitoring of the given gtfsRtFeed ID /api/gtfs-rt-feed/{id}/monitor
 for (var gtfsFeed in gtfsFeeds) {
@@ -35,7 +37,7 @@ for (var gtfsFeed in gtfsFeeds) {
             success: function(data) {
                 initializeInterface(data);
                 refresh(data["gtfsRtId"]);
-                setIntervalGetFeeds = setInterval(function() { refresh(data["gtfsRtId"]) }, 10000);
+                setIntervalGetFeeds = setInterval(function() { refresh(data["gtfsRtId"]) }, updateInterval);
             }
         });
     }
