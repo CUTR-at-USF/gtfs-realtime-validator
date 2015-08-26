@@ -913,19 +913,26 @@ public class GTFSDB {
 
     //region CURD: Gtfs Message Log
     //Create
-    public static synchronized void createGtfsMessageLog(MessageLogModel messageLog) {
+    public static synchronized int createGtfsMessageLog(MessageLogModel messageLog) {
         Datasource ds = Datasource.getInstance();
         Connection con = ds.getConnection();
+        int createdId = 0;
 
         try {
             PreparedStatement stmt;
             con.setAutoCommit(false);
 
-            stmt = con.prepareStatement("INSERT INTO GtfsMessageLog (errorID, itterationID)VALUES (?, ?)");
+            stmt = con.prepareStatement("INSERT INTO GtfsMessageLog (errorID, itterationID)VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
             stmt.setString(1, messageLog.getErrorId());
             stmt.setInt(2, messageLog.getIterationId());
 
             stmt.executeUpdate();
+
+            //Get the id of the created feed
+            ResultSet rs = stmt.getGeneratedKeys();
+            if (rs != null && rs.next()) {
+                createdId = rs.getInt(1);
+            }
 
             stmt.close();
             con.commit();
@@ -941,6 +948,8 @@ public class GTFSDB {
                 e.printStackTrace();
             }
         }
+
+        return createdId;
     }
 
     //Update
@@ -1063,6 +1072,34 @@ public class GTFSDB {
 
             stmt = con.prepareStatement("DELETE FROM GtfsMessageLog WHERE messageID = ?");
             stmt.setInt(1, messageId);
+
+            stmt.executeUpdate();
+
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static synchronized void deleteGtfsMessageLogByFeed(int feedId) {
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+
+        try {
+            PreparedStatement stmt;
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("DELETE FROM GtfsMessageLog WHERE itterationID = ?");
+            stmt.setInt(1, feedId);
 
             stmt.executeUpdate();
 
@@ -1455,6 +1492,57 @@ public class GTFSDB {
         return errorList;
     }
     //endregion
+
+    //region VIEW gtfsErrorCount
+    //---------------------------------------------------------------------------------------
+    public static synchronized List<ViewGtfsErrorCountModel> getGtfsErrorList(int feedId){
+        List<ViewGtfsErrorCountModel> errorList = new ArrayList<>();
+
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+        try {
+            PreparedStatement stmt;
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("SELECT * FROM gtfsErrorCount WHERE itterationID = ?");
+            stmt.setInt(1, feedId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                ViewGtfsErrorCountModel errorModel = new ViewGtfsErrorCountModel();
+
+                errorModel.setMessageId(rs.getInt(ViewGtfsErrorCountModel.MESSAGE_ID));
+                errorModel.setErrorId(rs.getString(ViewGtfsErrorCountModel.ERROR_ID));
+                errorModel.setErrorDesc(rs.getString(ViewGtfsErrorCountModel.ERROR_DESC));
+                errorModel.setIterationId(rs.getInt(ViewGtfsErrorCountModel.ITERATION_ID));
+                errorModel.setErrorCount(rs.getInt(ViewGtfsErrorCountModel.ERROR_COUNT));
+                errorModel.setFeedUrl(rs.getString(ViewGtfsErrorCountModel.FEED_URL));
+                errorModel.setFileLocation(rs.getString(ViewGtfsErrorCountModel.FILE_LOCATION));
+                errorModel.setDownloadTime(rs.getLong(ViewGtfsErrorCountModel.DOWNLOAD_TIME));
+
+                errorList.add(errorModel);
+            }
+
+            rs.close();
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return errorList;
+    }
+    //---------------------------------------------------------------------------------------
+    //endregion
+
 
     //region VIEW messageDetails
     //Read

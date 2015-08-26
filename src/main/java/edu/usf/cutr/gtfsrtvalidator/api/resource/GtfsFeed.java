@@ -19,6 +19,7 @@ package edu.usf.cutr.gtfsrtvalidator.api.resource;
 
 import edu.usf.cutr.gtfsrtvalidator.api.model.ErrorMessageModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedModel;
+import edu.usf.cutr.gtfsrtvalidator.api.model.ViewGtfsErrorCountModel;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.helper.DBHelper;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
@@ -68,6 +69,16 @@ public class GtfsFeed {
             e.printStackTrace();
         }
         GenericEntity<List<GtfsFeedModel>> feedList = new GenericEntity<List<GtfsFeedModel>>(gtfsFeeds){};
+        return Response.ok(feedList).build();
+    }
+
+    //GET return list of errors for a given feed
+    @GET
+    @Path("/{id}/errors")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getGtfsFeedErrors(@PathParam("id") String id){
+        List<ViewGtfsErrorCountModel> gtfsFeeds = GTFSDB.getGtfsErrorList(Integer.parseInt(id));
+        GenericEntity<List<ViewGtfsErrorCountModel>> feedList = new GenericEntity<List<ViewGtfsErrorCountModel>>(gtfsFeeds){};
         return Response.ok(feedList).build();
     }
 
@@ -152,6 +163,10 @@ public class GtfsFeed {
             GtfsFeedModel gtfsFeed = GTFSDB.readGtfsFeed(searchFeed);
 
             if (gtfsFeed != null) {
+
+                //remove current errors from the database
+                GTFSDB.deleteGtfsMessageLogByFeed(gtfsFeed.getFeedId());
+
                 System.out.println("URL exists in database");
                 File f = new File(gtfsFeed.getFeedLocation());
 

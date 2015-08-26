@@ -80,14 +80,29 @@ CREATE VIEW IF NOT EXISTS errorCount AS
      GROUP BY itterationID) `iterationErrors`
       ON iterationErrors.itterationID = GtfsRtFeedIteration.IterationID;
 
--- CREATE VIEW IF NOT EXISTS errorCount AS
---   SELECT rtFeedID, feedURL, gtfsFeedID, errorItteration.* FROM GtfsRtFeed
---     JOIN
---     (SELECT IterationID, IterationTimestamp, Message.errorCount FROM GtfsRtFeedIteration
---       left JOIN
---       (SELECT COUNT(errorID) AS "errorCount", itterationID
---        FROM MessageLog)`Message`
---         ON GtfsRtFeedIteration.IterationID = Message.itterationID)`errorItteration`;
+CREATE VIEW IF NOT EXISTS gtfsErrorCount AS
+SELECT GtfsMessageLog.messageID,
+  itterationID,
+  GtfsMessageLog.errorID,
+  errorDescription,
+  feedUrl,
+  fileLocation,
+  downloadTimestamp,
+  errorCount
+FROM GtfsMessageLog
+  JOIN GtfsFeed
+    ON GtfsFeed.feedID = GtfsMessageLog.itterationID
+
+  LEFT JOIN
+  (SELECT
+     messageID,
+     COUNT(*) AS errorCount
+   FROM GtfsOccurrence
+   GROUP BY messageID) `iterationErrors`
+    ON iterationErrors.messageID = GtfsMessageLog.messageID
+
+  JOIN Error
+    ON GtfsMessageLog.errorID = Error.errorID;
 
 CREATE VIEW IF NOT EXISTS detailedError AS
   SELECT

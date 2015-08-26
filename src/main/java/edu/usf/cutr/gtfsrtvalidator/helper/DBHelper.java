@@ -31,10 +31,10 @@ public class DBHelper {
     }
 
     public static void saveGtfsError(ErrorListHelperModel errorListHelperModel) {
-        GTFSDB.createGtfsMessageLog(errorListHelperModel.getErrorMessage());
+        int messageId = GTFSDB.createGtfsMessageLog(errorListHelperModel.getErrorMessage());
 
         for (OccurrenceModel occurrence : errorListHelperModel.getOccurrenceList()) {
-            occurrence.setMessageId(errorListHelperModel.getErrorMessage().getMessageId());
+            occurrence.setMessageId(messageId);
             GTFSDB.createGtfsOccurrence(occurrence);
         }
     }
