@@ -67,46 +67,24 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-8">
+
+                        <div class="col-md-12">
                             <div class="well">
-                                <table class="table table-striped table-hover ">
-
-                                    <thead>
-                                    <tr>
-                                        <th>Type</th>
-                                        <th>Vehicle</th>
-                                        <th>Trips</th>
-                                        <th>Alerts</th>
-                                        <th></th>
-                                        <th>Count</th>
-                                    </tr>
-                                    </thead>
-
-                                    <tbody>
-                                    <tr class="warning">
-                                        <td>Warning</td>
-                                        <td>Column content</td>
-                                        <td>Column content</td>
-                                        <td>Column content</td>
-                                        <td style="background:transparent"></td>
-                                        <td align="center"><span class="label label-default">42</span></td>
-                                    </tr>
-
-                                    <tr class="danger">
-                                        <td>Error</td>
-                                        <td>Column content</td>
-                                        <td>Column content</td>
-                                        <td>Column content</td>
-                                        <td style="background:transparent"></td>
-                                        <td align="center"><span class="label label-default">42</span></td>
-                                    </tr>
-
-                                    </tbody>
-                                </table>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        GTFS Error Count:
+                                        <span id="gtfs-error">0</span>
+                                    </div>
+                                    <div class="col-md-4">
+                                        GTFS-RT Feed Errors:
+                                        <span id="gtfs-rt-error">0</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-4" style="height: 200px">
-                            <div style="bottom: 2px; position: absolute; right: 19px">
+
+                        <div class="row">
+                            <div class="pull-right" style="margin-right: 28px;">
                                 <input class="btn btn-default" type="button" onclick="stopMonitor()" value="Stop"/>
                             </div>
                         </div>
@@ -118,54 +96,6 @@
 
         <div class="monitor-placeholder"></div>
 
-<!--        <div class="col-md-12">
-            <div class="well content-well">
-                <h3>Most Recent Errors</h3>
-                <hr/>
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Err#</th>
-                        <th>Type</th>
-                        <th>Error Description</th>
-                        <th>Feed</th>
-                        <th>Occurrences</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td><a href="detailed.html">1</a></td>
-                        <td><a>1243</a></td>
-                        <td>Error</td>
-                        <td>Short Error description</td>
-                        <td>0</td>
-                        <td>0</td>
-                    </tr>
-                    <tr>
-                        <td><a href="detailed.html">2</a></td>
-                        <td><a>1243</a></td>
-                        <td>Error</td>
-                        <td>Short Error description</td>
-                        <td>0</td>
-                        <td>0</td>
-                    </tr>
-                    <tr>
-                        <td><a href="detailed.html">3</a></td>
-                        <td><a>1243</a></td>
-                        <td>Error</td>
-                        <td>Short Error description</td>
-                        <td>0</td>
-                        <td>0</td>
-                    </tr>
-
-                    </tbody>
-                </table>
-
-                <div id="placeholder" style="width:600px;height:300px"></div>
-
-            </div>
-        </div>-->
     </div>
 </div>
 <!-- /.container -->
@@ -185,19 +115,7 @@
                 <tr>
                     <th>#</th>
                     <th>Time Stamp</th>
-                    <th colspan="2">Vehicles</th>
-                    <th colspan="2">Alerts</th>
-                    <th colspan="2">Trip Updates</th>
-                </tr>
-                <tr>
-                    <th></th>
-                    <th></th>
-                    <th>Error</th>
-                    <th>Warning</th>
-                    <th>Error</th>
-                    <th>Warning</th>
-                    <th>Error</th>
-                    <th>Warning</th>
+                    <th>Errors</th>
                 </tr>
                 </thead>
 

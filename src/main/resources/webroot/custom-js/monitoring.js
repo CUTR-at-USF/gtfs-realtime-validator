@@ -20,13 +20,14 @@
 var urls = localStorage.getItem("gtfsRtFeeds");
 var gtfsFeeds = JSON.parse(urls);
 var iterations = 0;
+var errorCount = 0;
+
 var setIntervalGetFeeds;
 var setIntervalClock;
 
 //Retrieve the update interval value
 var updateInterval = localStorage.getItem("updateInterval");
 updateInterval = updateInterval*1000;
-alert(updateInterval);
 
 //PUT request to start monitoring of the given gtfsRtFeed ID /api/gtfs-rt-feed/{id}/monitor
 for (var gtfsFeed in gtfsFeeds) {
@@ -47,6 +48,8 @@ function refresh(id){
     $.get("http://localhost:8080/api/gtfs-rt-feed/"+ id).done(function(data){
         $("#iterations").text(++iterations);
         updateTables(id, data);
+        errorCount = errorCount + data[0]["errorCount"];
+        $("#gtfs-rt-error").text(errorCount);
     });
 }
 
