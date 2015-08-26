@@ -72,13 +72,13 @@ CREATE VIEW IF NOT EXISTS errorCount AS
     JOIN GtfsRtFeed
       ON GtfsRtFeed.rtFeedID = GtfsRtFeedIteration.rtFeedID
 
-    JOIN
+    LEFT JOIN
     (SELECT
        itterationID,
        COUNT(*) AS errorCount
      FROM MessageLog
      GROUP BY itterationID) `iterationErrors`
-      ON iterationErrors.itterationID = GtfsRtFeedIteration.IterationID
+      ON iterationErrors.itterationID = GtfsRtFeedIteration.IterationID;
 
 -- CREATE VIEW IF NOT EXISTS errorCount AS
 --   SELECT rtFeedID, feedURL, gtfsFeedID, errorItteration.* FROM GtfsRtFeed
