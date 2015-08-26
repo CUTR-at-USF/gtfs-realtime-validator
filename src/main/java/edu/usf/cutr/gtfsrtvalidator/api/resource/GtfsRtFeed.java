@@ -24,7 +24,6 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.combined.CombinedMessageOccurrence
 import edu.usf.cutr.gtfsrtvalidator.background.BackgroundTask;
 import edu.usf.cutr.gtfsrtvalidator.db.Datasource;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
-import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedIterationString;
 import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
 
 import javax.ws.rs.*;
@@ -32,6 +31,7 @@ import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -68,19 +68,34 @@ public class GtfsRtFeed {
 
         //Validate URL for GTFS feed and the GTFS ID.
         if (feedInfo.getGtfsUrl() == null) {
-            generateError("GTFS-RT URL is required");
-        }else if (feedInfo.getGtfsId() == 0) {
-            generateError("GTFS Feed id is required");
+            return generateError("GTFS-RT URL is required");
+        } else if (feedInfo.getGtfsId() == 0) {
+            return generateError("GTFS Feed id is required");
         }
+
+        //Check if URL is valid
+        try {
+            URL feedUrl = new URL(feedInfo.getGtfsUrl());
+            HttpURLConnection connection = (HttpURLConnection) feedUrl.openConnection();
+            connection.setRequestMethod("GET");
+            connection.connect();
+            boolean connectionSuccessful = connection.getResponseCode() / 100 == 2;
+            if (!connectionSuccessful) {
+                return generateError("URL returns code: " + connection.getResponseCode());
+            }
+        } catch (Exception ex) {
+            return generateError("Invalid URL");
+        }
+
 
         //Checks if the GTFS-RT feed returns valid protobuf
         if (checkFeedType(feedInfo.getGtfsUrl()) == INVALID_FEED) {
-            generateError("The GTFS-RT URL given is not a valid feed");
+            return generateError("The GTFS-RT URL given is not a valid feed");
         }
 
-        if(GTFSDB.readGtfsRtFeed(feedInfo) != null){
+        if (GTFSDB.readGtfsRtFeed(feedInfo) != null) {
             feedInfo = GTFSDB.readGtfsRtFeed(feedInfo);
-        }else {
+        } else {
             //If not, create the gtfs-rt feed in the DB and return the feed
             feedInfo.setGtfsRtId(GTFSDB.createGtfsRtFeed(feedInfo));
         }
@@ -90,7 +105,7 @@ public class GtfsRtFeed {
     //GET feed to retrive all RT-feeds
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getRtFeeds(){
+    public Response getRtFeeds() {
         List<GtfsRtFeedModel> gtfsFeeds = new ArrayList<>();
         try {
             Datasource ds = Datasource.getInstance();
@@ -118,7 +133,8 @@ public class GtfsRtFeed {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        GenericEntity<List<GtfsRtFeedModel>> feedList = new GenericEntity<List<GtfsRtFeedModel>>(gtfsFeeds){};
+        GenericEntity<List<GtfsRtFeedModel>> feedList = new GenericEntity<List<GtfsRtFeedModel>>(gtfsFeeds) {
+        };
         return Response.ok(feedList).build();
     }
 
@@ -140,11 +156,12 @@ public class GtfsRtFeed {
     @GET
     @Path("{id : \\d+}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getRtFeedDetails(@PathParam("id") int id){
+    public Response getRtFeedDetails(@PathParam("id") int id) {
         List<ViewErrorCountModel> gtfsFeeds;
 
         gtfsFeeds = GTFSDB.getErrors(id, 10);
-        GenericEntity<List<ViewErrorCountModel>> feedList = new GenericEntity<List<ViewErrorCountModel>>(gtfsFeeds){};
+        GenericEntity<List<ViewErrorCountModel>> feedList = new GenericEntity<List<ViewErrorCountModel>>(gtfsFeeds) {
+        };
         return Response.ok(feedList).build();
     }
 
@@ -189,7 +206,7 @@ public class GtfsRtFeed {
             URI FeedURI = new URI(FeedURL);
             URL url = FeedURI.toURL();
             feed = GtfsRealtime.FeedMessage.parseFrom(url.openStream());
-        } catch (URISyntaxException | IllegalArgumentException | IOException e ) {
+        } catch (URISyntaxException | IllegalArgumentException | IOException e) {
             return INVALID_FEED;
         }
         if (feed.hasHeader()) {
@@ -206,7 +223,7 @@ public class GtfsRtFeed {
             scheduler.scheduleAtFixedRate(new BackgroundTask(gtfsRtFeed), 0, updateInterval, TimeUnit.SECONDS);
             runningTasks.put(rtFeedUrl, scheduler);
             return scheduler;
-        }else {
+        } else {
             return runningTasks.get(rtFeedUrl);
         }
     }

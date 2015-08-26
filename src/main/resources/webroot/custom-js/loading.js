@@ -103,6 +103,18 @@ function monitorGtfsRtFeeds(gtfsrtUrlList, gtfsFeedId) {
                 }
             }
 
+            function feedError(data) {
+                alert(JSON.stringify(data));
+
+                var responseJson = data["responseJSON"];
+                var message = responseJson["message"];
+
+                $(progressID).removeClass("progress-striped active");
+                $(progressID + " .progress-bar").addClass("progress-bar-warning");
+
+                $(progressID).prev().find(".status").text("("+ message +")");
+            }
+
             var jsonData = {"gtfsUrl":url,"gtfsId":gtfsFeedId};
 
             $.ajax({
@@ -114,6 +126,7 @@ function monitorGtfsRtFeeds(gtfsrtUrlList, gtfsFeedId) {
                 },
                 data: JSON.stringify(jsonData),
                 success: success,
+                error: feedError,
                 dataType: 'json'
             });
 
@@ -137,7 +150,7 @@ function downloadGTFSFeed() {
         $(progressID + " .progress-bar").addClass("progress-bar-danger");
         $(progressID).prev().find(".status").text("(No GTFS URL Given)");
     } else {
-        function success(data){
+        function feedSuccess(data){
             if (data["feedId"] != null) {
                 $(progressID).removeClass("progress-striped active");
                 $(progressID + " .progress-bar").addClass("progress-bar-success");
@@ -170,7 +183,7 @@ function downloadGTFSFeed() {
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
             data: {gtfsurl: paramVal},
-            success: success,
+            success: feedSuccess,
             dataType: 'json'
         });
     }
