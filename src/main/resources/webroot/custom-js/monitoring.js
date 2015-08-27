@@ -18,7 +18,7 @@
 
 //Retrieve the validated urls (saved to the local storage in the loading.js file) from the localStorage
 var urls = localStorage.getItem("gtfsRtFeeds");
-var gtfsFeeds = JSON.parse(urls);
+var gtfsRtFeeds = JSON.parse(urls);
 var iterations = 0;
 var errorCount = 0;
 
@@ -27,25 +27,54 @@ var setIntervalClock;
 
 //Retrieve the update interval value
 var updateInterval = localStorage.getItem("updateInterval");
-updateInterval = updateInterval*1000;
+updateInterval = updateInterval * 1000;
 
 //PUT request to start monitoring of the given gtfsRtFeed ID /api/gtfs-rt-feed/{id}/monitor
-for (var gtfsFeed in gtfsFeeds) {
-    if(gtfsFeeds.hasOwnProperty(gtfsFeed)){
+for (var gtfsRtFeed in gtfsRtFeeds) {
+    if (gtfsRtFeeds.hasOwnProperty(gtfsRtFeed)) {
         $.ajax({
-            url: "http://localhost:8080/api/gtfs-rt-feed/"+ gtfsFeeds[gtfsFeed]["feedId"] +"/monitor",
+            url: "http://localhost:8080/api/gtfs-rt-feed/" + gtfsRtFeeds[gtfsRtFeed]["feedId"] + "/monitor",
             type: 'PUT',
-            success: function(data) {
+            success: function (data) {
                 initializeInterface(data);
                 refresh(data["gtfsRtId"]);
-                setIntervalGetFeeds = setInterval(function() { refresh(data["gtfsRtId"]) }, updateInterval);
+
+                setIntervalGetFeeds = setInterval(function () {
+                    refresh(data["gtfsRtId"])
+                }, updateInterval);
+
+                //Gather the GTFS feed id from the gtfs-rt-feed
+                loadGtfsErrors(data["gtfsId"]);
             }
         });
     }
 }
 
-function refresh(id){
-    $.get("http://localhost:8080/api/gtfs-rt-feed/"+ id).done(function(data){
+function loadGtfsErrors(gtfsFeedId) {
+    $.get("http://localhost:8080/api/gtfs-feed/" + gtfsFeedId + "/errors", function (data) {
+        //TODO: Draw table GTFS errors
+        //[{"downloadTime":1440626757,"errorCount":51,"errorDesc":"If location_type is used in stops.txt, all stops referenced in stop_times.txt must have location_type of 0",
+        // "errorId":"e010","feedUrl":"http://data.trilliumtransit.com/gtfs/humboldtcounty-ca-us/humboldtcounty-ca-us.zip",
+        // "fileLocation":"/home/nipuna/Development/gtfs-realtime-validator/target/humboldtcounty-ca-us.zip","iterationId":2,"messageId":5}]/**/
+
+        for(var errorItem in data) {
+            errorItem = data[errorItem]
+            alert (errorItem);
+
+            var errorRow="";
+            errorRow += "<tr>";
+            errorRow += "<td>"+ errorItem.errorId +"<\/td>";
+            errorRow += "<td>"+ errorItem.errorCount +"<\/td>";
+            errorRow += "<td>"+ errorItem.errorDesc +"<\/td>";
+            errorRow += "<\/tr>";
+
+            $("#gtfs-feed-tbody").append(errorRow);
+        }
+    });
+}
+
+function refresh(id) {
+    $.get("http://localhost:8080/api/gtfs-rt-feed/" + id).done(function (data) {
         $("#iterations").text(++iterations);
         updateTables(id, data);
         errorCount = errorCount + data[0]["errorCount"];
@@ -53,11 +82,11 @@ function refresh(id){
     });
 }
 
-function initializeInterface(gtfsFeeds){
-    //var wrapper  = {gtfsFeeds: gtfsFeeds};
+function initializeInterface(gtfsRtFeeds) {
+    //var wrapper  = {gtfsRtFeeds: gtfsRtFeeds};
     var monitorTemplateScript = $("#feed-monitor-template").html();
     var monitorTemplate = Handlebars.compile(monitorTemplateScript);
-    var compiledHtml = monitorTemplate(gtfsFeeds);
+    var compiledHtml = monitorTemplate(gtfsRtFeeds);
     $('.monitor-placeholder').append(compiledHtml);
 }
 
@@ -67,13 +96,13 @@ function updateTables(index, data) {
     var monitorTemplate = Handlebars.compile(monitorTemplateScript);
     var compiledHtml = monitorTemplate(data);
 
-    $("#monitor-table-"+ index +"").html(compiledHtml);
+    $("#monitor-table-" + index + "").html(compiledHtml);
 }
 
 //Calculate time for display
 var start = new Date();
 
-function getTimeElapsed(){
+function getTimeElapsed() {
     var elapsed = new Date() - start;
 
     var seconds = Math.round(elapsed / 1000);
@@ -89,18 +118,13 @@ function getTimeElapsed(){
         return elapsed;
     }
 
-    $("#time-elapsed").text(hours + "h "+ min + "m " + sec + "s");
+    $("#time-elapsed").text(hours + "h " + min + "m " + sec + "s");
 }
 
 //Call time elapsed to update the clock evey second
-setIntervalClock = setInterval(getTimeElapsed,1000);
+setIntervalClock = setInterval(getTimeElapsed, 1000);
 
-function stopMonitor(){
+function stopMonitor() {
     clearInterval(setIntervalClock);
     clearInterval(setIntervalGetFeeds);
-}
-
-function startMonitor(){
-    setInterval(getTimeElapsed,1000);
-
 }

@@ -46,7 +46,7 @@ import java.util.List;
 import java.util.Map;
 
 public class BackgroundTask implements Runnable {
-    //Entity list kept under the gtfsFeed id.
+    //Entity list kept under the gtfsRtFeed id.
     //Used to check errors with different feeds for the same transit agency.
 
     //HashMap<Integer, List<TimeFeedEntity>> feedEntityList = new HashMap<>();
@@ -73,7 +73,7 @@ public class BackgroundTask implements Runnable {
             //Get the GTFS feed from the GtfsDaoMap using the gtfsFeedId of the current feed.
             gtfsData = GtfsFeed.GtfsDaoMap.get(currentFeed.getGtfsId());
 
-            //region Get gtfsFeed Iteration
+            //region Get gtfsRtFeed Iteration
             //---------------------------------------------------------------------------------------
             //Parse the URL from the string provided
             URL gtfsRtFeedUrl;
