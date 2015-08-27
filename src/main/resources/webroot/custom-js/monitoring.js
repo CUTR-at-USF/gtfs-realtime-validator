@@ -52,11 +52,6 @@ for (var gtfsRtFeed in gtfsRtFeeds) {
 
 function loadGtfsErrors(gtfsFeedId) {
     $.get("http://localhost:8080/api/gtfs-feed/" + gtfsFeedId + "/errors", function (data) {
-        //TODO: Draw table GTFS errors
-        //[{"downloadTime":1440626757,"errorCount":51,"errorDesc":"If location_type is used in stops.txt, all stops referenced in stop_times.txt must have location_type of 0",
-        // "errorId":"e010","feedUrl":"http://data.trilliumtransit.com/gtfs/humboldtcounty-ca-us/humboldtcounty-ca-us.zip",
-        // "fileLocation":"/home/nipuna/Development/gtfs-realtime-validator/target/humboldtcounty-ca-us.zip","iterationId":2,"messageId":5}]/**/
-
         for(var errorItem in data) {
             errorItem = data[errorItem]
             alert (errorItem);
