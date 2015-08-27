@@ -235,6 +235,9 @@ public class GtfsFeed {
             }
         }else {
             System.out.println("Connection response not 2**");
+
+            ErrorMessageModel errorMessageModel = new ErrorMessageModel("Connection response not 2**", "Connection response not 2**");
+            return Response.ok(errorMessageModel).build();
         }
         return Response.ok(gtfsModel).build();
     }
