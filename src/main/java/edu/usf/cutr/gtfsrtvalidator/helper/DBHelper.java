@@ -22,10 +22,10 @@ import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 
 public class DBHelper {
     public static void saveError(ErrorListHelperModel errorListHelperModel) {
-        GTFSDB.createMessageLog(errorListHelperModel.getErrorMessage());
+        int messageId = GTFSDB.createMessageLog(errorListHelperModel.getErrorMessage());
 
         for (OccurrenceModel occurrence : errorListHelperModel.getOccurrenceList()) {
-            occurrence.setMessageId(errorListHelperModel.getErrorMessage().getMessageId());
+            occurrence.setMessageId(messageId);
             GTFSDB.createOccurrence(occurrence);
         }
     }

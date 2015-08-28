@@ -554,19 +554,26 @@ public class GTFSDB {
 
     //region CURD: Message Log
     //Create
-    public static synchronized void createMessageLog(MessageLogModel messageLog) {
+    public static synchronized int createMessageLog(MessageLogModel messageLog) {
         Datasource ds = Datasource.getInstance();
         Connection con = ds.getConnection();
+        int createdId = 0;
 
         try {
             PreparedStatement stmt;
             con.setAutoCommit(false);
 
-            stmt = con.prepareStatement("INSERT INTO MessageLog (itterationID, errorID)VALUES (?, ?)");
+            stmt = con.prepareStatement("INSERT INTO MessageLog (itterationID, errorID)VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
             stmt.setInt(1, messageLog.getIterationId());
             stmt.setString(2, messageLog.getErrorId());
 
             stmt.executeUpdate();
+
+            //Get the id of the created feed
+            ResultSet rs = stmt.getGeneratedKeys();
+            if (rs != null && rs.next()) {
+                createdId = rs.getInt(1);
+            }
 
             stmt.close();
             con.commit();
@@ -582,6 +589,8 @@ public class GTFSDB {
                 e.printStackTrace();
             }
         }
+
+        return createdId;
     }
 
     //Update
