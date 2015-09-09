@@ -29,10 +29,10 @@ CREATE TABLE IF NOT EXISTS "Error" (
 
 CREATE TABLE IF NOT EXISTS "MessageLog" (
   "messageID"    INTEGER PRIMARY KEY AUTOINCREMENT,
-  "itterationID" INTEGER,
+  "iterationID" INTEGER,
   "errorID"      TEXT,
   "errorDetails" TEXT,
-  FOREIGN KEY (itterationID) REFERENCES GtfsRtFeedIteration (itterationID),
+  FOREIGN KEY (iterationID) REFERENCES GtfsRtFeedIteration (iterationID),
   FOREIGN KEY (errorID) REFERENCES Error (errorID)
 );
 
@@ -46,9 +46,9 @@ CREATE TABLE IF NOT EXISTS "Occurrence" (
 
 CREATE TABLE IF NOT EXISTS "GtfsMessageLog" (
   "messageID"    INTEGER PRIMARY KEY AUTOINCREMENT,
-  "itterationID" INTEGER,
+  "iterationID" INTEGER,
   "errorID"      TEXT,
-  FOREIGN KEY (itterationID) REFERENCES GtfsFeed (feedID),
+  FOREIGN KEY (iterationID) REFERENCES GtfsFeed (feedID),
   FOREIGN KEY (errorID) REFERENCES Error (errorID)
 );
 
@@ -74,15 +74,15 @@ CREATE VIEW IF NOT EXISTS errorCount AS
 
     LEFT JOIN
     (SELECT
-       itterationID,
+       iterationID,
        COUNT(*) AS errorCount
      FROM MessageLog
-     GROUP BY itterationID) `iterationErrors`
-      ON iterationErrors.itterationID = GtfsRtFeedIteration.IterationID;
+     GROUP BY iterationID) `iterationErrors`
+      ON iterationErrors.iterationID = GtfsRtFeedIteration.IterationID;
 
 CREATE VIEW IF NOT EXISTS gtfsErrorCount AS
 SELECT GtfsMessageLog.messageID,
-  itterationID,
+  iterationID,
   GtfsMessageLog.errorID,
   errorDescription,
   feedUrl,
@@ -91,7 +91,7 @@ SELECT GtfsMessageLog.messageID,
   errorCount
 FROM GtfsMessageLog
   JOIN GtfsFeed
-    ON GtfsFeed.feedID = GtfsMessageLog.itterationID
+    ON GtfsFeed.feedID = GtfsMessageLog.iterationID
 
   LEFT JOIN
   (SELECT
@@ -123,7 +123,7 @@ CREATE VIEW IF NOT EXISTS detailedError AS
     JOIN GtfsRtFeedIteration
       ON GtfsRtFeed.rtFeedID = GtfsRtFeedIteration.rtFeedID
     LEFT JOIN MessageLog
-      ON GtfsRtFeedIteration.IterationID = MessageLog.itterationID
+      ON GtfsRtFeedIteration.IterationID = MessageLog.iterationID
     LEFT JOIN Error
       ON Error.errorID = MessageLog.errorID
     LEFT JOIN Occurrence
@@ -133,7 +133,7 @@ CREATE VIEW IF NOT EXISTS messageDetails AS
   SELECT *
   FROM GtfsRtFeedIteration
     LEFT JOIN MessageLog
-      ON GtfsRtFeedIteration.IterationID = MessageLog.itterationID
+      ON GtfsRtFeedIteration.IterationID = MessageLog.iterationID
     LEFT JOIN Error
       ON Error.errorID = MessageLog.errorID
     LEFT JOIN Occurrence

@@ -24,7 +24,7 @@ import java.util.Arrays;
 public class ViewMessageDetailsModel {
     public static final String FEED_PROTOCOL_BUFFER = "feedProtobuf";
     public static final String MESSAGE_ID = "messageId";
-    public static final String ITERATION_ID = "itterationId";
+    public static final String ITERATION_ID = "iterationId";
     public static final String ERROR_ID = "errorId";
     public static final String ERROR_DESC = "errorDescription";
     public static final String OCCURRENCE_ID = "occurrenceId";

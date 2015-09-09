@@ -29,7 +29,7 @@ public class MessageLogModel {
     }
 
     public static final String MESSAGE_ID = "messageId";
-    public static final String ITERATION_ID = "itterationID";
+    public static final String ITERATION_ID = "iterationID";
     public static final String ERROR_ID = "errorId";
 
     private int messageId;

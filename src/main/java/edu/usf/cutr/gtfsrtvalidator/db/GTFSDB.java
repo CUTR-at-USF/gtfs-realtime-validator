@@ -563,7 +563,7 @@ public class GTFSDB {
             PreparedStatement stmt;
             con.setAutoCommit(false);
 
-            stmt = con.prepareStatement("INSERT INTO MessageLog (itterationID, errorID)VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
+            stmt = con.prepareStatement("INSERT INTO MessageLog (iterationID, errorID)VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
             stmt.setInt(1, messageLog.getIterationId());
             stmt.setString(2, messageLog.getErrorId());
 
@@ -602,7 +602,7 @@ public class GTFSDB {
             PreparedStatement stmt;
             con.setAutoCommit(false);
 
-            stmt = con.prepareStatement("UPDATE MessageLog SET itterationID = ?, errorID = ?" +
+            stmt = con.prepareStatement("UPDATE MessageLog SET iterationID = ?, errorID = ?" +
                     "WHERE messageID = ?");
             stmt.setInt(1, messageLog.getIterationId());
             stmt.setString(2, messageLog.getErrorId());
@@ -675,7 +675,7 @@ public class GTFSDB {
 
             con.setAutoCommit(false);
 
-            stmt = con.prepareStatement("SELECT * FROM MessageLog WHERE itterationID = ?");
+            stmt = con.prepareStatement("SELECT * FROM MessageLog WHERE iterationID = ?");
             stmt.setInt(1, iterationId);
 
             ResultSet rs = stmt.executeQuery();
@@ -931,7 +931,7 @@ public class GTFSDB {
             PreparedStatement stmt;
             con.setAutoCommit(false);
 
-            stmt = con.prepareStatement("INSERT INTO GtfsMessageLog (errorID, itterationID)VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
+            stmt = con.prepareStatement("INSERT INTO GtfsMessageLog (errorID, iterationID)VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
             stmt.setString(1, messageLog.getErrorId());
             stmt.setInt(2, messageLog.getIterationId());
 
@@ -1107,7 +1107,7 @@ public class GTFSDB {
             PreparedStatement stmt;
             con.setAutoCommit(false);
 
-            stmt = con.prepareStatement("DELETE FROM GtfsMessageLog WHERE itterationID = ?");
+            stmt = con.prepareStatement("DELETE FROM GtfsMessageLog WHERE iterationID = ?");
             stmt.setInt(1, feedId);
 
             stmt.executeUpdate();
@@ -1513,7 +1513,7 @@ public class GTFSDB {
             PreparedStatement stmt;
             con.setAutoCommit(false);
 
-            stmt = con.prepareStatement("SELECT * FROM gtfsErrorCount WHERE itterationID = ?");
+            stmt = con.prepareStatement("SELECT * FROM gtfsErrorCount WHERE iterationID = ?");
             stmt.setInt(1, feedId);
             ResultSet rs = stmt.executeQuery();
 

@@ -19,7 +19,7 @@ package edu.usf.cutr.gtfsrtvalidator.api.model;
 
 public class ViewGtfsErrorCountModel {
     public static final String MESSAGE_ID = "messageID";
-    public static final String ITERATION_ID = "itterationID";
+    public static final String ITERATION_ID = "iterationID";
     public static final String ERROR_ID = "errorID";
     public static final String ERROR_DESC = "errorDescription";
     public static final String FEED_URL = "feedUrl";

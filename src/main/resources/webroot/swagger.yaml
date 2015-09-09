@@ -151,7 +151,7 @@ paths:
           type: string
         - name: limit
           in: query
-          description: limit the number of itterations checked for errors/warnings.
+          description: limit the number of iterations checked for errors/warnings.
           type: string
         - name: type
           in: query
@@ -240,10 +240,10 @@ definitions:
       url:
         type: string
         description: URL of the download location
-      itterations:
+      iterations:
         type: integer
         format: int32
-        description: Number of itterations checked
+        description: Number of iterations checked
       warning:
         type: integer
         format: int32
@@ -269,10 +269,10 @@ definitions:
         type: integer
         format: int32
         description: timestamp of the feed
-      itterations:
+      iterations:
         type: integer
         format: int32
-        description: The itteration
+        description: The iteration
       errors:
         type: array
         items:
@@ -284,10 +284,10 @@ definitions:
 
   gtfs-rt-error:
     properties:
-      itterations:
+      iterations:
         type: integer
         format: int32
-        description: Number of itteration error was found on
+        description: Number of iteration error was found on
       error-id:
         type: integer
         format: int32
@@ -298,17 +298,17 @@ definitions:
       count:
         type: integer
         format: int32
-        description: Number of same error occurences in the itteration
+        description: Number of same error occurences in the iteration
 
   gtfs-rt-warning:
     properties:
       uuid:
         type: string
         description: Unique identifier for the rt feed
-      itterations:
+      iterations:
         type: integer
         format: int32
-        description: Number of itteration warning was found on
+        description: Number of iteration warning was found on
       warning-id:
         type: integer
         format: int32
@@ -319,7 +319,7 @@ definitions:
       count:
         type: integer
         format: int32
-        description: Number of same warning occurences in the itteration
+        description: Number of same warning occurences in the iteration
   Error:
     properties:
       code:
