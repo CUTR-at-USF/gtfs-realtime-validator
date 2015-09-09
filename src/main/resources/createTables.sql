@@ -62,8 +62,8 @@ CREATE TABLE IF NOT EXISTS "GtfsOccurrence" (
 
 CREATE VIEW IF NOT EXISTS errorCount AS
   SELECT
-    IterationID,
-    IterationTimestamp,
+    GtfsRtFeedIteration.IterationID,
+    GtfsRtFeedIteration.IterationTimestamp,
     GtfsRtFeed.rtFeedID,
     GtfsRtFeed.feedURL,
     GtfsRtFeed.gtfsFeedID,
