@@ -17,7 +17,6 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.resource;
 
-import edu.usf.cutr.gtfsrtvalidator.api.model.ErrorMessageModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.ViewGtfsErrorCountModel;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
@@ -45,6 +44,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static edu.usf.cutr.gtfsrtvalidator.helper.HttpMessageHelper.generateError;
+
 @Path("/gtfs-feed")
 public class GtfsFeed {
     private static final int BUFFER_SIZE = 4096;
@@ -64,7 +65,10 @@ public class GtfsFeed {
     public Response getGtfsFeeds() {
         List<GtfsFeedModel> gtfsFeeds = new ArrayList<>();
         try {
-            gtfsFeeds = GTFSDB.readAllGtfsFeeds();
+            List<GtfsFeedModel> tempGtfsFeeds = GTFSDB.readAllGtfsFeeds();
+            if (tempGtfsFeeds != null) {
+                gtfsFeeds = tempGtfsFeeds;
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -89,12 +93,35 @@ public class GtfsFeed {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response postGtfsFeed(@FormParam("gtfsurl") String gtfsFeedUrl) {
+        URL url = getUrlFromString(gtfsFeedUrl);
+        if (url == null)
+            return generateError("Malformed URL", "Malformed URL for the GTFS feed", Response.Status.BAD_REQUEST);
 
-        Response downloadedFeedResponse;
-        downloadedFeedResponse = downloadFeed(gtfsFeedUrl);
+        HttpURLConnection connection = getHttpURLConnection(url);
+        if (connection == null)
+            return generateError("Can't read from URL", "Can't read content from the GTFS URL", Response.Status.BAD_REQUEST);
+
+        //Gets save file path generated from the URL and file name from the connection
+        String saveFilePath = getSaveFilePath(gtfsFeedUrl, connection);
+
+        GtfsFeedModel searchFeed = new GtfsFeedModel();
+        searchFeed.setGtfsUrl(gtfsFeedUrl);
+
+        GtfsFeedModel gtfsFeed = GTFSDB.readGtfsFeed(searchFeed);
+
+        //TODO: Create GTFS Iteration for Feed
+        //Downloads gtfs feed and creates a new gtfsFeedModel object
+        gtfsFeed = getGtfsFeedModel(gtfsFeedUrl, gtfsFeed, saveFilePath, connection);
+
+        //saves gtfs data to store and validates gtfs feed
+        GtfsDaoImpl store = saveGtfsFeed(gtfsFeed);
+        if (store == null)
+            return generateError("Can't read content", "Can't read content from the GTFS URL", Response.Status.NOT_FOUND);
+
+        GtfsDaoMap.put(gtfsFeed.getFeedId(), store);
 
         //Return the Response from the downloadFeed method
-        return downloadedFeedResponse;
+        return Response.ok(gtfsFeed).build();
     }
 
     //Gets URL from string returns null if failed to parse URL
@@ -127,45 +154,6 @@ public class GtfsFeed {
             connection = null;
         }
         return connection;
-    }
-
-    //helper method for generating and returning error message
-    private Response generateError(String title, String message, Response.Status errorStatus) {
-        ErrorMessageModel errorMessageModel = new ErrorMessageModel(title, message);
-        return Response.status(errorStatus).entity(errorMessageModel).build();
-    }
-
-    private Response downloadFeed(String gtfsFeedUrl) {
-        GtfsFeedModel gtfsFeed;
-        String saveFilePath;
-
-        URL url = getUrlFromString(gtfsFeedUrl);
-        if (url == null)
-            return generateError("Malformed URL", "Malformed URL for the GTFS feed", Response.Status.BAD_REQUEST);
-
-        HttpURLConnection connection = getHttpURLConnection(url);
-        if (connection == null)
-            return generateError("Can't read from URL", "Can't read content from the GTFS URL", Response.Status.BAD_REQUEST);
-
-        //Gets save file path generated from the URL and file name from the connection
-        saveFilePath = getSaveFilePath(gtfsFeedUrl, connection);
-
-        GtfsFeedModel searchFeed = new GtfsFeedModel();
-        searchFeed.setGtfsUrl(gtfsFeedUrl);
-
-        gtfsFeed = GTFSDB.readGtfsFeed(searchFeed);
-
-        //TODO: Create GTFS Iteration for Feed
-        //Downloads gtfs feed and creates a new gtfsFeedModel object
-        gtfsFeed = getGtfsFeedModel(gtfsFeedUrl, gtfsFeed, saveFilePath, connection);
-
-        //saves gtfs data to store and validates gtfs feed
-        GtfsDaoImpl store = saveGtfsFeed(gtfsFeed);
-        if(store == null) return generateError("Can't read content", "Can't read content from the GTFS URL", Response.Status.NOT_FOUND);
-
-        GtfsDaoMap.put(gtfsFeed.getFeedId(), store);
-
-        return Response.ok(gtfsFeed).build();
     }
 
     private GtfsFeedModel getGtfsFeedModel(String gtfsFeedUrl, GtfsFeedModel gtfsFeed, String saveFilePath, HttpURLConnection connection) {
@@ -214,8 +202,6 @@ public class GtfsFeed {
             validateGtfsError(gtfsFeed.getFeedId(), store, StopLocationTypeValidator);
 
         } catch (Exception ex) {
-            System.out.println("Unable to read from downloaded GTFS feed");
-            ErrorMessageModel errorMessageModel = new ErrorMessageModel("Can't read content", "Can't read content from the GTFS URL");
             return null;
         }
 
