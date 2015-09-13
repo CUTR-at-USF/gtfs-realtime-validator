@@ -22,7 +22,13 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.ErrorMessageModel;
 import javax.ws.rs.core.Response;
 
 public class HttpMessageHelper {
-    //helper method for generating and returning error message
+    /**
+     * Method for generating error response given a message title, description and the error status code
+     * @param title Title of the error
+     * @param message Detailed description of the error
+     * @param errorStatus Status code of the error
+     * @return Returns a Response generated with the provided details
+     */
     public static Response generateError(String title, String message, Response.Status errorStatus) {
         ErrorMessageModel errorMessageModel = new ErrorMessageModel(title, message);
         return Response.status(errorStatus).entity(errorMessageModel).build();
