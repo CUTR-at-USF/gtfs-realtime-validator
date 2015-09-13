@@ -53,7 +53,7 @@ public class GtfsFeed {
     //DELETE {id} remove feed with the given id
     @DELETE
     @Path("/{id}")
-    public Response deleteGtfsFeed(@PathParam("id") String id){
+    public Response deleteGtfsFeed(@PathParam("id") String id) {
         GTFSDB.deleteGtfsFeed(Integer.parseInt(id));
         return Response.accepted().build();
     }
@@ -61,14 +61,15 @@ public class GtfsFeed {
     //GET return list of available gtfs-feeds
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getGtfsFeeds(){
+    public Response getGtfsFeeds() {
         List<GtfsFeedModel> gtfsFeeds = new ArrayList<>();
         try {
             gtfsFeeds = GTFSDB.readAllGtfsFeeds();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        GenericEntity<List<GtfsFeedModel>> feedList = new GenericEntity<List<GtfsFeedModel>>(gtfsFeeds){};
+        GenericEntity<List<GtfsFeedModel>> feedList = new GenericEntity<List<GtfsFeedModel>>(gtfsFeeds) {
+        };
         return Response.ok(feedList).build();
     }
 
@@ -76,9 +77,10 @@ public class GtfsFeed {
     @GET
     @Path("/{id}/errors")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getGtfsFeedErrors(@PathParam("id") String id){
+    public Response getGtfsFeedErrors(@PathParam("id") String id) {
         List<ViewGtfsErrorCountModel> gtfsFeeds = GTFSDB.getGtfsErrorList(Integer.parseInt(id));
-        GenericEntity<List<ViewGtfsErrorCountModel>> feedList = new GenericEntity<List<ViewGtfsErrorCountModel>>(gtfsFeeds){};
+        GenericEntity<List<ViewGtfsErrorCountModel>> feedList = new GenericEntity<List<ViewGtfsErrorCountModel>>(gtfsFeeds) {
+        };
         return Response.ok(feedList).build();
     }
 
@@ -91,162 +93,183 @@ public class GtfsFeed {
         Response downloadedFeedResponse;
         downloadedFeedResponse = downloadFeed(gtfsFeedUrl);
 
-        //Retrun the Response from the downloadFeed method
+        //Return the Response from the downloadFeed method
         return downloadedFeedResponse;
-
-        //Return gtfs item on success
-        //return Response.ok(downloadedFeedResponse).build();
     }
 
-    private Response downloadFeed(String gtfsFeedUrl) {
-
-        GtfsFeedModel gtfsModel = null;
-
-        String saveFilePath;
+    //Gets URL from string returns null if failed to parse URL
+    private URL getUrlFromString(String urlString) {
         URL url;
-
-        //Tries to convert gtfsFeedUrl String and URL
         try {
-            url = new URL(gtfsFeedUrl);
+            url = new URL(urlString);
         } catch (MalformedURLException ex) {
             System.out.println("Invalid URL");
-            ErrorMessageModel errorMessageModel = new ErrorMessageModel("Malformed URL", "Malformed URL for the GTFS feed");
-            return Response.ok(errorMessageModel).build();
+            url = null;
         }
 
-        boolean connectionSuccessful;
-        HttpURLConnection connection;
+        return url;
+    }
 
+    private HttpURLConnection getHttpURLConnection(URL url) {
+        HttpURLConnection connection;
         try {
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
             connection.connect();
-            //Check if the request is handled successfully
-            connectionSuccessful = connection.getResponseCode() / 100 == 2;
 
-            System.out.println(connection.getResponseCode());
+            //Check if the request is handled successfully
+            if (connection.getResponseCode() / 100 == 2) {
+                connection = null;
+            }
+
         } catch (IOException ex) {
             System.out.println("Can't read from GTFS URL");
-            ErrorMessageModel errorMessageModel = new ErrorMessageModel("Can't read content", "Can't read content from the GTFS URL");
-            return Response.ok(errorMessageModel).build();
+            connection = null;
         }
+        return connection;
+    }
 
-        if (connectionSuccessful) {
-            //This gets you the size of the file to download (in bytes)
-            String fileName = "";
-            String disposition = connection.getHeaderField("Content-Disposition");
+    //helper method for generating and returning error message
+    private Response generateError(String title, String message, Response.Status errorStatus) {
+        ErrorMessageModel errorMessageModel = new ErrorMessageModel(title, message);
+        return Response.status(errorStatus).entity(errorMessageModel).build();
+    }
 
-            if (disposition == null) {
-                //Extracts file name from URL
-                fileName = gtfsFeedUrl.substring(gtfsFeedUrl.lastIndexOf("/") + 1,
-                        gtfsFeedUrl.length());
+    private Response downloadFeed(String gtfsFeedUrl) {
+        GtfsFeedModel gtfsFeed;
+        String saveFilePath;
+
+        URL url = getUrlFromString(gtfsFeedUrl);
+        if (url == null)
+            return generateError("Malformed URL", "Malformed URL for the GTFS feed", Response.Status.BAD_REQUEST);
+
+        HttpURLConnection connection = getHttpURLConnection(url);
+        if (connection == null)
+            return generateError("Can't read from URL", "Can't read content from the GTFS URL", Response.Status.BAD_REQUEST);
+
+        //Gets save file path generated from the URL and file name from the connection
+        saveFilePath = getSaveFilePath(gtfsFeedUrl, connection);
+
+        GtfsFeedModel searchFeed = new GtfsFeedModel();
+        searchFeed.setGtfsUrl(gtfsFeedUrl);
+
+        gtfsFeed = GTFSDB.readGtfsFeed(searchFeed);
+
+        //TODO: Create GTFS Iteration for Feed
+        //Downloads gtfs feed and creates a new gtfsFeedModel object
+        gtfsFeed = getGtfsFeedModel(gtfsFeedUrl, gtfsFeed, saveFilePath, connection);
+
+        //saves gtfs data to store and validates gtfs feed
+        GtfsDaoImpl store = saveGtfsFeed(gtfsFeed);
+        if(store == null) return generateError("Can't read content", "Can't read content from the GTFS URL", Response.Status.NOT_FOUND);
+
+        GtfsDaoMap.put(gtfsFeed.getFeedId(), store);
+
+        return Response.ok(gtfsFeed).build();
+    }
+
+    private GtfsFeedModel getGtfsFeedModel(String gtfsFeedUrl, GtfsFeedModel gtfsFeed, String saveFilePath, HttpURLConnection connection) {
+        if (gtfsFeed != null) {
+            //remove current errors from the database
+            GTFSDB.deleteGtfsMessageLogByFeed(gtfsFeed.getFeedId());
+
+            System.out.println("URL exists in database");
+            File f = new File(gtfsFeed.getFeedLocation());
+
+            if (f.exists() && !f.isDirectory()) {
+                System.out.println("File in db exists in File System");
             } else {
-                //Extracts file name from header field
-                int index = disposition.indexOf("filename=");
-                if (index > 0) {
-                    fileName = disposition.substring(index + 10, disposition.length() - 1);
-                }
-            }
+                //Remove db records and download data
+                System.out.println("File Doesn't Exist in File System");
 
-            //get the location of the executed jar file
-            GetFile jarInfo = new GetFile();
+                //TODO: Don't delete feed, use iterations
+                GTFSDB.deleteGtfsFeed(gtfsFeed.getFeedId());
+                System.out.println("DB entry deleted");
 
-            //remove file.jar from the path to get the folder where the jar is
-            File jarLocation = jarInfo.getJarLocation().getParentFile();
-            String saveDir = jarLocation.toString();
-
-            saveFilePath = saveDir + File.separator + fileName;
-
-            GtfsFeedModel searchFeed = new GtfsFeedModel();
-            searchFeed.setGtfsUrl(gtfsFeedUrl);
-
-            GtfsFeedModel gtfsFeed = GTFSDB.readGtfsFeed(searchFeed);
-
-            if (gtfsFeed != null) {
-
-                //remove current errors from the database
-                GTFSDB.deleteGtfsMessageLogByFeed(gtfsFeed.getFeedId());
-
-                System.out.println("URL exists in database");
-                File f = new File(gtfsFeed.getFeedLocation());
-
-                if (f.exists() && !f.isDirectory()) {
-                    System.out.println("File in db exists in filesystem");
-                    gtfsModel = gtfsFeed;
-                } else {
-                    //Remove db records and download data
-                    System.out.println("File Doesn't Exist in FileSystem");
-                    GTFSDB.deleteGtfsFeed(gtfsFeed.getFeedId());
-                    System.out.println("DB entry deleted");
-
-                    downloadGtfsFeed(saveFilePath, connection);
-
-                    gtfsFeed = new GtfsFeedModel();
-                    gtfsFeed.setFeedLocation(saveFilePath);
-                    gtfsFeed.setGtfsUrl(gtfsFeedUrl);
-
-                    //Create GTFS feed row in database
-                    int feedId = GTFSDB.createGtfsFeed(gtfsFeed);
-
-                    //Get the newly created GTFSfeed model from id
-                    gtfsFeed = GTFSDB.readGtfsFeed(feedId);
-
-                    //Return GTFS Model object
-                    gtfsModel = gtfsFeed;
-                }
-            } else {
-                System.out.println("File Doesn't Exist");
                 downloadGtfsFeed(saveFilePath, connection);
-
-                gtfsFeed = new GtfsFeedModel();
-                gtfsFeed.setFeedLocation(saveFilePath);
-                gtfsFeed.setGtfsUrl(gtfsFeedUrl);
-
-                //Create GTFS feed row in database
-                GTFSDB.createGtfsFeed(gtfsFeed);
-
-                //Get the newly created GTFSfeed model from url
-                gtfsFeed = GTFSDB.readGtfsFeed(gtfsFeed);
-                //Return GTFS Model object
-                gtfsModel = gtfsFeed;
+                gtfsFeed = getGtfsFeedModel(gtfsFeedUrl, saveFilePath);
             }
-
-            if (gtfsFeed != null) {
-                try {
-                    //Read GTFS data into a GtfsDaoImpl
-                    GtfsReader reader = new GtfsReader();
-                    reader.setInputLocation(new File(gtfsFeed.getFeedLocation()));
-
-                    GtfsDaoImpl store = new GtfsDaoImpl();
-                    reader.setEntityStore(store);
-                    reader.run();
-
-                    //Store GtfsDaoImpl to Map
-                    GtfsDaoMap.put(gtfsModel.getFeedId(), store);
-
-                    StopLocationTypeValidator StopLocationTypeValidator = new StopLocationTypeValidator();
-                    validateGtfs(gtfsModel.getFeedId(), store, StopLocationTypeValidator);
-
-                } catch (Exception ex) {
-                    System.out.println("Unable to read from downloaded GTFS feed");
-                    ErrorMessageModel errorMessageModel = new ErrorMessageModel("Can't read content", "Can't read content from the GTFS URL");
-                    return Response.ok(errorMessageModel).build();
-                }
-            }
-        }else {
-            System.out.println("Connection response not 2**");
-
-            ErrorMessageModel errorMessageModel = new ErrorMessageModel("Connection response not 2**", "Connection response not 2**");
-            return Response.ok(errorMessageModel).build();
+        } else {
+            System.out.println("File Doesn't Exist");
+            downloadGtfsFeed(saveFilePath, connection);
+            gtfsFeed = getGtfsFeedModel(gtfsFeedUrl, saveFilePath);
         }
-        return Response.ok(gtfsModel).build();
+        return gtfsFeed;
+    }
+
+    private GtfsDaoImpl saveGtfsFeed(GtfsFeedModel gtfsFeed) {
+
+        GtfsDaoImpl store = new GtfsDaoImpl();
+
+        try {
+            //Read GTFS data into a GtfsDaoImpl
+            GtfsReader reader = new GtfsReader();
+            reader.setInputLocation(new File(gtfsFeed.getFeedLocation()));
+
+            reader.setEntityStore(store);
+            reader.run();
+
+            //Check GTFS feed for errors
+            StopLocationTypeValidator StopLocationTypeValidator = new StopLocationTypeValidator();
+            validateGtfsError(gtfsFeed.getFeedId(), store, StopLocationTypeValidator);
+
+        } catch (Exception ex) {
+            System.out.println("Unable to read from downloaded GTFS feed");
+            ErrorMessageModel errorMessageModel = new ErrorMessageModel("Can't read content", "Can't read content from the GTFS URL");
+            return null;
+        }
+
+        return store;
+    }
+
+    private String getSaveFilePath(String gtfsFeedUrl, HttpURLConnection connection) {
+        String saveFilePath;
+        String fileName = "";
+        String disposition = connection.getHeaderField("Content-Disposition");
+
+        if (disposition == null) {
+            //Extracts file name from URL
+            fileName = gtfsFeedUrl.substring(gtfsFeedUrl.lastIndexOf("/") + 1,
+                    gtfsFeedUrl.length());
+        } else {
+            //Extracts file name from header field
+            int index = disposition.indexOf("filename=");
+            if (index > 0) {
+                fileName = disposition.substring(index + 10, disposition.length() - 1);
+            }
+        }
+
+        //get the location of the executed jar file
+        GetFile jarInfo = new GetFile();
+
+        //remove file.jar from the path to get the folder where the jar is
+        File jarLocation = jarInfo.getJarLocation().getParentFile();
+        String saveDir = jarLocation.toString();
+
+        saveFilePath = saveDir + File.separator + fileName;
+        return saveFilePath;
+    }
+
+    private GtfsFeedModel getGtfsFeedModel(String gtfsFeedUrl, String saveFilePath) {
+        GtfsFeedModel gtfsFeed;
+        gtfsFeed = new GtfsFeedModel();
+        gtfsFeed.setFeedLocation(saveFilePath);
+        gtfsFeed.setGtfsUrl(gtfsFeedUrl);
+
+        //Create GTFS feed row in database
+        int feedId = GTFSDB.createGtfsFeed(gtfsFeed);
+
+        //Get the newly created GTFSfeed model from id
+        gtfsFeed = GTFSDB.readGtfsFeed(feedId);
+        return gtfsFeed;
     }
 
     //helper method to validate GTFS feed according to a given rule
-    private void validateGtfs(int gtfsId, GtfsDaoImpl gtfsData, GtfsFeedValidator feedEntityValidator) {
+    private void validateGtfsError(int gtfsId, GtfsDaoImpl gtfsData, GtfsFeedValidator feedEntityValidator) {
         ErrorListHelperModel errorList = feedEntityValidator.validate(gtfsData);
 
         if (errorList != null && !errorList.getOccurrenceList().isEmpty()) {
+            //TODO: Change the iteration ID to not use gtfsID
             //Set Gtfs feed id
             errorList.getErrorMessage().setIterationId(gtfsId);
             //Save the captured errors to the database
