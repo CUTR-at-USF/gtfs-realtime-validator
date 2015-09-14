@@ -965,17 +965,21 @@ public class GTFSDB {
 
     //region CURD: GtfsRt Iteration
     //Create
-    public static synchronized GtfsFeedIterationModel createGtfsFeedIteration(GtfsFeedIterationModel gtfsFeedIterationModel) {
+    public static synchronized GtfsFeedIterationModel createGtfsFeedIteration(GtfsFeedModel gtfsFeed) {
         Datasource ds = Datasource.getInstance();
         Connection con = ds.getConnection();
+
         int createdId = 0;
+        int gtfsFeedId = gtfsFeed.getFeedId();
+        long currentTimestamp = TimeStampHelper.getCurrentTimestamp();
+
         try {
             PreparedStatement stmt;
             con.setAutoCommit(false);
 
             stmt = con.prepareStatement("INSERT INTO GtfsFeedIteration (feedID, IterationTimestamp) VALUES (?,?)");
-            stmt.setInt(1, gtfsFeedIterationModel.getFeedId());
-            stmt.setLong(2, TimeStampHelper.getCurrentTimestamp());
+            stmt.setInt(1, gtfsFeedId);
+            stmt.setLong(2, currentTimestamp);
 
             stmt.executeUpdate();
 
@@ -983,7 +987,6 @@ public class GTFSDB {
             ResultSet rs = stmt.getGeneratedKeys();
             if (rs != null && rs.next()) {
                 createdId = rs.getInt(1);
-                gtfsFeedIterationModel.setIterationId(createdId);
             }
 
             stmt.close();
@@ -1000,7 +1003,8 @@ public class GTFSDB {
                 e.printStackTrace();
             }
         }
-        return gtfsFeedIterationModel;
+
+        return new GtfsFeedIterationModel(createdId, currentTimestamp, gtfsFeedId);
     }
 
     //Read

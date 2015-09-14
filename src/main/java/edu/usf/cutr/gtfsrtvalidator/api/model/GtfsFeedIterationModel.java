@@ -21,9 +21,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class GtfsFeedIterationModel {
-    public GtfsFeedIterationModel(long timeStamp, int feedId) {
-        this.timeStamp = timeStamp;
-        this.feedId = feedId;
+    public GtfsFeedIterationModel(int iterationId, long timeStamp, int feedId) {
+        this.setIterationId(iterationId);
+        this.setTimeStamp(timeStamp);
+        this.setFeedId(feedId);
     }
 
     public GtfsFeedIterationModel(){};

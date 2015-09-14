@@ -17,6 +17,7 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.resource;
 
+import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedIterationModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.ViewGtfsErrorCountModel;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
@@ -110,30 +111,34 @@ public class GtfsFeed {
         GtfsFeedModel gtfsFeed = GTFSDB.readGtfsFeed(searchFeed);
 
         //TODO: Move to one method
-        //TODO: Create GTFS Iteration for Feed
         if (gtfsFeed != null) {
-            //TODO: don't overwrite the current errors a new iteration should be used instead
-            //remove current errors from the database
-            GTFSDB.deleteGtfsMessageLogByFeed(gtfsFeed.getFeedId());
-
             System.out.println("URL exists in database");
             File f = new File(gtfsFeed.getFeedLocation());
-            if (f.exists() && !f.isDirectory()) {
-                System.out.println("File in db exists in File System");
-            }else {
-                gtfsFeed = removeGtfsFeedModel(gtfsFeed, connection);
+
+            //Download the GTFS feed again if it doesn't exist in the filesystem
+            if (!f.exists() || f.isDirectory()) {
+                downloadGtfsFeed(gtfsFeed.getFeedLocation(), connection);
             }
         }else{
             //If the GTFS file associated with the
-            gtfsFeed = getGtfsFeedModel(gtfsFeedUrl, saveFilePath, connection);
+            System.out.println("File Doesn't Exist");
+            downloadGtfsFeed(saveFilePath, connection);
+            gtfsFeed = createGtfsFeedModel(gtfsFeedUrl, saveFilePath);
         }
 
-        //saves gtfs data to store and validates gtfs feed
+        //Saves GTFS data to store and validates GTFS feed
         GtfsDaoImpl store = saveGtfsFeed(gtfsFeed);
         if (store == null)
             return generateError("Can't read content", "Can't read content from the GTFS URL", Response.Status.NOT_FOUND);
 
+        //Create a new iteration for the GTFS feed
+        GtfsFeedIterationModel gtfsFeedIteration = GTFSDB.createGtfsFeedIteration(gtfsFeed);
+
         GtfsDaoMap.put(gtfsFeed.getFeedId(), store);
+
+        //Check GTFS feed for errors
+        StopLocationTypeValidator StopLocationTypeValidator = new StopLocationTypeValidator();
+        validateGtfsError(gtfsFeedIteration.getIterationId(), store, StopLocationTypeValidator);
 
         //Return the Response from the downloadFeed method
         return Response.ok(gtfsFeed).build();
@@ -223,11 +228,6 @@ public class GtfsFeed {
 
             reader.setEntityStore(store);
             reader.run();
-
-            //Check GTFS feed for errors
-            StopLocationTypeValidator StopLocationTypeValidator = new StopLocationTypeValidator();
-            validateGtfsError(gtfsFeed.getFeedId(), store, StopLocationTypeValidator);
-
         } catch (Exception ex) {
             return null;
         }
@@ -235,37 +235,15 @@ public class GtfsFeed {
     }
 
     //helper method to validate GTFS feed according to a given rule
-    private void validateGtfsError(int gtfsId, GtfsDaoImpl gtfsData, GtfsFeedValidator feedEntityValidator) {
+    private void validateGtfsError(int iterationID, GtfsDaoImpl gtfsData, GtfsFeedValidator feedEntityValidator) {
         ErrorListHelperModel errorList = feedEntityValidator.validate(gtfsData);
 
         if (errorList != null && !errorList.getOccurrenceList().isEmpty()) {
-            //TODO: Change the iteration ID to not use gtfsID
-            //Set Gtfs feed id
-            errorList.getErrorMessage().setIterationId(gtfsId);
+            //Set Iteration ID to save the data under
+            errorList.getErrorMessage().setIterationId(iterationID);
             //Save the captured errors to the database
             DBHelper.saveGtfsError(errorList);
         }
-    }
-
-    //TODO: Remove this method by using feed iterations
-    private GtfsFeedModel removeGtfsFeedModel(GtfsFeedModel gtfsFeed, HttpURLConnection connection){
-        //Remove db records and download data
-        System.out.println("File Doesn't Exist in File System");
-
-        //TODO: Don't delete feed, use iterations
-        GTFSDB.deleteGtfsFeed(gtfsFeed.getFeedId());
-        System.out.println("DB entry deleted");
-
-        downloadGtfsFeed(gtfsFeed.getFeedLocation(), connection);
-        return createGtfsFeedModel(gtfsFeed.getGtfsUrl(), gtfsFeed.getFeedLocation());
-    }
-
-    private GtfsFeedModel getGtfsFeedModel(String gtfsFeedUrl, String saveFilePath, HttpURLConnection connection) {
-        System.out.println("File Doesn't Exist");
-        downloadGtfsFeed(saveFilePath, connection);
-        GtfsFeedModel gtfsFeed = createGtfsFeedModel(gtfsFeedUrl, saveFilePath);
-
-        return gtfsFeed;
     }
 
     private void downloadGtfsFeed(String saveFilePath, HttpURLConnection connection) {
