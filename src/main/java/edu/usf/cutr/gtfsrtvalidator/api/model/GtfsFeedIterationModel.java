@@ -21,30 +21,27 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class GtfsFeedIterationModel {
-    public GtfsFeedIterationModel(long timeStamp, byte[] feedprotobuf, int rtFeedId) {
+    public GtfsFeedIterationModel(long timeStamp, int feedId) {
         this.timeStamp = timeStamp;
-        Feedprotobuf = feedprotobuf;
-        this.rtFeedId = rtFeedId;
+        this.feedId = feedId;
     }
 
     public GtfsFeedIterationModel(){};
 
     public static String ITERATIONID = "IterationId";
     public static String ITERATIONTIMESTAMP = "IterationTimestamp";
-    public static String FEEDPROTOBUF = "feedProtobuf";
-    public static String RTFEEDID = "rtFeedID";
+    public static String FEEDID = "feedID";
 
     private int IterationId;
     private long timeStamp;
-    private byte[] Feedprotobuf;
-    private int rtFeedId;
+    private int feedId;
 
-    public int getRtFeedId() {
-        return rtFeedId;
+    public int getFeedId() {
+        return feedId;
     }
 
-    public void setRtFeedId(int rtFeedId) {
-        this.rtFeedId = rtFeedId;
+    public void setFeedId(int feedId) {
+        this.feedId = feedId;
     }
 
     public int getIterationId() {
@@ -63,11 +60,4 @@ public class GtfsFeedIterationModel {
         this.timeStamp = timeStamp;
     }
 
-    public byte[] getFeedprotobuf() {
-        return Feedprotobuf;
-    }
-
-    public void setFeedprotobuf(byte[] feedprotobuf) {
-        Feedprotobuf = feedprotobuf;
-    }
 }

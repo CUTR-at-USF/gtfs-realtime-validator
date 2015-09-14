@@ -512,7 +512,7 @@ public class GTFSDB {
     //endregion
 
     //region CURD: Rt-feed-Info
-    public static synchronized int createRtFeedInfo(GtfsFeedIterationModel feedIteration) {
+    public static synchronized int createRtFeedInfo(GtfsRtFeedIterationModel feedIteration) {
         int createdId = 0;
 
         Datasource ds = Datasource.getInstance();
@@ -1413,9 +1413,9 @@ public class GTFSDB {
 
     //region CURD: Iteration
     //Read
-    public static synchronized GtfsFeedIterationModel getIteration(int iterationId) {
+    public static synchronized GtfsRtFeedIterationModel getIteration(int iterationId) {
 
-        GtfsFeedIterationModel gtfsIteration = new GtfsFeedIterationModel();
+        GtfsRtFeedIterationModel gtfsIteration = new GtfsRtFeedIterationModel();
 
         Datasource ds = Datasource.getInstance();
         Connection con = ds.getConnection();
@@ -1430,10 +1430,10 @@ public class GTFSDB {
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                gtfsIteration.setRtFeedId(rs.getInt(GtfsFeedIterationModel.RTFEEDID));
-                gtfsIteration.setTimeStamp(rs.getLong(GtfsFeedIterationModel.ITERATIONTIMESTAMP));
-                gtfsIteration.setFeedprotobuf(rs.getBytes(GtfsFeedIterationModel.FEEDPROTOBUF));
-                gtfsIteration.setIterationId(rs.getInt(GtfsFeedIterationModel.ITERATIONID));
+                gtfsIteration.setRtFeedId(rs.getInt(GtfsRtFeedIterationModel.RTFEEDID));
+                gtfsIteration.setTimeStamp(rs.getLong(GtfsRtFeedIterationModel.ITERATIONTIMESTAMP));
+                gtfsIteration.setFeedprotobuf(rs.getBytes(GtfsRtFeedIterationModel.FEEDPROTOBUF));
+                gtfsIteration.setIterationId(rs.getInt(GtfsRtFeedIterationModel.ITERATIONID));
             }
 
             rs.close();

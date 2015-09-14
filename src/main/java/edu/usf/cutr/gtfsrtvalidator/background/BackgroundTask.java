@@ -18,7 +18,7 @@
 package edu.usf.cutr.gtfsrtvalidator.background;
 
 import com.google.transit.realtime.GtfsRealtime;
-import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedIterationModel;
+import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsRtFeedIterationModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsRtFeedModel;
 import edu.usf.cutr.gtfsrtvalidator.api.resource.GtfsFeed;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
@@ -68,7 +68,7 @@ public class BackgroundTask implements Runnable {
             GtfsDaoImpl gtfsData;
 
             //Holds data needed in the database under each iteration
-            GtfsFeedIterationModel feedIteration;
+            GtfsRtFeedIterationModel feedIteration;
 
             //Get the GTFS feed from the GtfsDaoMap using the gtfsFeedId of the current feed.
             gtfsData = GtfsFeed.GtfsDaoMap.get(currentFeed.getGtfsId());
@@ -93,7 +93,7 @@ public class BackgroundTask implements Runnable {
                 feedMessage = GtfsRealtime.FeedMessage.parseFrom(is);
 
                 //Create new feedIteration object and save the iteration to the database
-                feedIteration = new GtfsFeedIterationModel(TimeStampHelper.getCurrentTimestamp(), gtfsRtProtobuf, currentFeed.getGtfsRtId());
+                feedIteration = new GtfsRtFeedIterationModel(TimeStampHelper.getCurrentTimestamp(), gtfsRtProtobuf, currentFeed.getGtfsRtId());
                 int iterationId = GTFSDB.createRtFeedInfo(feedIteration);
                 feedIteration.setIterationId(iterationId);
             } catch (Exception e) {
@@ -166,7 +166,7 @@ public class BackgroundTask implements Runnable {
         }
     }
 
-    private void validateEntity(GtfsRealtime.FeedMessage feedMessage, GtfsDaoImpl gtfsData, GtfsFeedIterationModel feedIteration, FeedEntityValidator feedEntityValidator) {
+    private void validateEntity(GtfsRealtime.FeedMessage feedMessage, GtfsDaoImpl gtfsData, GtfsRtFeedIterationModel feedIteration, FeedEntityValidator feedEntityValidator) {
         ErrorListHelperModel errorList = feedEntityValidator.validate(gtfsData, feedMessage);
 
         if (errorList != null && !errorList.getOccurrenceList().isEmpty()) {

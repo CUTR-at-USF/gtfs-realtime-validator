@@ -17,7 +17,7 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.model.combined;
 
-import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedIterationString;
+import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsRtFeedIterationString;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
@@ -27,14 +27,14 @@ public class CombinedIterationMessageModel {
 
     public CombinedIterationMessageModel() {}
 
-    private GtfsFeedIterationString gtfsFeedIterationModel;
+    private GtfsRtFeedIterationString gtfsFeedIterationModel;
     private List<CombinedMessageOccurrenceModel> messageOccurrenceList;
 
-    public GtfsFeedIterationString getGtfsFeedIterationModel() {
+    public GtfsRtFeedIterationString getGtfsFeedIterationModel() {
         return gtfsFeedIterationModel;
     }
 
-    public void setGtfsFeedIterationModel(GtfsFeedIterationString gtfsFeedIterationModel) {
+    public void setGtfsFeedIterationModel(GtfsRtFeedIterationString gtfsFeedIterationModel) {
         this.gtfsFeedIterationModel = gtfsFeedIterationModel;
     }
 

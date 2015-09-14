@@ -170,9 +170,9 @@ public class GtfsRtFeed {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getMessageDetails(@PathParam("id") int id, @PathParam("iteration") int iterationId) {
         CombinedIterationMessageModel messageList = new CombinedIterationMessageModel();
-        GtfsFeedIterationModel iterationModel = GTFSDB.getIteration(iterationId);
+        GtfsRtFeedIterationModel iterationModel = GTFSDB.getIteration(iterationId);
 
-        GtfsFeedIterationString iterationString = new GtfsFeedIterationString(iterationModel);
+        GtfsRtFeedIterationString iterationString = new GtfsRtFeedIterationString(iterationModel);
 
         messageList.setGtfsFeedIterationModel(iterationString);
 
