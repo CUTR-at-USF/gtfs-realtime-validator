@@ -963,6 +963,87 @@ public class GTFSDB {
     }
     //endregion
 
+    //region CURD: GtfsRt Iteration
+    //Create
+    public static synchronized GtfsFeedIterationModel createGtfsFeedIteration(GtfsFeedIterationModel gtfsFeedIterationModel) {
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+        int createdId = 0;
+        try {
+            PreparedStatement stmt;
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("INSERT INTO GtfsFeedIteration (feedID, IterationTimestamp) VALUES (?,?)");
+            stmt.setInt(1, gtfsFeedIterationModel.getFeedId());
+            stmt.setLong(2, TimeStampHelper.getCurrentTimestamp());
+
+            stmt.executeUpdate();
+
+            //Get the id of the created iteration
+            ResultSet rs = stmt.getGeneratedKeys();
+            if (rs != null && rs.next()) {
+                createdId = rs.getInt(1);
+                gtfsFeedIterationModel.setIterationId(createdId);
+            }
+
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return gtfsFeedIterationModel;
+    }
+
+    //Read
+    public static synchronized GtfsFeedIterationModel readGtfsIteration(int iterationId) {
+
+        GtfsFeedIterationModel gtfsIteration = new GtfsFeedIterationModel();
+
+        Datasource ds = Datasource.getInstance();
+        Connection con = ds.getConnection();
+        try {
+            PreparedStatement stmt;
+
+            con.setAutoCommit(false);
+
+            stmt = con.prepareStatement("SELECT * FROM GtfsFeedIteration WHERE IterationID = ?");
+            stmt.setInt(1, iterationId);
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                gtfsIteration.setFeedId(rs.getInt(GtfsFeedIterationModel.FEEDID));
+                gtfsIteration.setTimeStamp(rs.getLong(GtfsFeedIterationModel.ITERATIONTIMESTAMP));
+                gtfsIteration.setIterationId(rs.getInt(GtfsFeedIterationModel.ITERATIONID));
+            }
+
+            rs.close();
+            stmt.close();
+            con.commit();
+            con.close();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            System.exit(0);
+        } finally {
+            try {
+                con.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return gtfsIteration;
+    }
+    //endregion
+
     //region CURD: Gtfs Message Log
     //Create
     public static synchronized int createGtfsMessageLog(MessageLogModel messageLog) {
