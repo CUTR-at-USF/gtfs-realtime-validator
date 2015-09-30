@@ -93,6 +93,9 @@ public class GtfsFeed {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response postGtfsFeed(@FormParam("gtfsurl") String gtfsFeedUrl) {
+
+        System.out.println("POST GTFS URL: " + gtfsFeedUrl);
+
         //Extract the URL from the provided gtfsFeedUrl
         URL url = getUrlFromString(gtfsFeedUrl);
         if (url == null)

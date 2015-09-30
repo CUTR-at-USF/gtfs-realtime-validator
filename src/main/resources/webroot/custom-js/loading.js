@@ -143,29 +143,28 @@ function downloadGTFSFeed() {
 
     if (paramVal === null) {
         //No URL for the given feed entered. Show status
+        $(progressID).removeClass("progress-striped active");
         $(progressID + " .progress-bar").addClass("progress-bar-danger");
         $(progressID).prev().find(".status").text("(No GTFS URL Given)");
+        validGtfs = false;
     } else if (paramVal === "") {
         //No URL for the given feed entered. Show status
+        $(progressID).removeClass("progress-striped active");
         $(progressID + " .progress-bar").addClass("progress-bar-danger");
         $(progressID).prev().find(".status").text("(No GTFS URL Given)");
+        validGtfs = false;
     } else {
         function feedSuccess(data){
             if (data["feedId"] != null) {
                 $(progressID).removeClass("progress-striped active");
                 $(progressID + " .progress-bar").addClass("progress-bar-success");
-
                 $(progressID).prev().find(".status").text("(Download Successful)");
-
                 validGtfs = true;
 
                 //gtfsRtfeeds can only be started with a valid id
                 monitorGtfsRtFeeds(gtfsrtUrlList, data["feedId"]);
                 checkStatus();
             }else{
-                //data["title"];
-                //data["message"];
-
                 $(progressID).removeClass("progress-striped active");
                 $(progressID + " .progress-bar").addClass("progress-bar-warning");
 
@@ -173,6 +172,15 @@ function downloadGTFSFeed() {
 
                 validGtfs = false;
             }
+        }
+
+        function feedError(xhr,status,error){
+            $(progressID).removeClass("progress-striped active");
+            $(progressID + " .progress-bar").addClass("progress-bar-warning");
+
+            $(progressID).prev().find(".status").text("(" + data["title"] + ")");
+
+            validGtfs = false;
         }
 
         $.ajax({
@@ -184,6 +192,7 @@ function downloadGTFSFeed() {
             },
             data: {gtfsurl: paramVal},
             success: feedSuccess,
+            error: feedError,
             dataType: 'json'
         });
     }
