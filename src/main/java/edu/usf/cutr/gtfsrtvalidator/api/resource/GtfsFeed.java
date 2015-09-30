@@ -94,15 +94,21 @@ public class GtfsFeed {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response postGtfsFeed(@FormParam("gtfsurl") String gtfsFeedUrl) {
 
-        System.out.println("POST GTFS URL: " + gtfsFeedUrl);
-
         //Extract the URL from the provided gtfsFeedUrl
         URL url = getUrlFromString(gtfsFeedUrl);
         if (url == null)
             return generateError("Malformed URL", "Malformed URL for the GTFS feed", Response.Status.BAD_REQUEST);
 
-        //Open a connection for the given URL
-        HttpURLConnection connection = getHttpURLConnection(url);
+        System.out.println(url);
+
+        HttpURLConnection connection = null;
+        //Open a connection for the given URL u
+        try {
+            connection = (HttpURLConnection)url.openConnection();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
         if (connection == null)
             return generateError("Can't read from URL", "Can't read content from the GTFS URL", Response.Status.BAD_REQUEST);
 
@@ -131,9 +137,9 @@ public class GtfsFeed {
 
         //Saves GTFS data to store and validates GTFS feed
         GtfsDaoImpl store = saveGtfsFeed(gtfsFeed);
-        if (store == null)
+        if (store == null) {
             return generateError("Can't read content", "Can't read content from the GTFS URL", Response.Status.NOT_FOUND);
-
+        }
         //Create a new iteration for the GTFS feed
         GtfsFeedIterationModel gtfsFeedIteration = GTFSDB.createGtfsFeedIteration(gtfsFeed);
 
