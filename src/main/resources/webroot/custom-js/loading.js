@@ -141,18 +141,20 @@ function downloadGTFSFeed() {
 
     var progressID = "#gtfs-progress";
 
+    function feedErrorDisplay(message) {
+        $(progressID).removeClass("progress-striped active");
+        $(progressID + " .progress-bar").addClass("progress-bar-danger");
+        $(progressID).prev().find(".status").text("("+ message +")");
+        validGtfs = false;
+    }
+
     if (paramVal === null) {
         //No URL for the given feed entered. Show status
-        $(progressID).removeClass("progress-striped active");
-        $(progressID + " .progress-bar").addClass("progress-bar-danger");
-        $(progressID).prev().find(".status").text("(No GTFS URL Given)");
-        validGtfs = false;
+        feedErrorDisplay("No GTFS URL Given");
+
     } else if (paramVal === "") {
         //No URL for the given feed entered. Show status
-        $(progressID).removeClass("progress-striped active");
-        $(progressID + " .progress-bar").addClass("progress-bar-danger");
-        $(progressID).prev().find(".status").text("(No GTFS URL Given)");
-        validGtfs = false;
+        feedErrorDisplay("No GTFS URL Given");
     } else {
         function feedSuccess(data){
             if (data["feedId"] != null) {
@@ -165,22 +167,12 @@ function downloadGTFSFeed() {
                 monitorGtfsRtFeeds(gtfsrtUrlList, data["feedId"]);
                 checkStatus();
             }else{
-                $(progressID).removeClass("progress-striped active");
-                $(progressID + " .progress-bar").addClass("progress-bar-warning");
-
-                $(progressID).prev().find(".status").text("(" + data["title"] + ")");
-
-                validGtfs = false;
+                feedErrorDisplay(data["title"]);
             }
         }
 
         function feedError(xhr,status,error){
-            $(progressID).removeClass("progress-striped active");
-            $(progressID + " .progress-bar").addClass("progress-bar-warning");
-
-            $(progressID).prev().find(".status").text("(" + data["title"] + ")");
-
-            validGtfs = false;
+            feedErrorDisplay(status);
         }
 
         $.ajax({
