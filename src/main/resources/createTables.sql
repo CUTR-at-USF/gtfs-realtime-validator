@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS "GtfsRtFeedIteration" (
 
 CREATE TABLE IF NOT EXISTS "MessageLog" (
   "messageID"    INTEGER PRIMARY KEY AUTOINCREMENT,
-  "iterationID" INTEGER,
+  "iterationID"  INTEGER,
   "errorID"      TEXT,
   "errorDetails" TEXT,
   FOREIGN KEY (iterationID) REFERENCES GtfsRtFeedIteration (iterationID),
@@ -54,9 +54,9 @@ CREATE TABLE IF NOT EXISTS "GtfsFeedIteration" (
 );
 
 CREATE TABLE IF NOT EXISTS "GtfsMessageLog" (
-  "messageID"    INTEGER PRIMARY KEY AUTOINCREMENT,
+  "messageID"   INTEGER PRIMARY KEY AUTOINCREMENT,
   "iterationID" INTEGER,
-  "errorID"      TEXT,
+  "errorID"     TEXT,
   FOREIGN KEY (iterationID) REFERENCES GtfsFeedIteration (IterationID),
   FOREIGN KEY (errorID) REFERENCES Error (errorID)
 );
@@ -91,28 +91,34 @@ CREATE VIEW IF NOT EXISTS errorCount AS
       ON iterationErrors.iterationID = GtfsRtFeedIteration.IterationID;
 
 CREATE VIEW IF NOT EXISTS gtfsErrorCount AS
-SELECT GtfsMessageLog.messageID,
-  iterationID,
-  GtfsMessageLog.errorID,
-  errorDescription,
-  feedUrl,
-  fileLocation,
-  downloadTimestamp,
-  errorCount
-FROM GtfsMessageLog
-  JOIN GtfsFeed
-    ON GtfsFeed.feedID = GtfsMessageLog.iterationID
+  SELECT *
+  FROM GtfsMessageLog
+    JOIN GtfsOccurrence ON GtfsMessageLog.messageID = GtfsOccurrence.messageID;
 
-  LEFT JOIN
-  (SELECT
-     messageID,
-     COUNT(*) AS errorCount
-   FROM GtfsOccurrence
-   GROUP BY messageID) `iterationErrors`
-    ON iterationErrors.messageID = GtfsMessageLog.messageID
-
-  JOIN Error
-    ON GtfsMessageLog.errorID = Error.errorID;
+-- CREATE VIEW IF NOT EXISTS gtfsErrorCount AS
+--   SELECT
+--     GtfsMessageLog.messageID,
+--     iterationID,
+--     GtfsMessageLog.errorID,
+--     errorDescription,
+--     feedUrl,
+--     fileLocation,
+--     downloadTimestamp,
+--     errorCount
+--   FROM GtfsMessageLog
+--     JOIN GtfsFeed
+--       ON GtfsFeed.feedID = GtfsMessageLog.iterationID
+--
+--     LEFT JOIN
+--     (SELECT
+--        messageID,
+--        COUNT(*) AS errorCount
+--      FROM GtfsOccurrence
+--      GROUP BY messageID) `iterationErrors`
+--       ON iterationErrors.messageID = GtfsMessageLog.messageID
+--
+--     JOIN Error
+--       ON GtfsMessageLog.errorID = Error.errorID;
 
 CREATE VIEW IF NOT EXISTS detailedError AS
   SELECT

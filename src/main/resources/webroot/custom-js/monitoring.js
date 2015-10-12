@@ -52,6 +52,7 @@ for (var gtfsRtFeed in gtfsRtFeeds) {
 
 function loadGtfsErrors(gtfsFeedId) {
     $.get("http://localhost:8080/api/gtfs-feed/" + gtfsFeedId + "/errors", function (data) {
+        console.log("Errors in GTFS: " + data);
         for(var errorItem in data) {
             errorItem = data[errorItem]
             alert (errorItem);

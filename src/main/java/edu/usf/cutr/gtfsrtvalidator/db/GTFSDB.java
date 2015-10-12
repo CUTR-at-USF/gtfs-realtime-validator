@@ -1592,6 +1592,8 @@ public class GTFSDB {
     public static synchronized List<ViewGtfsErrorCountModel> getGtfsErrorList(int feedId){
         List<ViewGtfsErrorCountModel> errorList = new ArrayList<>();
 
+
+
         Datasource ds = Datasource.getInstance();
         Connection con = ds.getConnection();
         try {
@@ -1631,7 +1633,7 @@ public class GTFSDB {
                 e.printStackTrace();
             }
         }
-
+        System.out.println(errorList.size() + " Number of errors");
         return errorList;
     }
     //---------------------------------------------------------------------------------------

@@ -23,6 +23,7 @@ import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.GtfsFeedValidator;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
+import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
 
 import java.util.ArrayList;
@@ -42,11 +43,18 @@ public class StopLocationTypeValidator implements GtfsFeedValidator {
         //Get all StopTime objects from stop_time.txt
         Collection<StopTime> stopTimes = gtfsData.getAllStopTimes();
 
+        List<Stop> checkedStops = new ArrayList<>();
+
         for (StopTime stopTime : stopTimes) {
             //Create error occurrence if the location type is not equal to 0
-            if (stopTime.getStop().getLocationType() != 0) {
-                OccurrenceModel occurrenceModel = new OccurrenceModel("location_type is not 0",stopTime.getStop().getName());
-                errorOccurrenceList.add(occurrenceModel);
+
+            if (!checkedStops.contains(stopTime.getStop())) {
+                checkedStops.add(stopTime.getStop());
+
+                if (stopTime.getStop().getLocationType() != 0) {
+                    OccurrenceModel occurrenceModel = new OccurrenceModel("location_type is not 0 at ", stopTime.getStop().getName());
+                    errorOccurrenceList.add(occurrenceModel);
+                }
             }
         }
 

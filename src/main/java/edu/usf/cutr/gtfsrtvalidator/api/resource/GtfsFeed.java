@@ -83,7 +83,10 @@ public class GtfsFeed {
     @Path("/{id}/errors")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getGtfsFeedErrors(@PathParam("id") String id) {
+        //get the
         List<ViewGtfsErrorCountModel> gtfsFeeds = GTFSDB.getGtfsErrorList(Integer.parseInt(id));
+
+        //Return the list of errors for the feed.
         GenericEntity<List<ViewGtfsErrorCountModel>> feedList = new GenericEntity<List<ViewGtfsErrorCountModel>>(gtfsFeeds) {
         };
         return Response.ok(feedList).build();
