@@ -1592,8 +1592,6 @@ public class GTFSDB {
     public static synchronized List<ViewGtfsErrorCountModel> getGtfsErrorList(int feedId){
         List<ViewGtfsErrorCountModel> errorList = new ArrayList<>();
 
-
-
         Datasource ds = Datasource.getInstance();
         Connection con = ds.getConnection();
         try {
@@ -1611,10 +1609,11 @@ public class GTFSDB {
                 errorModel.setErrorId(rs.getString(ViewGtfsErrorCountModel.ERROR_ID));
                 errorModel.setErrorDesc(rs.getString(ViewGtfsErrorCountModel.ERROR_DESC));
                 errorModel.setIterationId(rs.getInt(ViewGtfsErrorCountModel.ITERATION_ID));
-                errorModel.setErrorCount(rs.getInt(ViewGtfsErrorCountModel.ERROR_COUNT));
-                errorModel.setFeedUrl(rs.getString(ViewGtfsErrorCountModel.FEED_URL));
-                errorModel.setFileLocation(rs.getString(ViewGtfsErrorCountModel.FILE_LOCATION));
-                errorModel.setDownloadTime(rs.getLong(ViewGtfsErrorCountModel.DOWNLOAD_TIME));
+                //TODO: Add error count
+                //errorModel.setErrorCount(rs.getInt(ViewGtfsErrorCountModel.ERROR_COUNT));
+                //errorModel.setFeedUrl(rs.getString(ViewGtfsErrorCountModel.FEED_URL));
+                //errorModel.setFileLocation(rs.getString(ViewGtfsErrorCountModel.FILE_LOCATION));
+                //errorModel.setDownloadTime(rs.getLong(ViewGtfsErrorCountModel.DOWNLOAD_TIME));
 
                 errorList.add(errorModel);
             }
@@ -1633,7 +1632,6 @@ public class GTFSDB {
                 e.printStackTrace();
             }
         }
-        System.out.println(errorList.size() + " Number of errors");
         return errorList;
     }
     //---------------------------------------------------------------------------------------

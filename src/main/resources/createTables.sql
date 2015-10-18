@@ -93,7 +93,8 @@ CREATE VIEW IF NOT EXISTS errorCount AS
 CREATE VIEW IF NOT EXISTS gtfsErrorCount AS
   SELECT *
   FROM GtfsMessageLog
-    JOIN GtfsOccurrence ON GtfsMessageLog.messageID = GtfsOccurrence.messageID;
+    JOIN GtfsOccurrence ON GtfsMessageLog.messageID = GtfsOccurrence.messageID
+    JOIN Error ON Error.errorID = GtfsMessageLog.errorID;
 
 -- CREATE VIEW IF NOT EXISTS gtfsErrorCount AS
 --   SELECT

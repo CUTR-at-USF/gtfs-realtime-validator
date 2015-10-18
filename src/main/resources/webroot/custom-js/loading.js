@@ -96,6 +96,7 @@ function monitorGtfsRtFeeds(gtfsrtUrlList, gtfsFeedId) {
 
                     validUrlList.gtfsFeeds.push(gtfsFeed);
 
+                    console.log(JSON.stringify(validUrlList.gtfsFeeds));
                     localStorage.setItem("gtfsRtFeeds", JSON.stringify(validUrlList.gtfsFeeds));
 
                     //gtfsRtfeeds can only be started with a valid id

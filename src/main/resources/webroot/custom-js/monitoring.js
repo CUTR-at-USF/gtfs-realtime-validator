@@ -29,6 +29,8 @@ var setIntervalClock;
 var updateInterval = localStorage.getItem("updateInterval");
 updateInterval = updateInterval * 1000;
 
+var checkedGTFS = [];
+
 //PUT request to start monitoring of the given gtfsRtFeed ID /api/gtfs-rt-feed/{id}/monitor
 for (var gtfsRtFeed in gtfsRtFeeds) {
     if (gtfsRtFeeds.hasOwnProperty(gtfsRtFeed)) {
@@ -44,7 +46,10 @@ for (var gtfsRtFeed in gtfsRtFeeds) {
                 }, updateInterval);
 
                 //Gather the GTFS feed id from the gtfs-rt-feed
-                loadGtfsErrors(data["gtfsId"]);
+                if(!(checkedGTFS.indexOf(data["gtfsId"]) > -1)){
+                    loadGtfsErrors(data["gtfsId"]);
+                    checkedGTFS.push(data["gtfsId"]);
+                }
             }
         });
     }
@@ -55,7 +60,6 @@ function loadGtfsErrors(gtfsFeedId) {
         console.log("Errors in GTFS: " + data);
         for(var errorItem in data) {
             errorItem = data[errorItem]
-            alert (errorItem);
 
             var errorRow="";
             errorRow += "<tr>";

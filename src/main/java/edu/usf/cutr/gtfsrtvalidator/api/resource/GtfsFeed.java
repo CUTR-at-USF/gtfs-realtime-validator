@@ -146,11 +146,14 @@ public class GtfsFeed {
         //Create a new iteration for the GTFS feed
         GtfsFeedIterationModel gtfsFeedIteration = GTFSDB.createGtfsFeedIteration(gtfsFeed);
 
-        GtfsDaoMap.put(gtfsFeed.getFeedId(), store);
+        GtfsDaoMap.put(gtfsFeedIteration.getIterationId(), store);
 
         //Check GTFS feed for errors
         StopLocationTypeValidator StopLocationTypeValidator = new StopLocationTypeValidator();
         validateGtfsError(gtfsFeedIteration.getIterationId(), store, StopLocationTypeValidator);
+
+        System.out.println(gtfsFeedIteration.getIterationId());
+        gtfsFeed.setFeedId(gtfsFeedIteration.getIterationId());
 
         //Return the Response from the downloadFeed method
         return Response.ok(gtfsFeed).build();
