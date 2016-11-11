@@ -47,13 +47,18 @@ function removeInput(){
 var gtfsURLField = $('#gtfsrt-feed-1');
 var gtfsrtURLField = $('#gtfs');
 var $submit = $('input[type="submit"]');
-
+var reset = $('input[type="reset"]');
+reset.on('click', disableSubmit);
 $submit.prop('disabled', true);
 
-gtfsURLField.on('keyup', checkStatus);
-gtfsrtURLField.on('keyup', checkStatus);
+gtfsURLField.bind('input', checkStatus);
+gtfsrtURLField.bind('input', checkStatus);
 
 function checkStatus() {
     var status = ($.trim(gtfsrtURLField.val()) === '' || $.trim(gtfsURLField.val()) === '');
     $submit.prop('disabled', status);
+}
+
+function disableSubmit() {
+    $submit.prop('disabled', true);
 }
