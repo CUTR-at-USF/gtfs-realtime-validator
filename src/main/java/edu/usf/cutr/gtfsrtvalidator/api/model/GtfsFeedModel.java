@@ -26,6 +26,7 @@ public class GtfsFeedModel {
     private int feedId;
     private long startTime;
     private String feedLocation;
+    private byte[] checksum;
 
     public static String FEEDID = "feedId";
     public static String FEEDURL = "feedUrl";
@@ -53,6 +54,10 @@ public class GtfsFeedModel {
     public long getStartTime() {
         return startTime;
     }
+    
+    public byte[] getChecksum() {
+        return checksum;
+    }
 
     public void setStartTime(long startTime) {
         this.startTime = startTime;
@@ -64,6 +69,10 @@ public class GtfsFeedModel {
 
     public void setFeedLocation(String feedLocation) {
         this.feedLocation = feedLocation;
+    }
+    
+    public void setChecksum(byte[] checksum) {
+        this.checksum = checksum;
     }
 
     @Override

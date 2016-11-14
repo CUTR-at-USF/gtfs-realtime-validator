@@ -743,10 +743,11 @@ public class GTFSDB {
             PreparedStatement stmt;
             con.setAutoCommit(false);
 
-            stmt = con.prepareStatement("INSERT INTO GtfsFeed (feedUrl, fileLocation, downloadTimestamp)VALUES (?,?,?)", Statement.RETURN_GENERATED_KEYS);
+            stmt = con.prepareStatement("INSERT INTO GtfsFeed (feedUrl, fileLocation, downloadTimestamp, fileChecksum)VALUES (?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
             stmt.setString(1, gtfsFeed.getGtfsUrl());
             stmt.setString(2, gtfsFeed.getFeedLocation());
             stmt.setLong(3, TimeStampHelper.getCurrentTimestamp());
+            stmt.setBytes(4, gtfsFeed.getChecksum());
 
             stmt.executeUpdate();
 
@@ -782,12 +783,13 @@ public class GTFSDB {
             PreparedStatement stmt;
             con.setAutoCommit(false);
 
-            stmt = con.prepareStatement("UPDATE GtfsFeed SET feedUrl = ?, fileLocation = ?, downloadTimestamp = ? " +
-                    "WHERE feedID = ?");
+            stmt = con.prepareStatement("UPDATE GtfsFeed SET feedUrl = ?, fileLocation = ?, downloadTimestamp = ?, " +
+                    "fileChecksum = ? WHERE feedID = ?");
             stmt.setString(1, gtfsFeed.getGtfsUrl());
             stmt.setString(2, gtfsFeed.getFeedLocation());
             stmt.setLong(3, gtfsFeed.getStartTime());
-            stmt.setInt(4, gtfsFeed.getFeedId());
+            stmt.setBytes(4, gtfsFeed.getChecksum());
+            stmt.setInt(5, gtfsFeed.getFeedId());
 
             stmt.executeUpdate();
 
@@ -828,6 +830,7 @@ public class GTFSDB {
                 gtfsFeed.setFeedId(rs.getInt("feedID"));
                 gtfsFeed.setStartTime(rs.getLong("downloadTimestamp"));
                 gtfsFeed.setFeedLocation(rs.getString("fileLocation"));
+                gtfsFeed.setChecksum(rs.getBytes("fileChecksum"));
             } else {
                 return null;
             }
@@ -871,6 +874,7 @@ public class GTFSDB {
                 gtfsFeed.setFeedId(rs.getInt("feedID"));
                 gtfsFeed.setStartTime(rs.getLong("downloadTimestamp"));
                 gtfsFeed.setFeedLocation(rs.getString("fileLocation"));
+                gtfsFeed.setChecksum(rs.getBytes("fileChecksum"));
             } else {
                 return null;
             }
@@ -912,6 +916,7 @@ public class GTFSDB {
                 gtfsFeed.setFeedId(rs.getInt("feedID"));
                 gtfsFeed.setStartTime(rs.getLong("downloadTimestamp"));
                 gtfsFeed.setFeedLocation(rs.getString("fileLocation"));
+                gtfsFeed.setChecksum(rs.getBytes("fileChecksum"));
 
                 gtfsFeedModelList.add(gtfsFeed);
             }
