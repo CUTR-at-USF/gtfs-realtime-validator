@@ -1,1 +1,9 @@
 language: java
+jdk: oraclejdk8
+
+# TODO - Figure out where to host the Laidig fork artifacts for gtfs-validator
+before_install: 
+  - git clone https://github.com/laidig/gtfs-validator.git
+  - cd gtfs-validator
+  - mvn install -DskipTests
+  - cd ..
