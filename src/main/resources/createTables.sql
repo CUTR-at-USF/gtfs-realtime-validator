@@ -2,7 +2,8 @@ CREATE TABLE IF NOT EXISTS "GtfsFeed" (
   "feedID"            INTEGER PRIMARY KEY AUTOINCREMENT,
   "feedUrl"           TEXT,
   "fileLocation"      TEXT,
-  "downloadTimestamp" INTEGER
+  "downloadTimestamp" INTEGER,
+  "fileChecksum"      BLOB
 );
 
 CREATE TABLE IF NOT EXISTS "GtfsRtFeed" (

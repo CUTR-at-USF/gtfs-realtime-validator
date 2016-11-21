@@ -17,17 +17,17 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.resource;
 
-import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedIterationModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.ViewGtfsErrorCountModel;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
-import edu.usf.cutr.gtfsrtvalidator.helper.DBHelper;
-import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.GetFile;
-import edu.usf.cutr.gtfsrtvalidator.validation.gtfs.StopLocationTypeValidator;
-import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.GtfsFeedValidator;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.onebusaway.gtfs.serialization.GtfsReader;
+import com.conveyal.gtfs.validator.json.backends.FileSystemFeedBackend;
+import com.conveyal.gtfs.validator.json.FeedValidationResultSet;
+import com.conveyal.gtfs.validator.json.serialization.JsonSerializer;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
@@ -46,10 +46,19 @@ import java.util.List;
 import java.util.Map;
 
 import static edu.usf.cutr.gtfsrtvalidator.helper.HttpMessageHelper.generateError;
+import com.conveyal.gtfs.validator.json.FeedProcessor;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Path("/gtfs-feed")
 public class GtfsFeed {
     private static final int BUFFER_SIZE = 4096;
+    private static final String jsonFilePath = "src\\main\\resources\\webroot";
     public static Map<Integer, GtfsDaoImpl> GtfsDaoMap = new HashMap<>();
 
     //DELETE {id} remove feed with the given id
@@ -95,7 +104,7 @@ public class GtfsFeed {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public Response postGtfsFeed(@FormParam("gtfsurl") String gtfsFeedUrl) {
+    public Response postGtfsFeed(@FormParam("gtfsurl") String gtfsFeedUrl) throws JsonProcessingException {
 
         //Extract the URL from the provided gtfsFeedUrl
         URL url = getUrlFromString(gtfsFeedUrl);
@@ -116,11 +125,13 @@ public class GtfsFeed {
             return generateError("Can't read from URL", "Can't read content from the GTFS URL", Response.Status.BAD_REQUEST);
 
         String saveFilePath = getSaveFilePath(gtfsFeedUrl, connection);
-
+        String fileName = saveFilePath.substring(saveFilePath.lastIndexOf(File.separator)+1, saveFilePath.lastIndexOf('.'));
+        
         //Read gtfsFeedModel with the same URL in the database
         GtfsFeedModel searchFeed = new GtfsFeedModel();
         searchFeed.setGtfsUrl(gtfsFeedUrl);
         GtfsFeedModel gtfsFeed = GTFSDB.readGtfsFeed(searchFeed);
+        ObjectMapper mapper = new ObjectMapper();
 
         //TODO: Move to one method
         if (gtfsFeed != null) {
@@ -131,7 +142,16 @@ public class GtfsFeed {
             if (!f.exists() || f.isDirectory()) {
                 downloadGtfsFeed(gtfsFeed.getFeedLocation(), connection);
             }
-        }else{
+            byte[] newChecksum = calculateMD5checksum(gtfsFeed.getFeedLocation());
+            byte[] oldChecksum = gtfsFeed.getChecksum();
+            if(MessageDigest.isEqual(newChecksum, oldChecksum)) {//if file digest are equal, check whether validated json file exists
+                String projectPath = new GetFile().getJarLocation().getParentFile().getParentFile().getAbsolutePath();
+                if(new File(projectPath +File.separator+ jsonFilePath +File.separator+ fileName + "_out.json").exists())
+                    return Response.ok(mapper.writeValueAsString(gtfsFeed)).build();
+            }
+            else gtfsFeed = updateGtfsFeedModel(gtfsFeed);            
+        }
+        else {
             //If the GTFS file associated with the
             System.out.println("File Doesn't Exist");
             downloadGtfsFeed(saveFilePath, connection);
@@ -143,20 +163,28 @@ public class GtfsFeed {
         if (store == null) {
             return generateError("Can't read content", "Can't read content from the GTFS URL", Response.Status.NOT_FOUND);
         }
-        //Create a new iteration for the GTFS feed
-        GtfsFeedIterationModel gtfsFeedIteration = GTFSDB.createGtfsFeedIteration(gtfsFeed);
-
-        GtfsDaoMap.put(gtfsFeedIteration.getIterationId(), store);
-
-        //Check GTFS feed for errors
-        StopLocationTypeValidator StopLocationTypeValidator = new StopLocationTypeValidator();
-        validateGtfsError(gtfsFeedIteration.getIterationId(), store, StopLocationTypeValidator);
-
-        System.out.println(gtfsFeedIteration.getIterationId());
-        gtfsFeed.setFeedId(gtfsFeedIteration.getIterationId());
-
-        //Return the Response from the downloadFeed method
-        return Response.ok(gtfsFeed).build();
+        
+        FileSystemFeedBackend backend = new FileSystemFeedBackend();
+        FeedValidationResultSet results = new FeedValidationResultSet();
+        File input = backend.getFeed(saveFilePath);
+        FeedProcessor processor = new FeedProcessor(input);
+        try {
+        processor.run();
+        } catch (IOException ex) {
+            Logger.getLogger(GtfsFeed.class.getName()).log(Level.SEVERE, null, ex);
+            return generateError("Unable to access input GTFS " + input.getPath() + ".", "Does the file exist and do I have permission to read it?", Response.Status.NOT_FOUND);
+        }
+        results.add(processor.getOutput());
+        JsonSerializer serializer = new JsonSerializer(results);
+        //get the location of the executed jar file
+        GetFile jarInfo = new GetFile();
+        String saveDir = jarInfo.getJarLocation().getParentFile().getParentFile().getAbsolutePath();
+        saveFilePath = saveDir + File.separator + jsonFilePath + File.separator + fileName + "_out.json";
+        try {     
+            serializer.serializeToFile(new File(saveFilePath));
+        } catch (Exception ex) {//TODO: Parse error.
+        } 
+        return Response.ok(mapper.writeValueAsString(gtfsFeed)).build();
     }
 
     //Gets URL from string returns null if failed to parse URL
@@ -224,6 +252,9 @@ public class GtfsFeed {
         gtfsFeed = new GtfsFeedModel();
         gtfsFeed.setFeedLocation(saveFilePath);
         gtfsFeed.setGtfsUrl(gtfsFeedUrl);
+        
+        byte[] checksum = calculateMD5checksum(saveFilePath);
+        gtfsFeed.setChecksum(checksum);
 
         //Create GTFS feed row in database
         int feedId = GTFSDB.createGtfsFeed(gtfsFeed);
@@ -233,6 +264,35 @@ public class GtfsFeed {
         return gtfsFeed;
     }
 
+    private GtfsFeedModel updateGtfsFeedModel(GtfsFeedModel gtfsFeed) {        
+        byte[] checksum = calculateMD5checksum(gtfsFeed.getFeedLocation());
+        gtfsFeed.setChecksum(checksum);
+        //Update GTFS feed row in database
+        GTFSDB.updateGtfsFeed(gtfsFeed);
+
+        //Get the newly created GTFSfeed model from id
+        gtfsFeed = GTFSDB.readGtfsFeed(gtfsFeed.getFeedId());
+        return gtfsFeed;
+    }
+    private byte[] calculateMD5checksum(String inputFile) {
+        byte[] digest = null;
+        byte[] dataBytes = new byte[1024];
+        int nread;
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            try {
+                InputStream is = Files.newInputStream(Paths.get(inputFile));
+                while ((nread = is.read(dataBytes)) != -1)
+                    md.update(dataBytes, 0, nread);
+                } catch (IOException ex) {
+                    Logger.getLogger(GtfsFeed.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            digest = md.digest();
+            }   catch (NoSuchAlgorithmException ex) {
+                Logger.getLogger(GtfsFeed.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        return digest;
+    }
     private GtfsDaoImpl saveGtfsFeed(GtfsFeedModel gtfsFeed) {
         GtfsDaoImpl store = new GtfsDaoImpl();
 
@@ -247,18 +307,6 @@ public class GtfsFeed {
             return null;
         }
         return store;
-    }
-
-    //helper method to validate GTFS feed according to a given rule
-    private void validateGtfsError(int iterationID, GtfsDaoImpl gtfsData, GtfsFeedValidator feedEntityValidator) {
-        ErrorListHelperModel errorList = feedEntityValidator.validate(gtfsData);
-
-        if (errorList != null && !errorList.getOccurrenceList().isEmpty()) {
-            //Set Iteration ID to save the data under
-            errorList.getErrorMessage().setIterationId(iterationID);
-            //Save the captured errors to the database
-            DBHelper.saveGtfsError(errorList);
-        }
     }
 
     private void downloadGtfsFeed(String saveFilePath, HttpURLConnection connection) {
