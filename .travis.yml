@@ -1,1 +1,7 @@
 language: java
+
+before_script: 
+  - git clone https://github.com/conveyal/gtfs-validator.git
+  - cd gtfs-validator
+  - mvn install -DskipTests
+  - cd ..
