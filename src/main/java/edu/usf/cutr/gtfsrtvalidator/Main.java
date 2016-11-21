@@ -17,8 +17,8 @@
 
 package edu.usf.cutr.gtfsrtvalidator;
 
-import edu.usf.cutr.gtfsrtvalidator.db.Datasource;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
+import edu.usf.cutr.gtfsrtvalidator.hibernate.HibernateUtil;
 import edu.usf.cutr.gtfsrtvalidator.servlets.GetFeedJSON;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.DefaultServlet;
@@ -28,11 +28,10 @@ import org.eclipse.jetty.servlet.ServletHolder;
 public class Main {
     static String BASE_RESOURCE = "./target/classes/webroot";
 
-    public static void main(String[] args){
+    public static void main(String[] args) throws InterruptedException{
+        HibernateUtil.configureSessionFactory();
         GTFSDB.InitializeDB();
-        Datasource ds = Datasource.getInstance();
-        ds.getConnection();
-
+        
         Server server = new Server(8080);
         ServletContextHandler context = new ServletContextHandler();
         context.setContextPath("/");

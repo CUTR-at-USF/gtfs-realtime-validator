@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.hibernate.Session;
 
 public class BackgroundTask implements Runnable {
     //Entity list kept under the gtfsRtFeed id.
@@ -94,8 +95,9 @@ public class BackgroundTask implements Runnable {
 
                 //Create new feedIteration object and save the iteration to the database
                 feedIteration = new GtfsRtFeedIterationModel(TimeStampHelper.getCurrentTimestamp(), gtfsRtProtobuf, currentFeed.getGtfsRtId());
-                int iterationId = GTFSDB.createRtFeedInfo(feedIteration);
-                feedIteration.setIterationId(iterationId);
+                Session session = GTFSDB.InitSessionBeginTrans();
+                session.save(feedIteration);
+                GTFSDB.commitAndCloseSession(session);                
             } catch (Exception e) {
                 System.out.println("The URL: " + gtfsRtFeedUrl + " does not contain valid Gtfs-Rt data");
                 //e.printStackTrace();

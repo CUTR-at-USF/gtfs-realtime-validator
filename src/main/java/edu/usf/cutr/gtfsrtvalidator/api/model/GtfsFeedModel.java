@@ -17,15 +17,31 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.model;
 
+import java.io.Serializable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class GtfsFeedModel {
-
+@Entity
+@Table(name = "GtfsFeed") 
+public class GtfsFeedModel implements Serializable {
+    @Column(name="feedUrl")
     private String gtfsUrl;
+    @Id
+    //@GeneratedValue(generator="GtfsFeed")
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @Column(name="feedID")
     private int feedId;
+    @Column(name="downloadTimestamp")
     private long startTime;
+    @Column(name="fileLocation")
     private String feedLocation;
+    @Column(name="fileChecksum")
     private byte[] checksum;
 
     public static String FEEDID = "feedId";

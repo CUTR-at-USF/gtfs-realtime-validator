@@ -17,10 +17,19 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.model;
 
+import java.io.Serializable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.NamedNativeQuery;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class ViewErrorCountModel {
+@Entity
+@NamedNativeQuery(name = "ErrorCountByrtfeedID",
+    query="SELECT GtfsRtFeedIteration.IterationID, GtfsRtFeedIteration.IterationTimestamp, GtfsRtFeed.rtFeedID,GtfsRtFeed.feedURL, GtfsRtFeed.gtfsFeedID, IFNULL(errorCount, 0) as errorCount FROM (GtfsRtFeedIteration JOIN GtfsRtFeed ON GtfsRtFeed.rtFeedID = GtfsRtFeedIteration.rtFeedID LEFT JOIN (SELECT iterationID, COUNT(*) AS errorCount FROM MessageLog GROUP BY iterationID) iterationErrors ON iterationErrors.iterationID = GtfsRtFeedIteration.IterationID) WHERE GtfsRtFeed.rtFeedID = ? ORDER BY GtfsRtFeedIteration.IterationID DESC LIMIT ?",
+    resultClass = ViewErrorCountModel.class)
+public class ViewErrorCountModel implements Serializable {
 
     public static final String RT_FEED_ID = "rtFeedId";
     public static final String FEED_URL = "feedUrl";
@@ -29,11 +38,18 @@ public class ViewErrorCountModel {
     public static final String GTFS_ID = "gtfsFeedId";
     public static final String ERROR_COUNT = "errorCount";
     
+    @Column(name="rtFeedID")
     private int gtfsRtId;
+    @Column(name="feedURL")
     private String feedUrl;
+    @Column(name="IterationTimestamp")
     private long iterationTime;
+    @Column(name="gtfsFeedID")
     private int gtfsId;
+    @Id
+    @Column(name="IterationID")
     private int iterationId;
+    @Column(name="errorCount")
     private int errorCount;
 
     public int getGtfsRtId() {
@@ -79,7 +95,7 @@ public class ViewErrorCountModel {
     public int getErrorCount() {
         return errorCount;
     }
-
+    
     public void setErrorCount(int errorCount) {
         this.errorCount = errorCount;
     }

@@ -17,15 +17,25 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.model;
 
+import java.io.Serializable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class ValidationRule {
+@Entity
+@Table(name = "Error")
+public class ValidationRule implements Serializable {
 
     public static final String ERROR_ID = "errorId";
     public static final String ERROR_DESCRIPTION = "errorDescription";
 
+    @Id
+    @Column(name="errorID")
     private String errorId;
+    @Column(name="errorDescription")
     private String errorDescription;
 
     public ValidationRule() {}

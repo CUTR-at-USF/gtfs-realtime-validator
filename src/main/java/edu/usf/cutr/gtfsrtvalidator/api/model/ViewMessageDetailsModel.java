@@ -17,11 +17,18 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Arrays;
+import javax.annotation.concurrent.Immutable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
 
 @XmlRootElement
-public class ViewMessageDetailsModel {
+@Entity
+@Immutable
+public class ViewMessageDetailsModel implements Serializable {
     public static final String FEED_PROTOCOL_BUFFER = "feedProtobuf";
     public static final String MESSAGE_ID = "messageId";
     public static final String ITERATION_ID = "iterationId";
@@ -31,13 +38,22 @@ public class ViewMessageDetailsModel {
     public static final String ELEMENT_PATH = "elementPath";
     public static final String ELEMENT_VALUE = "elementValue";
 
+    @Column(name="feedProtobuf")
     private byte[] feedProtobuf;
+    @Column(name="messageID")
     private int messageId;
+    @Id
+    @Column(name="IterationID")
     private int iterationId;
+    @Column(name="errorID")
     private String errorId;
+    @Column(name="errorDescription")
     private String errorDescription;
+    @Column(name="occurrenceID")
     private int occurrenceId;
+    @Column(name="elementPath")
     private String elementPath;
+    @Column(name="elementValue")
     private String elementValue;
 
     public int getMessageId() {
