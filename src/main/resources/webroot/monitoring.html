@@ -78,9 +78,12 @@
                         <div class="col-md-12">
                             <div class="well">
                                 <div class="row">
-                                    <div class="col-md-4">
+                                    <div class="col-md-2">
                                         GTFS Error Count:
                                         <span id="gtfs-error">0</span>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <input class="btn btn-success" id="btn-GTFSReport" type="button" onclick="validationReport();" value="GTFS Validation Report"/>
                                     </div>
                                 </div>
                             </div>
@@ -91,8 +94,8 @@
                                 <input class="btn btn-primary" type="button" onclick="stopMonitor()" value="Stop"/>
                             </div>
                         </div>
-                    </div>
 
+                    </div>
                 </div>
             </div>
         </form>

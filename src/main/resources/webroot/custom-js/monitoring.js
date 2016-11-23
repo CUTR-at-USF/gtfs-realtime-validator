@@ -206,3 +206,8 @@ function showOrHideError(gtfsRtId, errorId) {
         $('html, body').animate({scrollTop: scrollPosition}, 1);
     });
 }
+function validationReport() {
+    newWindow = window.open(localStorage.getItem("reportURL")+localStorage.getItem("gtfsFileName")+'_out.json', 'GTFS Validation Report');
+    if(window.focus()) newWindow.focus();
+    return false;
+}

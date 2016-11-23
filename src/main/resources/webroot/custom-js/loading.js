@@ -19,6 +19,7 @@ var validGtfs = false;
 var validGtfsRT = false;
 var validUrlList = {};
 validUrlList.gtfsFeeds = [];
+localStorage.setItem("reportURL", "http://localhost:8080/gtfs-rt-validator-webapp/gtfs-validator-master/gtfs-validator-webapp/index.html?report=http://localhost:8080/");
 
 //Generic function that given a name, retrieves get parameters from the URL
 function getUrlParameter(sParam) {
@@ -139,6 +140,7 @@ function monitorGtfsRtFeeds(gtfsrtUrlList, gtfsFeedId) {
 function downloadGTFSFeed() {
     var paramVal = getUrlParameter("gtfs");
     paramVal = decodeURIComponent(paramVal);
+    localStorage.setItem("gtfsFileName", paramVal.split('/').pop().split('.')[0]);
 
     var progressID = "#gtfs-progress";
 
@@ -167,6 +169,7 @@ function downloadGTFSFeed() {
                 //gtfsRtfeeds can only be started with a valid id
                 monitorGtfsRtFeeds(gtfsrtUrlList, data["feedId"]);
                 checkStatus();
+                loadGTFSfeedReport();
             }else{
                 feedErrorDisplay(data["title"]);
             }
@@ -199,9 +202,40 @@ function generateRealtimeProgressBar(urlList) {
     $('.progress-placeholder').html(compiledHtml);
 }
 
+function loadGTFSfeedReport() {
+    
+	$('.modalDialog').html('<div class="modal-content">\n\
+    <a href="#close" title="Close" class="close">X</a></br>\n\
+    <p>GTFS data has been validated. Follow the below link to view validation report.</p>\n\
+    <a href = '+localStorage.getItem("reportURL")+localStorage.getItem("gtfsFileName")+'_out.json target="_blank">GTFS Validation Report</a> <br/><br/>\n\
+    <p>You can always view the validation report by clicking <b>GTFS Validation Report</b> button </p></br>\n\
+    <button type="button" class="button btn-primary">OK</button></br>\n\
+    </div>');
+    var modal = document.getElementById('modal');
+    var span = document.getElementsByClassName("close")[0];
+    span = document.getElementsByClassName("button")[0];
+    modal.style.display = "block";
+    span.onclick = function() {
+    modal.style.display = "none";
+    };
+    window.onclick = function(event) {
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    };
+}
+
+function validationReport() {
+    newWindow = window.open(localStorage.getItem("reportURL")+localStorage.getItem("gtfsFileName")+'_out.json', 'GTFS Validation Report');
+    if(window.focus()) newWindow.focus();
+    return false;
+}
+
+
 function checkStatus(){
     if(validGtfs && validGtfsRT) {
         $("#btn-continue").removeAttr('disabled');
+        $("#btn-GTFSReport").removeAttr('disabled');
     }
 }
 
