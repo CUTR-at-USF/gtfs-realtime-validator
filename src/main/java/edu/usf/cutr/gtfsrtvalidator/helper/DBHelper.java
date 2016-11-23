@@ -19,23 +19,28 @@ package edu.usf.cutr.gtfsrtvalidator.helper;
 
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
+import org.hibernate.Session;
 
 public class DBHelper {
     public static void saveError(ErrorListHelperModel errorListHelperModel) {
-        int messageId = GTFSDB.createMessageLog(errorListHelperModel.getErrorMessage());
+        Session session = GTFSDB.InitSessionBeginTrans();
+        int messageId = (int) session.save(errorListHelperModel.getErrorMessage());
 
         for (OccurrenceModel occurrence : errorListHelperModel.getOccurrenceList()) {
             occurrence.setMessageId(messageId);
-            GTFSDB.createOccurrence(occurrence);
+            session.save(occurrence);
         }
+        GTFSDB.commitAndCloseSession(session);
     }
 
     public static void saveGtfsError(ErrorListHelperModel errorListHelperModel) {
-        int messageId = GTFSDB.createGtfsMessageLog(errorListHelperModel.getErrorMessage());
+        Session session = GTFSDB.InitSessionBeginTrans();
+        int messageId = (int) session.save(errorListHelperModel.getErrorMessage());
 
         for (OccurrenceModel occurrence : errorListHelperModel.getOccurrenceList()) {
             occurrence.setMessageId(messageId);
-            GTFSDB.createGtfsOccurrence(occurrence);
+            session.save(occurrence);
         }
+        GTFSDB.commitAndCloseSession(session);
     }
 }

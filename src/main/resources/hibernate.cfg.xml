@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC "-//Hibernate/Hibernate Configuration DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+  <session-factory>
+    <property name="hibernate.dialect">org.hibernate.dialect.HSQLDialect</property>
+    <property name="hibernate.connection.driver_class">org.hsqldb.jdbcDriver</property>
+    <property name="hibernate.connection.url">jdbc:hsqldb:file:gtfsrthsql</property>
+    <property name="hibernate.c3p0.min_size">1</property>
+    <property name="hibernate.c3p0.max_size">1</property>
+    <property name="hibernate.c3p0.timeout">1800</property>
+    <property name="hibernate.c3p0.max_statements">50</property>
+    <property name="hibernate.connection.username">sa</property>
+    <property name="hibernate.connection.password"></property>
+    <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedIterationModel"/>
+    <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedModel"/>
+    <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.GtfsRtFeedIterationModel"/>
+    <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.GtfsRtFeedModel"/>
+    <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel"/>
+    <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel"/>
+    <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.ValidationRule"/>
+    <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.ViewErrorCountModel"/>
+    <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.ViewGtfsErrorCountModel"/>
+    <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.ViewMessageDetailsModel"/>
+  </session-factory>
+</hibernate-configuration>

@@ -17,10 +17,19 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.model;
 
+import java.io.Serializable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class OccurrenceModel {
+@Entity
+@Table(name="GtfsOccurrence")
+public class OccurrenceModel implements Serializable {
     public OccurrenceModel(String elementPath, String elementValue) {
         this.elementPath = elementPath;
         this.elementValue = elementValue;
@@ -34,9 +43,15 @@ public class OccurrenceModel {
     public static final String ELEMENT_PATH = "elementPath";
     public static final String ELEMENT_VALUE = "elementValue";
 
+    @Id
+    @Column(name="occurrenceID")
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private int occurrenceId;
+    @Column(name="messageID")
     private int messageId;
+    @Column(name="elementPath")
     private String elementPath;
+    @Column(name="elementValue")
     private String elementValue;
 
     public int getOccurrenceId() {

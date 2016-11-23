@@ -18,7 +18,6 @@
 package edu.usf.cutr.gtfsrtvalidator.api.resource;
 
 import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedModel;
-import edu.usf.cutr.gtfsrtvalidator.api.model.ViewGtfsErrorCountModel;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.helper.GetFile;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
@@ -47,13 +46,14 @@ import java.util.Map;
 
 import static edu.usf.cutr.gtfsrtvalidator.helper.HttpMessageHelper.generateError;
 import com.conveyal.gtfs.validator.json.FeedProcessor;
+import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.hibernate.Session;
 
 @Path("/gtfs-feed")
 public class GtfsFeed {
@@ -65,7 +65,9 @@ public class GtfsFeed {
     @DELETE
     @Path("/{id}")
     public Response deleteGtfsFeed(@PathParam("id") String id) {
-        GTFSDB.deleteGtfsFeed(Integer.parseInt(id));
+        Session session = GTFSDB.InitSessionBeginTrans();
+        session.createQuery("DELETE FROM GtfsFeedModel WHERE feedID = "+ id).executeUpdate();
+        GTFSDB.commitAndCloseSession(session);
         return Response.accepted().build();
     }
 
@@ -75,7 +77,9 @@ public class GtfsFeed {
     public Response getGtfsFeeds() {
         List<GtfsFeedModel> gtfsFeeds = new ArrayList<>();
         try {
-            List<GtfsFeedModel> tempGtfsFeeds = GTFSDB.readAllGtfsFeeds();
+            Session session = GTFSDB.InitSessionBeginTrans();
+            List<GtfsFeedModel> tempGtfsFeeds = session.createQuery(" FROM GtfsFeedModel").list();
+            GTFSDB.commitAndCloseSession(session);
             if (tempGtfsFeeds != null) {
                 gtfsFeeds = tempGtfsFeeds;
             }
@@ -83,20 +87,6 @@ public class GtfsFeed {
             e.printStackTrace();
         }
         GenericEntity<List<GtfsFeedModel>> feedList = new GenericEntity<List<GtfsFeedModel>>(gtfsFeeds) {
-        };
-        return Response.ok(feedList).build();
-    }
-
-    //GET return list of errors for a given feed
-    @GET
-    @Path("/{id}/errors")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getGtfsFeedErrors(@PathParam("id") String id) {
-        //get the
-        List<ViewGtfsErrorCountModel> gtfsFeeds = GTFSDB.getGtfsErrorList(Integer.parseInt(id));
-
-        //Return the list of errors for the feed.
-        GenericEntity<List<ViewGtfsErrorCountModel>> feedList = new GenericEntity<List<ViewGtfsErrorCountModel>>(gtfsFeeds) {
         };
         return Response.ok(feedList).build();
     }
@@ -126,43 +116,43 @@ public class GtfsFeed {
 
         String saveFilePath = getSaveFilePath(gtfsFeedUrl, connection);
         String fileName = saveFilePath.substring(saveFilePath.lastIndexOf(File.separator)+1, saveFilePath.lastIndexOf('.'));
-        
-        //Read gtfsFeedModel with the same URL in the database
-        GtfsFeedModel searchFeed = new GtfsFeedModel();
-        searchFeed.setGtfsUrl(gtfsFeedUrl);
-        GtfsFeedModel gtfsFeed = GTFSDB.readGtfsFeed(searchFeed);
+        boolean canReturn = false;
+        //Read gtfsFeedModel with the same URL in the database        
+        Session session = GTFSDB.InitSessionBeginTrans();
+        GtfsFeedModel gtfsFeed = (GtfsFeedModel) session.createQuery("FROM GtfsFeedModel "
+                            + "WHERE gtfsUrl = '"+gtfsFeedUrl+"'").uniqueResult();
+        GTFSDB.commitAndCloseSession(session);
         ObjectMapper mapper = new ObjectMapper();
-
+        downloadGtfsFeed(saveFilePath, connection);
+        System.out.println("GTFS File Downloaded Successfully");
         //TODO: Move to one method
-        if (gtfsFeed != null) {
-            System.out.println("URL exists in database");
-            File f = new File(gtfsFeed.getFeedLocation());
-
-            //Download the GTFS feed again if it doesn't exist in the filesystem
-            if (!f.exists() || f.isDirectory()) {
-                downloadGtfsFeed(gtfsFeed.getFeedLocation(), connection);
-            }
+        if (gtfsFeed == null) {
+            gtfsFeed = createGtfsFeedModel(gtfsFeedUrl, saveFilePath);
+        }
+        else {
+            System.out.println("URL exists in database");            
             byte[] newChecksum = calculateMD5checksum(gtfsFeed.getFeedLocation());
             byte[] oldChecksum = gtfsFeed.getChecksum();
             if(MessageDigest.isEqual(newChecksum, oldChecksum)) {//if file digest are equal, check whether validated json file exists
                 String projectPath = new GetFile().getJarLocation().getParentFile().getParentFile().getAbsolutePath();
                 if(new File(projectPath +File.separator+ jsonFilePath +File.separator+ fileName + "_out.json").exists())
-                    return Response.ok(mapper.writeValueAsString(gtfsFeed)).build();
+                    canReturn = true;
             }
-            else gtfsFeed = updateGtfsFeedModel(gtfsFeed);            
-        }
-        else {
-            //If the GTFS file associated with the
-            System.out.println("File Doesn't Exist");
-            downloadGtfsFeed(saveFilePath, connection);
-            gtfsFeed = createGtfsFeedModel(gtfsFeedUrl, saveFilePath);
+            else {
+                gtfsFeed.setChecksum(newChecksum);
+                updateGtfsFeedModel(gtfsFeed);
+            }
         }
 
         //Saves GTFS data to store and validates GTFS feed
         GtfsDaoImpl store = saveGtfsFeed(gtfsFeed);
         if (store == null) {
             return generateError("Can't read content", "Can't read content from the GTFS URL", Response.Status.NOT_FOUND);
-        }
+        }        
+        GtfsDaoMap.put(gtfsFeed.getFeedId(), store);
+        
+        if(canReturn)
+            return Response.ok(mapper.writeValueAsString(gtfsFeed)).build();
         
         FileSystemFeedBackend backend = new FileSystemFeedBackend();
         FeedValidationResultSet results = new FeedValidationResultSet();
@@ -252,26 +242,23 @@ public class GtfsFeed {
         gtfsFeed = new GtfsFeedModel();
         gtfsFeed.setFeedLocation(saveFilePath);
         gtfsFeed.setGtfsUrl(gtfsFeedUrl);
+        gtfsFeed.setStartTime(TimeStampHelper.getCurrentTimestamp());
         
         byte[] checksum = calculateMD5checksum(saveFilePath);
         gtfsFeed.setChecksum(checksum);
 
         //Create GTFS feed row in database
-        int feedId = GTFSDB.createGtfsFeed(gtfsFeed);
-
-        //Get the newly created GTFSfeed model from id
-        gtfsFeed = GTFSDB.readGtfsFeed(feedId);
+        Session session = GTFSDB.InitSessionBeginTrans();
+        session.save(gtfsFeed);
+        GTFSDB.commitAndCloseSession(session);
         return gtfsFeed;
     }
 
     private GtfsFeedModel updateGtfsFeedModel(GtfsFeedModel gtfsFeed) {        
-        byte[] checksum = calculateMD5checksum(gtfsFeed.getFeedLocation());
-        gtfsFeed.setChecksum(checksum);
         //Update GTFS feed row in database
-        GTFSDB.updateGtfsFeed(gtfsFeed);
-
-        //Get the newly created GTFSfeed model from id
-        gtfsFeed = GTFSDB.readGtfsFeed(gtfsFeed.getFeedId());
+        Session session = GTFSDB.InitSessionBeginTrans();
+        session.update(gtfsFeed);
+        GTFSDB.commitAndCloseSession(session);
         return gtfsFeed;
     }
     private byte[] calculateMD5checksum(String inputFile) {

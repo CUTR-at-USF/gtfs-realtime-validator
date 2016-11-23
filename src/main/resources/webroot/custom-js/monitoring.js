@@ -46,10 +46,10 @@ for (var gtfsRtFeed in gtfsRtFeeds) {
                 }, updateInterval);
 
                 //Gather the GTFS feed id from the gtfs-rt-feed
-                if(!(checkedGTFS.indexOf(data["gtfsId"]) > -1)){
-                    loadGtfsErrors(data["gtfsId"]);
-                    checkedGTFS.push(data["gtfsId"]);
-                }
+                //if(!(checkedGTFS.indexOf(data["gtfsId"]) > -1)){
+                    //loadGtfsErrors(data["gtfsId"]);
+                    //checkedGTFS.push(data["gtfsId"]);
+                //}
             }
         });
     }

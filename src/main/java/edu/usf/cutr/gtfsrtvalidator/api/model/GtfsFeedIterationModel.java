@@ -17,10 +17,19 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.model;
 
+import java.io.Serializable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class GtfsFeedIterationModel {
+@Entity
+@Table(name="GtfsFeedIteration")
+public class GtfsFeedIterationModel implements Serializable {
     public GtfsFeedIterationModel(int iterationId, long timeStamp, int feedId) {
         this.setIterationId(iterationId);
         this.setTimeStamp(timeStamp);
@@ -32,9 +41,14 @@ public class GtfsFeedIterationModel {
     public static String ITERATIONID = "IterationId";
     public static String ITERATIONTIMESTAMP = "IterationTimestamp";
     public static String FEEDID = "feedID";
-
+    
+    @Id
+    @Column(name="IterationID")
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private int IterationId;
+    @Column(name="IterationTimestamp")
     private long timeStamp;
+    @Column(name="feedID")
     private int feedId;
 
     public int getFeedId() {
