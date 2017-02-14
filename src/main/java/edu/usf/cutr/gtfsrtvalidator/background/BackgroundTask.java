@@ -30,7 +30,7 @@ import edu.usf.cutr.gtfsrtvalidator.validation.entity.CheckTripId;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.StopTimeSequanceValidator;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.VehicleIdValidator;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.VehicleTripDescriptorValidator;
-import edu.usf.cutr.gtfsrtvalidator.validation.header.HeaderValidation;
+import edu.usf.cutr.gtfsrtvalidator.validation.entity.TimestampValidation;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.apache.commons.io.IOUtils;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
@@ -135,11 +135,11 @@ public class BackgroundTask implements Runnable {
             //---------------------------------------------------------------------------------------
             //endregion
 
-            //region Rules for header errors
+            //region warnings
             //---------------------------------------------------------------------------------------
-            //Validation rules for all headers
-            HeaderValidation validateHeaders = new HeaderValidation();
-            validateEntity(feedMessage, gtfsData, feedIteration, validateHeaders);
+            //w001
+            FeedEntityValidator validateTimestamp = new TimestampValidation();
+            validateEntity(feedMessage, gtfsData, feedIteration, validateTimestamp);
             //---------------------------------------------------------------------------------------
             //endregion
 
