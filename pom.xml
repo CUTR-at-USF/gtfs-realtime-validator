@@ -19,9 +19,13 @@
             <url>http://nexus.onebusaway.org/content/groups/public/</url>
         </repository>
         <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>        
+            <id>conveyal-releases-mvn-repo</id>
+            <url>http://build.staging.obanyc.com/archiva/repository/releases/</url>
+        </repository>
+        <repository>
+            <id>conveyal-snapshots-mvn-repo</id>
+            <url>http://build.staging.obanyc.com/archiva/repository/snapshots/</url>
+        </repository>
     </repositories>
     <dependencies>
         <dependency>
@@ -177,9 +181,14 @@
         </dependency>
         <!-- conveyal-gtfs-validator-->
         <dependency>
-            <groupId>com.github.conveyal</groupId>
-	    <artifactId>gtfs-validator</artifactId>
-	    <version>gtfs-validator-0.1.6</version>
+            <groupId>com.conveyal</groupId>
+	        <artifactId>gtfs-validation-lib</artifactId>
+	        <version>0.1.7-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.conveyal</groupId>
+            <artifactId>gtfs-validator-json</artifactId>
+            <version>0.1.7-SNAPSHOT</version>
         </dependency>
         <!-- Hibernate -->
         <dependency>
