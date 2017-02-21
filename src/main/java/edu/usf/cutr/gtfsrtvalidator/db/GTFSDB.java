@@ -62,6 +62,8 @@ public class GTFSDB {
         //Use reflection to get the list of rules from the ValidataionRules class
         Field[] fields = ValidationRules.class.getDeclaredFields();
 
+        Session session = InitSessionBeginTrans();
+
         List<ValidationRule> rulesInClass = new ArrayList<>();
         for (Field field : fields) {
             if (Modifier.isStatic(field.getModifiers())) {
@@ -72,7 +74,11 @@ public class GTFSDB {
                         Object value = field.get(rule);
                         rule = (ValidationRule)value;
                         System.out.println(rule.getErrorDescription());
-                        rulesInClass.add(rule);
+                        ValidationRule validationRule = (ValidationRule) session.createQuery("FROM ValidationRule WHERE errorId = "
+                                + "'" + rule.getErrorId() + "'").uniqueResult();
+                        if(validationRule == null) {
+                            rulesInClass.add(rule);
+                        }
                     } catch (IllegalAccessException ex) {
                         ex.printStackTrace();
                     }
@@ -80,8 +86,6 @@ public class GTFSDB {
             }
         }
 
-        Session session = InitSessionBeginTrans();
-        session.createQuery("DELETE FROM ValidationRule").executeUpdate(); //Deleting Error table
         try {
             for (ValidationRule rule : rulesInClass) {
                 session.save(rule);
