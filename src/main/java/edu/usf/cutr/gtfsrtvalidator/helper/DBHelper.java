@@ -25,7 +25,9 @@ public class DBHelper {
     public static void saveError(ErrorListHelperModel errorListHelperModel) {
         Session session = GTFSDB.InitSessionBeginTrans();
         int messageId = (int) session.save(errorListHelperModel.getErrorMessage());
+        GTFSDB.commitAndCloseSession(session);
 
+        session = GTFSDB.InitSessionBeginTrans();
         for (OccurrenceModel occurrence : errorListHelperModel.getOccurrenceList()) {
             occurrence.setMessageId(messageId);
             session.save(occurrence);

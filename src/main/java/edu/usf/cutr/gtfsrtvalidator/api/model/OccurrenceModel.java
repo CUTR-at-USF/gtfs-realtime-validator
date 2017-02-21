@@ -28,7 +28,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 @Entity
-@Table(name="GtfsOccurrence")
+@Table(name="Occurrence")
 public class OccurrenceModel implements Serializable {
     public OccurrenceModel(String elementPath, String elementValue) {
         this.elementPath = elementPath;

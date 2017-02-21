@@ -28,7 +28,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 @Entity
-@Table(name="GtfsMessageLog")
+@Table(name="MessageLog")
 public class MessageLogModel implements Serializable {
 
     public MessageLogModel(){};
