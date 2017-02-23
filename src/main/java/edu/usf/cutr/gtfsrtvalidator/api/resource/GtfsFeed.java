@@ -123,7 +123,11 @@ public class GtfsFeed {
                             + "WHERE gtfsUrl = '"+gtfsFeedUrl+"'").uniqueResult();
         GTFSDB.commitAndCloseSession(session);
         ObjectMapper mapper = new ObjectMapper();
-        downloadGtfsFeed(saveFilePath, connection);
+        Response.Status response = downloadGtfsFeed(saveFilePath, connection);
+        if(response == null) {
+            return generateError("Download Failed", "Downloading static GTFS feed from provided Url failed", Response.Status.BAD_REQUEST);
+        }
+
         System.out.println("GTFS File Downloaded Successfully");
         //TODO: Move to one method
         if (gtfsFeed == null) {
@@ -221,8 +225,9 @@ public class GtfsFeed {
         } else {
             //Extracts file name from header field
             int index = disposition.indexOf("filename=");
+            int filenameLastIndex = disposition.indexOf("\"", index + 10);
             if (index > 0) {
-                fileName = disposition.substring(index + 10, disposition.length() - 1);
+                fileName = disposition.substring(index + 10, filenameLastIndex);
             }
         }
 
@@ -296,7 +301,7 @@ public class GtfsFeed {
         return store;
     }
 
-    private void downloadGtfsFeed(String saveFilePath, HttpURLConnection connection) {
+    private Response.Status downloadGtfsFeed(String saveFilePath, HttpURLConnection connection) {
         try {
             // opens input stream from the HTTP connection
             InputStream inputStream = connection.getInputStream();
@@ -314,6 +319,8 @@ public class GtfsFeed {
             inputStream.close();
         } catch (IOException ex) {
             System.out.println("Downloading GTFS Feed Failed");
+            return null;
         }
+        return Response.Status.OK;
     }
 }
