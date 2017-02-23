@@ -15,5 +15,4 @@ buildNumber.properties
 *.log
 *~
 
-*.zip
 *.db
