@@ -31,6 +31,7 @@ public class GtfsFeedTest extends TestCase {
     private final String validGtfsFeedURL = "http://gohart.org/google/google_transit.zip";
     private final String invalidGtfsFeedURL = "DUMMY";
     private final String downloadFailURL = "http://gohart.org/google/file_not_exist.zip";
+    private final String badGTFS = "https://github.com/CUTR-at-USF/gtfs-realtime-validator/raw/master/src/test/resources/badgtfs.zip";
 
     GtfsFeed gtfsFeed;
 
@@ -44,12 +45,15 @@ public class GtfsFeedTest extends TestCase {
         Response response;
 
         response = gtfsFeed.postGtfsFeed(validGtfsFeedURL);
-        assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
         response = gtfsFeed.postGtfsFeed(invalidGtfsFeedURL);
-        assertEquals(response.getStatus(), Response.Status.BAD_REQUEST.getStatusCode());
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
 
         response = gtfsFeed.postGtfsFeed(downloadFailURL);
-        assertEquals(response.getStatus(), Response.Status.BAD_REQUEST.getStatusCode());
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+
+        response = gtfsFeed.postGtfsFeed(badGTFS);
+        assertEquals(Response.Status.NOT_FOUND.getStatusCode(), response.getStatus());
     }
 }
