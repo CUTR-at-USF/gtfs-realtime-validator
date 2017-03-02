@@ -26,6 +26,10 @@
             <id>conveyal-snapshots-mvn-repo</id>
             <url>http://build.staging.obanyc.com/archiva/repository/snapshots/</url>
         </repository>
+        <repository>
+            <id>mvnrepository</id>
+            <url>https://mvnrepository.com/artifact/</url>
+        </repository>
     </repositories>
     <dependencies>
         <dependency>
@@ -160,6 +164,12 @@
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-moxy</artifactId>
             <version>2.19</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>javax.mail-api</artifactId>
+            <version>1.5.1</version>
         </dependency>
 
         <dependency>

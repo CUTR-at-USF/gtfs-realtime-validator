@@ -17,19 +17,21 @@
 
 package edu.usf.cutr.gtfsrtvalidator.db;
 
-import edu.usf.cutr.gtfsrtvalidator.api.model.*;
+import edu.usf.cutr.gtfsrtvalidator.api.model.ValidationRule;
 import edu.usf.cutr.gtfsrtvalidator.hibernate.HibernateUtil;
 import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 
 public class GTFSDB {
 
@@ -74,11 +76,7 @@ public class GTFSDB {
                         Object value = field.get(rule);
                         rule = (ValidationRule)value;
                         System.out.println(rule.getErrorDescription());
-                        ValidationRule validationRule = (ValidationRule) session.createQuery("FROM ValidationRule WHERE errorId = "
-                                + "'" + rule.getErrorId() + "'").uniqueResult();
-                        if(validationRule == null) {
-                            rulesInClass.add(rule);
-                        }
+                        rulesInClass.add(rule);
                     } catch (IllegalAccessException ex) {
                         ex.printStackTrace();
                     }
@@ -88,7 +86,7 @@ public class GTFSDB {
 
         try {
             for (ValidationRule rule : rulesInClass) {
-                session.save(rule);
+                session.update(rule);
             }
             commitAndCloseSession(session);
         } catch (Exception ex) {

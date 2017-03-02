@@ -17,8 +17,6 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.resource;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.api.model.*;
 import edu.usf.cutr.gtfsrtvalidator.api.model.combined.CombinedIterationMessageModel;
@@ -26,6 +24,8 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.combined.CombinedMessageOccurrence
 import edu.usf.cutr.gtfsrtvalidator.background.BackgroundTask;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
+import org.hibernate.Session;
+import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
@@ -37,13 +37,13 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.sql.PreparedStatement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import org.hibernate.Session;
 
 @Path("/gtfs-rt-feed")
 public class GtfsRtFeed {
@@ -51,6 +51,7 @@ public class GtfsRtFeed {
     private static final int INVALID_FEED = 0;
     private static final int VALID_FEED = 1;
     PreparedStatement stmt;
+    public static String agencyTimezone;
 
     public Response generateError(String errorMessage) {
         return Response
@@ -142,15 +143,42 @@ public class GtfsRtFeed {
 
     //GET {id} return information about the feed with {id}
     @GET
-    @Path("{id : \\d+}")
+    @Path("/{id : \\d+}/summary")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getRtFeedDetails(@PathParam("id") int id) {
+    public Response getRtFeedSummaryDetails(@PathParam("id") int id) {
         List<ViewErrorCountModel> gtfsFeeds;
         Session session = GTFSDB.InitSessionBeginTrans();
         gtfsFeeds = session.createNamedQuery("ErrorCountByrtfeedID", ViewErrorCountModel.class)
-                .setParameter(0, id).setParameter(1, 10).list();
+                .setParameter(0, id).setParameter(1, id).list();
         GTFSDB.commitAndCloseSession(session);
+        for(ViewErrorCountModel viewErrorCountModel: gtfsFeeds) {
+            int index = gtfsFeeds.indexOf(viewErrorCountModel);
+            String formattedTimestamp = getDateFormat(viewErrorCountModel.getLastOccurrence(), id);
+            viewErrorCountModel.setFormattedTimestamp(formattedTimestamp);
+            viewErrorCountModel.setTimeZone(agencyTimezone);
+        }
         GenericEntity<List<ViewErrorCountModel>> feedList = new GenericEntity<List<ViewErrorCountModel>>(gtfsFeeds) {
+        };
+        return Response.ok(feedList).build();
+    }
+
+    // Return Log information about the feed with {id}
+    @GET
+    @Path("/{id : \\d+}/log")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getRtFeedLogDetails(@PathParam("id") int id) {
+        List<ViewErrorLogModel> gtfsFeeds;
+        Session session = GTFSDB.InitSessionBeginTrans();
+        gtfsFeeds = session.createNamedQuery("ErrorLogByrtfeedID", ViewErrorLogModel.class)
+                .setParameter(0, id).setParameter(1, id).setMaxResults(10).list();
+        GTFSDB.commitAndCloseSession(session);
+        for(ViewErrorLogModel viewErrorLogModel: gtfsFeeds) {
+            int index = gtfsFeeds.indexOf(viewErrorLogModel);
+            String formattedTimestamp = getDateFormat(viewErrorLogModel.getOccurrence(), id);
+            viewErrorLogModel.setFormattedTimestamp(formattedTimestamp);
+            viewErrorLogModel.setTimeZone(agencyTimezone);
+        }
+        GenericEntity<List<ViewErrorLogModel>> feedList = new GenericEntity<List<ViewErrorLogModel>>(gtfsFeeds) {
         };
         return Response.ok(feedList).build();
     }
@@ -219,5 +247,40 @@ public class GtfsRtFeed {
         } else {
             return runningTasks.get(rtFeedUrl);
         }
+    }
+
+    public String getDateFormat(long lastOccurrence, int gtfsRtId) {
+        Session session = GTFSDB.InitSessionBeginTrans();
+        GtfsRtFeedModel gtfsRtFeed = (GtfsRtFeedModel) session.createQuery(" FROM GtfsRtFeedModel "
+                + "WHERE rtFeedID = " + gtfsRtId).uniqueResult();
+        GTFSDB.commitAndCloseSession(session);
+
+        GtfsDaoImpl gtfsFeed = GtfsFeed.GtfsDaoMap.get(gtfsRtFeed.getGtfsId());
+        agencyTimezone = gtfsFeed.getAllAgencies().iterator().next().getTimezone();
+
+        DateFormat todaytimeFormat = new SimpleDateFormat("hh:mm:ss a");
+        DateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");
+        DateFormat todayDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        TimeZone timeZone = TimeZone.getTimeZone(agencyTimezone);
+        todaytimeFormat.setTimeZone(timeZone);
+        dateTimeFormat.setTimeZone(timeZone);
+        todayDateFormat.setTimeZone(timeZone);
+
+        String formattedTime;
+        String currentDate = todayDateFormat.format(new Date().getTime()); // converting to milliseconds
+        long fromStartOfDay = 0;
+        try {
+            fromStartOfDay = todayDateFormat.parse(currentDate).getTime() / 1000; // converting to seconds
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        if(lastOccurrence < fromStartOfDay) {
+            formattedTime = dateTimeFormat.format(lastOccurrence * 1000);
+        }
+        else {
+            formattedTime = todaytimeFormat.format(lastOccurrence * 1000);
+        }
+        return formattedTime;
     }
 }

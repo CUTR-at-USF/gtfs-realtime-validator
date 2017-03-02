@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Nipuna Gunathilake.
+ * Copyright (C) 2017 University of South Florida.
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,43 +17,44 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.model;
 
+import org.hibernate.annotations.RowId;
+
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
 @XmlRootElement
 @Entity
-@NamedNativeQuery(name = "ErrorCountByrtfeedID",
-    query = "SELECT ? AS rtFeedID, Error.errorID AS id, Error.title, " +
-              "Error.severity, errorCount.totalCount, " +
-              "errorCount.IterationTimestamp AS lastOccurrence " +
-            "FROM Error " +
-            "INNER JOIN " +
-              "(SELECT errorID, count(*) AS totalCount, " +
-                "MAX(IterationTimestamp)  AS IterationTimestamp " +
-              "FROM MessageLog " +
-              "INNER JOIN  " +
-                "(SELECT IterationID, IterationTimestamp " +
-                "FROM GtfsRtFeedIteration " +
-                "WHERE rtFeedID = ?) GtfsRtFeedIDIteration " +
-              "ON MessageLog.iterationID = GtfsRtFeedIDIteration.IterationID " +
-            "GROUP BY errorID) errorCount " +
-            "ON Error.errorID = errorCount.errorID ",
-    resultClass = ViewErrorCountModel.class)
-public class ViewErrorCountModel implements Serializable {
+@NamedNativeQuery(name = "ErrorLogByrtfeedID",
+        query = "SELECT ? AS rtFeedID, Error.errorID AS id, Error.title, " +
+                "Error.severity, errorLog.IterationTimestamp AS occurrence " +
+                "FROM Error " +
+                "INNER JOIN " +
+                    "(SELECT errorID, GtfsRtFeedIDIteration.IterationTimestamp " +
+                    "FROM MessageLog " +
+                    "INNER JOIN  " +
+                        "(SELECT IterationID, IterationTimestamp " +
+                        "FROM GtfsRtFeedIteration " +
+                        "WHERE rtFeedID = ?) GtfsRtFeedIDIteration " +
+                    "ON MessageLog.iterationID = GtfsRtFeedIDIteration.IterationID " +
+                    "ORDER BY GtfsRtFeedIDIteration.IterationID " +
+                    "DESC ) errorLog " +
+                "ON Error.errorID = errorLog.errorID ",
+        resultClass = ViewErrorLogModel.class)
+public class ViewErrorLogModel implements Serializable {
 
-    @Column(name="rtFeedID")
+    @Column(name = "rtFeedID")
     private int gtfsRtId;
-    @Column(name="lastOccurrence")
-    private long lastOccurrence;
-    @Column(name="totalCount")
-    private int count; // total number of error or warning count
+    // The composite id is occurrence+id; because a specific error occurs once in an iteration for a given gtfs rt feed
+    @Id
+    @Column(name = "occurrence")
+    private long occurrence;
     @Id
     @Column(name = "id")
     private String id; // error or warning ID
     @Column(name = "severity")
     private String severity;
-    @Column (name = "title")
+    @Column(name = "title")
     private String title;
     @Transient
     private String formattedTimestamp;
@@ -68,20 +69,12 @@ public class ViewErrorCountModel implements Serializable {
         this.gtfsRtId = gtfsRtId;
     }
 
-    public long getLastOccurrence() {
-        return lastOccurrence;
+    public long getOccurrence() {
+        return occurrence;
     }
 
-    public void setLastOccurrence(long lastOccurrence) {
-        this.lastOccurrence = lastOccurrence;
-    }
-
-    public int getCount() {
-        return count;
-    }
-    
-    public void setCount(int count) {
-        this.count = count;
+    public void setOccurrence(long occurrence) {
+        this.occurrence = occurrence;
     }
 
     public String getId() {
@@ -108,11 +101,12 @@ public class ViewErrorCountModel implements Serializable {
         this.title = title;
     }
 
-    public void setFormattedTimestamp(String formattedTimestamp) {
-        this.formattedTimestamp = formattedTimestamp;
-    }
     public String getFormattedTimestamp() {
         return formattedTimestamp;
+    }
+
+    public void setFormattedTimestamp(String formattedTimestamp) {
+        this.formattedTimestamp = formattedTimestamp;
     }
 
     public String getTimeZone() {

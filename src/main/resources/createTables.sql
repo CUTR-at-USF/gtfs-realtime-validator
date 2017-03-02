@@ -3,7 +3,8 @@ CREATE TABLE IF NOT EXISTS GtfsFeed (
   feedUrl           VARCHAR(100),
   fileLocation      VARCHAR(100),
   downloadTimestamp INTEGER,
-  fileChecksum      BLOB
+  fileChecksum      BLOB,
+  errorCount        INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS GtfsRtFeed (
@@ -16,6 +17,8 @@ CREATE TABLE IF NOT EXISTS GtfsRtFeed (
 
 CREATE TABLE IF NOT EXISTS Error (
   errorID          VARCHAR(20),
+  severity         VARCHAR(20),
+  title            VARCHAR(100),
   errorDescription VARCHAR(500),
   PRIMARY KEY (errorID)
 );

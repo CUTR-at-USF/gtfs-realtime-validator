@@ -17,12 +17,12 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.model;
 
-import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.io.Serializable;
 
 @XmlRootElement
 @Entity
@@ -35,13 +35,19 @@ public class ValidationRule implements Serializable {
     @Id
     @Column(name="errorID")
     private String errorId;
+    @Column(name = "severity")
+    private String severity;
+    @Column(name = "title")
+    private String title;
     @Column(name="errorDescription")
     private String errorDescription;
 
     public ValidationRule() {}
 
-    public ValidationRule(String errorId, String errorDescription) {
+    public ValidationRule(String errorId, String severity, String title, String errorDescription) {
         this.setErrorId(errorId);
+        this.setSeverity(severity);
+        this.setTitle(title);
         this.setErrorDescription(errorDescription);
     }
 
@@ -59,5 +65,21 @@ public class ValidationRule implements Serializable {
 
     public void setErrorId(String errorId) {
         this.errorId = errorId;
+    }
+
+    public String getSeverity() {
+        return severity;
+    }
+
+    public void setSeverity(String errorType) {
+        this.severity = errorType;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 }

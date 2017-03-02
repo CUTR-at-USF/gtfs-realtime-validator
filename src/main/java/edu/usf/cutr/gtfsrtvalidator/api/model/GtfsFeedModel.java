@@ -43,6 +43,8 @@ public class GtfsFeedModel implements Serializable {
     private String feedLocation;
     @Column(name="fileChecksum")
     private byte[] checksum;
+    @Column(name = "errorCount")
+    private int errorCount;
 
     public static String FEEDID = "feedId";
     public static String FEEDURL = "feedUrl";
@@ -91,6 +93,14 @@ public class GtfsFeedModel implements Serializable {
         this.checksum = checksum;
     }
 
+    public int getErrorCount() {
+        return errorCount;
+    }
+
+    public void setErrorCount(int errorCount) {
+        this.errorCount = errorCount;
+    }
+
     @Override
     public String toString() {
         return "GtfsFeedModel{" +
@@ -98,6 +108,8 @@ public class GtfsFeedModel implements Serializable {
                 ", feedId=" + feedId +
                 ", startTime=" + startTime +
                 ", feedLocation='" + feedLocation + '\'' +
+                ", checkSum=" + checksum +
+                ", errorCount=" + errorCount +
                 '}';
     }
 }

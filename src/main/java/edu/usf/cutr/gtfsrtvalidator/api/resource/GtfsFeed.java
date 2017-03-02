@@ -17,16 +17,21 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.resource;
 
-import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedModel;
-import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
-import edu.usf.cutr.gtfsrtvalidator.helper.GetFile;
-import org.onebusaway.gtfs.impl.GtfsDaoImpl;
-import org.onebusaway.gtfs.serialization.GtfsReader;
-import com.conveyal.gtfs.validator.json.backends.FileSystemFeedBackend;
+import com.conveyal.gtfs.model.InvalidValue;
+import com.conveyal.gtfs.validator.json.FeedProcessor;
+import com.conveyal.gtfs.validator.json.FeedValidationResult;
 import com.conveyal.gtfs.validator.json.FeedValidationResultSet;
+import com.conveyal.gtfs.validator.json.backends.FileSystemFeedBackend;
 import com.conveyal.gtfs.validator.json.serialization.JsonSerializer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedModel;
+import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
+import edu.usf.cutr.gtfsrtvalidator.helper.GetFile;
+import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
+import org.hibernate.Session;
+import org.onebusaway.gtfs.impl.GtfsDaoImpl;
+import org.onebusaway.gtfs.serialization.GtfsReader;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
@@ -39,21 +44,18 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static edu.usf.cutr.gtfsrtvalidator.helper.HttpMessageHelper.generateError;
-import com.conveyal.gtfs.validator.json.FeedProcessor;
-import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.hibernate.Session;
+
+import static edu.usf.cutr.gtfsrtvalidator.helper.HttpMessageHelper.generateError;
 
 @Path("/gtfs-feed")
 public class GtfsFeed {
@@ -169,6 +171,7 @@ public class GtfsFeed {
             return generateError("Unable to access input GTFS " + input.getPath() + ".", "Does the file exist and do I have permission to read it?", Response.Status.NOT_FOUND);
         }
         results.add(processor.getOutput());
+        saveGtfsErrorCount(gtfsFeed, processor.getOutput());
         JsonSerializer serializer = new JsonSerializer(results);
         //get the location of the executed jar file
         GetFile jarInfo = new GetFile();
@@ -322,5 +325,38 @@ public class GtfsFeed {
             return null;
         }
         return Response.Status.OK;
+    }
+
+    private void saveGtfsErrorCount(GtfsFeedModel gtfsFeedModel, FeedValidationResult result) {
+
+        int errorCount = 0;
+        for (InvalidValue invalidValue: result.routes.invalidValues) {
+            errorCount++;
+        }
+        for (InvalidValue invalidValue: result.shapes.invalidValues) {
+            errorCount++;
+        }
+        for (InvalidValue invalidValue: result.stops.invalidValues) {
+            errorCount++;
+        }
+        for (InvalidValue invalidValue: result.trips.invalidValues) {
+            errorCount++;
+        }
+
+        gtfsFeedModel.setErrorCount(errorCount);
+        Session session = GTFSDB.InitSessionBeginTrans();
+        session.update(gtfsFeedModel);
+        GTFSDB.commitAndCloseSession(session);
+    }
+
+    @GET
+    @Path("/{id : \\d+}/errorCount")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getFeedErrorCount(@PathParam("id") int id) {
+        Session session = GTFSDB.InitSessionBeginTrans();
+        GtfsFeedModel gtfsFeed = (GtfsFeedModel) session.createQuery(" FROM GtfsFeedModel WHERE feedId = " + id).uniqueResult();
+        GTFSDB.commitAndCloseSession(session);
+
+        return Response.ok(gtfsFeed).build();
     }
 }

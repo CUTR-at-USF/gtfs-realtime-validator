@@ -75,10 +75,6 @@
                                         GTFS Error Count:
                                         <span id="gtfs-error">0</span>
                                     </div>
-                                    <div class="col-md-4">
-                                        GTFS-RT Feed Errors:
-                                        <span id="gtfs-rt-error">0</span>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -96,26 +92,6 @@
 
         <div class="monitor-placeholder"></div>
 
-        <div class="col-md-12">
-            <div class="well content-well">
-                <h3>GTFS Feed Errors</h3>
-                <hr/>
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th class="col-md-2">Error ID</th>
-                        <th class="col-md-2">Error Count</th>
-                        <th>Description</th>
-                    </tr>
-                    </thead>
-
-                    <tbody id="gtfs-feed-tbody">
-
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
     </div>
 </div>
 <!-- /.container -->
@@ -128,40 +104,74 @@
 <script id="feed-monitor-template" type="text/x-handlebars-template">
     <div class="col-md-12">
         <div class="well content-well">
-            <h3>Monitor Feed - {{gtfsUrl}} {{gtfsRtId}}</h3>
+            <h3>Feed - {{gtfsUrl}}</h3>
             <hr/>
-            <table class="table">
-                <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Time Stamp</th>
-                    <th>Errors</th>
-                </tr>
-                </thead>
+            <div class="well">
+                <h3>Summary</h3>
+                <hr/>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Severity</th>
+                        <th>Last occurrence</th>
+                        <th>Count</th>
+                    </tr>
+                    </thead>
 
-                <!-- placeholder for rows of records from the database -->
-                <tbody id="monitor-table-{{gtfsRtId}}">
+                    <!-- placeholder for rows of records from the database -->
+                    <tbody id="monitor-table-summary-{{gtfsRtId}}">
 
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="well">
+                <h3>Log</h3>
+                <hr/>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Severity</th>
+                        <th>Timestamp</th>
+                    </tr>
+                    </thead>
+
+                    <!-- placeholder for rows of records from the database -->
+                    <tbody id="monitor-table-log-{{gtfsRtId}}">
+
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </script>
 
-<script id="feed-monitor-row-template" type="text/x-handlebars-template">
+<script id="feed-monitor-summary-row-template" type="text/x-handlebars-template">
     {{#each this}}
     <tr>
-        <td><a href="error.html?={{iterationId}}">{{iterationId}}</a></td>
-        <td>{{iterationTime}}</td>
+        <td> <font color="blue">{{id}}</font> </td>
+        <td>{{title}}</td>
 
-        <td>{{errorCount}}</td>
-        <td>{{vehicleCount}}</td>
+        <td>{{severity}}</td>
+        <td title="Time zone: {{timeZone}}">{{formattedTimestamp}} ({{lastOccurrence}})</td>
 
-        <td>{{alertCount}}</td>
-        <td>{{alertCount}}</td>
+        <td>{{count}}</td>
+    </tr>
+    {{/each}}
+</script>
 
-        <td>{{updateCount}}</td>
-        <td>{{updateCount}}</td>
+<script id="feed-monitor-log-row-template" type="text/x-handlebars-template">
+    {{#each this}}
+    <tr>
+        <td><font color="blue">{{id}}</font></td>
+        <td>{{title}}</td>
+
+        <td>{{severity}}</td>
+        <td title="Time zone: {{timeZone}}">{{formattedTimestamp}} ({{occurrence}})</td>
     </tr>
     {{/each}}
 </script>

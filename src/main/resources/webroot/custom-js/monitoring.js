@@ -45,40 +45,28 @@ for (var gtfsRtFeed in gtfsRtFeeds) {
                     refresh(data["gtfsRtId"])
                 }, updateInterval);
 
-                //Gather the GTFS feed id from the gtfs-rt-feed
-                //if(!(checkedGTFS.indexOf(data["gtfsId"]) > -1)){
-                    //loadGtfsErrors(data["gtfsId"]);
-                    //checkedGTFS.push(data["gtfsId"]);
-                //}
+                // get gtfs error count
+                loadGtfsErrorCount(data["gtfsId"]);
             }
         });
     }
 }
 
-function loadGtfsErrors(gtfsFeedId) {
-    $.get("http://localhost:8080/api/gtfs-feed/" + gtfsFeedId + "/errors", function (data) {
-        console.log("Errors in GTFS: " + data);
-        for(var errorItem in data) {
-            errorItem = data[errorItem]
-
-            var errorRow="";
-            errorRow += "<tr>";
-            errorRow += "<td>"+ errorItem.errorId +"<\/td>";
-            errorRow += "<td>"+ errorItem.errorCount +"<\/td>";
-            errorRow += "<td>"+ errorItem.errorDesc +"<\/td>";
-            errorRow += "<\/tr>";
-
-            $("#gtfs-feed-tbody").append(errorRow);
-        }
+function loadGtfsErrorCount(gtfsFeedId) {
+    $.get("http://localhost:8080/api/gtfs-feed/" + gtfsFeedId + "/errorCount").done(function (data)  {
+        $("#gtfs-error").text(data["errorCount"]);
     });
 }
 
 function refresh(id) {
-    $.get("http://localhost:8080/api/gtfs-rt-feed/" + id).done(function (data) {
+    $.get("http://localhost:8080/api/gtfs-rt-feed/" + id + "/summary").done(function (data) {
         $("#iterations").text(++iterations);
-        updateTables(id, data);
-        errorCount = errorCount + data[0]["errorCount"];
-        $("#gtfs-rt-error").text(errorCount);
+        updateSummaryTables(id, data);
+    });
+
+    $.get("http://localhost:8080/api/gtfs-rt-feed/" + id + "/log").done(function (data) {
+        $("#iterations").text(++iterations);
+        updateLogTables(id, data);
     });
 }
 
@@ -90,13 +78,22 @@ function initializeInterface(gtfsRtFeeds) {
     $('.monitor-placeholder').append(compiledHtml);
 }
 
-function updateTables(index, data) {
+function updateSummaryTables(index, data) {
 
-    var monitorTemplateScript = $("#feed-monitor-row-template").html();
+    var monitorTemplateScript = $("#feed-monitor-summary-row-template").html();
     var monitorTemplate = Handlebars.compile(monitorTemplateScript);
     var compiledHtml = monitorTemplate(data);
 
-    $("#monitor-table-" + index + "").html(compiledHtml);
+    $("#monitor-table-summary-" + index + "").html(compiledHtml);
+}
+
+function updateLogTables(index, data) {
+
+    var monitorTemplateScript = $("#feed-monitor-log-row-template").html();
+    var monitorTemplate = Handlebars.compile(monitorTemplateScript);
+    var compiledHtml = monitorTemplate(data);
+
+    $("#monitor-table-log-" + index + "").html(compiledHtml);
 }
 
 //Calculate time for display

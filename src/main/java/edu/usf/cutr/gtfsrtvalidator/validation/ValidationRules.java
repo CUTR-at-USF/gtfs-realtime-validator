@@ -21,11 +21,11 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.ValidationRule;
 public class ValidationRules {
     //region Warnings
     //---------------------------------------------------------------------------------------
-    public static final ValidationRule W001 = new ValidationRule("w001",
+    public static final ValidationRule W001 = new ValidationRule("w001", "WARNING", "Timestamp not populated",
             "Timestamps should be populated for all elements");
-    public static final ValidationRule W002 = new ValidationRule("w002",
+    public static final ValidationRule W002 = new ValidationRule("w002", "WARNING", "Vehicle_id not populated",
             "vehicle_id should be populated in trip_update");
-    public static final ValidationRule W003 = new ValidationRule("w003",
+    public static final ValidationRule W003 = new ValidationRule("w003", "WARNING", "VehiclePosition and TripUpdate feed mismatch",
             "If both vehicle positions and trip updates are provided, VehicleDescriptor or TripDescriptor values should match between the two feeds");
 
     //---------------------------------------------------------------------------------------
@@ -33,23 +33,23 @@ public class ValidationRules {
 
     //region Errors
     //---------------------------------------------------------------------------------------
-    public static final ValidationRule E001 = new ValidationRule("e001",
+    public static final ValidationRule E001 = new ValidationRule("e001", "ERROR", "Not in POSIX time",
             "All timestamps must be in POSIX time (i.e., number of seconds since January 1st 1970 00:00:00 UTC)");
-    public static final ValidationRule E002 = new ValidationRule("e002",
+    public static final ValidationRule E002 = new ValidationRule("e002", "ERROR", "Unsorted stop_sequence",
             "stop_time_updates for a given trip_id must be sorted by increasing stop_sequence");
-    public static final ValidationRule E003 = new ValidationRule("e003",
+    public static final ValidationRule E003 = new ValidationRule("e003", "ERROR", "Trip_id mismatch in GTFS-rt and GTFS",
             "All trip_ids provided in the GTFS-rt feed must appear in the GTFS data");
-    public static final ValidationRule E004 = new ValidationRule("e004",
+    public static final ValidationRule E004 = new ValidationRule("e004", "ERROR", "Route_id mismatch in GTFS-rt and GTFS",
             "All route_ids provided in the GTFS-rt feed must appear in the GTFS data");
-    public static final ValidationRule E005 = new ValidationRule("e005",
+    public static final ValidationRule E005 = new ValidationRule("e005", "ERROR", "GTFS stop_times.txt does not contain arrival_times and/or departure_times for all stops referenced in the GTFS-rt feed",
             "If only delay is provided in a stop_time_event (and not a time), then the GTFS stop_times.txt must contain arrival_times and/or departure_times for all stops referenced in the GTFS-rt feed (i.e., not just timepoints)");
-    public static final ValidationRule E006 = new ValidationRule("e006",
+    public static final ValidationRule E006 = new ValidationRule("e006", "ERROR", "Missing trip_id and start_time in Frequency-based trip_updates",
             "Frequency-based trip_updates must contain trip_id and start_time");
-    public static final ValidationRule E007 = new ValidationRule("e007",
-            "If more than more trip_update has the same vehicle_id, then all trips must belong to the same block, and the arrival predictions for each trip must match the sequential order for the trips in the block. For example, if we have trip_ids 1, 2, and 3 that all belong to the same block, and the vehicle trips trip 1, then trip 2, and then trip 3, the arrival predictions should increase chronologically for trips 1, 2, and 3. For example, trip 3 predictions shouldn't be earlier than trip 2 predictions.");
-    public static final ValidationRule E008 = new ValidationRule("e008",
+    public static final ValidationRule E007 = new ValidationRule("e007", "ERROR", "All trips does not belong to the same block",
+            "If more than one trip_update has the same vehicle_id, then all trips must belong to the same block, and the arrival predictions for each trip must match the sequential order for the trips in the block. For example, if we have trip_ids 1, 2, and 3 that all belong to the same block, and the vehicle trips trip 1, then trip 2, and then trip 3, the arrival predictions should increase chronologically for trips 1, 2, and 3. For example, trip 3 predictions shouldn't be earlier than trip 2 predictions.");
+    public static final ValidationRule E008 = new ValidationRule("e008", "ERROR", "In the GTFS-rt data, the tripId for each TripUpdate.TripDescriptor is not provided",
             "If a GTFS block (defined by block_id in trips.txt) contains multiple references to the same stopId (i.e., the bus visits the same stopId more than once in the same block), but in different trips, then in the GTFS-rt data the tripId for each TripUpdate.TripDescriptor must be provided. In this case, the bus wouldn't visit the same stopId more than once in the same trip.");
-    public static final ValidationRule E009 = new ValidationRule("e009",
+    public static final ValidationRule E009 = new ValidationRule("e009", "ERROR", "In the GTFS-rt data, the stop_sequence for each TripUpdate.StopTimeUpdate is not provided",
             "If a GTFS trip contains multiple references to the same stopId (i.e., the bus visits the same stopId more than once in the SAME trip), then in the GTFS-rt data the stop_sequence for each TripUpdate.StopTimeUpdate must be provided.");
 
     /**
@@ -58,7 +58,7 @@ public class ValidationRules {
      * Affected Feed Type(s): GTFS feed
      * Reference(s): https://developers.google.com/transit/gtfs/reference?hl=en#stop_timestxt
      */
-    public static final ValidationRule E010 = new ValidationRule("e010",
+    public static final ValidationRule E010 = new ValidationRule("e010", "ERROR", "location_type not 0 in stops.txt",
             "If location_type is used in stops.txt, all stops referenced in stop_times.txt must have location_type of 0");
 
     /**
@@ -67,7 +67,7 @@ public class ValidationRules {
      * Affected Feed Type(s): TripUpdate, VehiclePostion
      * Reference(s): https://developers.google.com/transit/gtfs/reference?hl=en#stop_timestxt
      */
-    public static final ValidationRule E011 = new ValidationRule("e011",
+    public static final ValidationRule E011 = new ValidationRule("e011", "ERROR", "Location_type not 0 in GTFS-rt",
             "All stop_ids referenced in GTFS-rt feeds must have the location_type = 0");
     //---------------------------------------------------------------------------------------
     //endregion
