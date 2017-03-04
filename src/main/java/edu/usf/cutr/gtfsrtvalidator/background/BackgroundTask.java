@@ -25,16 +25,12 @@ import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.helper.DBHelper;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
-import edu.usf.cutr.gtfsrtvalidator.validation.entity.LocationTypeReferenceValidator;
-import edu.usf.cutr.gtfsrtvalidator.validation.entity.CheckTripId;
-import edu.usf.cutr.gtfsrtvalidator.validation.entity.StopTimeSequanceValidator;
-import edu.usf.cutr.gtfsrtvalidator.validation.entity.VehicleIdValidator;
+import edu.usf.cutr.gtfsrtvalidator.validation.entity.*;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.VehicleTripDescriptorValidator;
-import edu.usf.cutr.gtfsrtvalidator.validation.entity.TimestampValidation;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.apache.commons.io.IOUtils;
+import org.hibernate.Session;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
-import org.onebusway.gtfs_realtime.exporter.GtfsRealtimeLibrary;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -44,7 +40,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.hibernate.Session;
 
 public class BackgroundTask implements Runnable {
     //Entity list kept under the gtfsRtFeed id.
@@ -121,7 +116,7 @@ public class BackgroundTask implements Runnable {
                 allEntitiesArrayList.addAll(message.getEntityList());
             }
 
-            GtfsRealtime.FeedMessage.Builder feedMessageBuilder = GtfsRealtimeLibrary.createFeedMessageBuilder();
+            GtfsRealtime.FeedMessage.Builder feedMessageBuilder = GtfsRealtime.FeedMessage.newBuilder();
             feedMessageBuilder.addAllEntity(allEntitiesArrayList);
 
             GtfsRealtime.FeedMessage combinedFeed = feedMessageBuilder.build();
