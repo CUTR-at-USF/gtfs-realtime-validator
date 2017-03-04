@@ -20,12 +20,12 @@ import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.test.headerandentity.FeedEntityTest;
 import edu.usf.cutr.gtfsrtvalidator.test.headerandentity.FeedHeaderTest;
-import java.io.File;
-import java.io.IOException;
 import junit.framework.TestCase;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.onebusaway.gtfs.serialization.GtfsReader;
-import org.onebusway.gtfs_realtime.exporter.GtfsRealtimeLibrary;
+
+import java.io.File;
+import java.io.IOException;
 
 
 public class FeedMessageTest extends TestCase {
@@ -51,8 +51,8 @@ public class FeedMessageTest extends TestCase {
         
     public FeedMessageTest() throws IOException {
         errors = new ErrorListHelperModel();
-        
-        feedMessageBuilder = GtfsRealtimeLibrary.createFeedMessageBuilder();
+
+        feedMessageBuilder = GtfsRealtime.FeedMessage.newBuilder();
         feedEntityBuilder = GtfsRealtime.FeedEntity.newBuilder();
         feedHeaderBuilder = GtfsRealtime.FeedHeader.newBuilder();
 
