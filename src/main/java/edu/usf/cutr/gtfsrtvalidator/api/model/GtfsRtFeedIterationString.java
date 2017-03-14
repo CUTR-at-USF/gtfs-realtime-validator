@@ -84,7 +84,6 @@ public class GtfsRtFeedIterationString {
             GtfsRealtime.FeedMessage feedMessage = GtfsRealtime.FeedMessage.parseFrom(feedprotobuf);
             s = JsonFormat.printToString(feedMessage);
             s.replace('\\', ' ');
-            System.out.println(s);
         } catch (InvalidProtocolBufferException e) {
             e.printStackTrace();
         }

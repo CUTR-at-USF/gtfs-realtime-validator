@@ -31,6 +31,7 @@ import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -42,6 +43,9 @@ import java.util.List;
 import java.util.Map;
 
 public class BackgroundTask implements Runnable {
+
+    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(BackgroundTask.class);
+
     //Entity list kept under the gtfsRtFeed id.
     //Used to check errors with different feeds for the same transit agency.
 
@@ -76,7 +80,7 @@ public class BackgroundTask implements Runnable {
             try {
                 gtfsRtFeedUrl = new URL(currentFeed.getGtfsUrl());
             } catch (MalformedURLException e) {
-                System.out.println("Malformed Url: " + currentFeed.getGtfsUrl());
+                _log.error("Malformed Url: " + currentFeed.getGtfsUrl(), e);
                 e.printStackTrace();
                 return;
             }
@@ -94,8 +98,7 @@ public class BackgroundTask implements Runnable {
                 session.save(feedIteration);
                 GTFSDB.commitAndCloseSession(session);                
             } catch (Exception e) {
-                System.out.println("The URL: " + gtfsRtFeedUrl + " does not contain valid Gtfs-Rt data");
-                //e.printStackTrace();
+                _log.error("The URL '" + gtfsRtFeedUrl + "' does not contain valid Gtfs-Rt data", e);
                 return;
             }
             //---------------------------------------------------------------------------------------

@@ -23,11 +23,14 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class TimestampValidation implements FeedEntityValidator{
+
+    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(TimestampValidation.class);
 
     @Override
     public ErrorListHelperModel validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
@@ -37,7 +40,7 @@ public class TimestampValidation implements FeedEntityValidator{
         
         long headerTimestamp = feedMessage.getHeader().getTimestamp();
         if (headerTimestamp == 0) {
-            System.out.println("Timestamp not present in FeedHeader");
+            _log.debug("Timestamp not present in FeedHeader");
             errorOccurrence = new OccurrenceModel("$.header.timestamp not populated", String.valueOf(headerTimestamp));
             errorOccurrenceList.add(errorOccurrence);
         }
@@ -45,12 +48,12 @@ public class TimestampValidation implements FeedEntityValidator{
             long tripupdateTimestamp = entity.getTripUpdate().getTimestamp();
             long vehicleTimestamp = entity.getVehicle().getTimestamp();
             if (tripupdateTimestamp == 0) {
-                System.out.println("Timestamp not present in TripUpdate");
+                _log.debug("Timestamp not present in TripUpdate");
                 errorOccurrence = new OccurrenceModel("$.entity.*.trip_update.timestamp not populated", String.valueOf(tripupdateTimestamp));
                 errorOccurrenceList.add(errorOccurrence);
             }
             if (vehicleTimestamp == 0) {
-                System.out.println("Timestamp not present in VehiclePosition");
+                _log.debug("Timestamp not present in VehiclePosition");
                 errorOccurrence = new OccurrenceModel("$.entity.*.vehicle_position.timestamp not populated", String.valueOf(vehicleTimestamp));
                 errorOccurrenceList.add(errorOccurrence);
             }

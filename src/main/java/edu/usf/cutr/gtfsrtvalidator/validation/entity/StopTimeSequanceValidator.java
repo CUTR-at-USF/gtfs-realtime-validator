@@ -25,6 +25,7 @@ import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +35,9 @@ import java.util.List;
  * Description: stop_time_updates for a given trip_id must be sorted by increasing stop_sequence
  */
 public class StopTimeSequanceValidator implements FeedEntityValidator {
+
+    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(StopTimeSequanceValidator.class);
+
     @Override
     public ErrorListHelperModel validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
         List<GtfsRealtime.FeedEntity> entityList = feedMessage.getEntityList();
@@ -60,7 +64,7 @@ public class StopTimeSequanceValidator implements FeedEntityValidator {
 
             boolean sorted = Ordering.natural().isOrdered(stopSequenceList);
             if (!sorted) {
-                //System.out.println("StopSequenceList is not in order");
+                _log.debug("StopSequenceList is not in order");
                 String feedId = tripUpdateEntity.getId();
                 OccurrenceModel occurrenceModel = new OccurrenceModel("$.entity[?(@.id == \"" + feedId + "\")]", stopSequenceList.toString());
                 errorOccurrenceList.add(occurrenceModel);
