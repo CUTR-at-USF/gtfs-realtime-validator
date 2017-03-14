@@ -110,13 +110,20 @@ public class BackgroundTask implements Runnable {
 
             List<GtfsRealtime.FeedEntity> allEntitiesArrayList = new ArrayList<>();
 
+            GtfsRealtime.FeedHeader header = null;
+
             for (Map.Entry<Integer, GtfsRealtime.FeedMessage> allFeeds : feedEntityInstance.entrySet()) {
                 int key = allFeeds.getKey();
                 GtfsRealtime.FeedMessage message = feedEntityInstance.get(key);
+                if (header == null) {
+                    // Save one header to use in our combined feed below
+                    header = feedEntityInstance.get(key).getHeader();
+                }
                 allEntitiesArrayList.addAll(message.getEntityList());
             }
 
             GtfsRealtime.FeedMessage.Builder feedMessageBuilder = GtfsRealtime.FeedMessage.newBuilder();
+            feedMessageBuilder.setHeader(header);
             feedMessageBuilder.addAllEntity(allEntitiesArrayList);
 
             GtfsRealtime.FeedMessage combinedFeed = feedMessageBuilder.build();
