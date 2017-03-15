@@ -17,21 +17,27 @@
 
 package edu.usf.cutr.gtfsrtvalidator.db;
 
-import edu.usf.cutr.gtfsrtvalidator.api.model.*;
+import edu.usf.cutr.gtfsrtvalidator.api.model.ValidationRule;
 import edu.usf.cutr.gtfsrtvalidator.hibernate.HibernateUtil;
 import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 
 public class GTFSDB {
+
+    private static final Logger _log = LoggerFactory.getLogger(GTFSDB.class);
 
     public static void InitializeDB() {
         Statement stmt;
@@ -73,7 +79,6 @@ public class GTFSDB {
                     try {
                         Object value = field.get(rule);
                         rule = (ValidationRule)value;
-                        System.out.println(rule.getErrorDescription());
                         ValidationRule validationRule = (ValidationRule) session.createQuery("FROM ValidationRule WHERE errorId = "
                                 + "'" + rule.getErrorId() + "'").uniqueResult();
                         if(validationRule == null) {
@@ -95,7 +100,7 @@ public class GTFSDB {
             ex.printStackTrace();
         }
 
-        System.out.println("Table initialized successfully");
+        _log.info("Table initialized successfully");
     }
     public static Session InitSessionBeginTrans() {
         Session session = null;

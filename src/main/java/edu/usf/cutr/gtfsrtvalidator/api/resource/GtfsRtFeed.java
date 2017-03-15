@@ -17,8 +17,6 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.resource;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.api.model.*;
 import edu.usf.cutr.gtfsrtvalidator.api.model.combined.CombinedIterationMessageModel;
@@ -26,6 +24,8 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.combined.CombinedMessageOccurrence
 import edu.usf.cutr.gtfsrtvalidator.background.BackgroundTask;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
+import org.hibernate.Session;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
@@ -43,10 +43,11 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import org.hibernate.Session;
 
 @Path("/gtfs-rt-feed")
 public class GtfsRtFeed {
+
+    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(GtfsRtFeed.class);
 
     private static final int INVALID_FEED = 0;
     private static final int VALID_FEED = 1;
@@ -195,7 +196,6 @@ public class GtfsRtFeed {
     private int checkFeedType(String FeedURL) {
         GtfsRealtime.FeedMessage feed;
         try {
-            System.out.println(FeedURL);
             URI FeedURI = new URI(FeedURL);
             URL url = FeedURI.toURL();
             feed = GtfsRealtime.FeedMessage.parseFrom(url.openStream());
@@ -203,6 +203,7 @@ public class GtfsRtFeed {
             return INVALID_FEED;
         }
         if (feed.hasHeader()) {
+            _log.info(String.format("%s is a valid GTFS-realtime feed", FeedURL));
             return VALID_FEED;
         }
         return INVALID_FEED;

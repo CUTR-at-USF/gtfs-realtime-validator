@@ -24,8 +24,11 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.slf4j.LoggerFactory;
 
 public class Main {
+    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(Main.class);
+
     static String BASE_RESOURCE = "./target/classes/webroot";
 
     public static void main(String[] args) throws InterruptedException{
@@ -49,6 +52,7 @@ public class Main {
 
         try {
             server.start();
+            _log.info("Go to http://localhost:8080 in your browser");
             server.join();
         } catch (Exception e) {
             e.printStackTrace();

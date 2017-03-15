@@ -17,16 +17,20 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.resource;
 
-import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedModel;
-import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
-import edu.usf.cutr.gtfsrtvalidator.helper.GetFile;
-import org.onebusaway.gtfs.impl.GtfsDaoImpl;
-import org.onebusaway.gtfs.serialization.GtfsReader;
-import com.conveyal.gtfs.validator.json.backends.FileSystemFeedBackend;
+import com.conveyal.gtfs.validator.json.FeedProcessor;
 import com.conveyal.gtfs.validator.json.FeedValidationResultSet;
+import com.conveyal.gtfs.validator.json.backends.FileSystemFeedBackend;
 import com.conveyal.gtfs.validator.json.serialization.JsonSerializer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedModel;
+import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
+import edu.usf.cutr.gtfsrtvalidator.helper.GetFile;
+import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
+import org.hibernate.Session;
+import org.onebusaway.gtfs.impl.GtfsDaoImpl;
+import org.onebusaway.gtfs.serialization.GtfsReader;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
@@ -39,24 +43,24 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static edu.usf.cutr.gtfsrtvalidator.helper.HttpMessageHelper.generateError;
-import com.conveyal.gtfs.validator.json.FeedProcessor;
-import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.hibernate.Session;
+
+import static edu.usf.cutr.gtfsrtvalidator.helper.HttpMessageHelper.generateError;
 
 @Path("/gtfs-feed")
 public class GtfsFeed {
+
+    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(GtfsFeed.class);
+
     private static final int BUFFER_SIZE = 4096;
     private static final String jsonFilePath = "src\\main\\resources\\webroot";
     public static Map<Integer, GtfsDaoImpl> GtfsDaoMap = new HashMap<>();
@@ -101,7 +105,7 @@ public class GtfsFeed {
         if (url == null)
             return generateError("Malformed URL", "Malformed URL for the GTFS feed", Response.Status.BAD_REQUEST);
 
-        System.out.println(url);
+        _log.info(String.format("Downloading GTFS data from %s...", url));
 
         HttpURLConnection connection = null;
         //Open a connection for the given URL u
@@ -128,21 +132,23 @@ public class GtfsFeed {
             return generateError("Download Failed", "Downloading static GTFS feed from provided Url failed", Response.Status.BAD_REQUEST);
         }
 
-        System.out.println("GTFS File Downloaded Successfully");
+        _log.info("GTFS data downloaded successfully");
+
         //TODO: Move to one method
         if (gtfsFeed == null) {
             gtfsFeed = createGtfsFeedModel(gtfsFeedUrl, saveFilePath);
-        }
-        else {
-            System.out.println("URL exists in database");            
+        } else {
+            _log.info("GTFS URL already exists exists in database - checking if data has changed...");
             byte[] newChecksum = calculateMD5checksum(gtfsFeed.getFeedLocation());
             byte[] oldChecksum = gtfsFeed.getChecksum();
-            if(MessageDigest.isEqual(newChecksum, oldChecksum)) {//if file digest are equal, check whether validated json file exists
+            // If file digest are equal, check whether validated json file exists
+            if (MessageDigest.isEqual(newChecksum, oldChecksum)) {
+                _log.info("GTFS data hasn't changed since last execution");
                 String projectPath = new GetFile().getJarLocation().getParentFile().getParentFile().getAbsolutePath();
                 if(new File(projectPath +File.separator+ jsonFilePath +File.separator+ fileName + "_out.json").exists())
                     canReturn = true;
-            }
-            else {
+            } else {
+                _log.info("GTFS data has changed, updating database...");
                 gtfsFeed.setChecksum(newChecksum);
                 updateGtfsFeedModel(gtfsFeed);
             }
@@ -187,7 +193,7 @@ public class GtfsFeed {
         try {
             url = new URL(urlString);
         } catch (MalformedURLException ex) {
-            System.out.println("Invalid URL");
+            _log.error("Invalid URL", ex);
             url = null;
         }
 
@@ -207,7 +213,7 @@ public class GtfsFeed {
             }
 
         } catch (IOException ex) {
-            System.out.println("Can't read from GTFS URL");
+            _log.error("Can't read from GTFS URL", ex);
             connection = null;
         }
         return connection;
@@ -318,7 +324,7 @@ public class GtfsFeed {
             outputStream.close();
             inputStream.close();
         } catch (IOException ex) {
-            System.out.println("Downloading GTFS Feed Failed");
+            _log.error("Downloading GTFS Feed Failed", ex);
             return null;
         }
         return Response.Status.OK;
