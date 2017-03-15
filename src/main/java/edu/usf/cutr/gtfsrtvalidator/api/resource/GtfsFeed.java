@@ -32,6 +32,7 @@ import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
 import org.hibernate.Session;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.onebusaway.gtfs.serialization.GtfsReader;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
@@ -59,6 +60,9 @@ import static edu.usf.cutr.gtfsrtvalidator.helper.HttpMessageHelper.generateErro
 
 @Path("/gtfs-feed")
 public class GtfsFeed {
+
+    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(GtfsFeed.class);
+
     private static final int BUFFER_SIZE = 4096;
     private static final String jsonFilePath = "src\\main\\resources\\webroot";
     public static Map<Integer, GtfsDaoImpl> GtfsDaoMap = new HashMap<>();
@@ -103,7 +107,7 @@ public class GtfsFeed {
         if (url == null)
             return generateError("Malformed URL", "Malformed URL for the GTFS feed", Response.Status.BAD_REQUEST);
 
-        System.out.println(url);
+        _log.info(String.format("Downloading GTFS data from %s...", url));
 
         HttpURLConnection connection = null;
         //Open a connection for the given URL u
@@ -123,28 +127,29 @@ public class GtfsFeed {
         Session session = GTFSDB.InitSessionBeginTrans();
         GtfsFeedModel gtfsFeed = (GtfsFeedModel) session.createQuery("FROM GtfsFeedModel "
                             + "WHERE gtfsUrl = '"+gtfsFeedUrl+"'").uniqueResult();
-        GTFSDB.commitAndCloseSession(session);
         ObjectMapper mapper = new ObjectMapper();
         Response.Status response = downloadGtfsFeed(saveFilePath, connection);
         if(response == null) {
             return generateError("Download Failed", "Downloading static GTFS feed from provided Url failed", Response.Status.BAD_REQUEST);
         }
 
-        System.out.println("GTFS File Downloaded Successfully");
+        _log.info("GTFS data downloaded successfully");
+
         //TODO: Move to one method
         if (gtfsFeed == null) {
             gtfsFeed = createGtfsFeedModel(gtfsFeedUrl, saveFilePath);
-        }
-        else {
-            System.out.println("URL exists in database");            
+        } else {
+            _log.info("GTFS URL already exists exists in database - checking if data has changed...");
             byte[] newChecksum = calculateMD5checksum(gtfsFeed.getFeedLocation());
             byte[] oldChecksum = gtfsFeed.getChecksum();
-            if(MessageDigest.isEqual(newChecksum, oldChecksum)) {//if file digest are equal, check whether validated json file exists
+            // If file digest are equal, check whether validated json file exists
+            if (MessageDigest.isEqual(newChecksum, oldChecksum)) {
+                _log.info("GTFS data hasn't changed since last execution");
                 String projectPath = new GetFile().getJarLocation().getParentFile().getParentFile().getAbsolutePath();
                 if(new File(projectPath +File.separator+ jsonFilePath +File.separator+ fileName + "_out.json").exists())
                     canReturn = true;
-            }
-            else {
+            } else {
+                _log.info("GTFS data has changed, updating database...");
                 gtfsFeed.setChecksum(newChecksum);
                 updateGtfsFeedModel(gtfsFeed);
             }
@@ -154,7 +159,12 @@ public class GtfsFeed {
         GtfsDaoImpl store = saveGtfsFeed(gtfsFeed);
         if (store == null) {
             return generateError("Can't read content", "Can't read content from the GTFS URL", Response.Status.NOT_FOUND);
-        }        
+        }
+        // Save gtfs agency to the database
+        gtfsFeed.setAgency(store.getAllAgencies().iterator().next().getTimezone());
+        session.update(gtfsFeed);
+        GTFSDB.commitAndCloseSession(session);
+
         GtfsDaoMap.put(gtfsFeed.getFeedId(), store);
         
         if(canReturn)
@@ -190,7 +200,7 @@ public class GtfsFeed {
         try {
             url = new URL(urlString);
         } catch (MalformedURLException ex) {
-            System.out.println("Invalid URL");
+            _log.error("Invalid URL", ex);
             url = null;
         }
 
@@ -210,7 +220,7 @@ public class GtfsFeed {
             }
 
         } catch (IOException ex) {
-            System.out.println("Can't read from GTFS URL");
+            _log.error("Can't read from GTFS URL", ex);
             connection = null;
         }
         return connection;
@@ -321,7 +331,7 @@ public class GtfsFeed {
             outputStream.close();
             inputStream.close();
         } catch (IOException ex) {
-            System.out.println("Downloading GTFS Feed Failed");
+            _log.error("Downloading GTFS Feed Failed", ex);
             return null;
         }
         return Response.Status.OK;

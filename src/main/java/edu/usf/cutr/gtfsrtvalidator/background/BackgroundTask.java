@@ -31,17 +31,22 @@ import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class BackgroundTask implements Runnable {
+
+    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(BackgroundTask.class);
+
     //Entity list kept under the gtfsRtFeed id.
     //Used to check errors with different feeds for the same transit agency.
 
@@ -76,7 +81,7 @@ public class BackgroundTask implements Runnable {
             try {
                 gtfsRtFeedUrl = new URL(currentFeed.getGtfsUrl());
             } catch (MalformedURLException e) {
-                System.out.println("Malformed Url: " + currentFeed.getGtfsUrl());
+                _log.error("Malformed Url: " + currentFeed.getGtfsUrl(), e);
                 e.printStackTrace();
                 return;
             }
@@ -85,17 +90,34 @@ public class BackgroundTask implements Runnable {
                 //Get the GTFS-RT feedMessage for this method
                 InputStream in = gtfsRtFeedUrl.openStream();
                 byte[] gtfsRtProtobuf = IOUtils.toByteArray(in);
+
+                boolean isUniqueFeed = true;
+                MessageDigest md = MessageDigest.getInstance("MD5");
+                byte[] prevFeedDigest = null;
+                byte[] currentFeedDigest = md.digest(gtfsRtProtobuf);
+
+                Session session = GTFSDB.InitSessionBeginTrans();
+                feedIteration = (GtfsRtFeedIterationModel) session.createQuery("FROM GtfsRtFeedIterationModel"
+                            + " WHERE rtFeedId = " + currentFeed.getGtfsRtId()
+                            + " ORDER BY IterationId DESC").setMaxResults(1).uniqueResult();
+                if (feedIteration != null) {
+                    prevFeedDigest = md.digest(feedIteration.getFeedprotobuf());
+                }
+
+                if(MessageDigest.isEqual(currentFeedDigest, prevFeedDigest)) {
+                    // If previous feed digest and newly fetched/current feed digest are equal means, we received the same feed again.
+                    isUniqueFeed = false;
+                }
+
                 InputStream is = new ByteArrayInputStream(gtfsRtProtobuf);
                 feedMessage = GtfsRealtime.FeedMessage.parseFrom(is);
 
                 //Create new feedIteration object and save the iteration to the database
-                feedIteration = new GtfsRtFeedIterationModel(TimeStampHelper.getCurrentTimestamp(), gtfsRtProtobuf, currentFeed.getGtfsRtId());
-                Session session = GTFSDB.InitSessionBeginTrans();
+                feedIteration = new GtfsRtFeedIterationModel(TimeStampHelper.getCurrentTimestamp(), gtfsRtProtobuf, currentFeed.getGtfsRtId(), isUniqueFeed);
                 session.save(feedIteration);
                 GTFSDB.commitAndCloseSession(session);                
             } catch (Exception e) {
-                System.out.println("The URL: " + gtfsRtFeedUrl + " does not contain valid Gtfs-Rt data");
-                //e.printStackTrace();
+                _log.error("The URL '" + gtfsRtFeedUrl + "' does not contain valid Gtfs-Rt data", e);
                 return;
             }
             //---------------------------------------------------------------------------------------
@@ -110,13 +132,20 @@ public class BackgroundTask implements Runnable {
 
             List<GtfsRealtime.FeedEntity> allEntitiesArrayList = new ArrayList<>();
 
+            GtfsRealtime.FeedHeader header = null;
+
             for (Map.Entry<Integer, GtfsRealtime.FeedMessage> allFeeds : feedEntityInstance.entrySet()) {
                 int key = allFeeds.getKey();
                 GtfsRealtime.FeedMessage message = feedEntityInstance.get(key);
+                if (header == null) {
+                    // Save one header to use in our combined feed below
+                    header = feedEntityInstance.get(key).getHeader();
+                }
                 allEntitiesArrayList.addAll(message.getEntityList());
             }
 
             GtfsRealtime.FeedMessage.Builder feedMessageBuilder = GtfsRealtime.FeedMessage.newBuilder();
+            feedMessageBuilder.setHeader(header);
             feedMessageBuilder.addAllEntity(allEntitiesArrayList);
 
             GtfsRealtime.FeedMessage combinedFeed = feedMessageBuilder.build();

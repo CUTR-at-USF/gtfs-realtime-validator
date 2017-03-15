@@ -61,8 +61,14 @@
                                         <span class="info-text" id="time-elapsed">00h 00m 00s</span>
                                     </div>
                                     <div class="col-md-4">
-                                        Feed iterations Checked:
-                                        <span class="info-text" id="iterations">0</span>
+                                        Total HTTP requests:
+                                        <span class="info-text" id="totalRequests">0</span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4 pull-right">
+                                        Total Unique responses:
+                                        <span class="info-text" id="totalResponses">0</span>
                                     </div>
                                 </div>
                             </div>
@@ -107,7 +113,19 @@
             <h3>Feed - {{gtfsUrl}}</h3>
             <hr/>
             <div class="well">
-                <h3>Summary</h3>
+                <div class="row">
+                    <div class="col-md-8">
+                        <h3>Summary</h3>
+                    </div>
+                    <div class="col-md-4 pull-right">
+                        Http requests:
+                        <span class="info-text" id="requests-{{gtfsRtId}}">0</span>
+                    </div>
+                    <div class="col-md-4 pull-right">
+                        Unique responses:
+                        <span class="info-text" id="responses-{{gtfsRtId}}">0</span>
+                    </div>
+                </div>
                 <hr/>
                 <table class="table">
                     <thead>
@@ -115,7 +133,8 @@
                         <th>ID</th>
                         <th>Title</th>
                         <th>Severity</th>
-                        <th>Last occurrence</th>
+                        <th>Last iteration</th>
+                        <th>Last time</th>
                         <th>Count</th>
                     </tr>
                     </thead>
@@ -133,6 +152,7 @@
                 <table class="table">
                     <thead>
                     <tr>
+                        <th>Iteration</th>
                         <th>ID</th>
                         <th>Title</th>
                         <th>Severity</th>
@@ -157,7 +177,8 @@
         <td>{{title}}</td>
 
         <td>{{severity}}</td>
-        <td title="Time zone: {{timeZone}}">{{formattedTimestamp}} ({{lastOccurrence}})</td>
+        <td>{{lastIterationId}}</td>
+        <td title="Time zone: {{timeZone}}">{{formattedTimestamp}} ({{lastTime}})</td>
 
         <td>{{count}}</td>
     </tr>
@@ -167,7 +188,8 @@
 <script id="feed-monitor-log-row-template" type="text/x-handlebars-template">
     {{#each this}}
     <tr>
-        <td><font color="blue">{{id}}</font></td>
+        <td><font color="blue">{{iterationId}}</font></td>
+        <td>{{id}}</td>
         <td>{{title}}</td>
 
         <td>{{severity}}</td>

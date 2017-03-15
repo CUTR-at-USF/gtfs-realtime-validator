@@ -23,14 +23,16 @@ import java.io.Serializable;
 
 @XmlRootElement
 @Entity
-@NamedNativeQuery(name = "ErrorCountByrtfeedID",
+@NamedNativeQuery(name = "ErrorSummaryByrtfeedID",
     query = "SELECT ? AS rtFeedID, Error.errorID AS id, Error.title, " +
               "Error.severity, errorCount.totalCount, " +
-              "errorCount.IterationTimestamp AS lastOccurrence " +
+              "errorCount.IterationTimestamp AS lastTime, " +
+              "errorCount.lastIterationId " +
             "FROM Error " +
             "INNER JOIN " +
               "(SELECT errorID, count(*) AS totalCount, " +
-                "MAX(IterationTimestamp)  AS IterationTimestamp " +
+                "MAX(IterationTimestamp)  AS IterationTimestamp, " +
+                "MAX(IterationID) AS lastIterationId " +
               "FROM MessageLog " +
               "INNER JOIN  " +
                 "(SELECT IterationID, IterationTimestamp " +
@@ -39,13 +41,13 @@ import java.io.Serializable;
               "ON MessageLog.iterationID = GtfsRtFeedIDIteration.IterationID " +
             "GROUP BY errorID) errorCount " +
             "ON Error.errorID = errorCount.errorID ",
-    resultClass = ViewErrorCountModel.class)
-public class ViewErrorCountModel implements Serializable {
+    resultClass = ViewErrorSummaryModel.class)
+public class ViewErrorSummaryModel implements Serializable {
 
     @Column(name="rtFeedID")
     private int gtfsRtId;
-    @Column(name="lastOccurrence")
-    private long lastOccurrence;
+    @Column(name="lastTime")
+    private long lastTime;
     @Column(name="totalCount")
     private int count; // total number of error or warning count
     @Id
@@ -55,6 +57,8 @@ public class ViewErrorCountModel implements Serializable {
     private String severity;
     @Column (name = "title")
     private String title;
+    @Column(name = "lastIterationId")
+    private int lastIterationId;
     @Transient
     private String formattedTimestamp;
     @Transient
@@ -68,18 +72,18 @@ public class ViewErrorCountModel implements Serializable {
         this.gtfsRtId = gtfsRtId;
     }
 
-    public long getLastOccurrence() {
-        return lastOccurrence;
+    public long getLastTime() {
+        return lastTime;
     }
 
-    public void setLastOccurrence(long lastOccurrence) {
-        this.lastOccurrence = lastOccurrence;
+    public void setLastTime(long lastTime) {
+        this.lastTime = lastTime;
     }
 
     public int getCount() {
         return count;
     }
-    
+
     public void setCount(int count) {
         this.count = count;
     }
@@ -121,5 +125,13 @@ public class ViewErrorCountModel implements Serializable {
 
     public void setTimeZone(String timeZone) {
         this.timeZone = timeZone;
+    }
+
+    public int getLastIterationId() {
+        return lastIterationId;
+    }
+
+    public void setLastIterationId(int lastIterationId) {
+        this.lastIterationId = lastIterationId;
     }
 }

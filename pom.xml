@@ -26,10 +26,6 @@
             <id>public.onebusaway.org</id>
             <url>http://nexus.onebusaway.org/content/groups/public/</url>
         </repository>
-        <repository>
-            <id>mvnrepository</id>
-            <url>https://mvnrepository.com/artifact/</url>
-        </repository>
     </repositories>
     <dependencies>
         <dependency>
@@ -108,18 +104,6 @@
                     <artifactId>collections</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.17</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>1.7.24</version>
         </dependency>
 
         <!-- protobuf-java-fromat to format protobuf message to json-->

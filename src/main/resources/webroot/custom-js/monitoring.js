@@ -19,8 +19,10 @@
 //Retrieve the validated urls (saved to the local storage in the loading.js file) from the localStorage
 var urls = localStorage.getItem("gtfsRtFeeds");
 var gtfsRtFeeds = JSON.parse(urls);
-var iterations = 0;
-var errorCount = 0;
+var totalRequests = 0;
+var totalResponses = 0;
+var requests = [];
+var responses = [];
 
 var setIntervalGetFeeds;
 var setIntervalClock;
@@ -29,7 +31,7 @@ var setIntervalClock;
 var updateInterval = localStorage.getItem("updateInterval");
 updateInterval = updateInterval * 1000;
 
-var checkedGTFS = [];
+var showOrHideErrors = [];
 
 //PUT request to start monitoring of the given gtfsRtFeed ID /api/gtfs-rt-feed/{id}/monitor
 for (var gtfsRtFeed in gtfsRtFeeds) {
@@ -59,13 +61,20 @@ function loadGtfsErrorCount(gtfsFeedId) {
 }
 
 function refresh(id) {
+
+    $.get("http://localhost:8080/api/gtfs-rt-feed/" + id + "/feedIterations").done(function (data) {
+        updateRequestData(id, data);
+    });
+
+    $.get("http://localhost:8080/api/gtfs-rt-feed/" + id + "/uniqueResponses").done(function (data) {
+        updateUniqueFeedResponseData(id, data);
+    })
+
     $.get("http://localhost:8080/api/gtfs-rt-feed/" + id + "/summary").done(function (data) {
-        $("#iterations").text(++iterations);
         updateSummaryTables(id, data);
     });
 
     $.get("http://localhost:8080/api/gtfs-rt-feed/" + id + "/log").done(function (data) {
-        $("#iterations").text(++iterations);
         updateLogTables(id, data);
     });
 }
@@ -96,18 +105,41 @@ function updateLogTables(index, data) {
     $("#monitor-table-log-" + index + "").html(compiledHtml);
 }
 
+function updateRequestData(id, data) {
+    requests[id] = data["iterationCount"];
+    $("#requests-" + id + "").text(requests[id]);
+    for(var id in requests) {
+        if(requests.hasOwnProperty(id)) {
+            totalRequests += requests[id];
+        }
+    }
+    $("#totalRequests").text(totalRequests);
+    totalRequests = 0; // Again the new count is calculated in the next refresh
+}
+
+function updateUniqueFeedResponseData(id, data) {
+    responses[id] = data["uniqueFeedCount"];
+    $("#responses-" + id + "").text(responses[id]);
+    for(var id in responses) {
+        if(responses.hasOwnProperty(id)) {
+            totalResponses += responses[id];
+        }
+    }
+    $("#totalResponses").text(totalResponses);
+    totalResponses = 0;
+}
+
 //Calculate time for display
 var start = new Date();
 
 function getTimeElapsed() {
     var elapsed = new Date() - start;
 
-    var seconds = Math.round(elapsed / 1000);
-    var minutes = Math.round(seconds / 60);
-    var hours = Math.round(minutes / 60);
+    var seconds = Math.floor(elapsed / 1000);
+    var minutes = Math.floor(seconds / 60);
+    var hours = Math.floor(minutes / 60);
 
     var sec = TrimSecondsMinutes(seconds);
-    var min = TrimSecondsMinutes(minutes);
 
     function TrimSecondsMinutes(elapsed) {
         if (elapsed >= 60)
@@ -115,7 +147,7 @@ function getTimeElapsed() {
         return elapsed;
     }
 
-    $("#time-elapsed").text(hours + "h " + min + "m " + sec + "s");
+    $("#time-elapsed").text(hours + "h " + minutes + "m " + sec + "s");
 }
 
 //Call time elapsed to update the clock evey second

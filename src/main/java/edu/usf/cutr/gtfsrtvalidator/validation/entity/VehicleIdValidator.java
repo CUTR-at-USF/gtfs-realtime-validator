@@ -24,6 +24,7 @@ import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +36,8 @@ import java.util.List;
  */
 
 public class VehicleIdValidator implements FeedEntityValidator {
+
+    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(VehicleIdValidator.class);
 
     @Override
     public ErrorListHelperModel validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
@@ -52,7 +55,7 @@ public class VehicleIdValidator implements FeedEntityValidator {
                 if (tripUpdate.getVehicle().getId() == null) {
                     OccurrenceModel errorOccurrence = new OccurrenceModel("$.entity["+ entityId +"].trip_update", null);
                     errorOccurrenceList.add(errorOccurrence);
-                    System.out.println(ValidationRules.W002.getErrorDescription());
+                    _log.debug(ValidationRules.W002.getErrorDescription());
                 }
             }
             entityId++;

@@ -17,8 +17,6 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.model;
 
-import org.hibernate.annotations.RowId;
-
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
@@ -27,10 +25,12 @@ import java.io.Serializable;
 @Entity
 @NamedNativeQuery(name = "ErrorLogByrtfeedID",
         query = "SELECT ? AS rtFeedID, Error.errorID AS id, Error.title, " +
-                "Error.severity, errorLog.IterationTimestamp AS occurrence " +
+                "Error.severity, errorLog.IterationID AS iterationId, " +
+                "errorLog.IterationTimestamp AS occurrence " +
                 "FROM Error " +
                 "INNER JOIN " +
-                    "(SELECT errorID, GtfsRtFeedIDIteration.IterationTimestamp " +
+                    "(SELECT errorID, GtfsRtFeedIDIteration.IterationID, " +
+                    "GtfsRtFeedIDIteration.IterationTimestamp " +
                     "FROM MessageLog " +
                     "INNER JOIN  " +
                         "(SELECT IterationID, IterationTimestamp " +
@@ -45,11 +45,11 @@ public class ViewErrorLogModel implements Serializable {
 
     @Column(name = "rtFeedID")
     private int gtfsRtId;
-    // The composite id is occurrence+id; because a specific error occurs once in an iteration for a given gtfs rt feed
     @Id
+    @Column(name = "iterationId")
+    private int iterationId;
     @Column(name = "occurrence")
     private long occurrence;
-    @Id
     @Column(name = "id")
     private String id; // error or warning ID
     @Column(name = "severity")
@@ -63,6 +63,14 @@ public class ViewErrorLogModel implements Serializable {
 
     public int getGtfsRtId() {
         return gtfsRtId;
+    }
+
+    public int getIterationId() {
+        return iterationId;
+    }
+
+    public void setIterationId(int iterationId) {
+        this.iterationId = iterationId;
     }
 
     public void setGtfsRtId(int gtfsRtId) {

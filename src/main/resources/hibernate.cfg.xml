@@ -11,7 +11,6 @@
     <property name="hibernate.c3p0.max_statements">50</property>
     <property name="hibernate.connection.username">sa</property>
     <property name="hibernate.connection.password"></property>
-    <property name="hibernate.hbm2ddl.auto">update</property>
     <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedIterationModel"/>
     <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedModel"/>
     <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.GtfsRtFeedIterationModel"/>
@@ -19,9 +18,11 @@
     <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel"/>
     <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel"/>
     <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.ValidationRule"/>
-    <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.ViewErrorCountModel"/>
+    <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.ViewErrorSummaryModel"/>
     <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.ViewErrorLogModel"/>
     <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.ViewGtfsErrorCountModel"/>
+    <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.ViewFeedIterationsCount"/>
+    <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.ViewFeedUniqueResponseCount"/>
     <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.ViewMessageDetailsModel"/>
   </session-factory>
 </hibernate-configuration>

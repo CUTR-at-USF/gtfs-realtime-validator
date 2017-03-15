@@ -22,6 +22,8 @@ import edu.usf.cutr.gtfsrtvalidator.hibernate.HibernateUtil;
 import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -34,6 +36,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GTFSDB {
+
+    private static final Logger _log = LoggerFactory.getLogger(GTFSDB.class);
 
     public static void InitializeDB() {
         Statement stmt;
@@ -75,7 +79,6 @@ public class GTFSDB {
                     try {
                         Object value = field.get(rule);
                         rule = (ValidationRule)value;
-                        System.out.println(rule.getErrorDescription());
                         rulesInClass.add(rule);
                     } catch (IllegalAccessException ex) {
                         ex.printStackTrace();
@@ -86,14 +89,14 @@ public class GTFSDB {
 
         try {
             for (ValidationRule rule : rulesInClass) {
-                session.update(rule);
+                session.saveOrUpdate(rule);
             }
             commitAndCloseSession(session);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
 
-        System.out.println("Table initialized successfully");
+        _log.info("Table initialized successfully");
     }
     public static Session InitSessionBeginTrans() {
         Session session = null;
