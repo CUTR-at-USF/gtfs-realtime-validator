@@ -15,16 +15,16 @@
 
     <repositories>
         <repository>
-            <id>public.onebusaway.org</id>
-            <url>http://nexus.onebusaway.org/content/groups/public/</url>
-        </repository>
-        <repository>
             <id>conveyal-releases-mvn-repo</id>
             <url>http://build.staging.obanyc.com/archiva/repository/releases/</url>
         </repository>
         <repository>
             <id>conveyal-snapshots-mvn-repo</id>
             <url>http://build.staging.obanyc.com/archiva/repository/snapshots/</url>
+        </repository>
+        <repository>            
+            <id>public.onebusaway.org</id>
+            <url>http://nexus.onebusaway.org/content/groups/public/</url>
         </repository>
         <repository>
             <id>mvnrepository</id>
@@ -97,13 +97,6 @@
             <version>0.0.4</version>
         </dependency>
 
-        <!-- Core GTFS Library -->
-        <dependency>
-            <groupId>org.onebusaway</groupId>
-            <artifactId>onebusaway-gtfs</artifactId>
-            <version>1.3.4</version>
-        </dependency>
-
         <!-- Optional Hibernate GTFS Database Persistence -->
         <dependency>
             <groupId>org.onebusaway</groupId>
@@ -118,21 +111,15 @@
         </dependency>
 
         <dependency>
-            <groupId>org.onebusaway</groupId>
-            <artifactId>onebusaway-gtfs-realtime-exporter</artifactId>
-            <version>1.0.1</version>
-        </dependency>
-
-        <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
-            <version>1.2.16</version>
+            <version>1.2.17</version>
         </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-            <version>1.6.4</version>
+            <version>1.7.24</version>
         </dependency>
 
         <!-- protobuf-java-fromat to format protobuf message to json-->
