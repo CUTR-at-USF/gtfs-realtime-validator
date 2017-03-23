@@ -37,6 +37,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -89,12 +90,30 @@ public class BackgroundTask implements Runnable {
                 //Get the GTFS-RT feedMessage for this method
                 InputStream in = gtfsRtFeedUrl.openStream();
                 byte[] gtfsRtProtobuf = IOUtils.toByteArray(in);
+
+                boolean isUniqueFeed = true;
+                MessageDigest md = MessageDigest.getInstance("MD5");
+                byte[] prevFeedDigest = null;
+                byte[] currentFeedDigest = md.digest(gtfsRtProtobuf);
+
+                Session session = GTFSDB.InitSessionBeginTrans();
+                feedIteration = (GtfsRtFeedIterationModel) session.createQuery("FROM GtfsRtFeedIterationModel"
+                            + " WHERE rtFeedId = " + currentFeed.getGtfsRtId()
+                            + " ORDER BY IterationId DESC").setMaxResults(1).uniqueResult();
+                if (feedIteration != null) {
+                    prevFeedDigest = md.digest(feedIteration.getFeedprotobuf());
+                }
+
+                if(MessageDigest.isEqual(currentFeedDigest, prevFeedDigest)) {
+                    // If previous feed digest and newly fetched/current feed digest are equal means, we received the same feed again.
+                    isUniqueFeed = false;
+                }
+
                 InputStream is = new ByteArrayInputStream(gtfsRtProtobuf);
                 feedMessage = GtfsRealtime.FeedMessage.parseFrom(is);
 
                 //Create new feedIteration object and save the iteration to the database
-                feedIteration = new GtfsRtFeedIterationModel(TimeStampHelper.getCurrentTimestamp(), gtfsRtProtobuf, currentFeed.getGtfsRtId());
-                Session session = GTFSDB.InitSessionBeginTrans();
+                feedIteration = new GtfsRtFeedIterationModel(TimeStampHelper.getCurrentTimestamp(), gtfsRtProtobuf, currentFeed.getGtfsRtId(), isUniqueFeed);
                 session.save(feedIteration);
                 GTFSDB.commitAndCloseSession(session);                
             } catch (Exception e) {

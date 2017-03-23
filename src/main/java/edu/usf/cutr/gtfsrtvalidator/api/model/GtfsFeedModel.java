@@ -17,14 +17,9 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.model;
 
-import java.io.Serializable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.io.Serializable;
 
 @XmlRootElement
 @Entity
@@ -41,8 +36,12 @@ public class GtfsFeedModel implements Serializable {
     private long startTime;
     @Column(name="fileLocation")
     private String feedLocation;
+    @Column(name = "agency")
+    private String agency;
     @Column(name="fileChecksum")
     private byte[] checksum;
+    @Column(name = "errorCount")
+    private int errorCount;
 
     public static String FEEDID = "feedId";
     public static String FEEDURL = "feedUrl";
@@ -86,9 +85,25 @@ public class GtfsFeedModel implements Serializable {
     public void setFeedLocation(String feedLocation) {
         this.feedLocation = feedLocation;
     }
-    
+
+    public String getAgency() {
+        return agency;
+    }
+
+    public void setAgency(String agency) {
+        this.agency = agency;
+    }
+
     public void setChecksum(byte[] checksum) {
         this.checksum = checksum;
+    }
+
+    public int getErrorCount() {
+        return errorCount;
+    }
+
+    public void setErrorCount(int errorCount) {
+        this.errorCount = errorCount;
     }
 
     @Override
@@ -98,6 +113,8 @@ public class GtfsFeedModel implements Serializable {
                 ", feedId=" + feedId +
                 ", startTime=" + startTime +
                 ", feedLocation='" + feedLocation + '\'' +
+                ", checkSum=" + checksum +
+                ", errorCount=" + errorCount +
                 '}';
     }
 }

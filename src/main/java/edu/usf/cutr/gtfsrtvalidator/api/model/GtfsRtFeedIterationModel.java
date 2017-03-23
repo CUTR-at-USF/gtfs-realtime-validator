@@ -17,23 +17,19 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.model;
 
-import java.io.Serializable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.io.Serializable;
 
 @XmlRootElement
 @Entity
 @Table(name = "GtfsRtFeedIteration")
 public class GtfsRtFeedIterationModel implements Serializable {
-    public GtfsRtFeedIterationModel(long timeStamp, byte[] feedprotobuf, int rtFeedId) {
+    public GtfsRtFeedIterationModel(long timeStamp, byte[] feedprotobuf, int rtFeedId, boolean isUniqueFeed) {
         this.timeStamp = timeStamp;
         Feedprotobuf = feedprotobuf;
         this.rtFeedId = rtFeedId;
+        this.isUniqueFeed = isUniqueFeed;
     }
 
     public GtfsRtFeedIterationModel(){};
@@ -53,6 +49,8 @@ public class GtfsRtFeedIterationModel implements Serializable {
     private byte[] Feedprotobuf;
     @Column(name="rtFeedID")
     private int rtFeedId;
+    @Column(name = "isUniqueFeed")
+    private boolean isUniqueFeed;
 
     public int getRtFeedId() {
         return rtFeedId;
@@ -84,5 +82,13 @@ public class GtfsRtFeedIterationModel implements Serializable {
 
     public void setFeedprotobuf(byte[] feedprotobuf) {
         Feedprotobuf = feedprotobuf;
+    }
+
+    public boolean isUniqueFeed() {
+        return isUniqueFeed;
+    }
+
+    public void setUniqueFeed(boolean uniqueFeed) {
+        isUniqueFeed = uniqueFeed;
     }
 }

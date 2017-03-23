@@ -17,14 +17,9 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.model;
 
-import java.io.Serializable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.io.Serializable;
 
 @XmlRootElement
 @Entity
@@ -49,6 +44,8 @@ public class MessageLogModel implements Serializable {
     private int iterationId;
     @Column(name="errorID")
     private String errorId;
+    @Column(name = "errorDetails")
+    private String errorDetails;
 
     public int getMessageId() {
         return messageId;
@@ -72,5 +69,13 @@ public class MessageLogModel implements Serializable {
 
     public void setErrorId(String errorId) {
         this.errorId = errorId;
+    }
+
+    public String getErrorDetails() {
+        return errorDetails;
+    }
+
+    public void setErrorDetails(String errorDetails) {
+        this.errorDetails = errorDetails;
     }
 }

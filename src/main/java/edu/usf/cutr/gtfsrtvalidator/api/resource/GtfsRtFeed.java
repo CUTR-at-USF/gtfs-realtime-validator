@@ -37,9 +37,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.sql.PreparedStatement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -52,6 +53,7 @@ public class GtfsRtFeed {
     private static final int INVALID_FEED = 0;
     private static final int VALID_FEED = 1;
     PreparedStatement stmt;
+    public static String agencyTimezone;
 
     public Response generateError(String errorMessage) {
         return Response
@@ -143,17 +145,72 @@ public class GtfsRtFeed {
 
     //GET {id} return information about the feed with {id}
     @GET
-    @Path("{id : \\d+}")
+    @Path("/{id : \\d+}/summary")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getRtFeedDetails(@PathParam("id") int id) {
-        List<ViewErrorCountModel> gtfsFeeds;
+    public Response getRtFeedSummaryDetails(@PathParam("id") int id) {
+        List<ViewErrorSummaryModel> feedSummary;
         Session session = GTFSDB.InitSessionBeginTrans();
-        gtfsFeeds = session.createNamedQuery("ErrorCountByrtfeedID", ViewErrorCountModel.class)
-                .setParameter(0, id).setParameter(1, 10).list();
+        feedSummary = session.createNamedQuery("ErrorSummaryByrtfeedID", ViewErrorSummaryModel.class)
+                .setParameter(0, id).setParameter(1, id).list();
         GTFSDB.commitAndCloseSession(session);
-        GenericEntity<List<ViewErrorCountModel>> feedList = new GenericEntity<List<ViewErrorCountModel>>(gtfsFeeds) {
+        for(ViewErrorSummaryModel viewErrorSummaryModel : feedSummary) {
+            int index = feedSummary.indexOf(viewErrorSummaryModel);
+            String formattedTimestamp = getDateFormat(viewErrorSummaryModel.getLastTime(), id);
+            viewErrorSummaryModel.setFormattedTimestamp(formattedTimestamp);
+            viewErrorSummaryModel.setTimeZone(agencyTimezone);
+        }
+        GenericEntity<List<ViewErrorSummaryModel>> feedList = new GenericEntity<List<ViewErrorSummaryModel>>(feedSummary) {
         };
         return Response.ok(feedList).build();
+    }
+
+    // Return Log information about the feed with {id}
+    @GET
+    @Path("/{id : \\d+}/log")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getRtFeedLogDetails(@PathParam("id") int id) {
+        List<ViewErrorLogModel> feedLog;
+        Session session = GTFSDB.InitSessionBeginTrans();
+        feedLog = session.createNamedQuery("ErrorLogByrtfeedID", ViewErrorLogModel.class)
+                .setParameter(0, id).setParameter(1, id).setMaxResults(10).list();
+        GTFSDB.commitAndCloseSession(session);
+        for(ViewErrorLogModel viewErrorLogModel: feedLog) {
+            int index = feedLog.indexOf(viewErrorLogModel);
+            String formattedTimestamp = getDateFormat(viewErrorLogModel.getOccurrence(), id);
+            viewErrorLogModel.setFormattedTimestamp(formattedTimestamp);
+            viewErrorLogModel.setTimeZone(agencyTimezone);
+        }
+        GenericEntity<List<ViewErrorLogModel>> feedList = new GenericEntity<List<ViewErrorLogModel>>(feedLog) {
+        };
+        return Response.ok(feedList).build();
+    }
+
+    // Returns number of iterations a feed has gone through
+    @GET
+    @Path("/{id : \\d+}/feedIterations")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getFeedIterationsCount(@PathParam("id") int id) {
+        ViewFeedIterationsCount iterationsCount;
+        Session session = GTFSDB.InitSessionBeginTrans();
+        iterationsCount = (ViewFeedIterationsCount) session.createNamedQuery("feedIterationsCount", ViewFeedIterationsCount.class)
+                            .setParameter(0, id).uniqueResult();
+        GTFSDB.commitAndCloseSession(session);
+
+        return Response.ok(iterationsCount).build();
+    }
+
+    // Returns total number of feed unique responses
+    @GET
+    @Path("/{id : \\d+}/uniqueResponses")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getFeedUniqueResponses(@PathParam("id") int id) {
+        ViewFeedUniqueResponseCount uniqueResponseCount;
+        Session session = GTFSDB.InitSessionBeginTrans();
+        uniqueResponseCount = (ViewFeedUniqueResponseCount) session.createNamedQuery("feedUniqueResponseCount", ViewFeedUniqueResponseCount.class)
+                .setParameter(0, id).uniqueResult();
+        GTFSDB.commitAndCloseSession(session);
+
+        return Response.ok(uniqueResponseCount).build();
     }
 
     @GET
@@ -220,5 +277,41 @@ public class GtfsRtFeed {
         } else {
             return runningTasks.get(rtFeedUrl);
         }
+    }
+
+    public String getDateFormat(long lastTime, int gtfsRtId) {
+        Session session = GTFSDB.InitSessionBeginTrans();
+        GtfsRtFeedModel gtfsRtFeed = (GtfsRtFeedModel) session.createQuery(" FROM GtfsRtFeedModel "
+                + "WHERE rtFeedID = " + gtfsRtId).uniqueResult();
+
+        GtfsFeedModel gtfsFeed = (GtfsFeedModel) session.createQuery("FROM GtfsFeedModel "
+                + "WHERE feedID = " + gtfsRtFeed.getGtfsId()).uniqueResult();
+        GTFSDB.commitAndCloseSession(session);
+        agencyTimezone = gtfsFeed.getAgency();
+
+        DateFormat todaytimeFormat = new SimpleDateFormat("hh:mm:ss a");
+        DateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");
+        DateFormat todayDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        TimeZone timeZone = TimeZone.getTimeZone(agencyTimezone);
+        todaytimeFormat.setTimeZone(timeZone);
+        dateTimeFormat.setTimeZone(timeZone);
+        todayDateFormat.setTimeZone(timeZone);
+
+        String formattedTime;
+        String currentDate = todayDateFormat.format(new Date().getTime());
+        long fromStartOfDay = 0;
+        try {
+            fromStartOfDay = TimeUnit.MILLISECONDS.toSeconds(todayDateFormat.parse(currentDate).getTime()); // converting to seconds
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        if(lastTime < fromStartOfDay) {
+            formattedTime = dateTimeFormat.format(TimeUnit.SECONDS.toMillis(lastTime)); // converting to millisec
+        }
+        else {
+            formattedTime = todaytimeFormat.format(TimeUnit.SECONDS.toMillis(lastTime));
+        }
+        return formattedTime;
     }
 }

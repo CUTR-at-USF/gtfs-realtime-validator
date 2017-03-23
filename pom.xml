@@ -22,7 +22,7 @@
             <id>conveyal-snapshots-mvn-repo</id>
             <url>http://build.staging.obanyc.com/archiva/repository/snapshots/</url>
         </repository>
-        <repository>
+        <repository>            
             <id>public.onebusaway.org</id>
             <url>http://nexus.onebusaway.org/content/groups/public/</url>
         </repository>
@@ -135,6 +135,12 @@
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-moxy</artifactId>
             <version>2.19</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>javax.mail-api</artifactId>
+            <version>1.5.1</version>
         </dependency>
 
         <dependency>
