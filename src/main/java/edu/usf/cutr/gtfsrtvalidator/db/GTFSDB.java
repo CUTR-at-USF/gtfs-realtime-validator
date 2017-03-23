@@ -79,11 +79,7 @@ public class GTFSDB {
                     try {
                         Object value = field.get(rule);
                         rule = (ValidationRule)value;
-                        ValidationRule validationRule = (ValidationRule) session.createQuery("FROM ValidationRule WHERE errorId = "
-                                + "'" + rule.getErrorId() + "'").uniqueResult();
-                        if(validationRule == null) {
-                            rulesInClass.add(rule);
-                        }
+                        rulesInClass.add(rule);
                     } catch (IllegalAccessException ex) {
                         ex.printStackTrace();
                     }
@@ -93,7 +89,7 @@ public class GTFSDB {
 
         try {
             for (ValidationRule rule : rulesInClass) {
-                session.save(rule);
+                session.saveOrUpdate(rule);
             }
             commitAndCloseSession(session);
         } catch (Exception ex) {
