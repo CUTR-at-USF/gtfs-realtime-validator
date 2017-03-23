@@ -39,7 +39,8 @@ import java.io.Serializable;
                     "ON MessageLog.iterationID = GtfsRtFeedIDIteration.IterationID " +
                     "ORDER BY GtfsRtFeedIDIteration.IterationID " +
                     "DESC ) errorLog " +
-                "ON Error.errorID = errorLog.errorID ",
+                "ON Error.errorID = errorLog.errorID " +
+                "WHERE Error.errorID NOT IN (:errorIds)",
         resultClass = ViewErrorLogModel.class)
 public class ViewErrorLogModel implements Serializable {
 

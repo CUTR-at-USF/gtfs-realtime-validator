@@ -31,7 +31,10 @@ var setIntervalClock;
 var updateInterval = localStorage.getItem("updateInterval");
 updateInterval = updateInterval * 1000;
 
-var showOrHideErrors = [];
+var hideErrors = [];
+
+var toggleDataOn = '<input type="checkbox" checked data-toggle="toggle" data-onstyle="success"/>';
+var toggleDataOff = '<input type="checkbox" data-toggle="toggle" data-onstyle="success"/>';
 
 //PUT request to start monitoring of the given gtfsRtFeed ID /api/gtfs-rt-feed/{id}/monitor
 for (var gtfsRtFeed in gtfsRtFeeds) {
@@ -47,7 +50,7 @@ for (var gtfsRtFeed in gtfsRtFeeds) {
                     refresh(data["gtfsRtId"])
                 }, updateInterval);
 
-                // get gtfs error count
+                // Get gtfs error count
                 loadGtfsErrorCount(data["gtfsId"]);
             }
         });
@@ -74,13 +77,14 @@ function refresh(id) {
         updateSummaryTables(id, data);
     });
 
-    $.get("http://localhost:8080/api/gtfs-rt-feed/" + id + "/log").done(function (data) {
+    $.get("http://localhost:8080/api/gtfs-rt-feed/" + id + "/log/" + hideErrors[id]).done(function (data) {
         updateLogTables(id, data);
     });
 }
 
 function initializeInterface(gtfsRtFeeds) {
     //var wrapper  = {gtfsRtFeeds: gtfsRtFeeds};
+    hideErrors[gtfsRtFeeds["gtfsRtId"]] = [];
     var monitorTemplateScript = $("#feed-monitor-template").html();
     var monitorTemplate = Handlebars.compile(monitorTemplateScript);
     var compiledHtml = monitorTemplate(gtfsRtFeeds);
@@ -92,8 +96,33 @@ function updateSummaryTables(index, data) {
     var monitorTemplateScript = $("#feed-monitor-summary-row-template").html();
     var monitorTemplate = Handlebars.compile(monitorTemplateScript);
     var compiledHtml = monitorTemplate(data);
+    var summaryTable = $("#monitor-table-summary-" + index + "").html(compiledHtml);
 
-    $("#monitor-table-summary-" + index + "").html(compiledHtml);
+    handleToggledData(index, data, summaryTable);
+}
+
+function handleToggledData(index, data, summaryTable) {
+    var i = 0, j = 0;
+    // Add a toggle for each row and initialize based on toggle click history maintained in hideErrors
+    summaryTable.find("span[class=toggleHolder"+index+"]").each(function(){
+        if(hideErrors.hasOwnProperty(index)) {
+            var onOrOff = (hideErrors[index].indexOf(data[i]["id"]) == -1) ? 'on' : 'off'
+            if(onOrOff == 'off') {
+                $("#toggleId"+index+data[i++]["id"]+"").html(toggleDataOff);
+            }
+            else{
+                $("#toggleId"+index+data[i++]["id"]+"").html(toggleDataOn);
+            }
+        }
+    });
+
+    summaryTable.find('input[type=checkbox][data-toggle=toggle]').each(function(){
+        var errorId = data[j++]["id"];
+        $(this).bootstrapToggle(); // Initializing toggle
+        $(this).change(function() {
+            showOrHideError(index, errorId); // Toggle change event handler
+        });
+    });
 }
 
 function updateLogTables(index, data) {
@@ -156,4 +185,24 @@ setIntervalClock = setInterval(getTimeElapsed, 1000);
 function stopMonitor() {
     clearInterval(setIntervalClock);
     clearInterval(setIntervalGetFeeds);
+}
+
+function showOrHideError(gtfsRtId, errorId) {
+    if(hideErrors[gtfsRtId].indexOf(errorId) == -1) {
+        hideErrors[gtfsRtId].push(errorId);
+    }
+    else {
+        hideErrors[gtfsRtId].splice(hideErrors[gtfsRtId].indexOf(errorId), 1);
+    }
+
+    // Request data based on 'hideErrors'
+    $.get("http://localhost:8080/api/gtfs-rt-feed/" + gtfsRtId + "/log/" + hideErrors[gtfsRtId]).done(function (data) {
+
+        // Store current position for later use
+        var scrollPosition = document.body.scrollTop;
+
+        updateLogTables(gtfsRtId, data);
+
+        $('html, body').animate({scrollTop: scrollPosition}, 1);
+    });
 }
