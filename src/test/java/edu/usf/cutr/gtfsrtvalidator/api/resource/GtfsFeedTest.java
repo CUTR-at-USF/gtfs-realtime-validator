@@ -17,10 +17,10 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.resource;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.hibernate.HibernateUtil;
 import junit.framework.TestCase;
+
 import javax.ws.rs.core.Response;
 
 /*
@@ -41,7 +41,7 @@ public class GtfsFeedTest extends TestCase {
         GTFSDB.InitializeDB();
     }
 
-    public void testGtfsFeed() throws JsonProcessingException {
+    public void testGtfsFeed() {
         Response response;
 
         response = gtfsFeed.postGtfsFeed(validGtfsFeedURL);
