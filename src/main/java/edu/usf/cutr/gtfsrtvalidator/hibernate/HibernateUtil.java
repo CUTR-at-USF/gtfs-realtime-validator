@@ -13,6 +13,9 @@ public class HibernateUtil {
     private static SessionFactory sessionFactory = null;  
        
     public static void configureSessionFactory() throws HibernateException {
+        // Set jboss logging provider to use slf4j configuration provided in 'simplelogger.properties' file
+        System.setProperty("org.jboss.logging.provider", "slf4j");
+
         sessionFactory = new Configuration().configure().buildSessionFactory();
     }
  
