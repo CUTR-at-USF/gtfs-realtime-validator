@@ -124,16 +124,15 @@ public class TripUpdateFeedTest extends FeedMessageTest {
         // No errors, if vehicle id has a value.
         errors = vehicleIdValidator.validate(gtfsData, feedMessageBuilder.build());
         assertNull(errors);
-        
-        // unable to set Id = null as it's throwing NullPointerException.
-        // Assuming, there will be no values with Id = null in TripUpdate feed
-        /*vehicleDescriptor.setId(null);
+
+        // Test with empty string for Vehicle ID, which should generate warning
+        vehicleDescriptorBuilder.setId("");
         tripUpdateBuilder.setVehicle(vehicleDescriptorBuilder.build());
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
         
         errors = vehicleIdValidator.validate(gtfsData, feedMessageBuilder.build());
-        assertEquals(1, errors.getOccurrenceList().size());*/
+        assertEquals(1, errors.getOccurrenceList().size());
         
         clearAndInitRequiredFeedFields();
     }
