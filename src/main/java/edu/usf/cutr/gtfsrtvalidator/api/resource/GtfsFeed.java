@@ -32,6 +32,7 @@ import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.onebusaway.gtfs.serialization.GtfsReader;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.SSLHandshakeException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
@@ -316,11 +317,18 @@ public class GtfsFeed {
             // Check for HTTP 301 redirect
             String redirect = connection.getHeaderField("Location");
             if (redirect != null) {
+                _log.warn("Redirecting to " + redirect);
                 connection = (HttpURLConnection) new URL(redirect).openConnection();
             }
 
-            // opens input stream from the HTTP connection
-            InputStream inputStream = connection.getInputStream();
+            // Opens input stream from the HTTP(S) connection
+            InputStream inputStream;
+            try {
+                inputStream = connection.getInputStream();
+            } catch (SSLHandshakeException sslEx) {
+                _log.error("SSL handshake failed.  Try installing the JCE Extension - see https://github.com/CUTR-at-USF/gtfs-realtime-validator#prerequisites", sslEx);
+                return null;
+            }
 
             // opens an output stream to save into file
             FileOutputStream outputStream = new FileOutputStream(saveFilePath);

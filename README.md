@@ -19,6 +19,7 @@ Following are the requirements to get the project up and running.
 * JDK installed on the system 
 * Maven installed on the system 
 * (optional) git installed on the system to clone the repository
+* [Java Cryptography Extension (JCE)](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html) - If you're downloading GTFS or GTFS-rt from secure HTTPS URLs, you may need to install the JCE Extension.  You will need to replace the `US_export_policy.jar` and `local_policy.jar` files in your JVM `/security` directory, such as `C:\Program Files\Java\jdk1.8.0_73\jre\lib\security`, with the JAR files in the JCE Extension download. 
 
 ### 1. Download the code 
 
