@@ -23,8 +23,6 @@ import com.conveyal.gtfs.validator.json.FeedValidationResult;
 import com.conveyal.gtfs.validator.json.FeedValidationResultSet;
 import com.conveyal.gtfs.validator.json.backends.FileSystemFeedBackend;
 import com.conveyal.gtfs.validator.json.serialization.JsonSerializer;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedModel;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.helper.GetFile;
@@ -100,7 +98,7 @@ public class GtfsFeed {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public Response postGtfsFeed(@FormParam("gtfsurl") String gtfsFeedUrl) throws JsonProcessingException {
+    public Response postGtfsFeed(@FormParam("gtfsurl") String gtfsFeedUrl) {
 
         //Extract the URL from the provided gtfsFeedUrl
         URL url = getUrlFromString(gtfsFeedUrl);
@@ -127,7 +125,6 @@ public class GtfsFeed {
         Session session = GTFSDB.InitSessionBeginTrans();
         GtfsFeedModel gtfsFeed = (GtfsFeedModel) session.createQuery("FROM GtfsFeedModel "
                             + "WHERE gtfsUrl = '"+gtfsFeedUrl+"'").uniqueResult();
-        ObjectMapper mapper = new ObjectMapper();
         Response.Status response = downloadGtfsFeed(saveFilePath, connection);
         if(response == null) {
             return generateError("Download Failed", "Downloading static GTFS feed from provided Url failed", Response.Status.BAD_REQUEST);
@@ -168,7 +165,7 @@ public class GtfsFeed {
         GtfsDaoMap.put(gtfsFeed.getFeedId(), store);
         
         if(canReturn)
-            return Response.ok(mapper.writeValueAsString(gtfsFeed)).build();
+            return Response.ok(gtfsFeed).build();
         
         FileSystemFeedBackend backend = new FileSystemFeedBackend();
         FeedValidationResultSet results = new FeedValidationResultSet();
@@ -191,7 +188,7 @@ public class GtfsFeed {
             serializer.serializeToFile(new File(saveFilePath));
         } catch (Exception ex) {//TODO: Parse error.
         } 
-        return Response.ok(mapper.writeValueAsString(gtfsFeed)).build();
+        return Response.ok(gtfsFeed).build();
     }
 
     //Gets URL from string returns null if failed to parse URL
