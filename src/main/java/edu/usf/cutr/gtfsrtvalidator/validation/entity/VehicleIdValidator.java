@@ -23,6 +23,7 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
+import org.hsqldb.lib.StringUtil;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +53,7 @@ public class VehicleIdValidator implements FeedEntityValidator {
 
                 GtfsRealtime.TripUpdate tripUpdate = entity.getTripUpdate();
                 //w002: vehicle_id should be populated in trip_update
-                if (tripUpdate.getVehicle().getId() == null) {
+                if (StringUtil.isEmpty(tripUpdate.getVehicle().getId())) {
                     OccurrenceModel errorOccurrence = new OccurrenceModel("$.entity["+ entityId +"].trip_update", null);
                     errorOccurrenceList.add(errorOccurrence);
                     _log.debug(ValidationRules.W002.getErrorDescription());
