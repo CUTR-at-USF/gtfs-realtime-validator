@@ -313,6 +313,12 @@ public class GtfsFeed {
 
     private Response.Status downloadGtfsFeed(String saveFilePath, HttpURLConnection connection) {
         try {
+            // Check for HTTP 301 redirect
+            String redirect = connection.getHeaderField("Location");
+            if (redirect != null) {
+                connection = (HttpURLConnection) new URL(redirect).openConnection();
+            }
+
             // opens input stream from the HTTP connection
             InputStream inputStream = connection.getInputStream();
 
