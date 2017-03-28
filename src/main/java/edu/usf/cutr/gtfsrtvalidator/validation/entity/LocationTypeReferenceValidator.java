@@ -26,9 +26,7 @@ import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.onebusaway.gtfs.model.Stop;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * ID: e011
@@ -48,7 +46,7 @@ public class LocationTypeReferenceValidator implements FeedEntityValidator {
         Collection<Stop> stops = gtfsData.getAllStops();
 
         //Get a list of stop_ids from the GTFS feeds stops.txt
-        List<String> stopIds = new ArrayList<>();
+        Set<String> stopIds = new HashSet<>();
         for (Stop stop : stops) {
             stopIds.add(stop.getId().getId());
         }
@@ -72,7 +70,8 @@ public class LocationTypeReferenceValidator implements FeedEntityValidator {
                     OccurrenceModel errorOccurrence = new OccurrenceModel("$.entity["+ entityId +"]", entity.getVehicle().getStopId());
                     errorOccurrenceList.add(errorOccurrence);
                 }
-            }if(entity.hasAlert()){
+            }
+            if (entity.hasAlert()) {
                 //Alert>EntitySelector>stop_id(optional)
                 List<GtfsRealtime.EntitySelector> informedEntityList = entity.getAlert().getInformedEntityList();
                 for (GtfsRealtime.EntitySelector entitySelector : informedEntityList) {
