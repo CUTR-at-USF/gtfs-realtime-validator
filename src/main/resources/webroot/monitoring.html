@@ -5,14 +5,15 @@
     <meta charset="utf-8">
     <title>GTFS-RT Validator</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap-toggle.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css"/>
     <!--[if lt IE 9]>
     <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 </head>
 <body style="background-color: #e4e4e4">
-<div class="navbar navbar-default" style="margin-bottom: 0">
+<div class="navbar navbar-inverse" style="margin-bottom: 0">
     <div class="container">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -87,7 +88,7 @@
 
                         <div class="row">
                             <div class="pull-right" style="margin-right: 28px;">
-                                <input class="btn btn-default" type="button" onclick="stopMonitor()" value="Stop"/>
+                                <input class="btn btn-primary" type="button" onclick="stopMonitor()" value="Stop"/>
                             </div>
                         </div>
                     </div>
@@ -104,6 +105,7 @@
 <!-- script references -->
 <script src="js/jquery-2.1.4.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
+<script src="js/bootstrap-toggle.min.js"></script>
 <script src="js/jquery.flot.js"></script>
 <script src="js/handlebars.js"></script>
 
@@ -136,6 +138,7 @@
                         <th>Last iteration</th>
                         <th>Last time</th>
                         <th>Count</th>
+                        <th>Show in log</th>
                     </tr>
                     </thead>
 
@@ -181,6 +184,7 @@
         <td title="Time zone: {{timeZone}}">{{formattedTimestamp}} ({{lastTime}})</td>
 
         <td>{{count}}</td>
+        <td><span class="toggleHolder{{gtfsRtId}}" id="toggleId{{gtfsRtId}}{{id}}"></span></td>
     </tr>
     {{/each}}
 </script>

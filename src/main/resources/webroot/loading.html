@@ -5,14 +5,14 @@
     <meta charset="utf-8">
     <title>GTFS-RT Validator</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css"/>
     <!--[if lt IE 9]>
     <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 </head>
 <body style="background-color: #e4e4e4">
-<div class="navbar navbar-default" style="margin-bottom: 0">
+<div class="navbar navbar-inverse" style="margin-bottom: 0">
     <div class="container">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -65,12 +65,12 @@
                     </div>
                     <div class="row">
                         <div align="left" class="col-md-4">
-                            <input class="btn btn-default" type="button" onclick="window.history.back();" value="Back"/>
+                            <input class="btn btn-primary" type="button" onclick="window.history.back();" value="Back"/>
                         </div>
 
                         <div align="right" class="col-md-8">
-                            <input class="btn btn-default" type="button" onclick="location.reload();" value="Retry"/>
-                            <button class="btn btn-primary" id="btn-continue" onclick="startMonitoring()"
+                            <input class="btn btn-primary" type="button" onclick="location.reload();" value="Retry"/>
+                            <button class="btn btn-success" id="btn-continue" onclick="startMonitoring()"
                                    disabled>Continue</button>
                         </div>
                     </div>

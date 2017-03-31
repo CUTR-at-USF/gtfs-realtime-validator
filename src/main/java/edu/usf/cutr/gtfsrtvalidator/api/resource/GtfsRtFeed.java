@@ -166,13 +166,14 @@ public class GtfsRtFeed {
 
     // Return Log information about the feed with {id}
     @GET
-    @Path("/{id : \\d+}/log")
+    @Path("/{id : \\d+}/log/{toggledData: .*}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getRtFeedLogDetails(@PathParam("id") int id) {
+    public Response getRtFeedLogDetails(@PathParam("id") int id, @PathParam("toggledData") String hideErrors) {
         List<ViewErrorLogModel> feedLog;
+        String [] removeIds = hideErrors.split(",");
         Session session = GTFSDB.InitSessionBeginTrans();
         feedLog = session.createNamedQuery("ErrorLogByrtfeedID", ViewErrorLogModel.class)
-                .setParameter(0, id).setParameter(1, id).setMaxResults(10).list();
+                .setParameter(0, id).setParameter(1, id).setParameterList("errorIds", removeIds).setMaxResults(10).list();
         GTFSDB.commitAndCloseSession(session);
         for(ViewErrorLogModel viewErrorLogModel: feedLog) {
             int index = feedLog.indexOf(viewErrorLogModel);
