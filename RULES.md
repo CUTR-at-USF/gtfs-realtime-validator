@@ -19,6 +19,8 @@
 | [E010](#E010) | `location_type` not `0` in `stops.txt`
 | [E011](#E011) | `location_type` not `0` in GTFS-rt
 
+# Warnings
+
 <a name="W001"/>
 
 ### W001 - `timestamp` not populated
@@ -36,6 +38,8 @@
 ### W003 - `VehiclePosition` and `TripUpdate` feed mismatch
 
 If both vehicle positions and trip updates are provided, `VehicleDescriptor` or `TripDescriptor` values should match between the two feeds
+
+# Errors
 
 <a name="E001"/>
 
