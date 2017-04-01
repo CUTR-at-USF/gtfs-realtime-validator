@@ -21,6 +21,7 @@ import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
+import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,7 @@ public class TimestampValidation implements FeedEntityValidator{
 
     @Override
     public ErrorListHelperModel validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
-        MessageLogModel messageLogModel = new MessageLogModel("w001");
+        MessageLogModel messageLogModel = new MessageLogModel(ValidationRules.W001);
         OccurrenceModel errorOccurrence;
         List<OccurrenceModel> errorOccurrenceList = new ArrayList<>();
         

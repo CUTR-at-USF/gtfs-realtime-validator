@@ -27,11 +27,6 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,30 +35,6 @@ public class GTFSDB {
     private static final Logger _log = LoggerFactory.getLogger(GTFSDB.class);
 
     public static void InitializeDB() {
-        Statement stmt;
-        String workingDir = System.getProperty("user.dir");
-        String createTablePath = workingDir + "/target/classes/createTables.sql";
-
-        try {
-            byte[] encoded = Files.readAllBytes(Paths.get(createTablePath));
-            String createTableQuerry = new String(encoded, "UTF-8");
-
-            String[] createStatements = createTableQuerry.split(";");
-
-            for (String createStatement : createStatements) {
-                Class.forName("org.hsqldb.jdbcDriver");
-                Connection con = DriverManager.getConnection("jdbc:hsqldb:file:gtfsrthsql", "sa", "");
-
-                stmt = con.createStatement();
-                stmt.executeUpdate(createStatement);
-                stmt.close();
-                con.close();
-            }
-
-        } catch (Exception e) {
-            System.err.println(e.getClass().getName() + ": " + e.getMessage());
-            System.exit(0);
-        }
 
         //Use reflection to get the list of rules from the ValidataionRules class
         Field[] fields = ValidationRules.class.getDeclaredFields();

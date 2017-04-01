@@ -24,23 +24,12 @@ import org.hibernate.Session;
 public class DBHelper {
     public static void saveError(ErrorListHelperModel errorListHelperModel) {
         Session session = GTFSDB.InitSessionBeginTrans();
-        int messageId = (int) session.save(errorListHelperModel.getErrorMessage());
+        session.save(errorListHelperModel.getErrorMessage());
         GTFSDB.commitAndCloseSession(session);
 
         session = GTFSDB.InitSessionBeginTrans();
         for (OccurrenceModel occurrence : errorListHelperModel.getOccurrenceList()) {
-            occurrence.setMessageId(messageId);
-            session.save(occurrence);
-        }
-        GTFSDB.commitAndCloseSession(session);
-    }
-
-    public static void saveGtfsError(ErrorListHelperModel errorListHelperModel) {
-        Session session = GTFSDB.InitSessionBeginTrans();
-        int messageId = (int) session.save(errorListHelperModel.getErrorMessage());
-
-        for (OccurrenceModel occurrence : errorListHelperModel.getOccurrenceList()) {
-            occurrence.setMessageId(messageId);
+            occurrence.setMessageLogModel(errorListHelperModel.getErrorMessage());
             session.save(occurrence);
         }
         GTFSDB.commitAndCloseSession(session);

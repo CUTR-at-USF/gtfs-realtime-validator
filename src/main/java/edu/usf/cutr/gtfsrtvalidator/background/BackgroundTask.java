@@ -72,7 +72,7 @@ public class BackgroundTask implements Runnable {
             GtfsRtFeedIterationModel feedIteration;
 
             //Get the GTFS feed from the GtfsDaoMap using the gtfsFeedId of the current feed.
-            gtfsData = GtfsFeed.GtfsDaoMap.get(currentFeed.getGtfsId());
+            gtfsData = GtfsFeed.GtfsDaoMap.get(currentFeed.getGtfsFeedModel().getFeedId());
 
             //region Get gtfsRtFeed Iteration
             //---------------------------------------------------------------------------------------
@@ -113,9 +113,9 @@ public class BackgroundTask implements Runnable {
                 feedMessage = GtfsRealtime.FeedMessage.parseFrom(is);
 
                 //Create new feedIteration object and save the iteration to the database
-                feedIteration = new GtfsRtFeedIterationModel(TimeStampHelper.getCurrentTimestamp(), gtfsRtProtobuf, currentFeed.getGtfsRtId(), isUniqueFeed);
+                feedIteration = new GtfsRtFeedIterationModel(TimeStampHelper.getCurrentTimestamp(), gtfsRtProtobuf, currentFeed, isUniqueFeed);
                 session.save(feedIteration);
-                GTFSDB.commitAndCloseSession(session);                
+                GTFSDB.commitAndCloseSession(session);
             } catch (Exception e) {
                 _log.error("The URL '" + gtfsRtFeedUrl + "' does not contain valid Gtfs-Rt data", e);
                 return;
@@ -125,10 +125,10 @@ public class BackgroundTask implements Runnable {
 
             //region Get all entities for a GTFS feed
             //---------------------------------------------------------------------------------------
-            gtfsFeedHash.put(feedIteration.getRtFeedId(), feedMessage);
-            feedEntityList.put(currentFeed.getGtfsId(), gtfsFeedHash);
+            gtfsFeedHash.put(feedIteration.getGtfsRtFeedModel().getGtfsRtId(), feedMessage);
+            feedEntityList.put(currentFeed.getGtfsFeedModel().getFeedId(), gtfsFeedHash);
 
-            HashMap<Integer, GtfsRealtime.FeedMessage> feedEntityInstance = feedEntityList.get(currentFeed.getGtfsId());
+            HashMap<Integer, GtfsRealtime.FeedMessage> feedEntityInstance = feedEntityList.get(currentFeed.getGtfsFeedModel().getFeedId());
 
             List<GtfsRealtime.FeedEntity> allEntitiesArrayList = new ArrayList<>();
 
@@ -197,7 +197,7 @@ public class BackgroundTask implements Runnable {
 
         if (errorList != null && !errorList.getOccurrenceList().isEmpty()) {
             //Set iteration Id
-            errorList.getErrorMessage().setIterationId(feedIteration.getIterationId());
+            errorList.getErrorMessage().setGtfsRtFeedIterationModel(feedIteration);
             //Save the captured errors to the database
             DBHelper.saveError(errorList);
         }

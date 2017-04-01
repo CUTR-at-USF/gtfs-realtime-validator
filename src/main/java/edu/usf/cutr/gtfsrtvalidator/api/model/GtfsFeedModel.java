@@ -25,10 +25,10 @@ import java.io.Serializable;
 @Entity
 @Table(name = "GtfsFeed") 
 public class GtfsFeedModel implements Serializable {
+
     @Column(name="feedUrl")
     private String gtfsUrl;
     @Id
-    //@GeneratedValue(generator="GtfsFeed")
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="feedID")
     private int feedId;
@@ -39,14 +39,10 @@ public class GtfsFeedModel implements Serializable {
     @Column(name = "agency")
     private String agency;
     @Column(name="fileChecksum")
+    @Lob
     private byte[] checksum;
     @Column(name = "errorCount")
     private int errorCount;
-
-    public static String FEEDID = "feedId";
-    public static String FEEDURL = "feedUrl";
-    public static String FILELOCATION = "fileLocation";
-    public static String TIMESTAMP = "downloadTimestamp";
 
     public GtfsFeedModel(){}
 

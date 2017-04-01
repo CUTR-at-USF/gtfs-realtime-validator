@@ -17,46 +17,33 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.model;
 
-import java.io.Serializable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.io.Serializable;
 
 @XmlRootElement
 @Entity
 @Table(name="GtfsFeedIteration")
 public class GtfsFeedIterationModel implements Serializable {
-    public GtfsFeedIterationModel(int iterationId, long timeStamp, int feedId) {
-        this.setIterationId(iterationId);
-        this.setTimeStamp(timeStamp);
-        this.setFeedId(feedId);
-    }
 
-    public GtfsFeedIterationModel(){};
+    public GtfsFeedIterationModel() {}
 
-    public static String ITERATIONID = "IterationId";
-    public static String ITERATIONTIMESTAMP = "IterationTimestamp";
-    public static String FEEDID = "feedID";
-    
     @Id
     @Column(name="IterationID")
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private int IterationId;
     @Column(name="IterationTimestamp")
     private long timeStamp;
-    @Column(name="feedID")
-    private int feedId;
+    @ManyToOne
+    @JoinColumn(name = "feedID")
+    private GtfsFeedModel gtfsFeedModel;
 
-    public int getFeedId() {
-        return feedId;
+    public GtfsFeedModel getGtfsFeedModel() {
+        return gtfsFeedModel;
     }
 
-    public void setFeedId(int feedId) {
-        this.feedId = feedId;
+    public void setGtfsFeedModel(GtfsFeedModel gtfsFeedModel) {
+        this.gtfsFeedModel = gtfsFeedModel;
     }
 
     public int getIterationId() {

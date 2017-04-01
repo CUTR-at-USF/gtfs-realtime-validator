@@ -17,6 +17,8 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.model;
 
+import org.hibernate.annotations.Type;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -29,17 +31,16 @@ import java.io.Serializable;
 @Table(name = "Error")
 public class ValidationRule implements Serializable {
 
-    public static final String ERROR_ID = "errorId";
-    public static final String ERROR_DESCRIPTION = "errorDescription";
-
     @Id
     @Column(name="errorID")
     private String errorId;
     @Column(name = "severity")
     private String severity;
     @Column(name = "title")
+    @Type(type = "text")
     private String title;
     @Column(name="errorDescription")
+    @Type(type = "text")
     private String errorDescription;
 
     public ValidationRule() {}

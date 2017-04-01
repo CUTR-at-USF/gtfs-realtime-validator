@@ -28,22 +28,20 @@ public class MessageLogModel implements Serializable {
 
     public MessageLogModel(){};
 
-    public MessageLogModel(String errorId) {
-        this.errorId = errorId;
+    public MessageLogModel(ValidationRule validationRule) {
+        this.setValidationRule(validationRule);
     }
-
-    public static final String MESSAGE_ID = "messageId";
-    public static final String ITERATION_ID = "iterationID";
-    public static final String ERROR_ID = "errorId";
 
     @Id
     @Column(name="messageID")
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private int messageId;
-    @Column(name="iterationID")
-    private int iterationId;
-    @Column(name="errorID")
-    private String errorId;
+    @ManyToOne
+    @JoinColumn(name = "iterationID")
+    private GtfsRtFeedIterationModel gtfsRtFeedIterationModel;
+    @ManyToOne
+    @JoinColumn(name = "errorID")
+    private ValidationRule validationRule;
     @Column(name = "errorDetails")
     private String errorDetails;
 
@@ -55,20 +53,20 @@ public class MessageLogModel implements Serializable {
         this.messageId = messageId;
     }
 
-    public int getIterationId() {
-        return iterationId;
+    public GtfsRtFeedIterationModel getGtfsRtFeedIterationModel() {
+        return gtfsRtFeedIterationModel;
     }
 
-    public void setIterationId(int iterationId) {
-        this.iterationId = iterationId;
+    public void setGtfsRtFeedIterationModel(GtfsRtFeedIterationModel gtfsRtFeedIterationModel) {
+        this.gtfsRtFeedIterationModel = gtfsRtFeedIterationModel;
     }
 
-    public String getErrorId() {
-        return errorId;
+    public ValidationRule getValidationRule() {
+        return validationRule;
     }
 
-    public void setErrorId(String errorId) {
-        this.errorId = errorId;
+    public void setValidationRule(ValidationRule validationRule) {
+        this.validationRule = validationRule;
     }
 
     public String getErrorDetails() {

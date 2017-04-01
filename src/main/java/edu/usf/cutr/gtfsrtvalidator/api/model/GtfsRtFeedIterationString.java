@@ -27,13 +27,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class GtfsRtFeedIterationString {
 
-    public GtfsRtFeedIterationString() {}
-
     public GtfsRtFeedIterationString(GtfsRtFeedIterationModel iterationModel) {
         setFeedprotobuf(iterationModel.getFeedprotobuf());
         setTimeStamp(iterationModel.getTimeStamp());
         setIterationId(iterationModel.getIterationId());
-        setRtFeedId(iterationModel.getRtFeedId());
+        setRtFeedId(iterationModel.getGtfsRtFeedModel().getGtfsRtId());
     }
 
     private int IterationId;
