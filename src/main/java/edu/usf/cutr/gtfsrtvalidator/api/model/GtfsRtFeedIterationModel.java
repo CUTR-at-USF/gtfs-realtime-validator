@@ -28,11 +28,11 @@ public class GtfsRtFeedIterationModel implements Serializable {
 
     public GtfsRtFeedIterationModel() {}
 
-    public GtfsRtFeedIterationModel(long timeStamp, byte[] feedprotobuf, GtfsRtFeedModel gtfsRtFeedModel, boolean isUniqueFeed) {
+    public GtfsRtFeedIterationModel(long timeStamp, byte[] feedprotobuf, GtfsRtFeedModel gtfsRtFeedModel, byte[] feedHash) {
         this.timeStamp = timeStamp;
         this.feedprotobuf = feedprotobuf;
         this.gtfsRtFeedModel = gtfsRtFeedModel;
-        this.isUniqueFeed = isUniqueFeed;
+        this.feedHash = feedHash;
     }
 
     @Id
@@ -47,8 +47,8 @@ public class GtfsRtFeedIterationModel implements Serializable {
     @ManyToOne
     @JoinColumn(name = "rtFeedID")
     private GtfsRtFeedModel gtfsRtFeedModel;
-    @Column(name = "isUniqueFeed", columnDefinition = "boolean default false", nullable = false)
-    private boolean isUniqueFeed;
+    @Column(name = "feedHash")
+    private byte[] feedHash;
 
     public GtfsRtFeedModel getGtfsRtFeedModel() {
         return gtfsRtFeedModel;
@@ -82,11 +82,11 @@ public class GtfsRtFeedIterationModel implements Serializable {
         this.feedprotobuf = feedprotobuf;
     }
 
-    public boolean isUniqueFeed() {
-        return isUniqueFeed;
+    public byte[] getFeedHash() {
+        return feedHash;
     }
 
-    public void setUniqueFeed(boolean uniqueFeed) {
-        isUniqueFeed = uniqueFeed;
+    public void setFeedHash(byte[] feedHash) {
+        this.feedHash = feedHash;
     }
 }

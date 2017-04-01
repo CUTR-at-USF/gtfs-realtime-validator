@@ -26,10 +26,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @Entity
 @NamedNativeQuery(name = "feedUniqueResponseCount",
-        query = "SELECT count(isUniqueFeed) AS uniqueFeedCount " +
+        query = "SELECT count(*) AS uniqueFeedCount " +
                 "FROM GtfsRtFeedIteration " +
                 "WHERE (rtFeedID = ? " +
-                    "AND isUniqueFeed = 1)",
+                    "AND feedProtobuf IS NOT NULL)",
         resultClass = ViewFeedUniqueResponseCount.class)
 public class ViewFeedUniqueResponseCount {
 
