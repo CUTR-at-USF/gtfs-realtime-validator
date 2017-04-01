@@ -37,7 +37,7 @@ import java.util.List;
 public class StopLocationTypeValidator implements GtfsFeedValidator {
     @Override
     public ErrorListHelperModel validate(GtfsDaoImpl gtfsData) {
-        MessageLogModel messageLogModel = new MessageLogModel(ValidationRules.E010.getErrorId());
+        MessageLogModel messageLogModel = new MessageLogModel(ValidationRules.E010);
         List<OccurrenceModel> errorOccurrenceList = new ArrayList<>();
 
         //Get all StopTime objects from stop_time.txt

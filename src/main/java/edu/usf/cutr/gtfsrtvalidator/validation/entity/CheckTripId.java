@@ -39,7 +39,7 @@ public class CheckTripId implements FeedEntityValidator {
     public ErrorListHelperModel validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
         Collection<Trip> gtfsTripList = gtfsData.getAllTrips();
 
-        MessageLogModel messageLogModel = new MessageLogModel(ValidationRules.E003.getErrorId());
+        MessageLogModel messageLogModel = new MessageLogModel(ValidationRules.E003);
         List<OccurrenceModel> errorOccurrenceList = new ArrayList<>();
 
         List<String> tripList = new ArrayList<>();

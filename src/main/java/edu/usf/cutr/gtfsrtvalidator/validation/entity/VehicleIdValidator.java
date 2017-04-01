@@ -45,7 +45,7 @@ public class VehicleIdValidator implements FeedEntityValidator {
         List<GtfsRealtime.FeedEntity> entityList = feedMessage.getEntityList();
         int entityId = 0;
 
-        MessageLogModel messageLogModel = new MessageLogModel(ValidationRules.W002.getErrorId());
+        MessageLogModel messageLogModel = new MessageLogModel(ValidationRules.W002);
 
         List<OccurrenceModel> errorOccurrenceList = new ArrayList<>();
         for (GtfsRealtime.FeedEntity entity : entityList) {

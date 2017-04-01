@@ -11,6 +11,7 @@
     <property name="hibernate.c3p0.max_statements">50</property>
     <property name="hibernate.connection.username">sa</property>
     <property name="hibernate.connection.password"></property>
+    <property name="hibernate.hbm2ddl.auto">update</property>
     <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedIterationModel"/>
     <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedModel"/>
     <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.GtfsRtFeedIterationModel"/>

@@ -25,19 +25,15 @@ import java.io.Serializable;
 @Entity
 @Table(name = "GtfsRtFeedIteration")
 public class GtfsRtFeedIterationModel implements Serializable {
-    public GtfsRtFeedIterationModel(long timeStamp, byte[] feedprotobuf, int rtFeedId, boolean isUniqueFeed) {
+
+    public GtfsRtFeedIterationModel() {}
+
+    public GtfsRtFeedIterationModel(long timeStamp, byte[] feedprotobuf, GtfsRtFeedModel gtfsRtFeedModel, boolean isUniqueFeed) {
         this.timeStamp = timeStamp;
-        Feedprotobuf = feedprotobuf;
-        this.rtFeedId = rtFeedId;
+        this.feedprotobuf = feedprotobuf;
+        this.gtfsRtFeedModel = gtfsRtFeedModel;
         this.isUniqueFeed = isUniqueFeed;
     }
-
-    public GtfsRtFeedIterationModel(){};
-
-    public static String ITERATIONID = "IterationId";
-    public static String ITERATIONTIMESTAMP = "IterationTimestamp";
-    public static String FEEDPROTOBUF = "feedProtobuf";
-    public static String RTFEEDID = "rtFeedID";
 
     @Id
     @Column(name="IterationID")
@@ -46,18 +42,20 @@ public class GtfsRtFeedIterationModel implements Serializable {
     @Column(name="IterationTimestamp")
     private long timeStamp;
     @Column(name="feedProtobuf")
-    private byte[] Feedprotobuf;
-    @Column(name="rtFeedID")
-    private int rtFeedId;
-    @Column(name = "isUniqueFeed")
+    @Lob
+    private byte[] feedprotobuf;
+    @ManyToOne
+    @JoinColumn(name = "rtFeedID")
+    private GtfsRtFeedModel gtfsRtFeedModel;
+    @Column(name = "isUniqueFeed", columnDefinition = "boolean default false", nullable = false)
     private boolean isUniqueFeed;
 
-    public int getRtFeedId() {
-        return rtFeedId;
+    public GtfsRtFeedModel getGtfsRtFeedModel() {
+        return gtfsRtFeedModel;
     }
 
-    public void setRtFeedId(int rtFeedId) {
-        this.rtFeedId = rtFeedId;
+    public void setGtfsRtFeedModel(GtfsRtFeedModel gtfsRtFeedModel) {
+        this.gtfsRtFeedModel = gtfsRtFeedModel;
     }
 
     public int getIterationId() {
@@ -77,11 +75,11 @@ public class GtfsRtFeedIterationModel implements Serializable {
     }
 
     public byte[] getFeedprotobuf() {
-        return Feedprotobuf;
+        return feedprotobuf;
     }
 
     public void setFeedprotobuf(byte[] feedprotobuf) {
-        Feedprotobuf = feedprotobuf;
+        this.feedprotobuf = feedprotobuf;
     }
 
     public boolean isUniqueFeed() {

@@ -54,7 +54,7 @@ public class VehicleTripDescriptorValidator implements FeedEntityValidator {
             }
         }
 
-        MessageLogModel messageLogModel = new MessageLogModel(ValidationRules.W003.getErrorId());
+        MessageLogModel messageLogModel = new MessageLogModel(ValidationRules.W003);
         List<OccurrenceModel> errorOccurrenceList = new ArrayList<>();
 
         //Should be optimized since this would be costly with a higher number of feeds

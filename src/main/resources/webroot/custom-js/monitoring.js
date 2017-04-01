@@ -51,7 +51,7 @@ for (var gtfsRtFeed in gtfsRtFeeds) {
                 }, updateInterval);
 
                 // Get gtfs error count
-                loadGtfsErrorCount(data["gtfsId"]);
+                loadGtfsErrorCount(data["gtfsFeedModel"]["feedId"]);
             }
         });
     }

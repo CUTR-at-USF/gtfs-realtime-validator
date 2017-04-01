@@ -116,7 +116,7 @@ function monitorGtfsRtFeeds(gtfsrtUrlList, gtfsFeedId) {
                 $(progressID).prev().find(".status").text("("+ message +")");
             }
 
-            var jsonData = {"gtfsUrl":url,"gtfsId":gtfsFeedId};
+            var jsonData = {"gtfsUrl":url, "gtfsFeedModel":{"feedId": gtfsFeedId}};
 
             $.ajax({
                 type: "POST",

@@ -42,7 +42,7 @@ public class StopTimeSequanceValidator implements FeedEntityValidator {
     public ErrorListHelperModel validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
         List<GtfsRealtime.FeedEntity> entityList = feedMessage.getEntityList();
 
-        MessageLogModel messageLogModel = new MessageLogModel(ValidationRules.E002.getErrorId());
+        MessageLogModel messageLogModel = new MessageLogModel(ValidationRules.E002);
         List<OccurrenceModel> errorOccurrenceList = new ArrayList<>();
 
         List<GtfsRealtime.FeedEntity> tripUpdateList = new ArrayList<>();

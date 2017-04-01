@@ -17,23 +17,20 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.model;
 
-import java.io.Serializable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.io.Serializable;
 
 @XmlRootElement
 @Entity
 @Table(name = "GtfsRtFeed") 
 public class GtfsRtFeedModel implements Serializable {
+
     @Column(name="feedURL")
     private String gtfsUrl;
-    @Column(name="gtfsFeedID")    
-    private int gtfsId;
+    @ManyToOne
+    @JoinColumn(name = "gtfsFeedID")
+    private GtfsFeedModel gtfsFeedModel;
     @Column(name="startTime")
     private long startTime;
     @Id
@@ -51,12 +48,12 @@ public class GtfsRtFeedModel implements Serializable {
         this.gtfsUrl = gtfsUrl;
     }
 
-    public int getGtfsId() {
-        return gtfsId;
+    public GtfsFeedModel getGtfsFeedModel() {
+        return gtfsFeedModel;
     }
 
-    public void setGtfsId(int gtfsId) {
-        this.gtfsId = gtfsId;
+    public void setGtfsFeedModel(GtfsFeedModel gtfsFeedModel) {
+        this.gtfsFeedModel = gtfsFeedModel;
     }
 
     public long getStartTime() {
@@ -79,7 +76,7 @@ public class GtfsRtFeedModel implements Serializable {
     public String toString() {
         return "GtfsRtFeedModel{" +
                 "gtfsUrl='" + gtfsUrl + '\'' +
-                ", gtfsId=" + gtfsId +
+                ", gtfsId=" + gtfsFeedModel.getFeedId() +
                 ", startTime=" + startTime +
                 ", gtfsRtId=" + gtfsRtId +
                 '}';

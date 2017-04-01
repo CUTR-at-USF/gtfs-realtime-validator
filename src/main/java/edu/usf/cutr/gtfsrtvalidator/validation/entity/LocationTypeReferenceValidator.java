@@ -36,7 +36,7 @@ public class LocationTypeReferenceValidator implements FeedEntityValidator {
     @Override
     public ErrorListHelperModel validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
 
-        MessageLogModel messageLogModel = new MessageLogModel(ValidationRules.E011.getErrorId());
+        MessageLogModel messageLogModel = new MessageLogModel(ValidationRules.E011);
         List<OccurrenceModel> errorOccurrenceList = new ArrayList<>();
 
         //Get all Feed Entities from the GTFS feed

@@ -36,7 +36,6 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.sql.PreparedStatement;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -52,7 +51,6 @@ public class GtfsRtFeed {
 
     private static final int INVALID_FEED = 0;
     private static final int VALID_FEED = 1;
-    PreparedStatement stmt;
     public static String agencyTimezone;
 
     public Response generateError(String errorMessage) {
@@ -72,7 +70,7 @@ public class GtfsRtFeed {
         //Validate URL for GTFS feed and the GTFS ID.
         if (feedInfo.getGtfsUrl() == null) {
             return generateError("GTFS-RT URL is required");
-        } else if (feedInfo.getGtfsId() == 0) {
+        } else if (feedInfo.getGtfsFeedModel().getFeedId() == 0) {
             return generateError("GTFS Feed id is required");
         }
 
@@ -98,7 +96,7 @@ public class GtfsRtFeed {
 
         Session session = GTFSDB.InitSessionBeginTrans();
         GtfsRtFeedModel storedFeedInfo = (GtfsRtFeedModel) session.createQuery(" FROM GtfsRtFeedModel WHERE "
-                + "gtfsUrl= '"+feedInfo.getGtfsUrl()+"' AND gtfsId = "+feedInfo.getGtfsId()).uniqueResult();
+                + "gtfsUrl= '"+feedInfo.getGtfsUrl()+"' AND gtfsFeedModel.feedId = "+feedInfo.getGtfsFeedModel().getFeedId()).uniqueResult();
         GTFSDB.commitAndCloseSession(session);
         if(storedFeedInfo == null) {    //If null, create the gtfs-rt feed in the DB and return the feed
             session = GTFSDB.InitSessionBeginTrans();
@@ -286,7 +284,7 @@ public class GtfsRtFeed {
                 + "WHERE rtFeedID = " + gtfsRtId).uniqueResult();
 
         GtfsFeedModel gtfsFeed = (GtfsFeedModel) session.createQuery("FROM GtfsFeedModel "
-                + "WHERE feedID = " + gtfsRtFeed.getGtfsId()).uniqueResult();
+                + "WHERE feedID = " + gtfsRtFeed.getGtfsFeedModel().getFeedId()).uniqueResult();
         GTFSDB.commitAndCloseSession(session);
         agencyTimezone = gtfsFeed.getAgency();
 
