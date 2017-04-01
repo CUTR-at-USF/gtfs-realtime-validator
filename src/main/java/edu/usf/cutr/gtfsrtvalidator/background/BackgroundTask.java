@@ -101,7 +101,7 @@ public class BackgroundTask implements Runnable {
                             + " WHERE rtFeedId = " + currentFeed.getGtfsRtId()
                             + " ORDER BY IterationId DESC").setMaxResults(1).uniqueResult();
                 if (feedIteration != null) {
-                    prevFeedDigest = md.digest(feedIteration.getFeedprotobuf());
+                    prevFeedDigest = feedIteration.getFeedHash();
                 }
 
                 if(MessageDigest.isEqual(currentFeedDigest, prevFeedDigest)) {
@@ -113,7 +113,12 @@ public class BackgroundTask implements Runnable {
                 feedMessage = GtfsRealtime.FeedMessage.parseFrom(is);
 
                 //Create new feedIteration object and save the iteration to the database
-                feedIteration = new GtfsRtFeedIterationModel(TimeStampHelper.getCurrentTimestamp(), gtfsRtProtobuf, currentFeed, isUniqueFeed);
+                if(isUniqueFeed) {
+                    feedIteration = new GtfsRtFeedIterationModel(TimeStampHelper.getCurrentTimestamp(), gtfsRtProtobuf, currentFeed, currentFeedDigest);
+                }
+                else {
+                    feedIteration = new GtfsRtFeedIterationModel(TimeStampHelper.getCurrentTimestamp(), null, currentFeed, currentFeedDigest);
+                }
                 session.save(feedIteration);
                 GTFSDB.commitAndCloseSession(session);
             } catch (Exception e) {
