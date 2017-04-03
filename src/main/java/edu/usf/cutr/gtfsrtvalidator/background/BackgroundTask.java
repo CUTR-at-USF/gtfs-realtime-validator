@@ -166,7 +166,7 @@ public class BackgroundTask implements Runnable {
 
             //region warnings
             //---------------------------------------------------------------------------------------
-            //w001
+            //w001 and e012
             FeedEntityValidator validateTimestamp = new TimestampValidation();
             validateEntity(feedMessage, gtfsData, feedIteration, validateTimestamp);
             //---------------------------------------------------------------------------------------
@@ -198,14 +198,15 @@ public class BackgroundTask implements Runnable {
     }
 
     private void validateEntity(GtfsRealtime.FeedMessage feedMessage, GtfsDaoImpl gtfsData, GtfsRtFeedIterationModel feedIteration, FeedEntityValidator feedEntityValidator) {
-        ErrorListHelperModel errorList = feedEntityValidator.validate(gtfsData, feedMessage);
+        List<ErrorListHelperModel> errorLists = feedEntityValidator.validate(gtfsData, feedMessage);
 
-        if (errorList != null && !errorList.getOccurrenceList().isEmpty()) {
-            //Set iteration Id
-            errorList.getErrorMessage().setGtfsRtFeedIterationModel(feedIteration);
-            //Save the captured errors to the database
-            DBHelper.saveError(errorList);
+        for (ErrorListHelperModel errorList : errorLists) {
+            if (errorList != null && !errorList.getOccurrenceList().isEmpty()) {
+                //Set iteration Id
+                errorList.getErrorMessage().setGtfsRtFeedIterationModel(feedIteration);
+                //Save the captured errors to the database
+                DBHelper.saveError(errorList);
+            }
         }
     }
-
 }

@@ -34,7 +34,7 @@ import java.util.*;
  */
 public class LocationTypeReferenceValidator implements FeedEntityValidator {
     @Override
-    public ErrorListHelperModel validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
+    public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
 
         MessageLogModel messageLogModel = new MessageLogModel(ValidationRules.E011);
         List<OccurrenceModel> errorOccurrenceList = new ArrayList<>();
@@ -82,6 +82,6 @@ public class LocationTypeReferenceValidator implements FeedEntityValidator {
                 }
             }
         }
-        return new ErrorListHelperModel(messageLogModel, errorOccurrenceList);
+        return Arrays.asList(new ErrorListHelperModel(messageLogModel, errorOccurrenceList));
     }
 }

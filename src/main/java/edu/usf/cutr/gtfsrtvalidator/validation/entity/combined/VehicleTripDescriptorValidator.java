@@ -26,6 +26,7 @@ import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -36,7 +37,7 @@ public class VehicleTripDescriptorValidator implements FeedEntityValidator {
      * Description: If both vehicle positions and trip updates are provided, VehicleDescriptor or TripDescriptor values should match between the two feeds.
      */
     @Override
-    public ErrorListHelperModel validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
+    public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
 
         List<GtfsRealtime.TripUpdate> tripUpdates = new ArrayList<>();
         List<GtfsRealtime.VehiclePosition> vehiclePositions = new ArrayList<>();
@@ -96,9 +97,6 @@ public class VehicleTripDescriptorValidator implements FeedEntityValidator {
                 }
             }
         }
-
-        return new ErrorListHelperModel(messageLogModel, errorOccurrenceList);
+        return Arrays.asList(new ErrorListHelperModel(messageLogModel, errorOccurrenceList));
     }
-
-
 }
