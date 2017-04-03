@@ -20,6 +20,8 @@ package edu.usf.cutr.gtfsrtvalidator.validation.interfaces;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 
+import java.util.List;
+
 public interface GtfsFeedValidator {
-    ErrorListHelperModel validate(GtfsDaoImpl gtfsData);
+    List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData);
 }

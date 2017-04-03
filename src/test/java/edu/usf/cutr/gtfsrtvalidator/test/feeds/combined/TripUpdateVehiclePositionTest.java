@@ -18,8 +18,8 @@ package edu.usf.cutr.gtfsrtvalidator.test.feeds.combined;
 
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.FeedMessageTest;
+import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.VehicleTripDescriptorValidator;
-import static junit.framework.TestCase.assertEquals;
 import org.junit.Test;
 
 /* 
@@ -57,7 +57,9 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
         
         // TripUpdate and VehiclePosition feed have same trip id = 1.1 and same vehicle id = 1. So, no errors.
         errors = vehicleAndTripDescriptorValidator.validate(gtfsData, feedMessageBuilder.build());
-        assertEquals(0, errors.getOccurrenceList().size());
+        for (ErrorListHelperModel error : errors) {
+            assertEquals(0, error.getOccurrenceList().size());
+        }
         
         /* If trip_id's and vehicle_id's in TripUpdate and VehiclePosition are not equal, validator should return an error.
            That is, it fails the validation and passes the assertion.
@@ -75,7 +77,9 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
         // 2 errors. Unmatched trip id's and vechicle id's in TripUpdate and VehiclePosition feeds
         errors = vehicleAndTripDescriptorValidator.validate(gtfsData, feedMessageBuilder.build());
-        assertEquals(2, errors.getOccurrenceList().size());
+        for (ErrorListHelperModel error : errors) {
+            assertEquals(2, error.getOccurrenceList().size());
+        }
         
         clearAndInitRequiredFeedFields();
     }

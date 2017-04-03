@@ -26,6 +26,8 @@ import org.onebusaway.gtfs.serialization.GtfsReader;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 
 public class FeedMessageTest extends TestCase {
@@ -38,8 +40,8 @@ public class FeedMessageTest extends TestCase {
     
     FeedHeaderTest feedHeaderTest;
     FeedEntityTest feedEntityTest;
-    
-    public ErrorListHelperModel errors;
+
+    public List<ErrorListHelperModel> errors;
     
     public GtfsRealtime.FeedMessage.Builder feedMessageBuilder;
     public GtfsRealtime.FeedEntity.Builder feedEntityBuilder;
@@ -50,7 +52,7 @@ public class FeedMessageTest extends TestCase {
     public GtfsRealtime.Alert.Builder alertBuilder;
         
     public FeedMessageTest() throws IOException {
-        errors = new ErrorListHelperModel();
+        errors = Arrays.asList(new ErrorListHelperModel());
 
         feedMessageBuilder = GtfsRealtime.FeedMessage.newBuilder();
         feedEntityBuilder = GtfsRealtime.FeedEntity.newBuilder();

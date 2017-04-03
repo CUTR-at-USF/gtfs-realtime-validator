@@ -28,6 +28,7 @@ import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -39,7 +40,7 @@ public class StopTimeSequanceValidator implements FeedEntityValidator {
     private static final org.slf4j.Logger _log = LoggerFactory.getLogger(StopTimeSequanceValidator.class);
 
     @Override
-    public ErrorListHelperModel validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
+    public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
         List<GtfsRealtime.FeedEntity> entityList = feedMessage.getEntityList();
 
         MessageLogModel messageLogModel = new MessageLogModel(ValidationRules.E002);
@@ -71,10 +72,9 @@ public class StopTimeSequanceValidator implements FeedEntityValidator {
             }
         }
 
-        if(!errorOccurrenceList.isEmpty()){
-            return  new ErrorListHelperModel(messageLogModel, errorOccurrenceList);
+        if (!errorOccurrenceList.isEmpty()) {
+            return Arrays.asList(new ErrorListHelperModel(messageLogModel, errorOccurrenceList));
         }
-
         return null;
     }
 }

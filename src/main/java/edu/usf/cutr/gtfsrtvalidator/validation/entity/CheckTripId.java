@@ -27,6 +27,7 @@ import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.onebusaway.gtfs.model.Trip;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -36,7 +37,7 @@ import java.util.List;
  */
 public class CheckTripId implements FeedEntityValidator {
     @Override
-    public ErrorListHelperModel validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
+    public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
         Collection<Trip> gtfsTripList = gtfsData.getAllTrips();
 
         MessageLogModel messageLogModel = new MessageLogModel(ValidationRules.E003);
@@ -59,7 +60,6 @@ public class CheckTripId implements FeedEntityValidator {
                 }
             }
         }
-
-        return  new ErrorListHelperModel(messageLogModel, errorOccurrenceList);
+        return Arrays.asList(new ErrorListHelperModel(messageLogModel, errorOccurrenceList));
     }
 }

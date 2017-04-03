@@ -27,6 +27,7 @@ import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -36,7 +37,7 @@ import java.util.List;
  */
 public class StopLocationTypeValidator implements GtfsFeedValidator {
     @Override
-    public ErrorListHelperModel validate(GtfsDaoImpl gtfsData) {
+    public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData) {
         MessageLogModel messageLogModel = new MessageLogModel(ValidationRules.E010);
         List<OccurrenceModel> errorOccurrenceList = new ArrayList<>();
 
@@ -57,7 +58,6 @@ public class StopLocationTypeValidator implements GtfsFeedValidator {
                 }
             }
         }
-
-        return new ErrorListHelperModel(messageLogModel, errorOccurrenceList);
+        return Arrays.asList(new ErrorListHelperModel(messageLogModel, errorOccurrenceList));
     }
 }

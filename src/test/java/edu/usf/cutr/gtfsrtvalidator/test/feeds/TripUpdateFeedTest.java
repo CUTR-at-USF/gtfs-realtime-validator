@@ -18,6 +18,7 @@ package edu.usf.cutr.gtfsrtvalidator.test.feeds;
 
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.FeedMessageTest;
+import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.CheckTripId;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.StopTimeSequanceValidator;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.VehicleIdValidator;
@@ -49,7 +50,9 @@ public class TripUpdateFeedTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
         
         errors = tripIdValidator.validate(gtfsData, feedMessageBuilder.build());
-        assertEquals(0, errors.getOccurrenceList().size());
+        for (ErrorListHelperModel error : errors) {
+            assertEquals(0, error.getOccurrenceList().size());
+        }
         
         // setting invalid trip id = 100 that does not match with any trip id in static Gtfs data
         tripDescriptorBuilder.setTripId("100");
@@ -58,7 +61,9 @@ public class TripUpdateFeedTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
         
         errors = tripIdValidator.validate(gtfsData, feedMessageBuilder.build());
-        assertEquals(1, errors.getOccurrenceList().size());
+        for (ErrorListHelperModel error : errors) {
+            assertEquals(1, error.getOccurrenceList().size());
+        }
         
         clearAndInitRequiredFeedFields();
     }
@@ -99,7 +104,9 @@ public class TripUpdateFeedTest extends FeedMessageTest {
         assertEquals(3, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
         
         errors = stopSequenceValidator.validate(gtfsData, feedMessageBuilder.build());
-        assertEquals(1, errors.getOccurrenceList().size());
+        for (ErrorListHelperModel error : errors) {
+            assertEquals(1, error.getOccurrenceList().size());
+        }
         
         clearAndInitRequiredFeedFields();
     }
@@ -132,7 +139,9 @@ public class TripUpdateFeedTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
         
         errors = vehicleIdValidator.validate(gtfsData, feedMessageBuilder.build());
-        assertEquals(1, errors.getOccurrenceList().size());
+        for (ErrorListHelperModel error : errors) {
+            assertEquals(1, error.getOccurrenceList().size());
+        }
         
         clearAndInitRequiredFeedFields();
     }
@@ -145,11 +154,15 @@ public class TripUpdateFeedTest extends FeedMessageTest {
         
         // gtfsData does not contain location_type = 1 for stop_id. Therefore returns 0 errors
         errors = stopLocationValidator.validate(gtfsData);
-        assertEquals(0, errors.getOccurrenceList().size());
+        for (ErrorListHelperModel error : errors) {
+            assertEquals(0, error.getOccurrenceList().size());
+        }
         
         // gtfsData2 contains location_type = 1 for stop_ids. Therefore returns errorcount = (number of location_type = 1 for stop_ids)
         errors = stopLocationValidator.validate(gtfsData2);
-        assertTrue(errors.getOccurrenceList().size() >= 1);
+        for (ErrorListHelperModel error : errors) {
+            assertTrue(error.getOccurrenceList().size() >= 1);
+        }
         
         clearAndInitRequiredFeedFields();
     }

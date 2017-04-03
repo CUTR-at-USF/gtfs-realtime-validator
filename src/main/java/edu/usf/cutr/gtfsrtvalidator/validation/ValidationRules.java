@@ -71,4 +71,7 @@ public class ValidationRules {
             "All stop_ids referenced in GTFS-rt feeds must have the location_type = 0");
     //---------------------------------------------------------------------------------------
     //endregion
+
+    public static final ValidationRule E012 = new ValidationRule("e012", "ERROR", "Header timestamp should be greater than or equal to all other timestamps",
+            "No timestamps for individual entities (TripUpdate, VehiclePosition) in the feeds should be greater than the header timestamp");
 }
