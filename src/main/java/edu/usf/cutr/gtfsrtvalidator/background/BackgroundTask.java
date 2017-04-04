@@ -204,12 +204,14 @@ public class BackgroundTask implements Runnable {
     private void validateEntity(GtfsRealtime.FeedMessage feedMessage, GtfsDaoImpl gtfsData, GtfsRtFeedIterationModel feedIteration, FeedEntityValidator feedEntityValidator) {
         List<ErrorListHelperModel> errorLists = feedEntityValidator.validate(gtfsData, feedMessage);
 
-        for (ErrorListHelperModel errorList : errorLists) {
-            if (errorList != null && !errorList.getOccurrenceList().isEmpty()) {
-                //Set iteration Id
-                errorList.getErrorMessage().setGtfsRtFeedIterationModel(feedIteration);
-                //Save the captured errors to the database
-                DBHelper.saveError(errorList);
+        if (errorLists != null) {
+            for (ErrorListHelperModel errorList : errorLists) {
+                if (!errorList.getOccurrenceList().isEmpty()) {
+                    //Set iteration Id
+                    errorList.getErrorMessage().setGtfsRtFeedIterationModel(feedIteration);
+                    //Save the captured errors to the database
+                    DBHelper.saveError(errorList);
+                }
             }
         }
     }
