@@ -121,6 +121,10 @@ public class BackgroundTask implements Runnable {
                 }
                 session.save(feedIteration);
                 GTFSDB.commitAndCloseSession(session);
+
+                if (!isUniqueFeed) {
+                    return;
+                }
             } catch (Exception e) {
                 _log.error("The URL '" + gtfsRtFeedUrl + "' does not contain valid Gtfs-Rt data", e);
                 return;
