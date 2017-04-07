@@ -103,8 +103,9 @@ public class GtfsFeed {
 
         //Extract the URL from the provided gtfsFeedUrl
         URL url = getUrlFromString(gtfsFeedUrl);
-        if (url == null)
-            return generateError("Malformed URL", "Malformed URL for the GTFS feed", Response.Status.BAD_REQUEST);
+        if (url == null) {
+            return generateError("Malformed URL", "Malformed URL for the GTFS feed.", Response.Status.BAD_REQUEST);
+        }
 
         _log.info(String.format("Downloading GTFS data from %s...", url));
 
@@ -116,8 +117,9 @@ public class GtfsFeed {
             ex.printStackTrace();
         }
 
-        if (connection == null)
-            return generateError("Can't read from URL", "Can't read content from the GTFS URL", Response.Status.BAD_REQUEST);
+        if (connection == null) {
+            return generateError("Can't read from URL", "Failed to establish a connection to the GTFS URL.", Response.Status.BAD_REQUEST);
+        }
 
         String saveFilePath = getSaveFilePath(gtfsFeedUrl, connection);
         String fileName = saveFilePath.substring(saveFilePath.lastIndexOf(File.separator)+1, saveFilePath.lastIndexOf('.'));
@@ -127,8 +129,10 @@ public class GtfsFeed {
         GtfsFeedModel gtfsFeed = (GtfsFeedModel) session.createQuery("FROM GtfsFeedModel "
                             + "WHERE gtfsUrl = '"+gtfsFeedUrl+"'").uniqueResult();
         Response.Status response = downloadGtfsFeed(saveFilePath, connection);
-        if(response == null) {
-            return generateError("Download Failed", "Downloading static GTFS feed from provided Url failed", Response.Status.BAD_REQUEST);
+        if (response == Response.Status.BAD_REQUEST) {
+            return generateError("Download Failed", "Downloading static GTFS feed from provided Url failed.", Response.Status.BAD_REQUEST);
+        } else if (response == Response.Status.FORBIDDEN) {
+            return generateError("SSL Handshake Failed", "SSL handshake failed.  Try installing the JCE Extension - see https://github.com/CUTR-at-USF/gtfs-realtime-validator#prerequisites", Response.Status.FORBIDDEN);
         }
 
         _log.info("GTFS data downloaded successfully");
@@ -176,7 +180,7 @@ public class GtfsFeed {
         processor.run();
         } catch (IOException ex) {
             Logger.getLogger(GtfsFeed.class.getName()).log(Level.SEVERE, null, ex);
-            return generateError("Unable to access input GTFS " + input.getPath() + ".", "Does the file exist and do I have permission to read it?", Response.Status.NOT_FOUND);
+            return generateError("Unable to access input GTFS " + input.getPath() + ".", "Does the file " + saveFilePath + "exist and do I have permission to read it?", Response.Status.NOT_FOUND);
         }
         results.add(processor.getOutput());
         saveGtfsErrorCount(gtfsFeed, processor.getOutput());
@@ -327,7 +331,7 @@ public class GtfsFeed {
                 inputStream = connection.getInputStream();
             } catch (SSLHandshakeException sslEx) {
                 _log.error("SSL handshake failed.  Try installing the JCE Extension - see https://github.com/CUTR-at-USF/gtfs-realtime-validator#prerequisites", sslEx);
-                return null;
+                return Response.Status.FORBIDDEN;
             }
 
             // opens an output stream to save into file
@@ -343,7 +347,7 @@ public class GtfsFeed {
             inputStream.close();
         } catch (IOException ex) {
             _log.error("Downloading GTFS Feed Failed", ex);
-            return null;
+            return Response.Status.BAD_REQUEST;
         }
         return Response.Status.OK;
     }

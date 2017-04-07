@@ -21,6 +21,8 @@ import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 
+import java.util.List;
+
 public interface FeedEntityValidator {
-    ErrorListHelperModel validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage);
+    List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage);
 }

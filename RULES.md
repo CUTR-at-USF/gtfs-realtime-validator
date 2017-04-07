@@ -18,6 +18,7 @@
 | [E003](#E003) | `trip_id` mismatch in GTFS-rt and GTFS
 | [E010](#E010) | `location_type` not `0` in `stops.txt`
 | [E011](#E011) | `location_type` not `0` in GTFS-rt
+| [E012](#E012) | Header timestamp should be greater than or equal to all other timestamps
 
 # Warnings
 
@@ -70,3 +71,9 @@ If location_type is used in `stops.txt`, all stops referenced in `stop_times.txt
 ### E011 - `location_type` not `0` in GTFS-rt
 
 All `stop_ids` referenced in GTFS-rt feeds must have the `location_type` = `0`
+
+<a name="E012"/>
+
+### E012 - Header timestamp should be greater than or equal to all other timestamps
+
+No timestamps for individual entities (TripUpdate, VehiclePosition, Alerts) in the feeds should be greater than the header timestamp.

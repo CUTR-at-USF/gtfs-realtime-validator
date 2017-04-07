@@ -17,6 +17,7 @@
 
 var validGtfs = false;
 var validGtfsRT = false;
+var errorMessage = [];
 var validUrlList = {};
 validUrlList.gtfsFeeds = [];
 localStorage.setItem("reportURL", "http://localhost:8080/gtfs-rt-validator-webapp/gtfs-validator-master/gtfs-validator-webapp/index.html?report=http://localhost:8080/");
@@ -106,15 +107,16 @@ function monitorGtfsRtFeeds(gtfsrtUrlList, gtfsFeedId) {
             }
 
             function feedError(data) {
-                alert(JSON.stringify(data));
-
-                var responseJson = data["responseJSON"];
-                var message = responseJson["message"];
 
                 $(progressID).removeClass("progress-striped active");
                 $(progressID + " .progress-bar").addClass("progress-bar-warning");
 
-                $(progressID).prev().find(".status").text("("+ message +")");
+                $(progressID).prev().find(".status").text("(" + data.statusText + ")");
+
+                errorMessage["modalTitle"] = "GTFS-RT Feed error";
+                errorMessage["errorDescription"] = data.statusText + ". " + data["responseJSON"]["message"] +
+                                            ". Please check the URL \"" + url + "\" provided.";
+                displayModalDialog(errorMessage);
             }
 
             var jsonData = {"gtfsUrl":url, "gtfsFeedModel":{"feedId": gtfsFeedId}};
@@ -147,19 +149,20 @@ function downloadGTFSFeed() {
     function feedErrorDisplay(message) {
         $(progressID).removeClass("progress-striped active");
         $(progressID + " .progress-bar").addClass("progress-bar-danger");
-        $(progressID).prev().find(".status").text("("+ message +")");
+        $(progressID).prev().find(".status").text("(" + message["title"] + ")");
         validGtfs = false;
+
+        message["modalTitle"] = "GTFS Feed error";
+        displayModalDialog(message);
     }
 
-    if (paramVal === null) {
+    if (paramVal === null || paramVal === "") {
         //No URL for the given feed entered. Show status
-        feedErrorDisplay("No GTFS URL Given");
-
-    } else if (paramVal === "") {
-        //No URL for the given feed entered. Show status
-        feedErrorDisplay("No GTFS URL Given");
+        errorMessage["title"] = "Invalid URL";
+        errorMessage["errorDescription"] = "No GTFS URL Given";
+        feedErrorDisplay(errorMessage);
     } else {
-        function feedSuccess(data){
+        function feedSuccess(data) {
             if (data["feedId"] != null) {
                 $(progressID).removeClass("progress-striped active");
                 $(progressID + " .progress-bar").addClass("progress-bar-success");
@@ -170,13 +173,14 @@ function downloadGTFSFeed() {
                 monitorGtfsRtFeeds(gtfsrtUrlList, data["feedId"]);
                 checkStatus();
                 loadGTFSfeedReport();
-            }else{
+            } else {
                 feedErrorDisplay(data["title"]);
-            }
         }
 
-        function feedError(xhr,status,error){
-            feedErrorDisplay(status);
+        function feedError(xhr,status,error) {
+            errorMessage["title"] = xhr["responseJSON"]["title"];
+            errorMessage["errorDescription"] = error + ". " + xhr["responseJSON"]["message"];
+            feedErrorDisplay(errorMessage);
         }
 
         $.ajax({
@@ -192,6 +196,14 @@ function downloadGTFSFeed() {
             dataType: 'json'
         });
     }
+}
+
+function displayModalDialog(message) {
+    var errorTemplateScript = $("#gtfs-error-modal").html();
+    var errorTemplate = Handlebars.compile(errorTemplateScript);
+    var compiledHtml = errorTemplate(message);
+    $('.gtfs-error-message').html(compiledHtml);
+    $("#myModal").modal();
 }
 
 //Generates the progress bars for the list of RealTime Feeds provided

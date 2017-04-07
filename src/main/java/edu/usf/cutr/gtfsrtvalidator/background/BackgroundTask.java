@@ -121,6 +121,10 @@ public class BackgroundTask implements Runnable {
                 }
                 session.save(feedIteration);
                 GTFSDB.commitAndCloseSession(session);
+
+                if (!isUniqueFeed) {
+                    return;
+                }
             } catch (Exception e) {
                 _log.error("The URL '" + gtfsRtFeedUrl + "' does not contain valid Gtfs-Rt data", e);
                 return;
@@ -166,7 +170,7 @@ public class BackgroundTask implements Runnable {
 
             //region warnings
             //---------------------------------------------------------------------------------------
-            //w001
+            //w001 and e012
             FeedEntityValidator validateTimestamp = new TimestampValidation();
             validateEntity(feedMessage, gtfsData, feedIteration, validateTimestamp);
             //---------------------------------------------------------------------------------------
@@ -198,14 +202,17 @@ public class BackgroundTask implements Runnable {
     }
 
     private void validateEntity(GtfsRealtime.FeedMessage feedMessage, GtfsDaoImpl gtfsData, GtfsRtFeedIterationModel feedIteration, FeedEntityValidator feedEntityValidator) {
-        ErrorListHelperModel errorList = feedEntityValidator.validate(gtfsData, feedMessage);
+        List<ErrorListHelperModel> errorLists = feedEntityValidator.validate(gtfsData, feedMessage);
 
-        if (errorList != null && !errorList.getOccurrenceList().isEmpty()) {
-            //Set iteration Id
-            errorList.getErrorMessage().setGtfsRtFeedIterationModel(feedIteration);
-            //Save the captured errors to the database
-            DBHelper.saveError(errorList);
+        if (errorLists != null) {
+            for (ErrorListHelperModel errorList : errorLists) {
+                if (!errorList.getOccurrenceList().isEmpty()) {
+                    //Set iteration Id
+                    errorList.getErrorMessage().setGtfsRtFeedIterationModel(feedIteration);
+                    //Save the captured errors to the database
+                    DBHelper.saveError(errorList);
+                }
+            }
         }
     }
-
 }

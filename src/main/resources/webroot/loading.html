@@ -78,6 +78,10 @@
                 </div>
             </div>
     </div>
+
+    <div class="gtfs-error-message">
+    </div>
+
 </div>
 
 <div id=modal class="modalDialog"></div>
@@ -97,6 +101,30 @@
             <div class="progress-bar" style="width: 100%"></div>
         </div>
         {{/each}}
+</script>
+
+<script id="gtfs-error-modal" type="text/x-handlebars-template">
+    <div id="myModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title">{{modalTitle}}</h4>
+                </div>
+                <div class="modal-body">
+                    <p>{{errorDescription}}</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
 </script>
 
 <script src="custom-js/loading.js" type="application/javascript"></script>

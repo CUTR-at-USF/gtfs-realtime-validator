@@ -51,7 +51,7 @@ public class GtfsFeedTest extends TestCase {
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
 
         response = gtfsFeed.postGtfsFeed(downloadFailURL);
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+        assertTrue(Response.Status.BAD_REQUEST.getStatusCode() == response.getStatus() || Response.Status.FORBIDDEN.getStatusCode() == response.getStatus());
 
         response = gtfsFeed.postGtfsFeed(badGTFS);
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), response.getStatus());

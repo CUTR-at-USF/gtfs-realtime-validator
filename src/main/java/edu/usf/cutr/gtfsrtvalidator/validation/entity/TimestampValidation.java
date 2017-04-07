@@ -29,36 +29,64 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Implement validation rules related to feed entity timestamps:
+ * * W001 - Timestamp not populated
+ * * E012 - Header timestamp should be greater than or equal to all other timestamps
+ */
 public class TimestampValidation implements FeedEntityValidator{
 
     private static final org.slf4j.Logger _log = LoggerFactory.getLogger(TimestampValidation.class);
 
     @Override
-    public ErrorListHelperModel validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
-        MessageLogModel messageLogModel = new MessageLogModel(ValidationRules.W001);
-        OccurrenceModel errorOccurrence;
-        List<OccurrenceModel> errorOccurrenceList = new ArrayList<>();
-        
+    public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
+        MessageLogModel modelW001 = new MessageLogModel(ValidationRules.W001);
+        OccurrenceModel errorW001;
+        List<OccurrenceModel> errorListW001 = new ArrayList<>();
+
+        MessageLogModel modelE012 = new MessageLogModel(ValidationRules.E012);
+        OccurrenceModel errorE012;
+        List<OccurrenceModel> errorListE012 = new ArrayList<>();
+
         long headerTimestamp = feedMessage.getHeader().getTimestamp();
         if (headerTimestamp == 0) {
             _log.debug("Timestamp not present in FeedHeader");
-            errorOccurrence = new OccurrenceModel("$.header.timestamp not populated", String.valueOf(headerTimestamp));
-            errorOccurrenceList.add(errorOccurrence);
+            errorW001 = new OccurrenceModel("$.header.timestamp not populated", String.valueOf(headerTimestamp));
+            errorListW001.add(errorW001);
         }
         for(GtfsRealtime.FeedEntity entity: feedMessage.getEntityList()) {
             long tripupdateTimestamp = entity.getTripUpdate().getTimestamp();
             long vehicleTimestamp = entity.getVehicle().getTimestamp();
             if (tripupdateTimestamp == 0) {
                 _log.debug("Timestamp not present in TripUpdate");
-                errorOccurrence = new OccurrenceModel("$.entity.*.trip_update.timestamp not populated", String.valueOf(tripupdateTimestamp));
-                errorOccurrenceList.add(errorOccurrence);
+                errorW001 = new OccurrenceModel("$.entity.*.trip_update.timestamp not populated", String.valueOf(tripupdateTimestamp));
+                errorListW001.add(errorW001);
+            } else {
+                if (headerTimestamp != 0 && tripupdateTimestamp > headerTimestamp) {
+                    _log.debug("TripUpdate timestamp is greater than Header timestamp");
+                    errorE012 = new OccurrenceModel("$.entity.*.trip_update.timestamp is greater than the FeedHeader timestamp", String.valueOf(tripupdateTimestamp));
+                    errorListE012.add(errorE012);
+                }
             }
             if (vehicleTimestamp == 0) {
                 _log.debug("Timestamp not present in VehiclePosition");
-                errorOccurrence = new OccurrenceModel("$.entity.*.vehicle_position.timestamp not populated", String.valueOf(vehicleTimestamp));
-                errorOccurrenceList.add(errorOccurrence);
+                errorW001 = new OccurrenceModel("$.entity.*.vehicle_position.timestamp not populated", String.valueOf(vehicleTimestamp));
+                errorListW001.add(errorW001);
+            } else {
+                if (headerTimestamp != 0 && vehicleTimestamp > headerTimestamp) {
+                    _log.debug("VehiclePosition timestamp is greater than Header timestamp");
+                    errorE012 = new OccurrenceModel("$.entity.*.vehicle_position.timestamp is greater than the FeedHeader timestamp", String.valueOf(tripupdateTimestamp));
+                    errorListE012.add(errorE012);
+                }
             }
         }
-        return new ErrorListHelperModel(messageLogModel, errorOccurrenceList);
+        List<ErrorListHelperModel> errors = new ArrayList<>();
+        if (!errorListW001.isEmpty()) {
+            errors.add(new ErrorListHelperModel(modelW001, errorListW001));
+        }
+        if (!errorListE012.isEmpty()) {
+            errors.add(new ErrorListHelperModel(modelE012, errorListE012));
+        }
+        return errors;
     }
 }
