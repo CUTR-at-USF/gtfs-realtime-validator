@@ -66,25 +66,21 @@
                     <div class="row">
                         <div align="left" class="col-md-4">
                             <input class="btn btn-primary" type="button" onclick="window.history.back();" value="Back"/>
-                            <input class="btn btn-primary" id="btn-GTFSReport" type="button" onclick="validationReport();" disabled value="GTFS Validation Report"/>
                         </div>
 
                         <div align="right" class="col-md-8">
                             <input class="btn btn-primary" type="button" onclick="location.reload();" value="Retry"/>
-                            <button class="btn btn-success" id="btn-continue" onclick="startMonitoring()"
-                                   disabled>Continue</button>
                         </div>
                     </div>
                 </div>
             </div>
     </div>
 
-    <div class="gtfs-error-message">
-    </div>
+    <div class="gtfs-error-message"></div>
+
+    <div class="gtfs-success-message"></div>
 
 </div>
-
-<div id=modal class="modalDialog"></div>
 
 
 <!-- /.container -->
@@ -104,10 +100,9 @@
 </script>
 
 <script id="gtfs-error-modal" type="text/x-handlebars-template">
-    <div id="myModal" class="modal fade" role="dialog">
+    <div id="errorModal" class="modal fade" role="dialog">
         <div class="modal-dialog">
 
-            <!-- Modal content-->
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -119,7 +114,30 @@
                     <p>{{errorDescription}}</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Ok</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</script>
+
+<script id="gtfs-success-modal" type="text/x-handlebars-template">
+    <div id="successModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title">GTFS feeds are loaded successfully</h4>
+                </div>
+                <div class="modal-body">
+                    <p>GTFS static data has been validated. Continue to Start monitoring GTFS Realtime feed(s).</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-success" id="btn-continue" onclick="startMonitoring()">Continue</button>
                 </div>
             </div>
 

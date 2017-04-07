@@ -103,6 +103,10 @@ function monitorGtfsRtFeeds(gtfsrtUrlList, gtfsFeedId) {
 
                     //gtfsRtfeeds can only be started with a valid id
                     checkStatus();
+
+                    var successTemplate = $("#gtfs-success-modal").html();
+                    $('.gtfs-success-message').html(successTemplate);
+                    $("#successModal").modal();
                 }
             }
 
@@ -116,7 +120,7 @@ function monitorGtfsRtFeeds(gtfsrtUrlList, gtfsFeedId) {
                 errorMessage["modalTitle"] = "GTFS-RT Feed error";
                 errorMessage["errorDescription"] = data.statusText + ". " + data["responseJSON"]["message"] +
                                             ". Please check the URL \"" + url + "\" provided.";
-                displayModalDialog(errorMessage);
+                displayErrorModalDialog(errorMessage);
             }
 
             var jsonData = {"gtfsUrl":url, "gtfsFeedModel":{"feedId": gtfsFeedId}};
@@ -153,7 +157,7 @@ function downloadGTFSFeed() {
         validGtfs = false;
 
         message["modalTitle"] = "GTFS Feed error";
-        displayModalDialog(message);
+        displayErrorModalDialog(message);
     }
 
     if (paramVal === null || paramVal === "") {
@@ -172,9 +176,9 @@ function downloadGTFSFeed() {
                 //gtfsRtfeeds can only be started with a valid id
                 monitorGtfsRtFeeds(gtfsrtUrlList, data["feedId"]);
                 checkStatus();
-                loadGTFSfeedReport();
             } else {
                 feedErrorDisplay(data["title"]);
+	        }
         }
 
         function feedError(xhr,status,error) {
@@ -198,12 +202,12 @@ function downloadGTFSFeed() {
     }
 }
 
-function displayModalDialog(message) {
+function displayErrorModalDialog(message) {
     var errorTemplateScript = $("#gtfs-error-modal").html();
     var errorTemplate = Handlebars.compile(errorTemplateScript);
     var compiledHtml = errorTemplate(message);
     $('.gtfs-error-message').html(compiledHtml);
-    $("#myModal").modal();
+    $("#errorModal").modal();
 }
 
 //Generates the progress bars for the list of RealTime Feeds provided
@@ -213,36 +217,6 @@ function generateRealtimeProgressBar(urlList) {
     var compiledHtml = progressTemplate(urlList);
     $('.progress-placeholder').html(compiledHtml);
 }
-
-function loadGTFSfeedReport() {
-    
-	$('.modalDialog').html('<div class="modal-content">\n\
-    <a href="#close" title="Close" class="close">X</a></br>\n\
-    <p>GTFS data has been validated. Follow the below link to view validation report.</p>\n\
-    <a href = '+localStorage.getItem("reportURL")+localStorage.getItem("gtfsFileName")+'_out.json target="_blank">GTFS Validation Report</a> <br/><br/>\n\
-    <p>You can always view the validation report by clicking <b>GTFS Validation Report</b> button </p></br>\n\
-    <button type="button" class="button btn-primary">OK</button></br>\n\
-    </div>');
-    var modal = document.getElementById('modal');
-    var span = document.getElementsByClassName("close")[0];
-    span = document.getElementsByClassName("button")[0];
-    modal.style.display = "block";
-    span.onclick = function() {
-    modal.style.display = "none";
-    };
-    window.onclick = function(event) {
-        if (event.target === modal) {
-            modal.style.display = "none";
-        }
-    };
-}
-
-function validationReport() {
-    newWindow = window.open(localStorage.getItem("reportURL")+localStorage.getItem("gtfsFileName")+'_out.json', 'GTFS Validation Report');
-    if(window.focus()) newWindow.focus();
-    return false;
-}
-
 
 function checkStatus(){
     if(validGtfs && validGtfsRT) {

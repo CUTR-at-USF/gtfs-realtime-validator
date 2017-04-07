@@ -60,6 +60,9 @@ for (var gtfsRtFeed in gtfsRtFeeds) {
 function loadGtfsErrorCount(gtfsFeedId) {
     $.get("http://localhost:8080/api/gtfs-feed/" + gtfsFeedId + "/errorCount").done(function (data)  {
         $("#gtfs-error").text(data["errorCount"]);
+
+        var linkToReport = '<a href = ' + localStorage.getItem("reportURL") + localStorage.getItem("gtfsFileName") + '_out.json target="_blank">' + data["errorCount"] + ' error(s)/warning(s)</a>';
+        $(".GTFS-report-link").html(linkToReport);
     });
 }
 
@@ -205,9 +208,4 @@ function showOrHideError(gtfsRtId, errorId) {
 
         $('html, body').animate({scrollTop: scrollPosition}, 1);
     });
-}
-function validationReport() {
-    newWindow = window.open(localStorage.getItem("reportURL")+localStorage.getItem("gtfsFileName")+'_out.json', 'GTFS Validation Report');
-    if(window.focus()) newWindow.focus();
-    return false;
 }
