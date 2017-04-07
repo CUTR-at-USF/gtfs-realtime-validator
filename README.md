@@ -64,3 +64,7 @@ Once the application has been started the web interface can be accessed at `loca
 From there, following the instructions should allow for starting the monitoirng of the GTFS-Realtime Feeds.
 
 *Tables for each valid RT feed will be created and updated every 10 second if the execution is succesful*
+
+## Acknowledgements
+
+This project was funded by the [National Institute for Transportation Communities (NITC)](http://nitc.trec.pdx.edu/) via the project ["Overcoming Barriers for the Wide-scale Adoption of Standardized Real-time Transit Information"](http://nitc.trec.pdx.edu/research/project/1062/Overcoming_Barriers_for_the_Wide-scale_Adoption_of_Standardized_Real-time_Transit_Information).  It also includes work funded under the [2015 Google Summer of Code](https://www.google-melange.com/archive/gsoc/2015/orgs/osgeo/projects/nipuna777.html).
