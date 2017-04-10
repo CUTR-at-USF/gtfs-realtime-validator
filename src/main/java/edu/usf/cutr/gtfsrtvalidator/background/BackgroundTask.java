@@ -170,7 +170,7 @@ public class BackgroundTask implements Runnable {
 
             //region warnings
             //---------------------------------------------------------------------------------------
-            //w001 and e012
+            // W001, E001, E012
             FeedEntityValidator validateTimestamp = new TimestampValidation();
             validateEntity(feedMessage, gtfsData, feedIteration, validateTimestamp);
             //---------------------------------------------------------------------------------------

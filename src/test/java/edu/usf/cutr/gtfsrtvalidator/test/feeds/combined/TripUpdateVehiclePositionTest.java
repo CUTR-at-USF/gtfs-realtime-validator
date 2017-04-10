@@ -17,8 +17,8 @@
 package edu.usf.cutr.gtfsrtvalidator.test.feeds.combined;
 
 import com.google.transit.realtime.GtfsRealtime;
-import edu.usf.cutr.gtfsrtvalidator.FeedMessageTest;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
+import edu.usf.cutr.gtfsrtvalidator.test.FeedMessageTest;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.VehicleTripDescriptorValidator;
 import org.junit.Test;
 
@@ -54,10 +54,10 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
         vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        
-        // TripUpdate and VehiclePosition feed have same trip id = 1.1 and same vehicle id = 1. So, no errors.
-        errors = vehicleAndTripDescriptorValidator.validate(gtfsData, feedMessageBuilder.build());
-        for (ErrorListHelperModel error : errors) {
+
+        // TripUpdate and VehiclePosition feed have same trip id = 1.1 and same vehicle id = 1. So, no results.
+        results = vehicleAndTripDescriptorValidator.validate(gtfsData, feedMessageBuilder.build());
+        for (ErrorListHelperModel error : results) {
             assertEquals(0, error.getOccurrenceList().size());
         }
         
@@ -75,9 +75,9 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
         vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        // 2 errors. Unmatched trip id's and vechicle id's in TripUpdate and VehiclePosition feeds
-        errors = vehicleAndTripDescriptorValidator.validate(gtfsData, feedMessageBuilder.build());
-        for (ErrorListHelperModel error : errors) {
+        // 2 results. Unmatched trip id's and vechicle id's in TripUpdate and VehiclePosition feeds
+        results = vehicleAndTripDescriptorValidator.validate(gtfsData, feedMessageBuilder.build());
+        for (ErrorListHelperModel error : results) {
             assertEquals(2, error.getOccurrenceList().size());
         }
         
