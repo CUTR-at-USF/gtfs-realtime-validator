@@ -20,6 +20,7 @@ var validGtfsRT = false;
 var errorMessage = [];
 var validUrlList = {};
 validUrlList.gtfsFeeds = [];
+localStorage.setItem("reportURL", "http://localhost:8080/gtfs-rt-validator-webapp/gtfs-validator-master/gtfs-validator-webapp/index.html?report=http://localhost:8080/");
 
 //Generic function that given a name, retrieves get parameters from the URL
 function getUrlParameter(sParam) {
@@ -102,6 +103,10 @@ function monitorGtfsRtFeeds(gtfsrtUrlList, gtfsFeedId) {
 
                     //gtfsRtfeeds can only be started with a valid id
                     checkStatus();
+
+                    var successTemplate = $("#gtfs-success-modal").html();
+                    $('.gtfs-success-message').html(successTemplate);
+                    $("#successModal").modal();
                 }
             }
 
@@ -115,7 +120,7 @@ function monitorGtfsRtFeeds(gtfsrtUrlList, gtfsFeedId) {
                 errorMessage["modalTitle"] = "GTFS-RT Feed error";
                 errorMessage["errorDescription"] = data.statusText + ". " + data["responseJSON"]["message"] +
                                             ". Please check the URL \"" + url + "\" provided.";
-                displayModalDialog(errorMessage);
+                displayErrorModalDialog(errorMessage);
             }
 
             var jsonData = {"gtfsUrl":url, "gtfsFeedModel":{"feedId": gtfsFeedId}};
@@ -141,6 +146,7 @@ function monitorGtfsRtFeeds(gtfsrtUrlList, gtfsFeedId) {
 function downloadGTFSFeed() {
     var paramVal = getUrlParameter("gtfs");
     paramVal = decodeURIComponent(paramVal);
+    localStorage.setItem("gtfsFileName", paramVal.split('/').pop().split('.')[0]);
 
     var progressID = "#gtfs-progress";
 
@@ -151,7 +157,7 @@ function downloadGTFSFeed() {
         validGtfs = false;
 
         message["modalTitle"] = "GTFS Feed error";
-        displayModalDialog(message);
+        displayErrorModalDialog(message);
     }
 
     if (paramVal === null || paramVal === "") {
@@ -171,8 +177,8 @@ function downloadGTFSFeed() {
                 monitorGtfsRtFeeds(gtfsrtUrlList, data["feedId"]);
                 checkStatus();
             } else {
-                feedErrorDisplay(data);
-            }
+                feedErrorDisplay(data["title"]);
+	        }
         }
 
         function feedError(xhr,status,error) {
@@ -196,12 +202,12 @@ function downloadGTFSFeed() {
     }
 }
 
-function displayModalDialog(message) {
+function displayErrorModalDialog(message) {
     var errorTemplateScript = $("#gtfs-error-modal").html();
     var errorTemplate = Handlebars.compile(errorTemplateScript);
     var compiledHtml = errorTemplate(message);
     $('.gtfs-error-message').html(compiledHtml);
-    $("#myModal").modal();
+    $("#errorModal").modal();
 }
 
 //Generates the progress bars for the list of RealTime Feeds provided
@@ -215,6 +221,7 @@ function generateRealtimeProgressBar(urlList) {
 function checkStatus(){
     if(validGtfs && validGtfsRT) {
         $("#btn-continue").removeAttr('disabled');
+        $("#btn-GTFSReport").removeAttr('disabled');
     }
 }
 

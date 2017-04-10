@@ -63,7 +63,7 @@ public class GtfsFeed {
     private static final org.slf4j.Logger _log = LoggerFactory.getLogger(GtfsFeed.class);
 
     private static final int BUFFER_SIZE = 4096;
-    private static final String jsonFilePath = "src\\main\\resources\\webroot";
+    private static final String jsonFilePath = "target"+File.separator+"classes"+File.separator+"webroot";
     public static Map<Integer, GtfsDaoImpl> GtfsDaoMap = new HashMap<>();
 
     //DELETE {id} remove feed with the given id
