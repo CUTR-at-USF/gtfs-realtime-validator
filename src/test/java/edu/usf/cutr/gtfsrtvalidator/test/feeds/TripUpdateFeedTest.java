@@ -17,8 +17,8 @@
 package edu.usf.cutr.gtfsrtvalidator.test.feeds;
 
 import com.google.transit.realtime.GtfsRealtime;
-import edu.usf.cutr.gtfsrtvalidator.FeedMessageTest;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
+import edu.usf.cutr.gtfsrtvalidator.test.FeedMessageTest;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.CheckTripId;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.StopTimeSequanceValidator;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.VehicleIdValidator;
@@ -48,9 +48,9 @@ public class TripUpdateFeedTest extends FeedMessageTest {
         tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        
-        errors = tripIdValidator.validate(gtfsData, feedMessageBuilder.build());
-        for (ErrorListHelperModel error : errors) {
+
+        results = tripIdValidator.validate(gtfsData, feedMessageBuilder.build());
+        for (ErrorListHelperModel error : results) {
             assertEquals(0, error.getOccurrenceList().size());
         }
         
@@ -59,9 +59,9 @@ public class TripUpdateFeedTest extends FeedMessageTest {
         tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        
-        errors = tripIdValidator.validate(gtfsData, feedMessageBuilder.build());
-        for (ErrorListHelperModel error : errors) {
+
+        results = tripIdValidator.validate(gtfsData, feedMessageBuilder.build());
+        for (ErrorListHelperModel error : results) {
             assertEquals(1, error.getOccurrenceList().size());
         }
         
@@ -89,9 +89,9 @@ public class TripUpdateFeedTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
         // StopTimeUpdate count should be 2
         assertEquals(2, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
-        
-        errors = stopSequenceValidator.validate(gtfsData, feedMessageBuilder.build());
-        assertNull(errors);
+
+        results = stopSequenceValidator.validate(gtfsData, feedMessageBuilder.build());
+        assertNull(results);
         
         /* Adding stop sequence 3. So, the stop sequence now is 1, 5, 3 which is unordered.
            So, the validation fails and the assertion test passes
@@ -102,9 +102,9 @@ public class TripUpdateFeedTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
         // StopTimeUpdate count should be 3
         assertEquals(3, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
-        
-        errors = stopSequenceValidator.validate(gtfsData, feedMessageBuilder.build());
-        for (ErrorListHelperModel error : errors) {
+
+        results = stopSequenceValidator.validate(gtfsData, feedMessageBuilder.build());
+        for (ErrorListHelperModel error : results) {
             assertEquals(1, error.getOccurrenceList().size());
         }
         
@@ -128,18 +128,18 @@ public class TripUpdateFeedTest extends FeedMessageTest {
         tripUpdateBuilder.setVehicle(vehicleDescriptorBuilder.build());
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        // No errors, if vehicle id has a value.
-        errors = vehicleIdValidator.validate(gtfsData, feedMessageBuilder.build());
-        assertNull(errors);
+        // No results, if vehicle id has a value.
+        results = vehicleIdValidator.validate(gtfsData, feedMessageBuilder.build());
+        assertNull(results);
 
         // Test with empty string for Vehicle ID, which should generate warning
         vehicleDescriptorBuilder.setId("");
         tripUpdateBuilder.setVehicle(vehicleDescriptorBuilder.build());
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        
-        errors = vehicleIdValidator.validate(gtfsData, feedMessageBuilder.build());
-        for (ErrorListHelperModel error : errors) {
+
+        results = vehicleIdValidator.validate(gtfsData, feedMessageBuilder.build());
+        for (ErrorListHelperModel error : results) {
             assertEquals(1, error.getOccurrenceList().size());
         }
         
@@ -151,16 +151,16 @@ public class TripUpdateFeedTest extends FeedMessageTest {
     @Test
     public void testLocationTypeValidation() {
         StopLocationTypeValidator stopLocationValidator = new StopLocationTypeValidator();
-        
-        // gtfsData does not contain location_type = 1 for stop_id. Therefore returns 0 errors
-        errors = stopLocationValidator.validate(gtfsData);
-        for (ErrorListHelperModel error : errors) {
+
+        // gtfsData does not contain location_type = 1 for stop_id. Therefore returns 0 results
+        results = stopLocationValidator.validate(gtfsData);
+        for (ErrorListHelperModel error : results) {
             assertEquals(0, error.getOccurrenceList().size());
         }
         
         // gtfsData2 contains location_type = 1 for stop_ids. Therefore returns errorcount = (number of location_type = 1 for stop_ids)
-        errors = stopLocationValidator.validate(gtfsData2);
-        for (ErrorListHelperModel error : errors) {
+        results = stopLocationValidator.validate(gtfsData2);
+        for (ErrorListHelperModel error : results) {
             assertTrue(error.getOccurrenceList().size() >= 1);
         }
         

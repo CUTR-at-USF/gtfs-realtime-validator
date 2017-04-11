@@ -14,12 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.usf.cutr.gtfsrtvalidator;
+package edu.usf.cutr.gtfsrtvalidator.test;
 
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
-import edu.usf.cutr.gtfsrtvalidator.test.headerandentity.FeedEntityTest;
-import edu.usf.cutr.gtfsrtvalidator.test.headerandentity.FeedHeaderTest;
 import junit.framework.TestCase;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.onebusaway.gtfs.serialization.GtfsReader;
@@ -30,7 +28,7 @@ import java.util.Arrays;
 import java.util.List;
 
 
-public class FeedMessageTest extends TestCase {
+public abstract class FeedMessageTest extends TestCase {
     
     public GtfsDaoImpl gtfsData, gtfsData2; // gtfsData2 contains location_type = 1 for stop_id
     public GtfsReader reader;
@@ -38,10 +36,7 @@ public class FeedMessageTest extends TestCase {
     public final File staticGtfs2 = new File("src/test/resources/testagency2.zip");
     public final static String ENTITY_ID = "TEST_ENTITY";
     
-    FeedHeaderTest feedHeaderTest;
-    FeedEntityTest feedEntityTest;
-
-    public List<ErrorListHelperModel> errors;
+    public List<ErrorListHelperModel> results;
     
     public GtfsRealtime.FeedMessage.Builder feedMessageBuilder;
     public GtfsRealtime.FeedEntity.Builder feedEntityBuilder;
@@ -52,7 +47,7 @@ public class FeedMessageTest extends TestCase {
     public GtfsRealtime.Alert.Builder alertBuilder;
         
     public FeedMessageTest() throws IOException {
-        errors = Arrays.asList(new ErrorListHelperModel());
+        results = Arrays.asList(new ErrorListHelperModel());
 
         feedMessageBuilder = GtfsRealtime.FeedMessage.newBuilder();
         feedEntityBuilder = GtfsRealtime.FeedEntity.newBuilder();
@@ -94,15 +89,5 @@ public class FeedMessageTest extends TestCase {
         
         feedEntityBuilder.setId(ENTITY_ID);
         feedMessageBuilder.addEntity(feedEntityBuilder);
-    }
-    
-    /**
-     * Tests the FeedHeader and FeedEntity. Initializing object of FeedHeader and FeedEntity will execute the
-     * tests in them.
-     * @throws Exception
-     */
-    public final void testMessageFeed() throws Exception {
-        feedHeaderTest = new FeedHeaderTest();
-        feedEntityTest = new FeedEntityTest();
     }
 }

@@ -17,8 +17,8 @@
 package edu.usf.cutr.gtfsrtvalidator.test.feeds.combined;
 
 import com.google.transit.realtime.GtfsRealtime;
-import edu.usf.cutr.gtfsrtvalidator.FeedMessageTest;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
+import edu.usf.cutr.gtfsrtvalidator.test.FeedMessageTest;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.LocationTypeReferenceValidator;
 import org.junit.Test;
 
@@ -58,10 +58,10 @@ public class TripUpdateVehiclePostionAlertTest extends FeedMessageTest {
         alertBuilder.addInformedEntity(entitySelectorBuilder.build());
         feedEntityBuilder.setAlert(alertBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        
-        // all the feeds have valid stop id matching that in static Gtfs data. So, returns 0 errors
-        errors = locationValidator.validate(gtfsData, feedMessageBuilder.build());
-        for (ErrorListHelperModel error : errors) {
+
+        // all the feeds have valid stop id matching that in static Gtfs data. So, returns 0 results
+        results = locationValidator.validate(gtfsData, feedMessageBuilder.build());
+        for (ErrorListHelperModel error : results) {
             assertEquals(0, error.getOccurrenceList().size());
         }
         
@@ -70,18 +70,18 @@ public class TripUpdateVehiclePostionAlertTest extends FeedMessageTest {
         tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        errors = locationValidator.validate(gtfsData, feedMessageBuilder.build());
+        results = locationValidator.validate(gtfsData, feedMessageBuilder.build());
         // one error from TripUpdate feed stop_id = "DUMMY". VehiclePosition and Alert feeds have valid stop id = "A"
-        for (ErrorListHelperModel error : errors) {
+        for (ErrorListHelperModel error : results) {
             assertEquals(1, error.getOccurrenceList().size());
         }
         
         vehiclePositionBuilder.setStopId("DUMMY");
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        errors = locationValidator.validate(gtfsData, feedMessageBuilder.build());
-        // 2 errors from TripUpdate and VehiclePosition feeds stop_id="DUMMY". Alert feed have valid stop id ="A"
-        for (ErrorListHelperModel error : errors) {
+        results = locationValidator.validate(gtfsData, feedMessageBuilder.build());
+        // 2 results from TripUpdate and VehiclePosition feeds stop_id="DUMMY". Alert feed have valid stop id ="A"
+        for (ErrorListHelperModel error : results) {
             assertEquals(2, error.getOccurrenceList().size());
         }
         
@@ -89,9 +89,9 @@ public class TripUpdateVehiclePostionAlertTest extends FeedMessageTest {
         alertBuilder.addInformedEntity(entitySelectorBuilder.build());
         feedEntityBuilder.setAlert(alertBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        errors = locationValidator.validate(gtfsData, feedMessageBuilder.build());
-        // 3 errors from TripUpdate, VehiclePosition and alert feeds stop_id="DUMMY"
-        for (ErrorListHelperModel error : errors) {
+        results = locationValidator.validate(gtfsData, feedMessageBuilder.build());
+        // 3 results from TripUpdate, VehiclePosition and alert feeds stop_id="DUMMY"
+        for (ErrorListHelperModel error : results) {
             assertEquals(3, error.getOccurrenceList().size());
         }
         
