@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/bootstrap-toggle.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/jquery.bs_pagination.min.css">
     <link rel="stylesheet" href="css/style.css"/>
     <!--[if lt IE 9]>
     <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -107,6 +108,8 @@
 <script src="js/bootstrap-toggle.min.js"></script>
 <script src="js/jquery.flot.js"></script>
 <script src="js/handlebars.js"></script>
+<script src="js/jquery.bs_pagination.min.js"></script>
+<script src="js/en.min.js"></script>
 
 <script id="feed-monitor-template" type="text/x-handlebars-template">
     <div class="col-md-12">
@@ -146,6 +149,9 @@
 
                     </tbody>
                 </table>
+
+                <div id="summary-pagination-{{gtfsRtId}}"></div>
+
             </div>
 
             <div class="well">
@@ -167,6 +173,9 @@
 
                     </tbody>
                 </table>
+
+                <div id="log-pagination-{{gtfsRtId}}"></div>
+
             </div>
         </div>
     </div>

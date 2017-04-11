@@ -37,10 +37,10 @@ import java.io.Serializable;
                         "FROM GtfsRtFeedIteration " +
                         "WHERE rtFeedID = ?) GtfsRtFeedIDIteration " +
                     "ON MessageLog.iterationID = GtfsRtFeedIDIteration.IterationID " +
-                    "ORDER BY GtfsRtFeedIDIteration.IterationID " +
-                    "DESC ) errorLog " +
+                    ") errorLog " +
                 "ON Error.errorID = errorLog.errorID " +
-                "WHERE Error.errorID NOT IN (:errorIds)",
+                "WHERE Error.errorID NOT IN (:errorIds)" +
+                "ORDER BY iterationId DESC",
         resultClass = ViewErrorLogModel.class)
 public class ViewErrorLogModel implements Serializable {
 
@@ -51,6 +51,7 @@ public class ViewErrorLogModel implements Serializable {
     private int iterationId;
     @Column(name = "occurrence")
     private long occurrence;
+    @Id
     @Column(name = "id")
     private String id; // error or warning ID
     @Column(name = "severity")
