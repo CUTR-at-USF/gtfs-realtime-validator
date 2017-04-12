@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class BackgroundTask implements Runnable {
 
@@ -65,6 +66,7 @@ public class BackgroundTask implements Runnable {
     public void run() {
 
         try {
+            long startTimeNanos = System.nanoTime();
             GtfsRealtime.FeedMessage feedMessage;
             GtfsDaoImpl gtfsData;
 
@@ -196,6 +198,8 @@ public class BackgroundTask implements Runnable {
             validateEntity(feedMessage, gtfsData, feedIteration, locationTypeReferenceValidator);
             //---------------------------------------------------------------------------------------
             //endregion
+
+            logDuration(startTimeNanos);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -214,5 +218,18 @@ public class BackgroundTask implements Runnable {
                 }
             }
         }
+    }
+
+    /**
+     * Logs the amount of time that this validation iteration took
+     *
+     * @param startTimeNanos the starting time of this iteration, in nanoseconds (e.g., System.nanoTime())
+     */
+    private void logDuration(long startTimeNanos) {
+        long durationNanos = System.nanoTime() - startTimeNanos;
+        long durationMillis = TimeUnit.NANOSECONDS.toMillis(durationNanos);
+        long durationSeconds = TimeUnit.NANOSECONDS.toSeconds(durationNanos);
+
+        _log.debug("Processed " + currentFeed.getGtfsUrl() + " in " + durationSeconds + "." + durationMillis + " seconds");
     }
 }
