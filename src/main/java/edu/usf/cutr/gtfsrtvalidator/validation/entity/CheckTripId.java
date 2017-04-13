@@ -36,30 +36,30 @@ import java.util.*;
 public class CheckTripId implements FeedEntityValidator {
     @Override
     public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
-        Collection<Trip> gtfsTripIds = gtfsData.getAllTrips();
+        Collection<Trip> gtfsTripList = gtfsData.getAllTrips();
 
         MessageLogModel messageLogModel = new MessageLogModel(ValidationRules.E003);
         List<OccurrenceModel> errorOccurrenceList = new ArrayList<>();
 
-        Set<String> tripList = new HashSet<>();
+        Set<String> tripIdSet = new HashSet<>();
 
         // Get a all trip_ids from the GTFS feed
-        for (Trip trip : gtfsTripIds) {
-            tripList.add(trip.getId().getId());
+        for (Trip trip : gtfsTripList) {
+            tripIdSet.add(trip.getId().getId());
         }
 
         //Check the trip_id values against the values from the GTFS feed
         for (GtfsRealtime.FeedEntity entity : feedMessage.getEntityList()) {
             if (entity.hasTripUpdate()) {
                 String tripId = entity.getTripUpdate().getTrip().getTripId();
-                if (!tripList.contains(tripId)) {
+                if (!tripIdSet.contains(tripId)) {
                     OccurrenceModel occurrenceModel = new OccurrenceModel("$.entity.*.trip_update.trip[?(@.trip_id==\""+ tripId +"\")]", tripId);
                     errorOccurrenceList.add(occurrenceModel);
                 }
             }
             if (entity.hasVehicle() && entity.getVehicle().hasTrip()) {
                 String tripId = entity.getTripUpdate().getTrip().getTripId();
-                if (!StringUtil.isEmpty(tripId) && !gtfsTripIds.contains(tripId)) {
+                if (!StringUtil.isEmpty(tripId) && !gtfsTripList.contains(tripId)) {
                     OccurrenceModel occurrenceModel = new OccurrenceModel("$.entity.*.vehicle.trip[?(@.route_id==\"" + tripId + "\")]", tripId);
                     errorOccurrenceList.add(occurrenceModel);
                 }

@@ -41,11 +41,11 @@ public class CheckRouteId implements FeedEntityValidator {
         MessageLogModel messageLogModel = new MessageLogModel(ValidationRules.E004);
         List<OccurrenceModel> errorOccurrenceList = new ArrayList<>();
 
-        Set<String> routeIdList = new HashSet<>();
+        Set<String> routeIdSet = new HashSet<>();
 
         // Get a list of route_ids from the GTFS feed
         for (Route r : gtfsRouteList) {
-            routeIdList.add(r.getId().getId());
+            routeIdSet.add(r.getId().getId());
         }
 
         // Check the route_id values against the values from the GTFS feed
@@ -53,7 +53,7 @@ public class CheckRouteId implements FeedEntityValidator {
             if (entity.hasTripUpdate()) {
                 String routeId = entity.getTripUpdate().getTrip().getRouteId();
                 String tripId = entity.getTripUpdate().getTrip().getTripId();
-                if (!StringUtil.isEmpty(routeId) && !routeIdList.contains(routeId)) {
+                if (!StringUtil.isEmpty(routeId) && !routeIdSet.contains(routeId)) {
                     OccurrenceModel occurrenceModel = new OccurrenceModel("$.entity.*.trip_update.trip[?(@.route_id==\"" + routeId + "\")]", tripId);
                     errorOccurrenceList.add(occurrenceModel);
                 }
@@ -61,7 +61,7 @@ public class CheckRouteId implements FeedEntityValidator {
             if (entity.hasVehicle() && entity.getVehicle().hasTrip()) {
                 String routeId = entity.getVehicle().getTrip().getRouteId();
                 String tripId = entity.getTripUpdate().getTrip().getTripId();
-                if (!StringUtil.isEmpty(routeId) && !routeIdList.contains(routeId)) {
+                if (!StringUtil.isEmpty(routeId) && !routeIdSet.contains(routeId)) {
                     OccurrenceModel occurrenceModel = new OccurrenceModel("$.entity.*.vehicle.trip[?(@.route_id==\"" + routeId + "\")]", tripId);
                     errorOccurrenceList.add(occurrenceModel);
                 }
