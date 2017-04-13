@@ -19,6 +19,9 @@ package edu.usf.cutr.gtfsrtvalidator.test.feeds;
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.test.FeedMessageTest;
+import edu.usf.cutr.gtfsrtvalidator.test.util.TestUtils;
+import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
+import edu.usf.cutr.gtfsrtvalidator.validation.entity.CheckRouteId;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.CheckTripId;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.StopTimeSequanceValidator;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.VehicleIdValidator;
@@ -65,6 +68,38 @@ public class TripUpdateFeedTest extends FeedMessageTest {
             assertEquals(1, error.getOccurrenceList().size());
         }
         
+        clearAndInitRequiredFeedFields();
+    }
+
+    @Test
+    public void testRouteIdValidation() {
+        CheckRouteId tripIdValidator = new CheckRouteId();
+
+        GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+
+        // setting valid trip_id = 1.1, route_id 1.1 that match with IDs in static Gtfs data
+        tripDescriptorBuilder.setTripId("1.1");
+        tripDescriptorBuilder.setRouteId("1");
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripIdValidator.validate(gtfsData, feedMessageBuilder.build());
+        TestUtils.assertResults(ValidationRules.E004, results, 0);
+
+        // Set invalid route id = 100 that does not match with any route_id in static Gtfs data - two errors
+        tripDescriptorBuilder.setRouteId("100");
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripIdValidator.validate(gtfsData, feedMessageBuilder.build());
+        TestUtils.assertResults(ValidationRules.E004, results, 2);
+
         clearAndInitRequiredFeedFields();
     }
     

@@ -162,6 +162,7 @@ public class BackgroundTask implements Runnable {
             validationRules.add(new TimestampValidation()); // W003
             validationRules.add(new StopTimeSequanceValidator()); // E002
             validationRules.add(new CheckTripId()); // E003
+            validationRules.add(new CheckRouteId()); // E004
             validationRules.add(new LocationTypeReferenceValidator()); // E011
 
             for (FeedEntityValidator f : validationRules) {

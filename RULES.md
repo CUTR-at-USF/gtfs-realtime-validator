@@ -16,6 +16,7 @@
 | [E001](#E001) | Not in POSIX time
 | [E002](#E002) | Unsorted `stop_sequence`
 | [E003](#E003) | `trip_id` mismatch in GTFS-rt and GTFS
+| [E004](#E004) | `route_id` mismatch in GTFS-rt and GTFS
 | [E010](#E010) | `location_type` not `0` in `stops.txt`
 | [E011](#E011) | `location_type` not `0` in GTFS-rt
 | [E012](#E012) | Header timestamp should be greater than or equal to all other timestamps
@@ -70,6 +71,12 @@ See:
 ### E003 - `trip_id` mismatch in GTFS-rt and GTFS
 
 All `trip_ids` provided in the GTFS-rt feed must appear in the GTFS data
+
+<a name="E004"/>
+
+### E004 - `route_id` mismatch in GTFS-rt and GTFS
+
+All `route_ids` provided in the GTFS-rt feed must appear in the GTFS data
 
 <a name="E010"/>
 
