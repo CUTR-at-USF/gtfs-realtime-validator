@@ -26,10 +26,7 @@ import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.onebusaway.gtfs.model.Trip;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * ID: e003
@@ -43,7 +40,7 @@ public class CheckTripId implements FeedEntityValidator {
         MessageLogModel messageLogModel = new MessageLogModel(ValidationRules.E003);
         List<OccurrenceModel> errorOccurrenceList = new ArrayList<>();
 
-        List<String> tripList = new ArrayList<>();
+        Set<String> tripList = new HashSet<>();
 
         //get a list of trip Ids from the GTFS feed
         for (Trip trip : gtfsTripList) {
