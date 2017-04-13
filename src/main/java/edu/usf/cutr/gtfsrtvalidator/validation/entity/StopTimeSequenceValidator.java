@@ -35,9 +35,9 @@ import java.util.List;
  * ID: e002
  * Description: stop_time_updates for a given trip_id must be sorted by increasing stop_sequence
  */
-public class StopTimeSequanceValidator implements FeedEntityValidator {
+public class StopTimeSequenceValidator implements FeedEntityValidator {
 
-    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(StopTimeSequanceValidator.class);
+    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(StopTimeSequenceValidator.class);
 
     @Override
     public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {

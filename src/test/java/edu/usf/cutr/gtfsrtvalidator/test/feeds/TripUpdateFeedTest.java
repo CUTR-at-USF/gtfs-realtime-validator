@@ -19,7 +19,7 @@ package edu.usf.cutr.gtfsrtvalidator.test.feeds;
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.test.FeedMessageTest;
-import edu.usf.cutr.gtfsrtvalidator.validation.entity.StopTimeSequanceValidator;
+import edu.usf.cutr.gtfsrtvalidator.validation.entity.StopTimeSequenceValidator;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.VehicleIdValidator;
 import edu.usf.cutr.gtfsrtvalidator.validation.gtfs.StopLocationTypeValidator;
 import org.junit.Test;
@@ -36,7 +36,7 @@ public class TripUpdateFeedTest extends FeedMessageTest {
 
     @Test
     public void testStopSequenceValidation() {
-        StopTimeSequanceValidator stopSequenceValidator = new StopTimeSequanceValidator();
+        StopTimeSequenceValidator stopSequenceValidator = new StopTimeSequenceValidator();
         
         GtfsRealtime.TripUpdate.StopTimeUpdate.Builder stopTimeUpdateBuilder = GtfsRealtime.TripUpdate.StopTimeUpdate.newBuilder();
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
