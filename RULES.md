@@ -17,7 +17,7 @@
 | [E002](#E002) | Unsorted `stop_sequence`
 | [E003](#E003) | `trip_id` mismatch in GTFS-rt and GTFS
 | [E004](#E004) | `route_id` mismatch in GTFS-rt and GTFS
-| [E010](#E010) | `location_type` not `0` in `stops.txt`
+| [E010](#E010) | `location_type` not `0` in `stops.txt` (Note that this is implemented but not executed because it's specific to GTFS - see #126)
 | [E011](#E011) | `location_type` not `0` in GTFS-rt
 | [E012](#E012) | Header timestamp should be greater than or equal to all other timestamps
 
@@ -81,6 +81,8 @@ All `route_ids` provided in the GTFS-rt feed must appear in the GTFS data
 <a name="E010"/>
 
 ### E010 - `location_type` not `0` in stops.txt
+
+(Note that this is implemented but not executed because it's specific to GTFS - see #126)
 
 If location_type is used in `stops.txt`, all stops referenced in `stop_times.txt` must have `location_type` of `0`
 
