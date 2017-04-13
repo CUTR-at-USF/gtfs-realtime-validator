@@ -76,9 +76,7 @@ public class BackgroundTask implements Runnable {
             //Get the GTFS feed from the GtfsDaoMap using the gtfsFeedId of the current feed.
             gtfsData = GtfsFeed.GtfsDaoMap.get(currentFeed.getGtfsFeedModel().getFeedId());
 
-            //region Get gtfsRtFeed Iteration
-            //---------------------------------------------------------------------------------------
-            //Parse the URL from the string provided
+            // Read the GTFS-rt feed from the feed URL
             URL gtfsRtFeedUrl;
             try {
                 gtfsRtFeedUrl = new URL(currentFeed.getGtfsUrl());
@@ -89,7 +87,7 @@ public class BackgroundTask implements Runnable {
             }
 
             try {
-                //Get the GTFS-RT feedMessage for this method
+                // Get the GTFS-RT feedMessage for this method
                 InputStream in = gtfsRtFeedUrl.openStream();
                 byte[] gtfsRtProtobuf = IOUtils.toByteArray(in);
 
@@ -114,11 +112,10 @@ public class BackgroundTask implements Runnable {
                 InputStream is = new ByteArrayInputStream(gtfsRtProtobuf);
                 feedMessage = GtfsRealtime.FeedMessage.parseFrom(is);
 
-                //Create new feedIteration object and save the iteration to the database
+                // Create new feedIteration object and save the iteration to the database
                 if(isUniqueFeed) {
                     feedIteration = new GtfsRtFeedIterationModel(TimeStampHelper.getCurrentTimestamp(), gtfsRtProtobuf, currentFeed, currentFeedDigest);
-                }
-                else {
+                } else {
                     feedIteration = new GtfsRtFeedIterationModel(TimeStampHelper.getCurrentTimestamp(), null, currentFeed, currentFeedDigest);
                 }
                 session.save(feedIteration);
@@ -131,11 +128,8 @@ public class BackgroundTask implements Runnable {
                 _log.error("The URL '" + gtfsRtFeedUrl + "' does not contain valid Gtfs-Rt data", e);
                 return;
             }
-            //---------------------------------------------------------------------------------------
-            //endregion
 
-            //region Get all entities for a GTFS feed
-            //---------------------------------------------------------------------------------------
+            // Read all GTFS-rt entities
             gtfsFeedHash.put(feedIteration.getGtfsRtFeedModel().getGtfsRtId(), feedMessage);
             feedEntityList.put(currentFeed.getGtfsFeedModel().getFeedId(), gtfsFeedHash);
 
@@ -160,44 +154,19 @@ public class BackgroundTask implements Runnable {
             feedMessageBuilder.addAllEntity(allEntitiesArrayList);
 
             GtfsRealtime.FeedMessage combinedFeed = feedMessageBuilder.build();
-            //---------------------------------------------------------------------------------------
-            //endregion
 
-            //region Rules for all errors in all RT feeds in for One GTFS feed
-            //---------------------------------------------------------------------------------------
-            VehicleTripDescriptorValidator vehicleTripDescriptorValidator = new VehicleTripDescriptorValidator();
-            validateEntity(combinedFeed, gtfsData, feedIteration, vehicleTripDescriptorValidator);
-            //---------------------------------------------------------------------------------------
-            //endregion
+            // Run validation rules
+            List<FeedEntityValidator> validationRules = new ArrayList<>();
+            validationRules.add(new VehicleTripDescriptorValidator()); // W001, E001, E012
+            validationRules.add(new VehicleIdValidator()); // W002
+            validationRules.add(new TimestampValidation()); // W003
+            validationRules.add(new StopTimeSequanceValidator()); // E002
+            validationRules.add(new CheckTripId()); // E003
+            validationRules.add(new LocationTypeReferenceValidator()); // E011
 
-            //region warnings
-            //---------------------------------------------------------------------------------------
-            // W001, E001, E012
-            FeedEntityValidator validateTimestamp = new TimestampValidation();
-            validateEntity(feedMessage, gtfsData, feedIteration, validateTimestamp);
-            //---------------------------------------------------------------------------------------
-            //endregion
-
-            //region Rules for all errors in the current feed
-            //---------------------------------------------------------------------------------------
-            FeedEntityValidator vehicleIdValidator = new VehicleIdValidator();
-            validateEntity(feedMessage, gtfsData, feedIteration, vehicleIdValidator);
-
-            FeedEntityValidator stopTimeSequenceValidator = new StopTimeSequanceValidator();
-            validateEntity(feedMessage, gtfsData, feedIteration, stopTimeSequenceValidator);
-            //---------------------------------------------------------------------------------------
-            //endregion
-
-            //region Rules for all errors in the current feed + GTFS feed
-            //---------------------------------------------------------------------------------------
-            FeedEntityValidator checkTripId = new CheckTripId();
-            validateEntity(feedMessage, gtfsData, feedIteration, checkTripId);
-
-            //e010
-            FeedEntityValidator locationTypeReferenceValidator = new LocationTypeReferenceValidator();
-            validateEntity(feedMessage, gtfsData, feedIteration, locationTypeReferenceValidator);
-            //---------------------------------------------------------------------------------------
-            //endregion
+            for (FeedEntityValidator f : validationRules) {
+                validateEntity(combinedFeed, gtfsData, feedIteration, f);
+            }
 
             logDuration(startTimeNanos);
         } catch (Exception ex) {
