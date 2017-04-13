@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 University of South Florida.
+ * Copyright (C) 2011 Nipuna Gunathilake.
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.usf.cutr.gtfsrtvalidator.validation.entity;
+
+package edu.usf.cutr.gtfsrtvalidator.validation.entity.combined;
 
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
@@ -24,45 +25,42 @@ import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.hsqldb.lib.StringUtil;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
-import org.onebusaway.gtfs.model.Route;
+import org.onebusaway.gtfs.model.Trip;
 
 import java.util.*;
 
 /**
- * ID: E004
- * Description: All route_ids provided in the GTFS-rt feed must appear in the GTFS data
+ * ID: e003
+ * Description: All trip_ids provided in the GTFS-rt feed must appear in the GTFS data
  */
-public class CheckRouteId implements FeedEntityValidator {
-
+public class CheckTripId implements FeedEntityValidator {
     @Override
     public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
-        Collection<Route> gtfsRouteList = gtfsData.getAllRoutes();
+        Collection<Trip> gtfsTripList = gtfsData.getAllTrips();
 
-        MessageLogModel messageLogModel = new MessageLogModel(ValidationRules.E004);
+        MessageLogModel messageLogModel = new MessageLogModel(ValidationRules.E003);
         List<OccurrenceModel> errorOccurrenceList = new ArrayList<>();
 
-        Set<String> routeIdSet = new HashSet<>();
+        Set<String> tripIdSet = new HashSet<>();
 
-        // Get a list of route_ids from the GTFS feed
-        for (Route r : gtfsRouteList) {
-            routeIdSet.add(r.getId().getId());
+        // Get a all trip_ids from the GTFS feed
+        for (Trip trip : gtfsTripList) {
+            tripIdSet.add(trip.getId().getId());
         }
 
-        // Check the route_id values against the values from the GTFS feed
+        //Check the trip_id values against the values from the GTFS feed
         for (GtfsRealtime.FeedEntity entity : feedMessage.getEntityList()) {
             if (entity.hasTripUpdate()) {
-                String routeId = entity.getTripUpdate().getTrip().getRouteId();
                 String tripId = entity.getTripUpdate().getTrip().getTripId();
-                if (!StringUtil.isEmpty(routeId) && !routeIdSet.contains(routeId)) {
-                    OccurrenceModel occurrenceModel = new OccurrenceModel("$.entity.*.trip_update.trip[?(@.route_id==\"" + routeId + "\")]", tripId);
+                if (!tripIdSet.contains(tripId)) {
+                    OccurrenceModel occurrenceModel = new OccurrenceModel("$.entity.*.trip_update.trip[?(@.trip_id==\""+ tripId +"\")]", tripId);
                     errorOccurrenceList.add(occurrenceModel);
                 }
             }
             if (entity.hasVehicle() && entity.getVehicle().hasTrip()) {
-                String routeId = entity.getVehicle().getTrip().getRouteId();
                 String tripId = entity.getTripUpdate().getTrip().getTripId();
-                if (!StringUtil.isEmpty(routeId) && !routeIdSet.contains(routeId)) {
-                    OccurrenceModel occurrenceModel = new OccurrenceModel("$.entity.*.vehicle.trip[?(@.route_id==\"" + routeId + "\")]", tripId);
+                if (!StringUtil.isEmpty(tripId) && !gtfsTripList.contains(tripId)) {
+                    OccurrenceModel occurrenceModel = new OccurrenceModel("$.entity.*.vehicle.trip[?(@.route_id==\"" + tripId + "\")]", tripId);
                     errorOccurrenceList.add(occurrenceModel);
                 }
             }

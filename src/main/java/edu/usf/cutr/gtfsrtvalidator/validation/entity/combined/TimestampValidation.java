@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package edu.usf.cutr.gtfsrtvalidator.validation.entity;
+package edu.usf.cutr.gtfsrtvalidator.validation.entity.combined;
 
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;

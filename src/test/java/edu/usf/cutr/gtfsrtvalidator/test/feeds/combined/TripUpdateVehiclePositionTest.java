@@ -21,8 +21,8 @@ import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.test.FeedMessageTest;
 import edu.usf.cutr.gtfsrtvalidator.test.util.TestUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
-import edu.usf.cutr.gtfsrtvalidator.validation.entity.CheckRouteId;
-import edu.usf.cutr.gtfsrtvalidator.validation.entity.CheckTripId;
+import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.CheckRouteId;
+import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.CheckTripId;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.VehicleTripDescriptorValidator;
 import org.junit.Test;
 
