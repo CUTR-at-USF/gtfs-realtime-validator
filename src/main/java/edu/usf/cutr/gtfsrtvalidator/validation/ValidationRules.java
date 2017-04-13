@@ -19,8 +19,9 @@ package edu.usf.cutr.gtfsrtvalidator.validation;
 import edu.usf.cutr.gtfsrtvalidator.api.model.ValidationRule;
 
 public class ValidationRules {
-    //region Warnings
-    //---------------------------------------------------------------------------------------
+    /**
+     * Warnings
+     */
     public static final ValidationRule W001 = new ValidationRule("W001", "WARNING", "Timestamp not populated",
             "Timestamps should be populated for all elements");
     public static final ValidationRule W002 = new ValidationRule("W002", "WARNING", "Vehicle_id not populated",
@@ -28,11 +29,9 @@ public class ValidationRules {
     public static final ValidationRule W003 = new ValidationRule("W003", "WARNING", "VehiclePosition and TripUpdate feed mismatch",
             "If both vehicle positions and trip updates are provided, VehicleDescriptor or TripDescriptor values should match between the two feeds");
 
-    //---------------------------------------------------------------------------------------
-    //endregion
-
-    //region Errors
-    //---------------------------------------------------------------------------------------
+    /**
+     * Errors
+     */
     public static final ValidationRule E001 = new ValidationRule("E001", "ERROR", "Not in POSIX time",
             "All timestamps must be in POSIX time (i.e., number of seconds since January 1st 1970 00:00:00 UTC)");
     public static final ValidationRule E002 = new ValidationRule("E002", "ERROR", "Unsorted stop_sequence",
