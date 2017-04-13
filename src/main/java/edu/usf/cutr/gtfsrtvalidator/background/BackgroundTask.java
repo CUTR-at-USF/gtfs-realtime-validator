@@ -28,8 +28,7 @@ import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.LocationTypeReferenceValidator;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.StopTimeSequenceValidator;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.VehicleIdValidator;
-import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.CheckRouteId;
-import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.CheckTripId;
+import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.CheckRouteAndTripIds;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.TimestampValidation;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.VehicleTripDescriptorValidator;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
@@ -166,8 +165,7 @@ public class BackgroundTask implements Runnable {
             validationRules.add(new VehicleIdValidator()); // W002
             validationRules.add(new TimestampValidation()); // W003
             validationRules.add(new StopTimeSequenceValidator()); // E002
-            validationRules.add(new CheckTripId()); // E003
-            validationRules.add(new CheckRouteId()); // E004
+            validationRules.add(new CheckRouteAndTripIds()); // E003, E004
             validationRules.add(new LocationTypeReferenceValidator()); // E011
 
             for (FeedEntityValidator f : validationRules) {

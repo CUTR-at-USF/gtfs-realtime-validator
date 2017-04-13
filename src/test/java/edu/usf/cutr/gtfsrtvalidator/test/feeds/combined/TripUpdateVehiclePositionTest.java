@@ -21,8 +21,7 @@ import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.test.FeedMessageTest;
 import edu.usf.cutr.gtfsrtvalidator.test.util.TestUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
-import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.CheckRouteId;
-import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.CheckTripId;
+import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.CheckRouteAndTripIds;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.VehicleTripDescriptorValidator;
 import org.junit.Test;
 
@@ -91,39 +90,8 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
     }
 
     @Test
-    public void testTripIdValidation() {
-
-        CheckTripId tripIdValidator = new CheckTripId();
-
-        GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
-
-        // Set valid trip_id = 1.1 that match with trip_id in static Gtfs data - no errors
-        tripDescriptorBuilder.setTripId("1.1");
-        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
-        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
-        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
-        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-
-        results = tripIdValidator.validate(gtfsData, feedMessageBuilder.build());
-        TestUtils.assertResults(ValidationRules.E003, results, 0);
-
-        // Set invalid trip_id = 100 that does not match with any trip_id in static Gtfs data - 2 errors
-        tripDescriptorBuilder.setTripId("100");
-        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
-        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
-        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
-        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
-        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-
-        results = tripIdValidator.validate(gtfsData, feedMessageBuilder.build());
-        TestUtils.assertResults(ValidationRules.E003, results, 2);
-
-        clearAndInitRequiredFeedFields();
-    }
-
-    @Test
-    public void testRouteIdValidation() {
-        CheckRouteId tripIdValidator = new CheckRouteId();
+    public void testTripIdAndRouteIdValidation() {
+        CheckRouteAndTripIds tripIdValidator = new CheckRouteAndTripIds();
 
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
 
@@ -137,6 +105,7 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         results = tripIdValidator.validate(gtfsData, feedMessageBuilder.build());
+        TestUtils.assertResults(ValidationRules.E003, results, 0);
         TestUtils.assertResults(ValidationRules.E004, results, 0);
 
         // Set invalid route id = 100 that does not match with any route_id in static Gtfs data - two errors
@@ -149,6 +118,20 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
 
         results = tripIdValidator.validate(gtfsData, feedMessageBuilder.build());
         TestUtils.assertResults(ValidationRules.E004, results, 2);
+
+        // Reset to valid route ID
+        tripDescriptorBuilder.setRouteId("1");
+
+        // Set invalid trip_id = 100 that does not match with any trip_id in static Gtfs data - 2 errors
+        tripDescriptorBuilder.setTripId("100");
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripIdValidator.validate(gtfsData, feedMessageBuilder.build());
+        TestUtils.assertResults(ValidationRules.E003, results, 2);
 
         clearAndInitRequiredFeedFields();
     }
