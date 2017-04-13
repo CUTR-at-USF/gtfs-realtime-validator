@@ -19,10 +19,6 @@ package edu.usf.cutr.gtfsrtvalidator.test.feeds;
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.test.FeedMessageTest;
-import edu.usf.cutr.gtfsrtvalidator.test.util.TestUtils;
-import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
-import edu.usf.cutr.gtfsrtvalidator.validation.entity.CheckRouteId;
-import edu.usf.cutr.gtfsrtvalidator.validation.entity.CheckTripId;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.StopTimeSequanceValidator;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.VehicleIdValidator;
 import edu.usf.cutr.gtfsrtvalidator.validation.gtfs.StopLocationTypeValidator;
@@ -31,78 +27,13 @@ import org.junit.Test;
 /* 
  * Tests all the warnings and rules that validate TripUpdate feed.
  * Tests: w002 - "vehicle_id should be populated in trip_update"
- *        e003 - "All trip_ids provided in the GTFS-rt feed must appear in the GTFS data"
  *        e002 - "stop_time_updates for a given trip_id must be sorted by increasing stop_sequence"
  *        e010 - "If location_type is used in stops.txt, all stops referenced in stop_times.txt must have location_type of 0"
 */
 public class TripUpdateFeedTest extends FeedMessageTest {
     
     public TripUpdateFeedTest() throws Exception {}
-    
-    @Test
-    public void testTripIdValidation() {
-        
-        CheckTripId tripIdValidator = new CheckTripId();
-        
-        GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
-        
-        // setting valid trip id = 1.1 that match with trip id in static Gtfs data
-        tripDescriptorBuilder.setTripId("1.1");
-        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
-        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
-        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = tripIdValidator.validate(gtfsData, feedMessageBuilder.build());
-        for (ErrorListHelperModel error : results) {
-            assertEquals(0, error.getOccurrenceList().size());
-        }
-        
-        // setting invalid trip id = 100 that does not match with any trip id in static Gtfs data
-        tripDescriptorBuilder.setTripId("100");
-        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
-        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
-        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-
-        results = tripIdValidator.validate(gtfsData, feedMessageBuilder.build());
-        for (ErrorListHelperModel error : results) {
-            assertEquals(1, error.getOccurrenceList().size());
-        }
-        
-        clearAndInitRequiredFeedFields();
-    }
-
-    @Test
-    public void testRouteIdValidation() {
-        CheckRouteId tripIdValidator = new CheckRouteId();
-
-        GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
-
-        // setting valid trip_id = 1.1, route_id 1.1 that match with IDs in static Gtfs data
-        tripDescriptorBuilder.setTripId("1.1");
-        tripDescriptorBuilder.setRouteId("1");
-        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
-        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
-        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
-        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
-        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-
-        results = tripIdValidator.validate(gtfsData, feedMessageBuilder.build());
-        TestUtils.assertResults(ValidationRules.E004, results, 0);
-
-        // Set invalid route id = 100 that does not match with any route_id in static Gtfs data - two errors
-        tripDescriptorBuilder.setRouteId("100");
-        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
-        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
-        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
-        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
-        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-
-        results = tripIdValidator.validate(gtfsData, feedMessageBuilder.build());
-        TestUtils.assertResults(ValidationRules.E004, results, 2);
-
-        clearAndInitRequiredFeedFields();
-    }
-    
     @Test
     public void testStopSequenceValidation() {
         StopTimeSequanceValidator stopSequenceValidator = new StopTimeSequanceValidator();
@@ -180,9 +111,7 @@ public class TripUpdateFeedTest extends FeedMessageTest {
         
         clearAndInitRequiredFeedFields();
     }
-    
-    
-    
+
     @Test
     public void testLocationTypeValidation() {
         StopLocationTypeValidator stopLocationValidator = new StopLocationTypeValidator();

@@ -23,6 +23,7 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
+import org.hsqldb.lib.StringUtil;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.onebusaway.gtfs.model.Trip;
 
@@ -35,15 +36,15 @@ import java.util.*;
 public class CheckTripId implements FeedEntityValidator {
     @Override
     public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
-        Collection<Trip> gtfsTripList = gtfsData.getAllTrips();
+        Collection<Trip> gtfsTripIds = gtfsData.getAllTrips();
 
         MessageLogModel messageLogModel = new MessageLogModel(ValidationRules.E003);
         List<OccurrenceModel> errorOccurrenceList = new ArrayList<>();
 
         Set<String> tripList = new HashSet<>();
 
-        //get a list of trip Ids from the GTFS feed
-        for (Trip trip : gtfsTripList) {
+        // Get a all trip_ids from the GTFS feed
+        for (Trip trip : gtfsTripIds) {
             tripList.add(trip.getId().getId());
         }
 
@@ -53,6 +54,13 @@ public class CheckTripId implements FeedEntityValidator {
                 String tripId = entity.getTripUpdate().getTrip().getTripId();
                 if (!tripList.contains(tripId)) {
                     OccurrenceModel occurrenceModel = new OccurrenceModel("$.entity.*.trip_update.trip[?(@.trip_id==\""+ tripId +"\")]", tripId);
+                    errorOccurrenceList.add(occurrenceModel);
+                }
+            }
+            if (entity.hasVehicle() && entity.getVehicle().hasTrip()) {
+                String tripId = entity.getTripUpdate().getTrip().getTripId();
+                if (!StringUtil.isEmpty(tripId) && !gtfsTripIds.contains(tripId)) {
+                    OccurrenceModel occurrenceModel = new OccurrenceModel("$.entity.*.vehicle.trip[?(@.route_id==\"" + tripId + "\")]", tripId);
                     errorOccurrenceList.add(occurrenceModel);
                 }
             }
