@@ -220,6 +220,23 @@ public class GtfsRtFeed {
         return Response.ok(iterationsCount).build();
     }
 
+    // Returns feed message for a requested iteration
+    @GET
+    @Path("/{iterationId : \\d+}/feedMessage")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getFeedMessage(
+            @PathParam("iterationId") int iterationId) {
+
+        ViewFeedMessageModel feedMessageModel;
+        Session session = GTFSDB.InitSessionBeginTrans();
+        feedMessageModel = session.createNamedQuery("feedMessageByIterationId", ViewFeedMessageModel.class)
+                .setParameter(0, iterationId)
+                .uniqueResult();
+        GTFSDB.commitAndCloseSession(session);
+        feedMessageModel.setJsonFeedMessage(feedMessageModel.getByteFeedMessage());
+        return feedMessageModel.getJsonFeedMessage();
+    }
+
     // Returns total number of feed unique responses
     @GET
     @Path("/{id : \\d+}/uniqueResponses")

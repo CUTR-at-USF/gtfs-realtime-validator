@@ -106,7 +106,9 @@ function monitorGtfsRtFeeds(gtfsrtUrlList, gtfsFeedId) {
 
                     var successTemplate = $("#gtfs-success-modal").html();
                     $('.gtfs-success-message').html(successTemplate);
-                    $("#successModal").modal();
+                    $("#successModal").modal({
+                        backdrop: 'static'
+                    });
                 }
             }
 

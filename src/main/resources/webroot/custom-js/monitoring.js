@@ -306,3 +306,40 @@ function updatePaginationInfo(logOrSumary, index, paginationInfo) {
         paginationLog = pagination;
     }
 }
+
+function showFeedMessage(iterationId, timestamp, occurrence) {
+    $.get("http://localhost:8080/api/gtfs-rt-feed/" + iterationId + "/feedMessage").done(function (data) {
+        var jsonFeed = JSON.stringify(data, undefined, 2);
+        var feedTemplateScript = $("#gtfs-rt-feed-message").html();
+        $(".feedMessageDialog").html(feedTemplateScript);
+        document.getElementById("feedMessage").innerHTML = jsonFeed;
+        $("#title-text").text("Iteration " + iterationId + " - " + timestamp + " (" + occurrence + ")");
+        $("#feed-message-modal").modal();
+    });
+
+    var clipboard = new Clipboard("#clipboard");
+
+    clipboard.on('success', function(e) {
+        e.clearSelection();
+        var btn = $(e.trigger);
+        setTooltip(btn,'Copied!');
+        hideTooltip(btn);
+    });
+
+    clipboard.on('error', function(e) {
+        var btn = $(e.trigger);
+        setTooltip('Failed!');
+        hideTooltip(btn);
+    });
+}
+
+function setTooltip(btn,message) {
+    btn.attr('data-original-title', message)
+        .tooltip('show');
+}
+
+function hideTooltip(btn) {
+    setTimeout(function() {
+        btn.tooltip('hide');
+    }, 1000);
+}
