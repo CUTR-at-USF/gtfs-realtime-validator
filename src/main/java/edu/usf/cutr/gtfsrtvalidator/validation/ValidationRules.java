@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Nipuna Gunathilake.
+ * Copyright (C) 2011-2017 Nipuna Gunathilake, University of South Florida.
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
