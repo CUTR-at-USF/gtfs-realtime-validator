@@ -44,7 +44,7 @@ public class ValidationRules {
     public static final ValidationRule E005 = new ValidationRule("E005", "ERROR", "GTFS stop_times.txt does not contain arrival_times and/or departure_times for all stops referenced in the GTFS-rt feed",
             "If only delay is provided in a stop_time_event (and not a time), then the GTFS stop_times.txt must contain arrival_times and/or departure_times for all stops referenced in the GTFS-rt feed (i.e., not just timepoints)");
     public static final ValidationRule E006 = new ValidationRule("E006", "ERROR", "Missing trip_id and start_time in Frequency-based trip_updates",
-            "Frequency-based trip_updates must contain trip_id and start_time");
+            "Frequency-based trip_updates must contain trip_id, start_time, and start_date");
     public static final ValidationRule E007 = new ValidationRule("E007", "ERROR", "All trips does not belong to the same block",
             "If more than one trip_update has the same vehicle_id, then all trips must belong to the same block, and the arrival predictions for each trip must match the sequential order for the trips in the block. For example, if we have trip_ids 1, 2, and 3 that all belong to the same block, and the vehicle trips trip 1, then trip 2, and then trip 3, the arrival predictions should increase chronologically for trips 1, 2, and 3. For example, trip 3 predictions shouldn't be earlier than trip 2 predictions.");
     public static final ValidationRule E008 = new ValidationRule("E008", "ERROR", "In the GTFS-rt data, the tripId for each TripUpdate.TripDescriptor is not provided",
