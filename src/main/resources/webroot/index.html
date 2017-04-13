@@ -104,7 +104,10 @@
                                                 class="glyphicon glyphicon-minus-sign"></span> Remove Feed</a>
                                     </div>
                                     <div class="col-md-6">
-                                        <span class="pull-right">Interval(sec.): <input name="updateInterval" type="number" value="10" min="10" step="1"/></span>
+                                        <span class="pull-right">Interval (sec.):
+                                        <input name="updateInterval" type="number" value="10" min="1" step="1"
+                                               oninvalid="setCustomValidity('Interval must be at least 1 second')"
+                                               onchange="try{setCustomValidity('')}catch(e){}"/></span>
                                     </div>
                                 </div>
                             </div>
