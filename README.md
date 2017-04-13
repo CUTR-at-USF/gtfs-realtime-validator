@@ -40,11 +40,20 @@ Once the application has been started, you can enter URLs for the feeds you'd li
 
 ### Configuration
  
- If you'd like to change the logging level to see all debug statements, in `src/main/resources/simplelogger.properties` change the following line to say `DEBUG`:
+**Logging**
+
+If you'd like to change the logging level to see all debug statements, in `src/main/resources/simplelogger.properties` change the following line to say `DEBUG`:
  
  ~~~
  org.slf4j.simpleLogger.defaultLogLevel=DEBUG
  ~~~
+
+ **Port number**
+ 
+ Port `8080` is used by default.  If you'd like to change the port number (e.g., port `80`), you can use the command line parameter `-port 80`:
+ 
+ `java -jar target/gtfs-rt-validator-1.0-SNAPSHOT.jar -port 80`
+ 
 
 
 ## Acknowledgements

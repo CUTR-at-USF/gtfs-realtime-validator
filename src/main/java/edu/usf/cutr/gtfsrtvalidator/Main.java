@@ -20,6 +20,7 @@ package edu.usf.cutr.gtfsrtvalidator;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.hibernate.HibernateUtil;
 import edu.usf.cutr.gtfsrtvalidator.servlets.GetFeedJSON;
+import org.apache.commons.cli.*;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -30,12 +31,15 @@ public class Main {
     private static final org.slf4j.Logger _log = LoggerFactory.getLogger(Main.class);
 
     static String BASE_RESOURCE = "./target/classes/webroot";
+    private static String PORT_NUMBER_OPTION = "port";
 
-    public static void main(String[] args) throws InterruptedException{
+    public static void main(String[] args) throws InterruptedException, ParseException {
+        // Parse command line parameters
+        int port = getPortFromArgs(args);
         HibernateUtil.configureSessionFactory();
         GTFSDB.InitializeDB();
-        
-        Server server = new Server(8080);
+
+        Server server = new Server(port);
         ServletContextHandler context = new ServletContextHandler();
         context.setContextPath("/");
         context.setResourceBase(BASE_RESOURCE);
@@ -52,11 +56,32 @@ public class Main {
 
         try {
             server.start();
-            _log.info("Go to http://localhost:8080 in your browser");
+            _log.info("Go to http://localhost:" + port + " in your browser");
             server.join();
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
 
+    /**
+     * Returns the port to use from command line arguments, or 8080 if no args are provided
+     *
+     * @param args
+     * @return the port to use from command line arguments, or 8080 if no args are provided
+     */
+    private static int getPortFromArgs(String[] args) throws ParseException {
+        int port = 8080;
+        Option portOption = Option.builder(PORT_NUMBER_OPTION)
+                .hasArg()
+                .desc("Port number the server should run on")
+                .build();
+        CommandLineParser parser = new DefaultParser();
+        Options options = new Options();
+        options.addOption(portOption);
+        CommandLine cmd = parser.parse(options, args);
+        if (cmd.hasOption(PORT_NUMBER_OPTION)) {
+            port = Integer.valueOf(cmd.getOptionValue(PORT_NUMBER_OPTION));
+        }
+        return port;
     }
 }
