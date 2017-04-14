@@ -127,8 +127,8 @@ public class GtfsRtFeed {
     private static HashMap<String, ScheduledExecutorService> runningTasks = new HashMap<>();
 
     @PUT
-    @Path("/{id}/monitor")
-    public Response getID(@PathParam("id") int id, @DefaultValue("10") @QueryParam("updateInterval") int updateInterval) {
+    @Path("/{id}/{updateInterval}/monitor")
+    public Response getID(@PathParam("id") int id, @PathParam("updateInterval") int updateInterval) {
         //Get RtFeedModel from id
         Session session = GTFSDB.InitSessionBeginTrans();
         GtfsRtFeedModel gtfsRtFeed = (GtfsRtFeedModel) session.createQuery(" FROM GtfsRtFeedModel "

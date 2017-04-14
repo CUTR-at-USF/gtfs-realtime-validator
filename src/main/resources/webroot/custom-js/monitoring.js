@@ -28,8 +28,8 @@ var setIntervalGetFeeds;
 var setIntervalClock;
 
 //Retrieve the update interval value
-var updateInterval = localStorage.getItem("updateInterval");
-updateInterval = updateInterval * 1000;
+var serverUpdateInterval = localStorage.getItem("updateInterval");
+var updateInterval = (serverUpdateInterval / 2) * 1000;
 
 var hideErrors = [];
 var paginationLog = [];
@@ -42,7 +42,7 @@ var toggleDataOff = '<input type="checkbox" data-toggle="toggle" data-onstyle="s
 for (var gtfsRtFeed in gtfsRtFeeds) {
     if (gtfsRtFeeds.hasOwnProperty(gtfsRtFeed)) {
         $.ajax({
-            url: "http://localhost:8080/api/gtfs-rt-feed/" + gtfsRtFeeds[gtfsRtFeed]["feedId"] + "/monitor",
+            url: "http://localhost:8080/api/gtfs-rt-feed/" + gtfsRtFeeds[gtfsRtFeed]["feedId"] + "/" + serverUpdateInterval + "/monitor",
             type: 'PUT',
             success: function (data) {
                 initializeInterface(data);
