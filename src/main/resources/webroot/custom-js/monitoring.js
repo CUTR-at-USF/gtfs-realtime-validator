@@ -32,6 +32,8 @@ var updateInterval = localStorage.getItem("updateInterval");
 updateInterval = updateInterval * 1000;
 
 var hideErrors = [];
+var paginationLog = [];
+var paginationSummary = [];
 
 var toggleDataOn = '<input type="checkbox" checked data-toggle="toggle" data-onstyle="success"/>';
 var toggleDataOff = '<input type="checkbox" data-toggle="toggle" data-onstyle="success"/>';
@@ -76,18 +78,32 @@ function refresh(id) {
         updateUniqueFeedResponseData(id, data);
     })
 
-    $.get("http://localhost:8080/api/gtfs-rt-feed/" + id + "/summary").done(function (data) {
-        updateSummaryTables(id, data);
-    });
+    $.get("http://localhost:8080/api/gtfs-rt-feed/" + id + "/errorCount").done(function (errorData) {
+        updatePaginationSummaryData(id, errorData);
+        updatePaginationLogData(id, errorData);
 
-    $.get("http://localhost:8080/api/gtfs-rt-feed/" + id + "/log/" + hideErrors[id]).done(function (data) {
-        updateLogTables(id, data);
+        $.get("http://localhost:8080/api/gtfs-rt-feed/" + id + "/summary/pagination/" + paginationSummary[id]["currentPage"] + "/" + paginationSummary[id]["rowsPerPage"]).done(function (summaryData) {
+            updateSummaryTables(id, summaryData);
+        });
+
+        $.get("http://localhost:8080/api/gtfs-rt-feed/" + id + "/log/" + hideErrors[id] + "/pagination/" + paginationLog[id]["currentPage"] + "/" + paginationLog[id]["rowsPerPage"]).done(function (logData) {
+            updateLogTables(id, logData);
+        });
     });
 }
 
 function initializeInterface(gtfsRtFeeds) {
-    //var wrapper  = {gtfsRtFeeds: gtfsRtFeeds};
-    hideErrors[gtfsRtFeeds["gtfsRtId"]] = [];
+    var id = gtfsRtFeeds["gtfsRtId"];
+    hideErrors[id] = [];
+    // Initializing pagination variables.
+    paginationLog[id] = [];
+    paginationLog[id]["currentPage"] = 1;
+    // Default number of rows per page.
+    paginationLog[id]["rowsPerPage"] = 10;
+    paginationSummary[id] = [];
+    paginationSummary[id]["currentPage"] = 1;
+    paginationSummary[id]["rowsPerPage"] = 10;
+
     var monitorTemplateScript = $("#feed-monitor-template").html();
     var monitorTemplate = Handlebars.compile(monitorTemplateScript);
     var compiledHtml = monitorTemplate(gtfsRtFeeds);
@@ -99,6 +115,29 @@ function updateSummaryTables(index, data) {
     var monitorTemplateScript = $("#feed-monitor-summary-row-template").html();
     var monitorTemplate = Handlebars.compile(monitorTemplateScript);
     var compiledHtml = monitorTemplate(data);
+
+    if (paginationSummary[index]["totalRows"] > 0) {
+        $("#summary-pagination-" + index).bs_pagination({
+            onChangePage: function (event, page) {
+                paginationSummary[index]["userSelPage"] = page["currentPage"];
+                paginationSummary[index]["currentPage"] = page["currentPage"];
+                paginationSummary[index]["rowsPerPage"] = page["rowsPerPage"];
+                paginationSummary[index]["totalPages"] = Math.ceil(paginationSummary[index]["totalRows"] / paginationSummary[index]["rowsPerPage"]);
+                $.get("http://localhost:8080/api/gtfs-rt-feed/" + index + "/summary/pagination/" + paginationSummary[index]["currentPage"] + "/" + paginationSummary[index]["rowsPerPage"]).done(function (data) {
+                    updateSummaryTables(index, data);
+                });
+            },
+            rowsPerPage: paginationSummary[index]["rowsPerPage"],
+            totalPages: paginationSummary[index]["totalPages"],
+            totalRows: paginationSummary[index]["totalRows"],
+            currentPage: paginationSummary[index]["currentPage"],
+            // Maximum number of rows we can view in a page.
+            maxRowsPerPage: 10
+        });
+    } else {
+        $("#summary-pagination-" + index).empty();
+    }
+
     var summaryTable = $("#monitor-table-summary-" + index + "").html(compiledHtml);
 
     handleToggledData(index, data, summaryTable);
@@ -133,6 +172,28 @@ function updateLogTables(index, data) {
     var monitorTemplateScript = $("#feed-monitor-log-row-template").html();
     var monitorTemplate = Handlebars.compile(monitorTemplateScript);
     var compiledHtml = monitorTemplate(data);
+
+    if (paginationLog[index]["totalRows"] > 0) {
+        $("#log-pagination-" + index).bs_pagination({
+            onChangePage: function (event, page) {
+                paginationLog[index]["userSelPage"] = page["currentPage"];
+                paginationLog[index]["currentPage"] = page["currentPage"];
+                paginationLog[index]["rowsPerPage"] = page["rowsPerPage"];
+                paginationLog[index]["totalPages"] = Math.ceil(paginationLog[index]["totalRows"] / paginationLog[index]["rowsPerPage"]);
+                $.get("http://localhost:8080/api/gtfs-rt-feed/" + index + "/log/" + hideErrors[index] + "/pagination/" + paginationLog[index]["currentPage"] + "/" + paginationLog[index]["rowsPerPage"]).done(function (data) {
+                    updateLogTables(index, data);
+                });
+            },
+            rowsPerPage: paginationLog[index]["rowsPerPage"],
+            totalPages: paginationLog[index]["totalPages"],
+            totalRows: paginationLog[index]["totalRows"],
+            currentPage: paginationLog[index]["currentPage"],
+            // Maximum number of rows we can view in a page.
+            maxRowsPerPage: 100
+        });
+    } else {
+        $("#log-pagination-" + index).empty();
+    }
 
     $("#monitor-table-log-" + index + "").html(compiledHtml);
 }
@@ -198,14 +259,50 @@ function showOrHideError(gtfsRtId, errorId) {
         hideErrors[gtfsRtId].splice(hideErrors[gtfsRtId].indexOf(errorId), 1);
     }
 
-    // Request data based on 'hideErrors'
-    $.get("http://localhost:8080/api/gtfs-rt-feed/" + gtfsRtId + "/log/" + hideErrors[gtfsRtId]).done(function (data) {
+    $.get("http://localhost:8080/api/gtfs-rt-feed/" + gtfsRtId + "/errorCount").done(function (errorData) {
+        updatePaginationLogData(gtfsRtId, errorData);
+        // Request data based on 'hideErrors' and 'paginationLog' data
+        $.get("http://localhost:8080/api/gtfs-rt-feed/" + gtfsRtId + "/log/" + hideErrors[gtfsRtId] + "/pagination/" + paginationLog[gtfsRtId]["currentPage"] + "/" + paginationLog[gtfsRtId]["rowsPerPage"]).done(function (logData) {
 
-        // Store current position for later use
-        var scrollPosition = document.body.scrollTop;
+            // Store current position for later use
+            var scrollPosition = document.body.scrollTop;
 
-        updateLogTables(gtfsRtId, data);
+            updateLogTables(gtfsRtId, logData);
 
-        $('html, body').animate({scrollTop: scrollPosition}, 1);
+            $('html, body').animate({scrollTop: scrollPosition}, 1);
+        });
     });
+}
+
+function updatePaginationSummaryData(index, data) {
+    paginationSummary[index]["totalRows"] = 0;
+    for (var element in data) {
+        paginationSummary[index]["totalRows"] += 1;
+    }
+    updatePaginationInfo("summary", index, paginationSummary);
+}
+
+function updatePaginationLogData(index, data) {
+    paginationLog[index]["totalRows"] = 0;
+    for (var element in data) {
+        // Does not include the count of errorId's whose toggledData is 'off'.
+        if(hideErrors[index].indexOf(data[element]["id"]) == -1) {
+            paginationLog[index]["totalRows"] += data[element]["count"];
+        }
+    }
+    updatePaginationInfo("log", index, paginationLog);
+}
+
+function updatePaginationInfo(logOrSumary, index, paginationInfo) {
+    var pagination = paginationInfo;
+    pagination[index]["totalPages"] = Math.ceil(pagination[index]["totalRows"] / pagination[index]["rowsPerPage"]);
+    // If user selected a page and is less than totalPages, currentPage is user selected page.
+    if (pagination[index]["userSelPage"] > 0) {
+        pagination[index]["currentPage"] = pagination[index]["userSelPage"];
+    }
+    if (logOrSumary == "summary") {
+        paginationSummary = pagination;
+    } else {
+        paginationLog = pagination;
+    }
 }

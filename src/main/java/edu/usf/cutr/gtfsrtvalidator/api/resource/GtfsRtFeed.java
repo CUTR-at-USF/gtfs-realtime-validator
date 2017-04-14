@@ -143,15 +143,24 @@ public class GtfsRtFeed {
 
     //GET {id} return information about the feed with {id}
     @GET
-    @Path("/{id : \\d+}/summary")
+    @Path("/{id : \\d+}/summary/pagination/{currentPage: \\d+}/{rowsPerPage: \\d+}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getRtFeedSummaryDetails(@PathParam("id") int id) {
+    public Response getRtFeedSummaryDetails(
+            @PathParam("id") int id,
+            @PathParam("currentPage") int currentPage,
+            @PathParam("rowsPerPage") int rowsPerPage) {
+
         List<ViewErrorSummaryModel> feedSummary;
+        int fromRow = (currentPage - 1) * rowsPerPage;
         Session session = GTFSDB.InitSessionBeginTrans();
         feedSummary = session.createNamedQuery("ErrorSummaryByrtfeedID", ViewErrorSummaryModel.class)
-                .setParameter(0, id).setParameter(1, id).list();
+                .setParameter(0, id)
+                .setParameter(1, id)
+                .setFirstResult(fromRow)
+                .setMaxResults(rowsPerPage)
+                .list();
         GTFSDB.commitAndCloseSession(session);
-        for(ViewErrorSummaryModel viewErrorSummaryModel : feedSummary) {
+        for (ViewErrorSummaryModel viewErrorSummaryModel : feedSummary) {
             int index = feedSummary.indexOf(viewErrorSummaryModel);
             String formattedTimestamp = getDateFormat(viewErrorSummaryModel.getLastTime(), id);
             viewErrorSummaryModel.setFormattedTimestamp(formattedTimestamp);
@@ -164,17 +173,30 @@ public class GtfsRtFeed {
 
     // Return Log information about the feed with {id}
     @GET
-    @Path("/{id : \\d+}/log/{toggledData: .*}")
+    @Path("/{id : \\d+}/log/{toggledData: .*}/pagination/{currentPage: \\d+}/{rowsPerPage: \\d+}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getRtFeedLogDetails(@PathParam("id") int id, @PathParam("toggledData") String hideErrors) {
+    public Response getRtFeedLogDetails(
+            @PathParam("id") int id,
+            @PathParam("toggledData") String hideErrors,
+            @PathParam("currentPage") int currentPage,
+            @PathParam("rowsPerPage") int rowsPerPage) {
+
         List<ViewErrorLogModel> feedLog;
         String [] removeIds = hideErrors.split(",");
+
+        // Getting the value of fromRow from the rowsPerPage and currentPage values.
+        int fromRow = (currentPage - 1) * rowsPerPage;
+
         Session session = GTFSDB.InitSessionBeginTrans();
         feedLog = session.createNamedQuery("ErrorLogByrtfeedID", ViewErrorLogModel.class)
-                .setParameter(0, id).setParameter(1, id).setParameterList("errorIds", removeIds).setMaxResults(10).list();
+                .setParameter(0, id)
+                .setParameter(1, id)
+                .setParameterList("errorIds", removeIds)
+                .setFirstResult(fromRow)
+                .setMaxResults(rowsPerPage)
+                .list();
         GTFSDB.commitAndCloseSession(session);
-        for(ViewErrorLogModel viewErrorLogModel: feedLog) {
-            int index = feedLog.indexOf(viewErrorLogModel);
+        for (ViewErrorLogModel viewErrorLogModel: feedLog) {
             String formattedTimestamp = getDateFormat(viewErrorLogModel.getOccurrence(), id);
             viewErrorLogModel.setFormattedTimestamp(formattedTimestamp);
             viewErrorLogModel.setTimeZone(agencyTimezone);
@@ -210,6 +232,24 @@ public class GtfsRtFeed {
         GTFSDB.commitAndCloseSession(session);
 
         return Response.ok(uniqueResponseCount).build();
+    }
+
+    // Returns total number of Gtfs-Rt feed errors
+    @GET
+    @Path("/{id : \\d+}/errorCount")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getFeedErrorCount(
+            @PathParam("id") int id) {
+
+        List<ViewGtfsRtFeedErrorCountModel> viewGtfsRtFeedErrorCountModel;
+        Session session = GTFSDB.InitSessionBeginTrans();
+        viewGtfsRtFeedErrorCountModel = session.createNamedQuery("feedErrorCount", ViewGtfsRtFeedErrorCountModel.class)
+                .setParameter(0, id)
+                .list();
+        GTFSDB.commitAndCloseSession(session);
+        GenericEntity<List<ViewGtfsRtFeedErrorCountModel>> errorList = new GenericEntity<List<ViewGtfsRtFeedErrorCountModel>>(viewGtfsRtFeedErrorCountModel) {
+        };
+        return Response.ok(errorList).build();
     }
 
     @GET

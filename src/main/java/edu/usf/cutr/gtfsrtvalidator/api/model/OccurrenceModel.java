@@ -17,6 +17,8 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.model;
 
+import org.hibernate.annotations.Type;
+
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
@@ -43,6 +45,7 @@ public class OccurrenceModel implements Serializable {
     @Column(name="elementPath")
     private String elementPath;
     @Column(name="elementValue")
+    @Type(type = "text")
     private String elementValue;
 
     public int getOccurrenceId() {
