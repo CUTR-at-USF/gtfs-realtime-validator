@@ -83,4 +83,7 @@ public class ValidationRules {
 
     public static final ValidationRule E012 = new ValidationRule("E012", "ERROR", "Header timestamp should be greater than or equal to all other timestamps",
             "No timestamps for individual entities (TripUpdate, VehiclePosition) in the feeds should be greater than the header timestamp");
+
+    public static final ValidationRule E013 = new ValidationRule("E013", "ERROR", "Frequency type 0 trip schedule_relationship should be UNSCHEDULED or empty",
+            "For frequency-based exact_times=0 trips, schedule_relationship should be UNSCHEDULED or empty.");
 }

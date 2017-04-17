@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Nipuna Gunathilake.
+ * Copyright (C) 2017 Nipuna Gunathilake, University of South Florida
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,6 +29,7 @@ import edu.usf.cutr.gtfsrtvalidator.validation.entity.LocationTypeReferenceValid
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.StopTimeSequenceValidator;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.VehicleIdValidator;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.CheckRouteAndTripIds;
+import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.FrequencyTypeZero;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.TimestampValidation;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.VehicleTripDescriptorValidator;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
@@ -167,6 +168,7 @@ public class BackgroundTask implements Runnable {
             validationRules.add(new StopTimeSequenceValidator()); // E002
             validationRules.add(new CheckRouteAndTripIds()); // E003, E004
             validationRules.add(new LocationTypeReferenceValidator()); // E011
+            validationRules.add(new FrequencyTypeZero()); // E013
 
             for (FeedEntityValidator f : validationRules) {
                 validateEntity(combinedFeed, gtfsData, feedIteration, f);

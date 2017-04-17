@@ -29,11 +29,15 @@ import java.util.List;
 
 
 public abstract class FeedMessageTest extends TestCase {
-    
-    public GtfsDaoImpl gtfsData, gtfsData2; // gtfsData2 contains location_type = 1 for stop_id
+
+
+    public GtfsDaoImpl gtfsData;
+    public GtfsDaoImpl gtfsData2; // gtfsData2 contains location_type = 1 for stop_id
+    public GtfsDaoImpl bullRunnerGtfsData; // For Frequency-based exact_times=0 trips
     public GtfsReader reader;
     public final File staticGtfs = new File("src/test/resources/testagency.zip");
     public final File staticGtfs2 = new File("src/test/resources/testagency2.zip");
+    public final File bullRunnerGtfs = new File("src/test/resources/bullrunner-gtfs.zip");
     public final static String ENTITY_ID = "TEST_ENTITY";
     
     public List<ErrorListHelperModel> results;
@@ -68,6 +72,12 @@ public abstract class FeedMessageTest extends TestCase {
         reader = new GtfsReader();
         reader.setInputLocation(staticGtfs2);
         reader.setEntityStore(gtfsData2);
+        reader.run();
+
+        bullRunnerGtfsData = new GtfsDaoImpl();
+        reader = new GtfsReader();
+        reader.setInputLocation(bullRunnerGtfs);
+        reader.setEntityStore(bullRunnerGtfsData);
         reader.run();
         
         clearAndInitRequiredFeedFields();
