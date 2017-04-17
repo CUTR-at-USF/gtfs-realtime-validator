@@ -38,7 +38,6 @@ public class VehicleTripDescriptorValidator implements FeedEntityValidator {
      */
     @Override
     public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
-
         List<GtfsRealtime.TripUpdate> tripUpdates = new ArrayList<>();
         List<GtfsRealtime.VehiclePosition> vehiclePositions = new ArrayList<>();
         List<GtfsRealtime.Alert> alerts = new ArrayList<>();
@@ -55,7 +54,6 @@ public class VehicleTripDescriptorValidator implements FeedEntityValidator {
             }
         }
 
-        MessageLogModel messageLogModel = new MessageLogModel(ValidationRules.W003);
         List<OccurrenceModel> errorOccurrenceList = new ArrayList<>();
 
         //Should be optimized since this would be costly with a higher number of feeds
@@ -97,6 +95,6 @@ public class VehicleTripDescriptorValidator implements FeedEntityValidator {
                 }
             }
         }
-        return Arrays.asList(new ErrorListHelperModel(messageLogModel, errorOccurrenceList));
+        return Arrays.asList(new ErrorListHelperModel(new MessageLogModel(ValidationRules.W003), errorOccurrenceList));
     }
 }

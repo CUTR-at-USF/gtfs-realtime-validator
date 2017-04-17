@@ -43,10 +43,7 @@ public class CheckRouteAndTripIds implements FeedEntityValidator {
         Collection<Route> gtfsRouteList = gtfsData.getAllRoutes();
         Collection<Trip> gtfsTripList = gtfsData.getAllTrips();
 
-        MessageLogModel modelE003 = new MessageLogModel(ValidationRules.E003);
         List<OccurrenceModel> errorListE003 = new ArrayList<>();
-
-        MessageLogModel modelE004 = new MessageLogModel(ValidationRules.E004);
         List<OccurrenceModel> errorListE004 = new ArrayList<>();
 
         // Get all route_ids from the GTFS feed
@@ -90,10 +87,10 @@ public class CheckRouteAndTripIds implements FeedEntityValidator {
         }
         List<ErrorListHelperModel> errors = new ArrayList<>();
         if (!errorListE003.isEmpty()) {
-            errors.add(new ErrorListHelperModel(modelE003, errorListE003));
+            errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.E003), errorListE003));
         }
         if (!errorListE004.isEmpty()) {
-            errors.add(new ErrorListHelperModel(modelE004, errorListE004));
+            errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.E004), errorListE004));
         }
         return errors;
     }

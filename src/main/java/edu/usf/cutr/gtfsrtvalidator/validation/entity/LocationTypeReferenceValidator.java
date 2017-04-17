@@ -35,11 +35,7 @@ import java.util.*;
 public class LocationTypeReferenceValidator implements FeedEntityValidator {
     @Override
     public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
-
-        MessageLogModel messageLogModel = new MessageLogModel(ValidationRules.E011);
-        List<OccurrenceModel> errorOccurrenceList = new ArrayList<>();
-
-        //Get all Feed Entities from the GTFS feed
+        List<OccurrenceModel> e011List = new ArrayList<>();
         List<GtfsRealtime.FeedEntity> allEntities = feedMessage.getEntityList();
 
         //Get all stops from the GTFS feed
@@ -60,7 +56,7 @@ public class LocationTypeReferenceValidator implements FeedEntityValidator {
                 for (GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate : stopTimeUpdateList) {
                     if (stopTimeUpdate.hasStopId() && !stopIds.contains(stopTimeUpdate.getStopId())) {
                         OccurrenceModel errorOccurrence = new OccurrenceModel("$.entity["+ entityId +"]", stopTimeUpdate.getStopId());
-                        errorOccurrenceList.add(errorOccurrence);
+                        e011List.add(errorOccurrence);
                     }
                 }
             }
@@ -68,7 +64,7 @@ public class LocationTypeReferenceValidator implements FeedEntityValidator {
                 //VehiclePostion>stop_id
                 if(entity.getVehicle().hasStopId() && !stopIds.contains(entity.getVehicle().getStopId())){
                     OccurrenceModel errorOccurrence = new OccurrenceModel("$.entity["+ entityId +"]", entity.getVehicle().getStopId());
-                    errorOccurrenceList.add(errorOccurrence);
+                    e011List.add(errorOccurrence);
                 }
             }
             if (entity.hasAlert()) {
@@ -77,11 +73,11 @@ public class LocationTypeReferenceValidator implements FeedEntityValidator {
                 for (GtfsRealtime.EntitySelector entitySelector : informedEntityList) {
                     if (entitySelector.hasStopId() && !stopIds.contains(entitySelector.getStopId())) {
                         OccurrenceModel errorOccurrence = new OccurrenceModel("$.entity["+ entityId +"]", entitySelector.getStopId());
-                        errorOccurrenceList.add(errorOccurrence);
+                        e011List.add(errorOccurrence);
                     }
                 }
             }
         }
-        return Arrays.asList(new ErrorListHelperModel(messageLogModel, errorOccurrenceList));
+        return Arrays.asList(new ErrorListHelperModel(new MessageLogModel(ValidationRules.E011), e011List));
     }
 }

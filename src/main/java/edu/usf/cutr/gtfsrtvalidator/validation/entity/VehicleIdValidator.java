@@ -28,7 +28,6 @@ import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 
@@ -44,11 +43,9 @@ public class VehicleIdValidator implements FeedEntityValidator {
     @Override
     public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
         List<GtfsRealtime.FeedEntity> entityList = feedMessage.getEntityList();
+        List<OccurrenceModel> errorOccurrenceList = new ArrayList<>();
         int entityId = 0;
 
-        MessageLogModel messageLogModel = new MessageLogModel(ValidationRules.W002);
-
-        List<OccurrenceModel> errorOccurrenceList = new ArrayList<>();
         for (GtfsRealtime.FeedEntity entity : entityList) {
             if (entity.hasTripUpdate()) {
 
@@ -63,9 +60,10 @@ public class VehicleIdValidator implements FeedEntityValidator {
             entityId++;
         }
 
+        List<ErrorListHelperModel> errors = new ArrayList<>();
         if (!errorOccurrenceList.isEmpty()) {
-            return Arrays.asList(new ErrorListHelperModel(messageLogModel, errorOccurrenceList));
+            errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.W002), errorOccurrenceList));
         }
-        return null;
+        return errors;
     }
 }

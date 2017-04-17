@@ -38,7 +38,6 @@ public class FrequencyTypeZero implements FeedEntityValidator {
 
     @Override
     public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
-        MessageLogModel modelE013 = new MessageLogModel(ValidationRules.E013);
         List<OccurrenceModel> errorListE013 = new ArrayList<>();
 
         Collection<Frequency> frequencies = gtfsData.getAllFrequencies();
@@ -72,7 +71,7 @@ public class FrequencyTypeZero implements FeedEntityValidator {
         }
         List<ErrorListHelperModel> errors = new ArrayList<>();
         if (!errorListE013.isEmpty()) {
-            errors.add(new ErrorListHelperModel(modelE013, errorListE013));
+            errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.E013), errorListE013));
         }
         return errors;
     }

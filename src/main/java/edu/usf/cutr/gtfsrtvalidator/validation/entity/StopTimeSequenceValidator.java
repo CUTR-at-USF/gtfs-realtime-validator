@@ -22,14 +22,14 @@ import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
-import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+
+import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.E002;
 
 /**
  * ID: e002
@@ -42,10 +42,7 @@ public class StopTimeSequenceValidator implements FeedEntityValidator {
     @Override
     public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
         List<GtfsRealtime.FeedEntity> entityList = feedMessage.getEntityList();
-
-        MessageLogModel messageLogModel = new MessageLogModel(ValidationRules.E002);
         List<OccurrenceModel> errorOccurrenceList = new ArrayList<>();
-
         List<GtfsRealtime.FeedEntity> tripUpdateList = new ArrayList<>();
 
         for (GtfsRealtime.FeedEntity entity : entityList) {
@@ -71,10 +68,10 @@ public class StopTimeSequenceValidator implements FeedEntityValidator {
                 errorOccurrenceList.add(occurrenceModel);
             }
         }
-
+        List<ErrorListHelperModel> errors = new ArrayList<>();
         if (!errorOccurrenceList.isEmpty()) {
-            return Arrays.asList(new ErrorListHelperModel(messageLogModel, errorOccurrenceList));
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E002), errorOccurrenceList));
         }
-        return null;
+        return errors;
     }
 }

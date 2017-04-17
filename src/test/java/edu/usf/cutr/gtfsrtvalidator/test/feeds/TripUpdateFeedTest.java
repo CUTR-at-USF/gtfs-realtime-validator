@@ -62,7 +62,7 @@ public class TripUpdateFeedTest extends FeedMessageTest {
         assertEquals(2, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
         results = stopSequenceValidator.validate(gtfsData, feedMessageBuilder.build());
-        assertNull(results);
+        TestUtils.assertResults(ValidationRules.E002, results, 0);
         
         /* Adding stop sequence 3. So, the stop sequence now is 1, 5, 3 which is unordered.
            So, the validation fails and the assertion test passes
@@ -100,9 +100,10 @@ public class TripUpdateFeedTest extends FeedMessageTest {
         tripUpdateBuilder.setVehicle(vehicleDescriptorBuilder.build());
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        // No results, if vehicle id has a value.
+
+        // No errors, if vehicle id has a value.
         results = vehicleIdValidator.validate(gtfsData, feedMessageBuilder.build());
-        assertNull(results);
+        TestUtils.assertResults(ValidationRules.W002, results, 0);
 
         // Test with empty string for Vehicle ID, which should generate warning
         vehicleDescriptorBuilder.setId("");
