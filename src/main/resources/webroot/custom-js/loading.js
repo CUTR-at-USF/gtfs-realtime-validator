@@ -20,7 +20,10 @@ var validGtfsRT = false;
 var errorMessage = [];
 var validUrlList = {};
 validUrlList.gtfsFeeds = [];
-localStorage.setItem("reportURL", "http://localhost:8080/gtfs-rt-validator-webapp/gtfs-validator-master/gtfs-validator-webapp/index.html?report=http://localhost:8080/");
+
+var server = window.location.protocol + "//" + window.location.host;
+
+localStorage.setItem("reportURL", server + "/gtfs-rt-validator-webapp/gtfs-validator-master/gtfs-validator-webapp/index.html?report=" + server + "/");
 
 //Generic function that given a name, retrieves get parameters from the URL
 function getUrlParameter(sParam) {
@@ -129,7 +132,7 @@ function monitorGtfsRtFeeds(gtfsrtUrlList, gtfsFeedId) {
 
             $.ajax({
                 type: "POST",
-                url: "http://localhost:8080/api/gtfs-rt-feed",
+                url: server + "/api/gtfs-rt-feed",
                 headers: {
                     'Accept': '*/*',
                     'Content-Type': 'application/json'
@@ -191,7 +194,7 @@ function downloadGTFSFeed() {
 
         $.ajax({
             type: "POST",
-            url: "http://localhost:8080/api/gtfs-feed",
+            url: server + "/api/gtfs-feed",
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/x-www-form-urlencoded'
@@ -236,7 +239,7 @@ localStorage.setItem("updateInterval", getUrlParameter("updateInterval"));
 
 //Start monitoring gtfs feeds starts on click
 function startMonitoring() {
-    var path = "http://localhost:8080/monitoring.html";
+    var path = server + "/monitoring.html";
 
     var parameters = {};
 

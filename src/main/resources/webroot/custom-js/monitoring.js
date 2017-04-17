@@ -35,6 +35,8 @@ var hideErrors = [];
 var paginationLog = [];
 var paginationSummary = [];
 
+var server = window.location.protocol + "//" + window.location.host;
+
 var toggleDataOn = '<input type="checkbox" checked data-toggle="toggle" data-onstyle="success"/>';
 var toggleDataOff = '<input type="checkbox" data-toggle="toggle" data-onstyle="success"/>';
 
@@ -42,7 +44,7 @@ var toggleDataOff = '<input type="checkbox" data-toggle="toggle" data-onstyle="s
 for (var gtfsRtFeed in gtfsRtFeeds) {
     if (gtfsRtFeeds.hasOwnProperty(gtfsRtFeed)) {
         $.ajax({
-            url: "http://localhost:8080/api/gtfs-rt-feed/" + gtfsRtFeeds[gtfsRtFeed]["feedId"] + "/" + serverUpdateInterval + "/monitor",
+            url: server + "/api/gtfs-rt-feed/" + gtfsRtFeeds[gtfsRtFeed]["feedId"] + "/" + serverUpdateInterval + "/monitor",
             type: 'PUT',
             success: function (data) {
                 initializeInterface(data);
@@ -60,7 +62,7 @@ for (var gtfsRtFeed in gtfsRtFeeds) {
 }
 
 function loadGtfsErrorCount(gtfsFeedId) {
-    $.get("http://localhost:8080/api/gtfs-feed/" + gtfsFeedId + "/errorCount").done(function (data)  {
+    $.get(server + "/api/gtfs-feed/" + gtfsFeedId + "/errorCount").done(function (data)  {
         $("#gtfs-error").text(data["errorCount"]);
 
         var linkToReport = '<a href = ' + localStorage.getItem("reportURL") + localStorage.getItem("gtfsFileName") + '_out.json target="_blank">' + data["errorCount"] + ' error(s)/warning(s)</a>';
@@ -70,23 +72,23 @@ function loadGtfsErrorCount(gtfsFeedId) {
 
 function refresh(id) {
 
-    $.get("http://localhost:8080/api/gtfs-rt-feed/" + id + "/feedIterations").done(function (data) {
+    $.get(server + "/api/gtfs-rt-feed/" + id + "/feedIterations").done(function (data) {
         updateRequestData(id, data);
     });
 
-    $.get("http://localhost:8080/api/gtfs-rt-feed/" + id + "/uniqueResponses").done(function (data) {
+    $.get(server + "/api/gtfs-rt-feed/" + id + "/uniqueResponses").done(function (data) {
         updateUniqueFeedResponseData(id, data);
     })
 
-    $.get("http://localhost:8080/api/gtfs-rt-feed/" + id + "/errorCount").done(function (errorData) {
+    $.get(server + "/api/gtfs-rt-feed/" + id + "/errorCount").done(function (errorData) {
         updatePaginationSummaryData(id, errorData);
         updatePaginationLogData(id, errorData);
 
-        $.get("http://localhost:8080/api/gtfs-rt-feed/" + id + "/summary/pagination/" + paginationSummary[id]["currentPage"] + "/" + paginationSummary[id]["rowsPerPage"]).done(function (summaryData) {
+        $.get(server + "/api/gtfs-rt-feed/" + id + "/summary/pagination/" + paginationSummary[id]["currentPage"] + "/" + paginationSummary[id]["rowsPerPage"]).done(function (summaryData) {
             updateSummaryTables(id, summaryData);
         });
 
-        $.get("http://localhost:8080/api/gtfs-rt-feed/" + id + "/log/" + hideErrors[id] + "/pagination/" + paginationLog[id]["currentPage"] + "/" + paginationLog[id]["rowsPerPage"]).done(function (logData) {
+        $.get(server + "/api/gtfs-rt-feed/" + id + "/log/" + hideErrors[id] + "/pagination/" + paginationLog[id]["currentPage"] + "/" + paginationLog[id]["rowsPerPage"]).done(function (logData) {
             updateLogTables(id, logData);
         });
     });
@@ -123,7 +125,7 @@ function updateSummaryTables(index, data) {
                 paginationSummary[index]["currentPage"] = page["currentPage"];
                 paginationSummary[index]["rowsPerPage"] = page["rowsPerPage"];
                 paginationSummary[index]["totalPages"] = Math.ceil(paginationSummary[index]["totalRows"] / paginationSummary[index]["rowsPerPage"]);
-                $.get("http://localhost:8080/api/gtfs-rt-feed/" + index + "/summary/pagination/" + paginationSummary[index]["currentPage"] + "/" + paginationSummary[index]["rowsPerPage"]).done(function (data) {
+                $.get(server + "/api/gtfs-rt-feed/" + index + "/summary/pagination/" + paginationSummary[index]["currentPage"] + "/" + paginationSummary[index]["rowsPerPage"]).done(function (data) {
                     updateSummaryTables(index, data);
                 });
             },
@@ -180,7 +182,7 @@ function updateLogTables(index, data) {
                 paginationLog[index]["currentPage"] = page["currentPage"];
                 paginationLog[index]["rowsPerPage"] = page["rowsPerPage"];
                 paginationLog[index]["totalPages"] = Math.ceil(paginationLog[index]["totalRows"] / paginationLog[index]["rowsPerPage"]);
-                $.get("http://localhost:8080/api/gtfs-rt-feed/" + index + "/log/" + hideErrors[index] + "/pagination/" + paginationLog[index]["currentPage"] + "/" + paginationLog[index]["rowsPerPage"]).done(function (data) {
+                $.get(server + "/api/gtfs-rt-feed/" + index + "/log/" + hideErrors[index] + "/pagination/" + paginationLog[index]["currentPage"] + "/" + paginationLog[index]["rowsPerPage"]).done(function (data) {
                     updateLogTables(index, data);
                 });
             },
@@ -259,10 +261,10 @@ function showOrHideError(gtfsRtId, errorId) {
         hideErrors[gtfsRtId].splice(hideErrors[gtfsRtId].indexOf(errorId), 1);
     }
 
-    $.get("http://localhost:8080/api/gtfs-rt-feed/" + gtfsRtId + "/errorCount").done(function (errorData) {
+    $.get(server + "/api/gtfs-rt-feed/" + gtfsRtId + "/errorCount").done(function (errorData) {
         updatePaginationLogData(gtfsRtId, errorData);
         // Request data based on 'hideErrors' and 'paginationLog' data
-        $.get("http://localhost:8080/api/gtfs-rt-feed/" + gtfsRtId + "/log/" + hideErrors[gtfsRtId] + "/pagination/" + paginationLog[gtfsRtId]["currentPage"] + "/" + paginationLog[gtfsRtId]["rowsPerPage"]).done(function (logData) {
+        $.get(server + "/api/gtfs-rt-feed/" + gtfsRtId + "/log/" + hideErrors[gtfsRtId] + "/pagination/" + paginationLog[gtfsRtId]["currentPage"] + "/" + paginationLog[gtfsRtId]["rowsPerPage"]).done(function (logData) {
 
             // Store current position for later use
             var scrollPosition = document.body.scrollTop;
@@ -308,7 +310,7 @@ function updatePaginationInfo(logOrSumary, index, paginationInfo) {
 }
 
 function showFeedMessage(iterationId, timestamp, occurrence) {
-    $.get("http://localhost:8080/api/gtfs-rt-feed/" + iterationId + "/feedMessage").done(function (data) {
+    $.get(server + "/api/gtfs-rt-feed/" + iterationId + "/feedMessage").done(function (data) {
         var jsonFeed = JSON.stringify(data, undefined, 2);
         var feedTemplateScript = $("#gtfs-rt-feed-message").html();
         $(".feedMessageDialog").html(feedTemplateScript);
