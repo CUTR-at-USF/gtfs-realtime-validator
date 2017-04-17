@@ -19,7 +19,7 @@
  * Created by nipuna on 8/21/15.
  */
 
-$.get("http://localhost:8080/getFeed")
+$.get(window.location.protocol + "//" + window.location.host + "/getFeed")
     .done(function (data) {
 
         var res1 = jsonPath(data, "$.entity.*");
