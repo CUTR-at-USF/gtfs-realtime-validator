@@ -191,8 +191,8 @@
         <td>{{title}}</td>
 
         <td>{{severity}}</td>
-        <td>{{lastIterationId}}</td>
-        <td title="Time zone: {{timeZone}}">{{formattedTimestamp}} ({{lastTime}})</td>
+        <td>{{lastRowId}}</td>
+        <td title="Time zone: {{timeZone}}">{{formattedTimestamp}} ({{lastFeedTime}})</td>
 
         <td>{{count}}</td>
         <td><span class="toggleHolder{{gtfsRtId}}" id="toggleId{{gtfsRtId}}{{id}}"></span></td>
@@ -203,7 +203,7 @@
 <script id="feed-monitor-log-row-template" type="text/x-handlebars-template">
     {{#each this}}
     <tr>
-        <td><a href="#" onclick="showFeedMessage({{iterationId}}, '{{formattedTimestamp}}', {{occurrence}}); return false;">{{iterationId}}</a></td>
+        <td><a href="#" onclick="showFeedMessage({{iterationId}}, '{{formattedTimestamp}}', {{occurrence}}); return false;">{{rowId}}</a></td>
         <td>{{id}}</td>
         <td>{{title}}</td>
 

@@ -28,8 +28,9 @@ public class GtfsRtFeedIterationModel implements Serializable {
 
     public GtfsRtFeedIterationModel() {}
 
-    public GtfsRtFeedIterationModel(long timeStamp, byte[] feedprotobuf, GtfsRtFeedModel gtfsRtFeedModel, byte[] feedHash) {
+    public GtfsRtFeedIterationModel(long timeStamp, long feedTimestamp, byte[] feedprotobuf, GtfsRtFeedModel gtfsRtFeedModel, byte[] feedHash) {
         this.timeStamp = timeStamp;
+        this.feedTimestamp = feedTimestamp;
         this.feedprotobuf = feedprotobuf;
         this.gtfsRtFeedModel = gtfsRtFeedModel;
         this.feedHash = feedHash;
@@ -41,6 +42,8 @@ public class GtfsRtFeedIterationModel implements Serializable {
     private int IterationId;
     @Column(name="IterationTimestamp")
     private long timeStamp;
+    @Column(name = "feedTimestamp")
+    private long feedTimestamp;
     @Column(name="feedProtobuf")
     @Lob
     private byte[] feedprotobuf;
@@ -72,6 +75,14 @@ public class GtfsRtFeedIterationModel implements Serializable {
 
     public void setTimeStamp(long timeStamp) {
         this.timeStamp = timeStamp;
+    }
+
+    public long getFeedTimestamp() {
+        return feedTimestamp;
+    }
+
+    public void setFeedTimestamp(long feedTimestamp) {
+        this.feedTimestamp = feedTimestamp;
     }
 
     public byte[] getFeedprotobuf() {

@@ -24,7 +24,6 @@ import edu.usf.cutr.gtfsrtvalidator.api.resource.GtfsFeed;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.helper.DBHelper;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
-import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.StopTimeSequenceValidator;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.StopValidator;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.VehicleValidator;
@@ -132,6 +131,8 @@ public class BackgroundTask implements Runnable {
                 InputStream is = new ByteArrayInputStream(gtfsRtProtobuf);
                 currentFeedMessage = GtfsRealtime.FeedMessage.parseFrom(is);
 
+                long feedTimestamp = TimeUnit.SECONDS.toMillis(currentFeedMessage.getHeader().getTimestamp());
+
                 // Create new feedIteration object and save the iteration to the database
                 if(isUniqueFeed) {
                     if (feedIteration != null && feedIteration.getFeedprotobuf() != null) {
@@ -140,9 +141,9 @@ public class BackgroundTask implements Runnable {
                         previousFeedMessage = GtfsRealtime.FeedMessage.parseFrom(previousIs);
                     }
 
-                    feedIteration = new GtfsRtFeedIterationModel(TimeStampHelper.getCurrentTimestamp(), gtfsRtProtobuf, mCurrentGtfsRtFeed, currentFeedDigest);
+                    feedIteration = new GtfsRtFeedIterationModel(System.currentTimeMillis(), feedTimestamp, gtfsRtProtobuf, mCurrentGtfsRtFeed, currentFeedDigest);
                 } else {
-                    feedIteration = new GtfsRtFeedIterationModel(TimeStampHelper.getCurrentTimestamp(), null, mCurrentGtfsRtFeed, currentFeedDigest);
+                    feedIteration = new GtfsRtFeedIterationModel(System.currentTimeMillis(), feedTimestamp, null, mCurrentGtfsRtFeed, currentFeedDigest);
                 }
                 session.save(feedIteration);
                 GTFSDB.commitAndCloseSession(session);

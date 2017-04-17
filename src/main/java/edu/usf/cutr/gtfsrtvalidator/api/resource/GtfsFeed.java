@@ -26,7 +26,6 @@ import com.conveyal.gtfs.validator.json.serialization.JsonSerializer;
 import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsFeedModel;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.helper.GetFile;
-import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
 import org.hibernate.Session;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.onebusaway.gtfs.serialization.GtfsReader;
@@ -262,7 +261,7 @@ public class GtfsFeed {
         gtfsFeed = new GtfsFeedModel();
         gtfsFeed.setFeedLocation(saveFilePath);
         gtfsFeed.setGtfsUrl(gtfsFeedUrl);
-        gtfsFeed.setStartTime(TimeStampHelper.getCurrentTimestamp());
+        gtfsFeed.setStartTime(System.currentTimeMillis());
         
         byte[] checksum = calculateMD5checksum(saveFilePath);
         gtfsFeed.setChecksum(checksum);

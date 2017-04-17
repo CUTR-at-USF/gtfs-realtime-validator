@@ -94,4 +94,10 @@ public class GTFSDB {
                     session.close();
         }   
     }
+
+    public static void closeSession(Session session) {
+        if(session != null) {
+            session.close();
+        }
+    }
 }

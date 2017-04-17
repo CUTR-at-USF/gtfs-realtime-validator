@@ -72,25 +72,9 @@ function loadGtfsErrorCount(gtfsFeedId) {
 
 function refresh(id) {
 
-    $.get(server + "/api/gtfs-rt-feed/" + id + "/feedIterations").done(function (data) {
-        updateRequestData(id, data);
-    });
-
-    $.get(server + "/api/gtfs-rt-feed/" + id + "/uniqueResponses").done(function (data) {
-        updateUniqueFeedResponseData(id, data);
-    })
-
-    $.get(server + "/api/gtfs-rt-feed/" + id + "/errorCount").done(function (errorData) {
-        updatePaginationSummaryData(id, errorData);
-        updatePaginationLogData(id, errorData);
-
-        $.get(server + "/api/gtfs-rt-feed/" + id + "/summary/pagination/" + paginationSummary[id]["currentPage"] + "/" + paginationSummary[id]["rowsPerPage"]).done(function (summaryData) {
-            updateSummaryTables(id, summaryData);
-        });
-
-        $.get(server + "/api/gtfs-rt-feed/" + id + "/log/" + hideErrors[id] + "/pagination/" + paginationLog[id]["currentPage"] + "/" + paginationLog[id]["rowsPerPage"]).done(function (logData) {
-            updateLogTables(id, logData);
-        });
+    $.get(server + "/api/gtfs-rt-feed/" + id + "/summary/pagination/" + paginationSummary[id]["currentPage"] + "/" + paginationSummary[id]["rowsPerPage"] +
+            "/log/" + hideErrors[id] + "/pagination/" + paginationLog[id]["currentPage"] + "/" + paginationLog[id]["rowsPerPage"]).done(function (data) {
+        updateMonitorData(id, data);
     });
 }
 
@@ -112,6 +96,16 @@ function initializeInterface(gtfsRtFeeds) {
     $('.monitor-placeholder').append(compiledHtml);
 }
 
+// Update Monitor data from 'MergeMonitorData.java'
+function updateMonitorData(id, data) {
+    updateRequestData(id, data["iterationCount"]);
+    updateUniqueFeedResponseData(id, data["uniqueFeedCount"]);
+    updatePaginationSummaryData(id, data["viewGtfsRtFeedErrorCountModelList"]);
+    updatePaginationLogData(id, data["viewGtfsRtFeedErrorCountModelList"]);
+    updateSummaryTables(id, data["viewErrorSummaryModelList"]);
+    updateLogTables(id, data["viewErrorLogModelList"]);
+}
+
 function updateSummaryTables(index, data) {
 
     var monitorTemplateScript = $("#feed-monitor-summary-row-template").html();
@@ -125,9 +119,8 @@ function updateSummaryTables(index, data) {
                 paginationSummary[index]["currentPage"] = page["currentPage"];
                 paginationSummary[index]["rowsPerPage"] = page["rowsPerPage"];
                 paginationSummary[index]["totalPages"] = Math.ceil(paginationSummary[index]["totalRows"] / paginationSummary[index]["rowsPerPage"]);
-                $.get(server + "/api/gtfs-rt-feed/" + index + "/summary/pagination/" + paginationSummary[index]["currentPage"] + "/" + paginationSummary[index]["rowsPerPage"]).done(function (data) {
-                    updateSummaryTables(index, data);
-                });
+
+                refresh(id);
             },
             rowsPerPage: paginationSummary[index]["rowsPerPage"],
             totalPages: paginationSummary[index]["totalPages"],
@@ -182,9 +175,8 @@ function updateLogTables(index, data) {
                 paginationLog[index]["currentPage"] = page["currentPage"];
                 paginationLog[index]["rowsPerPage"] = page["rowsPerPage"];
                 paginationLog[index]["totalPages"] = Math.ceil(paginationLog[index]["totalRows"] / paginationLog[index]["rowsPerPage"]);
-                $.get(server + "/api/gtfs-rt-feed/" + index + "/log/" + hideErrors[index] + "/pagination/" + paginationLog[index]["currentPage"] + "/" + paginationLog[index]["rowsPerPage"]).done(function (data) {
-                    updateLogTables(index, data);
-                });
+
+                refresh(index);
             },
             rowsPerPage: paginationLog[index]["rowsPerPage"],
             totalPages: paginationLog[index]["totalPages"],
@@ -201,7 +193,7 @@ function updateLogTables(index, data) {
 }
 
 function updateRequestData(id, data) {
-    requests[id] = data["iterationCount"];
+    requests[id] = data;
     $("#requests-" + id + "").text(requests[id]);
     for(var id in requests) {
         if(requests.hasOwnProperty(id)) {
@@ -213,7 +205,7 @@ function updateRequestData(id, data) {
 }
 
 function updateUniqueFeedResponseData(id, data) {
-    responses[id] = data["uniqueFeedCount"];
+    responses[id] = data;
     $("#responses-" + id + "").text(responses[id]);
     for(var id in responses) {
         if(responses.hasOwnProperty(id)) {
@@ -260,20 +252,12 @@ function showOrHideError(gtfsRtId, errorId) {
     else {
         hideErrors[gtfsRtId].splice(hideErrors[gtfsRtId].indexOf(errorId), 1);
     }
+    // Store current position for later use
+    var scrollPosition = document.body.scrollTop;
 
-    $.get(server + "/api/gtfs-rt-feed/" + gtfsRtId + "/errorCount").done(function (errorData) {
-        updatePaginationLogData(gtfsRtId, errorData);
-        // Request data based on 'hideErrors' and 'paginationLog' data
-        $.get(server + "/api/gtfs-rt-feed/" + gtfsRtId + "/log/" + hideErrors[gtfsRtId] + "/pagination/" + paginationLog[gtfsRtId]["currentPage"] + "/" + paginationLog[gtfsRtId]["rowsPerPage"]).done(function (logData) {
+    refresh(gtfsRtId);
 
-            // Store current position for later use
-            var scrollPosition = document.body.scrollTop;
-
-            updateLogTables(gtfsRtId, logData);
-
-            $('html, body').animate({scrollTop: scrollPosition}, 1);
-        });
-    });
+    $('html, body').animate({scrollTop: scrollPosition}, 1);
 }
 
 function updatePaginationSummaryData(index, data) {

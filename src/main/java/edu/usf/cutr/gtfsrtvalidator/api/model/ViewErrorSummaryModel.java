@@ -24,30 +24,54 @@ import java.io.Serializable;
 @XmlRootElement
 @Entity
 @NamedNativeQuery(name = "ErrorSummaryByrtfeedID",
-    query = "SELECT ? AS rtFeedID, Error.errorID AS id, Error.title, " +
-              "Error.severity, errorCount.totalCount, " +
-              "errorCount.IterationTimestamp AS lastTime, " +
-              "errorCount.lastIterationId " +
+    query = "SELECT ? AS rtFeedID, errorID AS id, " +
+                "title, severity, totalCount, lastTime, " +
+                "lastFeedTime, lastIterationId, lastRowId " +
             "FROM Error " +
-            "INNER JOIN " +
-              "(SELECT errorID, count(*) AS totalCount, " +
-                "MAX(IterationTimestamp)  AS IterationTimestamp, " +
-                "MAX(IterationID) AS lastIterationId " +
-              "FROM MessageLog " +
-              "INNER JOIN  " +
-                "(SELECT IterationID, IterationTimestamp " +
-                "FROM GtfsRtFeedIteration " +
-                "WHERE rtFeedID = ?) GtfsRtFeedIDIteration " +
-              "ON MessageLog.iterationID = GtfsRtFeedIDIteration.IterationID " +
-            "GROUP BY errorID) errorCount " +
-            "ON Error.errorID = errorCount.errorID ",
-    resultClass = ViewErrorSummaryModel.class)
-public class ViewErrorSummaryModel implements Serializable {
+                "INNER JOIN " +
+                "(SELECT errorID, MAX(rowIdentifier) AS lastRowId, " +
+                    "count(*) AS totalCount, MAX(iterationId) AS lastIterationId, " +
+                    "MAX(iterationTimestamp) AS lastTime, " +
+                    "MAX(feedTimestamp) AS lastFeedTime " +
+                "FROM MessageLog " +
+                    "INNER JOIN " +
+                    // Retrieve rowIdentifier for each of unique (iterationId, iterationTimestamp)
+                    "(SELECT ROWNUM() AS rowIdentifier, " +
+                        "IterationID AS iterationId, " +
+                        "IterationTimestamp AS iterationTimestamp, feedTimestamp " +
+                    "FROM " +
+                        // Retrieve unique IterationID and IterationTimestamp, so that we can get ROWNUM in sequence
+                        "(SELECT DISTINCT errorLog.IterationID, errorLog.IterationTimestamp, " +
+                            "errorLog.feedTimestamp " +
+                        "FROM " +
+                            "(SELECT GtfsRtFeedIDIteration.IterationID, " +
+                                "GtfsRtFeedIDIteration.IterationTimestamp, " +
+                                "GtfsRtFeedIDIteration.feedTimestamp " +
+                            "FROM MessageLog " +
+                                "INNER JOIN " +
+                                "(SELECT  IterationID, IterationTimestamp, feedTimestamp " +
+                                "FROM GtfsRtFeedIteration " +
+                                "WHERE rtFeedID = ?) GtfsRtFeedIDIteration " +
+                            "ON MessageLog.iterationID = GtfsRtFeedIDIteration.IterationID " +
+                                "AND IterationTimestamp > ? " +
+                            ") errorLog " +
+                            "ORDER BY iterationId " +
+                        ") " +
+                    ") UniqueRowIdResult " +
+                "ON MessageLog.iterationID = UniqueRowIdResult.iterationId " +
+                "GROUP BY errorId " +
+                ") ErrorCount " +
+            "ON Error.errorID = ErrorCount.errorId " +
+            "ORDER BY Error.errorID ",
+        resultClass = ViewErrorSummaryModel.class)
+public class ViewErrorSummaryModel implements Serializable{
 
     @Column(name="rtFeedID")
     private int gtfsRtId;
     @Column(name="lastTime")
     private long lastTime;
+    @Column(name = "lastFeedTime")
+    private long lastFeedTime;
     @Column(name="totalCount")
     private int count; // total number of error or warning count
     @Id
@@ -59,6 +83,8 @@ public class ViewErrorSummaryModel implements Serializable {
     private String title;
     @Column(name = "lastIterationId")
     private int lastIterationId;
+    @Column(name = "lastRowId")
+    private int lastRowId;
     @Transient
     private String formattedTimestamp;
     @Transient
@@ -78,6 +104,14 @@ public class ViewErrorSummaryModel implements Serializable {
 
     public void setLastTime(long lastTime) {
         this.lastTime = lastTime;
+    }
+
+    public long getLastFeedTime() {
+        return lastFeedTime;
+    }
+
+    public void setLastFeedTime(long lastFeedTime) {
+        this.lastFeedTime = lastFeedTime;
     }
 
     public int getCount() {
@@ -133,5 +167,32 @@ public class ViewErrorSummaryModel implements Serializable {
 
     public void setLastIterationId(int lastIterationId) {
         this.lastIterationId = lastIterationId;
+    }
+
+    public int getLastRowId() {
+        return lastRowId;
+    }
+
+    public void setLastRowId(int lastRowId) {
+        this.lastRowId = lastRowId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        ViewErrorSummaryModel that = (ViewErrorSummaryModel) o;
+        return this.id == null ? that.id == null : this.id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id == null ? 0 : id.hashCode();
     }
 }
