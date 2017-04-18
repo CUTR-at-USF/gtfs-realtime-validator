@@ -26,10 +26,7 @@ import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * ID: e010
@@ -38,23 +35,21 @@ import java.util.List;
 public class StopLocationTypeValidator implements GtfsFeedValidator {
     @Override
     public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData) {
-        List<OccurrenceModel> errorOccurrenceList = new ArrayList<>();
+        List<OccurrenceModel> occurrenceList = new ArrayList<>();
         Collection<StopTime> stopTimes = gtfsData.getAllStopTimes();
 
-        List<Stop> checkedStops = new ArrayList<>();
+        Set<Stop> checkedStops = new HashSet<>();
 
         for (StopTime stopTime : stopTimes) {
-            // Create error occurrence if the location type is not equal to 0
-
             if (!checkedStops.contains(stopTime.getStop())) {
                 checkedStops.add(stopTime.getStop());
 
                 if (stopTime.getStop().getLocationType() != 0) {
-                    OccurrenceModel occurrenceModel = new OccurrenceModel("stop_id " + stopTime.getStop().getId());
-                    errorOccurrenceList.add(occurrenceModel);
+                    OccurrenceModel om = new OccurrenceModel("stop_id " + stopTime.getStop().getId());
+                    occurrenceList.add(om);
                 }
             }
         }
-        return Arrays.asList(new ErrorListHelperModel(new MessageLogModel(ValidationRules.E010), errorOccurrenceList));
+        return Arrays.asList(new ErrorListHelperModel(new MessageLogModel(ValidationRules.E010), occurrenceList));
     }
 }
