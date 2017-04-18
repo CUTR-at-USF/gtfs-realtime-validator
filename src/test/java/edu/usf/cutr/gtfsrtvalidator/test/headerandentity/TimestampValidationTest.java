@@ -45,7 +45,13 @@ public class TimestampValidationTest extends FeedMessageTest {
         TimestampValidation timestampValidation = new TimestampValidation();
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
 
+
         // Timestamp will be zero initially in FeedHeader, TripUpdate and VehiclePosition. Should return 3 results.
+        vehiclePositionBuilder.setVehicle(GtfsRealtime.VehicleDescriptor.newBuilder());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
         results = timestampValidation.validate(gtfsData, feedMessageBuilder.build());
         TestUtils.assertResults(W001, results, 3);
 

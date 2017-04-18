@@ -51,7 +51,6 @@ public class TimestampValidation implements FeedEntityValidator{
         /**
          * Validate FeedHeader timestamp - W001 and E001
          */
-
         long headerTimestamp = feedMessage.getHeader().getTimestamp();
         if (headerTimestamp == 0) {
             OccurrenceModel errorW001 = new OccurrenceModel("header");
@@ -66,75 +65,84 @@ public class TimestampValidation implements FeedEntityValidator{
         }
 
         for (GtfsRealtime.FeedEntity entity : feedMessage.getEntityList()) {
-            GtfsRealtime.TripUpdate tripUpdate = entity.getTripUpdate();
-            long tripUpdateTimestamp = tripUpdate.getTimestamp();
-            GtfsRealtime.VehiclePosition vehiclePosition = entity.getVehicle();
-            long vehicleTimestamp = vehiclePosition.getTimestamp();
+            if (entity.hasTripUpdate()) {
+                GtfsRealtime.TripUpdate tripUpdate = entity.getTripUpdate();
+                long tripUpdateTimestamp = tripUpdate.getTimestamp();
 
-            /**
-             * Validate VehiclePosition and TripUpdate timestamps - W001, E001, E012
-             */
-            if (tripUpdateTimestamp == 0) {
-                OccurrenceModel errorW001 = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId());
-                w001List.add(errorW001);
-                _log.debug(errorW001.getPrefix() + " " + W001.getOccurrenceSuffix());
-            } else {
-                if (headerTimestamp != 0 && tripUpdateTimestamp > headerTimestamp) {
-                    OccurrenceModel errorE012 = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() + " timestamp " + tripUpdateTimestamp);
-                    e012List.add(errorE012);
-                    _log.debug(errorE012.getPrefix() + " " + E012.getOccurrenceSuffix());
+                /**
+                 * Validate TripUpdate timestamps - W001, E001, E012
+                 */
+                if (tripUpdateTimestamp == 0) {
+                    OccurrenceModel errorW001 = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId());
+                    w001List.add(errorW001);
+                    _log.debug(errorW001.getPrefix() + " " + W001.getOccurrenceSuffix());
+                } else {
+                    if (headerTimestamp != 0 && tripUpdateTimestamp > headerTimestamp) {
+                        OccurrenceModel errorE012 = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() + " timestamp " + tripUpdateTimestamp);
+                        e012List.add(errorE012);
+                        _log.debug(errorE012.getPrefix() + " " + E012.getOccurrenceSuffix());
+                    }
+                    if (!isPosix(tripUpdateTimestamp)) {
+                        OccurrenceModel errorE001 = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() + " timestamp " + tripUpdateTimestamp);
+                        e001List.add(errorE001);
+                        _log.debug(errorE001.getPrefix() + " " + E001.getOccurrenceSuffix());
+                    }
                 }
-                if (!isPosix(tripUpdateTimestamp)) {
-                    OccurrenceModel errorE001 = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() + " timestamp " + tripUpdateTimestamp);
-                    e001List.add(errorE001);
-                    _log.debug(errorE001.getPrefix() + " " + E001.getOccurrenceSuffix());
-                }
-            }
-            if (vehicleTimestamp == 0) {
-                OccurrenceModel errorW001 = new OccurrenceModel("vehicle_id " + vehiclePosition.getVehicle().getId());
-                w001List.add(errorW001);
-                _log.debug(errorW001.getPrefix() + " " + W001.getOccurrenceSuffix());
-            } else {
-                if (headerTimestamp != 0 && vehicleTimestamp > headerTimestamp) {
-                    OccurrenceModel errorE012 = new OccurrenceModel("vehicle_id " + vehiclePosition.getVehicle().getId() + " timestamp " + vehicleTimestamp);
-                    e012List.add(errorE012);
-                    _log.debug(errorE012.getPrefix() + " " + E012.getOccurrenceSuffix());
-                }
-                if (!isPosix(vehicleTimestamp)) {
-                    OccurrenceModel errorE001 = new OccurrenceModel("vehicle_id " + vehiclePosition.getVehicle().getId() + " timestamp " + tripUpdateTimestamp);
-                    e001List.add(errorE001);
-                    _log.debug(errorE001.getPrefix() + " " + E001.getOccurrenceSuffix());
-                }
-            }
 
-            /**
-             * Validate TripUpdate StopTimeUpdate times - E001
-             */
-            List<GtfsRealtime.TripUpdate.StopTimeUpdate> stopTimeUpdates = tripUpdate.getStopTimeUpdateList();
-            if (stopTimeUpdates != null) {
-                for (GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate : stopTimeUpdates) {
-                    if (stopTimeUpdate.hasArrival()) {
-                        if (stopTimeUpdate.getArrival().hasTime()) {
-                            if (!isPosix(stopTimeUpdate.getArrival().getTime())) {
-                                OccurrenceModel errorE001 = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() +
-                                        " stop_time_update " + stopTimeUpdate.getStopSequence() +
-                                        " arrival time " + stopTimeUpdate.getArrival().getTime());
-                                e001List.add(errorE001);
-                                _log.debug(errorE001.getPrefix() + " " + E001.getOccurrenceSuffix());
+                /**
+                 * Validate TripUpdate StopTimeUpdate times - E001
+                 */
+                List<GtfsRealtime.TripUpdate.StopTimeUpdate> stopTimeUpdates = tripUpdate.getStopTimeUpdateList();
+                if (stopTimeUpdates != null) {
+                    for (GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate : stopTimeUpdates) {
+                        if (stopTimeUpdate.hasArrival()) {
+                            if (stopTimeUpdate.getArrival().hasTime()) {
+                                if (!isPosix(stopTimeUpdate.getArrival().getTime())) {
+                                    OccurrenceModel errorE001 = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() +
+                                            " stop_time_update " + stopTimeUpdate.getStopSequence() +
+                                            " arrival time " + stopTimeUpdate.getArrival().getTime());
+                                    e001List.add(errorE001);
+                                    _log.debug(errorE001.getPrefix() + " " + E001.getOccurrenceSuffix());
+                                }
+                            }
+                        }
+
+                        if (stopTimeUpdate.hasDeparture()) {
+                            if (stopTimeUpdate.getDeparture().hasTime()) {
+                                if (!isPosix(stopTimeUpdate.getDeparture().getTime())) {
+                                    OccurrenceModel errorE001 = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() +
+                                            " stop_time_update " + stopTimeUpdate.getStopSequence() +
+                                            " arrival time " + stopTimeUpdate.getDeparture().getTime());
+                                    e001List.add(errorE001);
+                                    _log.debug(errorE001.getPrefix() + " " + E001.getOccurrenceSuffix());
+                                }
                             }
                         }
                     }
+                }
+            }
 
-                    if (stopTimeUpdate.hasDeparture()) {
-                        if (stopTimeUpdate.getDeparture().hasTime()) {
-                            if (!isPosix(stopTimeUpdate.getDeparture().getTime())) {
-                                OccurrenceModel errorE001 = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() +
-                                        " stop_time_update " + stopTimeUpdate.getStopSequence() +
-                                        " arrival time " + stopTimeUpdate.getDeparture().getTime());
-                                e001List.add(errorE001);
-                                _log.debug(errorE001.getPrefix() + " " + E001.getOccurrenceSuffix());
-                            }
-                        }
+            /**
+             * Validate VehiclePosition timestamps - W001, E001, E012
+             */
+            if (entity.hasVehicle()) {
+                GtfsRealtime.VehiclePosition vehiclePosition = entity.getVehicle();
+                long vehicleTimestamp = vehiclePosition.getTimestamp();
+
+                if (vehicleTimestamp == 0) {
+                    OccurrenceModel errorW001 = new OccurrenceModel("vehicle_id " + vehiclePosition.getVehicle().getId());
+                    w001List.add(errorW001);
+                    _log.debug(errorW001.getPrefix() + " " + W001.getOccurrenceSuffix());
+                } else {
+                    if (headerTimestamp != 0 && vehicleTimestamp > headerTimestamp) {
+                        OccurrenceModel errorE012 = new OccurrenceModel("vehicle_id " + vehiclePosition.getVehicle().getId() + " timestamp " + vehicleTimestamp);
+                        e012List.add(errorE012);
+                        _log.debug(errorE012.getPrefix() + " " + E012.getOccurrenceSuffix());
+                    }
+                    if (!isPosix(vehicleTimestamp)) {
+                        OccurrenceModel errorE001 = new OccurrenceModel("vehicle_id " + vehiclePosition.getVehicle().getId() + " timestamp " + vehicleTimestamp);
+                        e001List.add(errorE001);
+                        _log.debug(errorE001.getPrefix() + " " + E001.getOccurrenceSuffix());
                     }
                 }
             }
@@ -142,23 +150,25 @@ public class TimestampValidation implements FeedEntityValidator{
             /**
              * Validate Alert time ranges - E001
              */
-            GtfsRealtime.Alert alert = entity.getAlert();
-            if (alert != null) {
-                List<GtfsRealtime.TimeRange> activePeriods = alert.getActivePeriodList();
-                if (activePeriods != null) {
-                    for (GtfsRealtime.TimeRange range : activePeriods) {
-                        if (range.hasStart()) {
-                            if (!isPosix(range.getStart())) {
-                                OccurrenceModel errorE001 = new OccurrenceModel("alert in entity " + entity + " active_period.start " + range.getStart());
-                                e001List.add(errorE001);
-                                _log.debug(errorE001.getPrefix() + " " + E001.getOccurrenceSuffix());
+            if (entity.hasAlert()) {
+                GtfsRealtime.Alert alert = entity.getAlert();
+                if (alert != null) {
+                    List<GtfsRealtime.TimeRange> activePeriods = alert.getActivePeriodList();
+                    if (activePeriods != null) {
+                        for (GtfsRealtime.TimeRange range : activePeriods) {
+                            if (range.hasStart()) {
+                                if (!isPosix(range.getStart())) {
+                                    OccurrenceModel errorE001 = new OccurrenceModel("alert in entity " + entity + " active_period.start " + range.getStart());
+                                    e001List.add(errorE001);
+                                    _log.debug(errorE001.getPrefix() + " " + E001.getOccurrenceSuffix());
+                                }
                             }
-                        }
-                        if (range.hasEnd()) {
-                            if (!isPosix(range.getEnd())) {
-                                OccurrenceModel errorE001 = new OccurrenceModel("alert in entity " + entity + " active_period.end " + range.getEnd());
-                                e001List.add(errorE001);
-                                _log.debug(errorE001.getPrefix() + " " + E001.getOccurrenceSuffix());
+                            if (range.hasEnd()) {
+                                if (!isPosix(range.getEnd())) {
+                                    OccurrenceModel errorE001 = new OccurrenceModel("alert in entity " + entity + " active_period.end " + range.getEnd());
+                                    e001List.add(errorE001);
+                                    _log.debug(errorE001.getPrefix() + " " + E001.getOccurrenceSuffix());
+                                }
                             }
                         }
                     }
