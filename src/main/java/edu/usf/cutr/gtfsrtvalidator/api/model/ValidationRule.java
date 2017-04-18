@@ -34,22 +34,45 @@ public class ValidationRule implements Serializable {
     @Id
     @Column(name="errorID")
     private String errorId;
+
     @Column(name = "severity")
     private String severity;
+
     @Column(name = "title")
     @Type(type = "text")
     private String title;
+
     @Column(name="errorDescription")
     @Type(type = "text")
     private String errorDescription;
 
-    public ValidationRule() {}
+    /**
+     * Text used to help describe an occurrence of this warning/error following the specific elements that it relates to.
+     * <p>
+     * For example, for E004 "GTFS-rt trip_ids must appear in GTFS data", the error message we want to show the user could be
+     * * "trip_id 6234 doesn't appear in the GTFS data"
+     * <p>
+     * For this message, the occurenceSuffix would be:
+     * * "doesn't appear in the GTFS data"
+     * <p>
+     * And the first part of the text (stored in OccurrenceModel.prefix) would be:
+     * * "trip_id 6234"
+     *
+     * @see OccurrenceModel
+     */
+    @Column(name = "occurrenceSuffix")
+    @Type(type = "text")
+    private String occurrenceSuffix;
 
-    public ValidationRule(String errorId, String severity, String title, String errorDescription) {
+    public ValidationRule() {
+    }
+
+    public ValidationRule(String errorId, String severity, String title, String errorDescription, String occurrenceSuffix) {
         this.setErrorId(errorId);
         this.setSeverity(severity);
         this.setTitle(title);
         this.setErrorDescription(errorDescription);
+        this.setOccurrenceSuffix(occurrenceSuffix);
     }
 
     public String getErrorDescription() {
@@ -82,5 +105,13 @@ public class ValidationRule implements Serializable {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getOccurrenceSuffix() {
+        return occurrenceSuffix;
+    }
+
+    public void setOccurrenceSuffix(String occurenceSuffix) {
+        this.occurrenceSuffix = occurenceSuffix;
     }
 }

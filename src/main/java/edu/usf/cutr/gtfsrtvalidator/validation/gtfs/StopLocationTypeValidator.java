@@ -50,7 +50,7 @@ public class StopLocationTypeValidator implements GtfsFeedValidator {
                 checkedStops.add(stopTime.getStop());
 
                 if (stopTime.getStop().getLocationType() != 0) {
-                    OccurrenceModel occurrenceModel = new OccurrenceModel("location_type is not 0 at ", stopTime.getStop().getName());
+                    OccurrenceModel occurrenceModel = new OccurrenceModel("stop_id " + stopTime.getStop().getId());
                     errorOccurrenceList.add(occurrenceModel);
                 }
             }

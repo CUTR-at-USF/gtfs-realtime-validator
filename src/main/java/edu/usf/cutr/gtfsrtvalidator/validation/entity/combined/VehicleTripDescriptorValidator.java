@@ -21,19 +21,23 @@ import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
-import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.W003;
+
 public class VehicleTripDescriptorValidator implements FeedEntityValidator {
 
+    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(VehicleTripDescriptorValidator.class);
+
     /**
-     * ID: w003
+     * ID: W003
      * Description: If both vehicle positions and trip updates are provided, VehicleDescriptor or TripDescriptor values should match between the two feeds.
      */
     @Override
@@ -54,9 +58,9 @@ public class VehicleTripDescriptorValidator implements FeedEntityValidator {
             }
         }
 
-        List<OccurrenceModel> errorOccurrenceList = new ArrayList<>();
+        List<OccurrenceModel> occurrences = new ArrayList<>();
 
-        //Should be optimized since this would be costly with a higher number of feeds
+        // FIXME - Should be optimized since this would be costly with a higher number of feeds
         if (!tripUpdates.isEmpty() && !vehiclePositions.isEmpty()) {
 
             //Checks if all TripUpdate object has a matching tripId in any of the VehicleUpdate objects
@@ -73,7 +77,9 @@ public class VehicleTripDescriptorValidator implements FeedEntityValidator {
                     }
                 }
                 if (!matchingTrips) {
-                    errorOccurrenceList.add(new OccurrenceModel("$.entity.*.trip_update.trip[?(@.trip_id==\"" + trip.getTrip().getTripId() + "\")]", trip.getTrip().getTripId()));
+                    OccurrenceModel om = new OccurrenceModel("trip_id " + trip.getTrip().getTripId());
+                    occurrences.add(om);
+                    _log.debug(om.getPrefix() + " " + W003.getOccurrenceSuffix());
                 }
             }
 
@@ -81,7 +87,6 @@ public class VehicleTripDescriptorValidator implements FeedEntityValidator {
             for (GtfsRealtime.VehiclePosition vehiclePosition : vehiclePositions) {
                 boolean matchingTrips = false;
                 for (GtfsRealtime.TripUpdate trip : tripUpdates) {
-
                     if (Objects.equals(trip.getTrip().getTripId(), vehiclePosition.getTrip().getTripId())) {
                         matchingTrips = true;
                         break;
@@ -91,10 +96,12 @@ public class VehicleTripDescriptorValidator implements FeedEntityValidator {
                     }
                 }
                 if (!matchingTrips) {
-                    errorOccurrenceList.add(new OccurrenceModel("$.entity.*.trip_update.trip[?(@.trip_id==\"" + vehiclePosition.getTrip().getTripId() + "\")]", vehiclePosition.getTrip().getTripId()));
+                    OccurrenceModel om = new OccurrenceModel("trip_id " + vehiclePosition.getTrip().getTripId());
+                    occurrences.add(om);
+                    _log.debug(om.getPrefix() + " " + W003.getOccurrenceSuffix());
                 }
             }
         }
-        return Arrays.asList(new ErrorListHelperModel(new MessageLogModel(ValidationRules.W003), errorOccurrenceList));
+        return Arrays.asList(new ErrorListHelperModel(new MessageLogModel(W003), occurrences));
     }
 }

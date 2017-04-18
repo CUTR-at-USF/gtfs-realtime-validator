@@ -32,7 +32,7 @@ import java.util.List;
 import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.E002;
 
 /**
- * ID: e002
+ * ID: E002
  * Description: stop_time_updates for a given trip_id must be sorted by increasing stop_sequence
  */
 public class StopTimeSequenceValidator implements FeedEntityValidator {
@@ -43,31 +43,34 @@ public class StopTimeSequenceValidator implements FeedEntityValidator {
     public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
         List<GtfsRealtime.FeedEntity> entityList = feedMessage.getEntityList();
         List<OccurrenceModel> errorOccurrenceList = new ArrayList<>();
-        List<GtfsRealtime.FeedEntity> tripUpdateList = new ArrayList<>();
 
         for (GtfsRealtime.FeedEntity entity : entityList) {
             if (entity.hasTripUpdate()) {
-                tripUpdateList.add(entity);
+                GtfsRealtime.TripUpdate tripUpdate = entity.getTripUpdate();
+                List<GtfsRealtime.TripUpdate.StopTimeUpdate> stopTimeUpdateList = tripUpdate.getStopTimeUpdateList();
+
+                List<Integer> stopSequenceList = new ArrayList<>();
+                for (GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate : stopTimeUpdateList) {
+                    stopTimeUpdate.getStopSequence();
+                    stopSequenceList.add(stopTimeUpdate.getStopSequence());
+                }
+
+                boolean sorted = Ordering.natural().isOrdered(stopSequenceList);
+                if (!sorted) {
+                    String tripId = null;
+                    if (tripUpdate.hasTrip() && tripUpdate.getTrip().hasTripId()) {
+                        tripId = tripUpdate.getTrip().getTripId();
+                    }
+
+                    OccurrenceModel om = new OccurrenceModel(tripId != null ? "trip_id " + tripId + " " : "" + "stop_sequence " + stopSequenceList.toString());
+                    errorOccurrenceList.add(om);
+                    _log.debug(om.getPrefix() + " " + E002.getOccurrenceSuffix());
+                }
+
+                // TODO - detect out-of-order stops when stop_sequence isn't provided
             }
         }
 
-        for (GtfsRealtime.FeedEntity tripUpdateEntity : tripUpdateList) {
-            List<GtfsRealtime.TripUpdate.StopTimeUpdate> stopTimeUpdateList = tripUpdateEntity.getTripUpdate().getStopTimeUpdateList();
-
-            List<Integer> stopSequenceList = new ArrayList<>();
-            for (GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate : stopTimeUpdateList) {
-                stopTimeUpdate.getStopSequence();
-                stopSequenceList.add(stopTimeUpdate.getStopSequence());
-            }
-
-            boolean sorted = Ordering.natural().isOrdered(stopSequenceList);
-            if (!sorted) {
-                _log.debug("StopSequenceList is not in order");
-                String feedId = tripUpdateEntity.getId();
-                OccurrenceModel occurrenceModel = new OccurrenceModel("$.entity[?(@.id == \"" + feedId + "\")]", stopSequenceList.toString());
-                errorOccurrenceList.add(occurrenceModel);
-            }
-        }
         List<ErrorListHelperModel> errors = new ArrayList<>();
         if (!errorOccurrenceList.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(E002), errorOccurrenceList));

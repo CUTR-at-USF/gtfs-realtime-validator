@@ -20,14 +20,17 @@ import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
-import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.hsqldb.lib.StringUtil;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.gtfs.model.Trip;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
+
+import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.E003;
+import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.E004;
 
 /**
  * ID: E003
@@ -37,6 +40,8 @@ import java.util.*;
  * Description: All route_ids provided in the GTFS-rt feed must appear in the GTFS data
  */
 public class CheckRouteAndTripIds implements FeedEntityValidator {
+
+    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(CheckRouteAndTripIds.class);
 
     @Override
     public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
@@ -64,33 +69,37 @@ public class CheckRouteAndTripIds implements FeedEntityValidator {
                 String routeId = entity.getTripUpdate().getTrip().getRouteId();
                 String tripId = entity.getTripUpdate().getTrip().getTripId();
                 if (!tripIdSet.contains(tripId)) {
-                    OccurrenceModel occurrenceModel = new OccurrenceModel("$.entity.*.trip_update.trip[?(@.trip_id==\"" + tripId + "\")]", tripId);
-                    errorListE003.add(occurrenceModel);
+                    OccurrenceModel om = new OccurrenceModel("trip_id " + tripId);
+                    errorListE003.add(om);
+                    _log.debug(om.getPrefix() + " " + E003.getOccurrenceSuffix());
                 }
                 if (!StringUtil.isEmpty(routeId) && !routeIdSet.contains(routeId)) {
-                    OccurrenceModel occurrenceModel = new OccurrenceModel("$.entity.*.trip_update.trip[?(@.route_id==\"" + routeId + "\")]", tripId);
-                    errorListE004.add(occurrenceModel);
+                    OccurrenceModel om = new OccurrenceModel("route_id " + routeId);
+                    errorListE004.add(om);
+                    _log.debug(om.getPrefix() + " " + E004.getOccurrenceSuffix());
                 }
             }
             if (entity.hasVehicle() && entity.getVehicle().hasTrip()) {
                 String routeId = entity.getVehicle().getTrip().getRouteId();
                 String tripId = entity.getTripUpdate().getTrip().getTripId();
                 if (!StringUtil.isEmpty(tripId) && !tripIdSet.contains(tripId)) {
-                    OccurrenceModel occurrenceModel = new OccurrenceModel("$.entity.*.vehicle.trip[?(@.route_id==\"" + tripId + "\")]", tripId);
-                    errorListE003.add(occurrenceModel);
+                    OccurrenceModel om = new OccurrenceModel("vehicle_id " + entity.getVehicle().getVehicle().getId() + " trip_id " + tripId);
+                    errorListE003.add(om);
+                    _log.debug(om.getPrefix() + " " + E003.getOccurrenceSuffix());
                 }
                 if (!StringUtil.isEmpty(routeId) && !routeIdSet.contains(routeId)) {
-                    OccurrenceModel occurrenceModel = new OccurrenceModel("$.entity.*.vehicle.trip[?(@.route_id==\"" + routeId + "\")]", tripId);
-                    errorListE004.add(occurrenceModel);
+                    OccurrenceModel om = new OccurrenceModel("vehicle_id " + entity.getVehicle().getVehicle().getId() + " route_id " + routeId);
+                    errorListE004.add(om);
+                    _log.debug(om.getPrefix() + " " + E004.getOccurrenceSuffix());
                 }
             }
         }
         List<ErrorListHelperModel> errors = new ArrayList<>();
         if (!errorListE003.isEmpty()) {
-            errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.E003), errorListE003));
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E003), errorListE003));
         }
         if (!errorListE004.isEmpty()) {
-            errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.E004), errorListE004));
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E004), errorListE004));
         }
         return errors;
     }

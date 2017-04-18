@@ -21,7 +21,6 @@ import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
-import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.hsqldb.lib.StringUtil;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
@@ -30,10 +29,12 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.W002;
+
 
 /**
- * ID: w002
- * Description:vehicle_id should be populated in trip_update
+ * ID: W002
+ * Description: vehicle_id should be populated in trip_update
  */
 
 public class VehicleIdValidator implements FeedEntityValidator {
@@ -44,25 +45,22 @@ public class VehicleIdValidator implements FeedEntityValidator {
     public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
         List<GtfsRealtime.FeedEntity> entityList = feedMessage.getEntityList();
         List<OccurrenceModel> errorOccurrenceList = new ArrayList<>();
-        int entityId = 0;
 
         for (GtfsRealtime.FeedEntity entity : entityList) {
             if (entity.hasTripUpdate()) {
-
                 GtfsRealtime.TripUpdate tripUpdate = entity.getTripUpdate();
                 //w002: vehicle_id should be populated in trip_update
                 if (StringUtil.isEmpty(tripUpdate.getVehicle().getId())) {
-                    OccurrenceModel errorOccurrence = new OccurrenceModel("$.entity["+ entityId +"].trip_update", null);
-                    errorOccurrenceList.add(errorOccurrence);
-                    _log.debug(ValidationRules.W002.getErrorDescription());
+                    OccurrenceModel om = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId());
+                    errorOccurrenceList.add(om);
+                    _log.debug(om.getPrefix() + " " + W002.getOccurrenceSuffix());
                 }
             }
-            entityId++;
         }
 
         List<ErrorListHelperModel> errors = new ArrayList<>();
         if (!errorOccurrenceList.isEmpty()) {
-            errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.W002), errorOccurrenceList));
+            errors.add(new ErrorListHelperModel(new MessageLogModel(W002), errorOccurrenceList));
         }
         return errors;
     }

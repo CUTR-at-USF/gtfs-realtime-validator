@@ -15,11 +15,12 @@
 |---------------|---------------------------|
 | [E001](#E001) | Not in POSIX time
 | [E002](#E002) | Unsorted `stop_sequence`
-| [E003](#E003) | `trip_id` mismatch in GTFS-rt and GTFS
-| [E004](#E004) | `route_id` mismatch in GTFS-rt and GTFS
+| [E003](#E003) | GTFS-rt `trip_id` does not appear in GTFS data
+| [E004](#E004) | GTFS-rt `route_id` does not appear in GTFS data
 | [E010](#E010) | `location_type` not `0` in `stops.txt` (Note that this is implemented but not executed because it's specific to GTFS - see #126)
 | [E011](#E011) | `location_type` not `0` in GTFS-rt
 | [E012](#E012) | Header timestamp should be greater than or equal to all other timestamps
+| [E013](#E013) | Frequency type 0 trip schedule_relationship should be UNSCHEDULED or empty
 
 # Warnings
 
@@ -68,13 +69,13 @@ See:
 
 <a name="E003"/>
 
-### E003 - `trip_id` mismatch in GTFS-rt and GTFS
+### E003 - GTFS-rt `trip_id` does not appear in GTFS data
 
 All `trip_ids` provided in the GTFS-rt feed must appear in the GTFS data
 
 <a name="E004"/>
 
-### E004 - `route_id` mismatch in GTFS-rt and GTFS
+### E004 - GTFS-rt `route_id` does not appear in GTFS data
 
 All `route_ids` provided in the GTFS-rt feed must appear in the GTFS data
 
@@ -97,3 +98,9 @@ All `stop_ids` referenced in GTFS-rt feeds must have the `location_type` = `0`
 ### E012 - Header timestamp should be greater than or equal to all other timestamps
 
 No timestamps for individual entities (TripUpdate, VehiclePosition, Alerts) in the feeds should be greater than the header timestamp.
+
+<a name="E013"/>
+
+### E013 - Frequency type 0 trip schedule_relationship should be UNSCHEDULED or empty
+
+For frequency-based exact_times=0 trips, schedule_relationship should be UNSCHEDULED or empty.

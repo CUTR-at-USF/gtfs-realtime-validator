@@ -17,8 +17,6 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.model;
 
-import org.hibernate.annotations.Type;
-
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
@@ -27,9 +25,9 @@ import java.io.Serializable;
 @Entity
 @Table(name="Occurrence")
 public class OccurrenceModel implements Serializable {
-    public OccurrenceModel(String elementPath, String elementValue) {
-        this.elementPath = elementPath;
-        this.elementValue = elementValue;
+
+    public OccurrenceModel(String prefix) {
+        this.prefix = prefix;
     }
 
     public OccurrenceModel() {
@@ -39,14 +37,27 @@ public class OccurrenceModel implements Serializable {
     @Column(name="occurrenceID")
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private int occurrenceId;
+
     @ManyToOne
     @JoinColumn(name = "messageID")
     private MessageLogModel messageLogModel;
-    @Column(name="elementPath")
-    private String elementPath;
-    @Column(name="elementValue")
-    @Type(type = "text")
-    private String elementValue;
+
+    /**
+     * This is used along with ValidationRule.occurrenceSuffix to create a description of this occurrence of an error/warning.
+     * <p>
+     * For example, for E004 "GTFS-rt trip_ids must appear in GTFS data", the error message we want to show the user could be
+     * "trip_id 6234 doesn't appear in the GTFS data"
+     * <p>
+     * For this message, the prefix would be:
+     * "trip_id 6234"
+     * <p>
+     * And the second part of the text (stored in ValidationRule.occurrenceSuffix) would be:
+     * "doesn't appear in the GTFS data"
+     *
+     * @see ValidationRule
+     */
+    @Column(name = "prefix")
+    private String prefix;
 
     public int getOccurrenceId() {
         return occurrenceId;
@@ -64,19 +75,11 @@ public class OccurrenceModel implements Serializable {
         this.messageLogModel = messageLogModel;
     }
 
-    public String getElementPath() {
-        return elementPath;
+    public String getPrefix() {
+        return prefix;
     }
 
-    public void setElementPath(String elementPath) {
-        this.elementPath = elementPath;
-    }
-
-    public String getElementValue() {
-        return elementValue;
-    }
-
-    public void setElementValue(String elementValue) {
-        this.elementValue = elementValue;
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
     }
 }
