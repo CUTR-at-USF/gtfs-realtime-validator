@@ -20,13 +20,14 @@ import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
-import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.onebusaway.gtfs.model.Frequency;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+
+import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.E013;
 
 /**
  * ID: E013
@@ -57,21 +58,23 @@ public class FrequencyTypeZero implements FeedEntityValidator {
             GtfsRealtime.TripUpdate tripUpdate = entity.getTripUpdate();
             if (exactTimesZeroTrips.contains(tripUpdate.getTrip().getTripId()) &&
                     !(tripUpdate.getTrip().hasScheduleRelationship() || tripUpdate.getTrip().getScheduleRelationship().equals(GtfsRealtime.TripDescriptor.ScheduleRelationship.UNSCHEDULED))) {
-                _log.info("TripUpdate trip_id " + tripUpdate.getTrip().getTripId() + " is exact_times=0 and has an incorrect ScheduleRelationship of " + tripUpdate.getTrip().getScheduleRelationship());
-                errorListE013.add(new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId(), "Incorrect ScheduleRelationship of " + tripUpdate.getTrip().getScheduleRelationship()));
+                OccurrenceModel om = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() + " schedule_relationship " + tripUpdate.getTrip().getScheduleRelationship());
+                errorListE013.add(om);
+                _log.debug(om.getPrefix() + " " + E013.getOccurrenceSuffix());
             }
 
             GtfsRealtime.VehiclePosition vehiclePosition = entity.getVehicle();
             if (vehiclePosition.hasTrip() &&
                     exactTimesZeroTrips.contains(vehiclePosition.getTrip().getTripId()) &&
                     !(vehiclePosition.getTrip().hasScheduleRelationship() || vehiclePosition.getTrip().getScheduleRelationship().equals(GtfsRealtime.TripDescriptor.ScheduleRelationship.UNSCHEDULED))) {
-                _log.info("vehicle ID " + vehiclePosition.getVehicle().getId() + "trip_id " + vehiclePosition.getTrip().getTripId() + " is exact_times=0 and has an incorrect ScheduleRelationship of " + vehiclePosition.getTrip().getScheduleRelationship());
-                errorListE013.add(new OccurrenceModel("vehicle ID " + vehiclePosition.getVehicle().getId() + "trip_id " + vehiclePosition.getTrip().getTripId(), "Incorrect ScheduleRelationship of " + vehiclePosition.getTrip().getScheduleRelationship()));
+                OccurrenceModel om = new OccurrenceModel("vehicle_id " + vehiclePosition.getVehicle().getId() + " trip_id " + vehiclePosition.getTrip().getTripId() + " schedule_relationship " + vehiclePosition.getTrip().getScheduleRelationship());
+                errorListE013.add(om);
+                _log.debug(om.getPrefix() + " " + E013.getOccurrenceSuffix());
             }
         }
         List<ErrorListHelperModel> errors = new ArrayList<>();
         if (!errorListE013.isEmpty()) {
-            errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.E013), errorListE013));
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E013), errorListE013));
         }
         return errors;
     }

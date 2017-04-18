@@ -36,7 +36,7 @@ public class UtilTest {
     @Test
     public void testAssertResults() {
         MessageLogModel modelE001 = new MessageLogModel(ValidationRules.E001);
-        OccurrenceModel errorE001 = new OccurrenceModel("$.header.timestamp is not POSIX time", String.valueOf(MIN_POSIX_TIME));
+        OccurrenceModel errorE001 = new OccurrenceModel(String.valueOf(MIN_POSIX_TIME));
         List<OccurrenceModel> errorListE001 = new ArrayList<>();
 
 

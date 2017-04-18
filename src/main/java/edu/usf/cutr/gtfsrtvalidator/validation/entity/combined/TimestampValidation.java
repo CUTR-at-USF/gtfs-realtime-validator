@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils.isPosix;
+import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
 
 /**
  * Implement validation rules related to feed entity timestamps:
@@ -53,55 +54,56 @@ public class TimestampValidation implements FeedEntityValidator{
 
         long headerTimestamp = feedMessage.getHeader().getTimestamp();
         if (headerTimestamp == 0) {
-            _log.debug("Timestamp not present in FeedHeader");
-            OccurrenceModel errorW001 = new OccurrenceModel("$.header.timestamp not populated", String.valueOf(headerTimestamp));
+            OccurrenceModel errorW001 = new OccurrenceModel("header");
             w001List.add(errorW001);
+            _log.debug(errorW001.getPrefix() + " " + W001.getOccurrenceSuffix());
         } else {
             if (!isPosix(headerTimestamp)) {
-                _log.debug("FeedHeader timestamp is not POSIX time");
-                OccurrenceModel errorE001 = new OccurrenceModel("$.header.timestamp is not POSIX time", String.valueOf(headerTimestamp));
+                OccurrenceModel errorE001 = new OccurrenceModel("header.timestamp");
                 e001List.add(errorE001);
+                _log.debug(errorE001.getPrefix() + " " + E001.getOccurrenceSuffix());
             }
         }
-        for(GtfsRealtime.FeedEntity entity: feedMessage.getEntityList()) {
+
+        for (GtfsRealtime.FeedEntity entity : feedMessage.getEntityList()) {
             GtfsRealtime.TripUpdate tripUpdate = entity.getTripUpdate();
             long tripUpdateTimestamp = tripUpdate.getTimestamp();
-
-            long vehicleTimestamp = entity.getVehicle().getTimestamp();
+            GtfsRealtime.VehiclePosition vehiclePosition = entity.getVehicle();
+            long vehicleTimestamp = vehiclePosition.getTimestamp();
 
             /**
              * Validate VehiclePosition and TripUpdate timestamps - W001, E001, E012
              */
             if (tripUpdateTimestamp == 0) {
-                _log.debug("Timestamp not present in TripUpdate");
-                OccurrenceModel errorW001 = new OccurrenceModel("$.entity.*.trip_update.timestamp not populated", String.valueOf(tripUpdateTimestamp));
+                OccurrenceModel errorW001 = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId());
                 w001List.add(errorW001);
+                _log.debug(errorW001.getPrefix() + " " + W001.getOccurrenceSuffix());
             } else {
                 if (headerTimestamp != 0 && tripUpdateTimestamp > headerTimestamp) {
-                    _log.debug("TripUpdate timestamp is greater than Header timestamp");
-                    OccurrenceModel errorE012 = new OccurrenceModel("$.entity.*.trip_update.timestamp is greater than the FeedHeader timestamp", String.valueOf(tripUpdateTimestamp));
+                    OccurrenceModel errorE012 = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() + " timestamp " + tripUpdateTimestamp);
                     e012List.add(errorE012);
+                    _log.debug(errorE012.getPrefix() + " " + E012.getOccurrenceSuffix());
                 }
                 if (!isPosix(tripUpdateTimestamp)) {
-                    _log.debug("TripUpdate timestamp is not POSIX time");
-                    OccurrenceModel errorE001 = new OccurrenceModel("$.entity.*.trip_update.timestamp is not POSIX time", String.valueOf(tripUpdateTimestamp));
+                    OccurrenceModel errorE001 = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() + " timestamp " + tripUpdateTimestamp);
                     e001List.add(errorE001);
+                    _log.debug(errorE001.getPrefix() + " " + E001.getOccurrenceSuffix());
                 }
             }
             if (vehicleTimestamp == 0) {
-                _log.debug("Timestamp not present in VehiclePosition");
-                OccurrenceModel errorW001 = new OccurrenceModel("$.entity.*.vehicle_position.timestamp not populated", String.valueOf(vehicleTimestamp));
+                OccurrenceModel errorW001 = new OccurrenceModel("vehicle_id " + vehiclePosition.getVehicle().getId());
                 w001List.add(errorW001);
+                _log.debug(errorW001.getPrefix() + " " + W001.getOccurrenceSuffix());
             } else {
                 if (headerTimestamp != 0 && vehicleTimestamp > headerTimestamp) {
-                    _log.debug("VehiclePosition timestamp is greater than Header timestamp");
-                    OccurrenceModel errorE012 = new OccurrenceModel("$.entity.*.vehicle_position.timestamp is greater than the FeedHeader timestamp", String.valueOf(tripUpdateTimestamp));
+                    OccurrenceModel errorE012 = new OccurrenceModel("vehicle_id " + vehiclePosition.getVehicle().getId() + " timestamp " + vehicleTimestamp);
                     e012List.add(errorE012);
+                    _log.debug(errorE012.getPrefix() + " " + E012.getOccurrenceSuffix());
                 }
                 if (!isPosix(vehicleTimestamp)) {
-                    _log.debug("VehiclePosition timestamp is not POSIX time");
-                    OccurrenceModel errorE001 = new OccurrenceModel("$.entity.*.vehicle_position.timestamp is not POSIX time", String.valueOf(vehicleTimestamp));
+                    OccurrenceModel errorE001 = new OccurrenceModel("vehicle_id " + vehiclePosition.getVehicle().getId() + " timestamp " + tripUpdateTimestamp);
                     e001List.add(errorE001);
+                    _log.debug(errorE001.getPrefix() + " " + E001.getOccurrenceSuffix());
                 }
             }
 
@@ -114,9 +116,11 @@ public class TimestampValidation implements FeedEntityValidator{
                     if (stopTimeUpdate.hasArrival()) {
                         if (stopTimeUpdate.getArrival().hasTime()) {
                             if (!isPosix(stopTimeUpdate.getArrival().getTime())) {
-                                _log.debug("StopTimeUpdate arrival time is not POSIX time");
-                                OccurrenceModel errorE001 = new OccurrenceModel("$.entity.*.trip_update.stop_time_update.arrival.time is not POSIX time", String.valueOf(vehicleTimestamp));
+                                OccurrenceModel errorE001 = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() +
+                                        " stop_time_update " + stopTimeUpdate.getStopSequence() +
+                                        " arrival time " + stopTimeUpdate.getArrival().getTime());
                                 e001List.add(errorE001);
+                                _log.debug(errorE001.getPrefix() + " " + E001.getOccurrenceSuffix());
                             }
                         }
                     }
@@ -124,9 +128,11 @@ public class TimestampValidation implements FeedEntityValidator{
                     if (stopTimeUpdate.hasDeparture()) {
                         if (stopTimeUpdate.getDeparture().hasTime()) {
                             if (!isPosix(stopTimeUpdate.getDeparture().getTime())) {
-                                _log.debug("StopTimeUpdate departure time is not POSIX time");
-                                OccurrenceModel errorE001 = new OccurrenceModel("$.entity.*.trip_update.stop_time_update.departure.time is not POSIX time", String.valueOf(vehicleTimestamp));
+                                OccurrenceModel errorE001 = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() +
+                                        " stop_time_update " + stopTimeUpdate.getStopSequence() +
+                                        " arrival time " + stopTimeUpdate.getDeparture().getTime());
                                 e001List.add(errorE001);
+                                _log.debug(errorE001.getPrefix() + " " + E001.getOccurrenceSuffix());
                             }
                         }
                     }
@@ -143,16 +149,16 @@ public class TimestampValidation implements FeedEntityValidator{
                     for (GtfsRealtime.TimeRange range : activePeriods) {
                         if (range.hasStart()) {
                             if (!isPosix(range.getStart())) {
-                                _log.debug("Alert starting time range time is not POSIX time");
-                                OccurrenceModel errorE001 = new OccurrenceModel("$.entity.*.alert.active_period.start is not POSIX time", String.valueOf(vehicleTimestamp));
+                                OccurrenceModel errorE001 = new OccurrenceModel("alert in entity " + entity + " active_period.start " + range.getStart());
                                 e001List.add(errorE001);
+                                _log.debug(errorE001.getPrefix() + " " + E001.getOccurrenceSuffix());
                             }
                         }
                         if (range.hasEnd()) {
                             if (!isPosix(range.getEnd())) {
-                                _log.debug("Alert ending time range time is not POSIX time");
-                                OccurrenceModel errorE001 = new OccurrenceModel("$.entity.*.alert.active_period.end is not POSIX time", String.valueOf(vehicleTimestamp));
+                                OccurrenceModel errorE001 = new OccurrenceModel("alert in entity " + entity + " active_period.end " + range.getEnd());
                                 e001List.add(errorE001);
+                                _log.debug(errorE001.getPrefix() + " " + E001.getOccurrenceSuffix());
                             }
                         }
                     }
@@ -161,10 +167,10 @@ public class TimestampValidation implements FeedEntityValidator{
         }
         List<ErrorListHelperModel> errors = new ArrayList<>();
         if (!w001List.isEmpty()) {
-            errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.W001), w001List));
+            errors.add(new ErrorListHelperModel(new MessageLogModel(W001), w001List));
         }
         if (!e001List.isEmpty()) {
-            errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.E001), e001List));
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E001), e001List));
         }
         if (!e012List.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.E012), e012List));
