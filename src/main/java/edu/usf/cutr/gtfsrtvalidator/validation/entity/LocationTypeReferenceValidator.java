@@ -44,10 +44,8 @@ public class LocationTypeReferenceValidator implements FeedEntityValidator {
         List<OccurrenceModel> e011List = new ArrayList<>();
         List<GtfsRealtime.FeedEntity> allEntities = feedMessage.getEntityList();
 
-        //Get all stops from the GTFS feed
+        // Create a set of stop_ids from the GTFS feeds stops.txt
         Collection<Stop> stops = gtfsData.getAllStops();
-
-        //Get a list of stop_ids from the GTFS feeds stops.txt
         Set<String> stopIds = new HashSet<>();
         for (Stop stop : stops) {
             stopIds.add(stop.getId().getId());
