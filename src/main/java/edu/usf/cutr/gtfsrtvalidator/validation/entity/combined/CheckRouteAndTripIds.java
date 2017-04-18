@@ -19,15 +19,15 @@ package edu.usf.cutr.gtfsrtvalidator.validation.entity.combined;
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
+import edu.usf.cutr.gtfsrtvalidator.background.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.hsqldb.lib.StringUtil;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
-import org.onebusaway.gtfs.model.Route;
-import org.onebusaway.gtfs.model.Trip;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.E003;
 import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.E004;
@@ -44,36 +44,21 @@ public class CheckRouteAndTripIds implements FeedEntityValidator {
     private static final org.slf4j.Logger _log = LoggerFactory.getLogger(CheckRouteAndTripIds.class);
 
     @Override
-    public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
-        Collection<Route> gtfsRouteList = gtfsData.getAllRoutes();
-        Collection<Trip> gtfsTripList = gtfsData.getAllTrips();
-
+    public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage) {
         List<OccurrenceModel> errorListE003 = new ArrayList<>();
         List<OccurrenceModel> errorListE004 = new ArrayList<>();
-
-        // Get all route_ids from the GTFS feed
-        Set<String> routeIdSet = new HashSet<>();
-        for (Route r : gtfsRouteList) {
-            routeIdSet.add(r.getId().getId());
-        }
-
-        // Get all trip_ids from the GTFS feed
-        Set<String> tripIdSet = new HashSet<>();
-        for (Trip trip : gtfsTripList) {
-            tripIdSet.add(trip.getId().getId());
-        }
 
         // Check the route_id values against the values from the GTFS feed
         for (GtfsRealtime.FeedEntity entity : feedMessage.getEntityList()) {
             if (entity.hasTripUpdate()) {
                 String routeId = entity.getTripUpdate().getTrip().getRouteId();
                 String tripId = entity.getTripUpdate().getTrip().getTripId();
-                if (!tripIdSet.contains(tripId)) {
+                if (!gtfsMetadata.getTripIds().contains(tripId)) {
                     OccurrenceModel om = new OccurrenceModel("trip_id " + tripId);
                     errorListE003.add(om);
                     _log.debug(om.getPrefix() + " " + E003.getOccurrenceSuffix());
                 }
-                if (!StringUtil.isEmpty(routeId) && !routeIdSet.contains(routeId)) {
+                if (!StringUtil.isEmpty(routeId) && !gtfsMetadata.getRouteIds().contains(routeId)) {
                     OccurrenceModel om = new OccurrenceModel("route_id " + routeId);
                     errorListE004.add(om);
                     _log.debug(om.getPrefix() + " " + E004.getOccurrenceSuffix());
@@ -82,12 +67,12 @@ public class CheckRouteAndTripIds implements FeedEntityValidator {
             if (entity.hasVehicle() && entity.getVehicle().hasTrip()) {
                 String routeId = entity.getVehicle().getTrip().getRouteId();
                 String tripId = entity.getTripUpdate().getTrip().getTripId();
-                if (!StringUtil.isEmpty(tripId) && !tripIdSet.contains(tripId)) {
+                if (!StringUtil.isEmpty(tripId) && !gtfsMetadata.getTripIds().contains(tripId)) {
                     OccurrenceModel om = new OccurrenceModel("vehicle_id " + entity.getVehicle().getVehicle().getId() + " trip_id " + tripId);
                     errorListE003.add(om);
                     _log.debug(om.getPrefix() + " " + E003.getOccurrenceSuffix());
                 }
-                if (!StringUtil.isEmpty(routeId) && !routeIdSet.contains(routeId)) {
+                if (!StringUtil.isEmpty(routeId) && !gtfsMetadata.getRouteIds().contains(routeId)) {
                     OccurrenceModel om = new OccurrenceModel("vehicle_id " + entity.getVehicle().getVehicle().getId() + " route_id " + routeId);
                     errorListE004.add(om);
                     _log.debug(om.getPrefix() + " " + E004.getOccurrenceSuffix());

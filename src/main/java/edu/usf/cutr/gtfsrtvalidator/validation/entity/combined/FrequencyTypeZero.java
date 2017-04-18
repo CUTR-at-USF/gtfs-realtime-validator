@@ -19,13 +19,14 @@ package edu.usf.cutr.gtfsrtvalidator.validation.entity.combined;
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
+import edu.usf.cutr.gtfsrtvalidator.background.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
-import org.onebusaway.gtfs.model.Frequency;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.E013;
 
@@ -38,18 +39,8 @@ public class FrequencyTypeZero implements FeedEntityValidator {
     private static final org.slf4j.Logger _log = LoggerFactory.getLogger(FrequencyTypeZero.class);
 
     @Override
-    public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
+    public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage) {
         List<OccurrenceModel> errorListE013 = new ArrayList<>();
-
-        Collection<Frequency> frequencies = gtfsData.getAllFrequencies();
-        Set<String> exactTimesZeroTrips = new HashSet<>();
-
-        for (Frequency f : frequencies) {
-            // Create a set of all exact_times=0 trips
-            if (f.getExactTimes() == 0) {
-                exactTimesZeroTrips.add(f.getTrip().getId().getAgencyId());
-            }
-        }
 
         /**
          * E013 - Validate schedule_relationship is UNSCHEDULED or empty
@@ -57,7 +48,7 @@ public class FrequencyTypeZero implements FeedEntityValidator {
         for (GtfsRealtime.FeedEntity entity : feedMessage.getEntityList()) {
             if (entity.hasTripUpdate()) {
                 GtfsRealtime.TripUpdate tripUpdate = entity.getTripUpdate();
-                if (exactTimesZeroTrips.contains(tripUpdate.getTrip().getTripId()) &&
+                if (gtfsMetadata.getExactTimesZeroTripIds().contains(tripUpdate.getTrip().getTripId()) &&
                         !(tripUpdate.getTrip().hasScheduleRelationship() || tripUpdate.getTrip().getScheduleRelationship().equals(GtfsRealtime.TripDescriptor.ScheduleRelationship.UNSCHEDULED))) {
                     OccurrenceModel om = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() + " schedule_relationship " + tripUpdate.getTrip().getScheduleRelationship());
                     errorListE013.add(om);
@@ -68,7 +59,7 @@ public class FrequencyTypeZero implements FeedEntityValidator {
             if (entity.hasVehicle()) {
                 GtfsRealtime.VehiclePosition vehiclePosition = entity.getVehicle();
                 if (vehiclePosition.hasTrip() &&
-                        exactTimesZeroTrips.contains(vehiclePosition.getTrip().getTripId()) &&
+                        gtfsMetadata.getExactTimesZeroTripIds().contains(vehiclePosition.getTrip().getTripId()) &&
                         !(vehiclePosition.getTrip().hasScheduleRelationship() || vehiclePosition.getTrip().getScheduleRelationship().equals(GtfsRealtime.TripDescriptor.ScheduleRelationship.UNSCHEDULED))) {
                     OccurrenceModel om = new OccurrenceModel("vehicle_id " + vehiclePosition.getVehicle().getId() + " trip_id " + vehiclePosition.getTrip().getTripId() + " schedule_relationship " + vehiclePosition.getTrip().getScheduleRelationship());
                     errorListE013.add(om);

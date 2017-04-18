@@ -61,7 +61,7 @@ public class TripUpdateFeedTest extends FeedMessageTest {
         // StopTimeUpdate count should be 2
         assertEquals(2, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(gtfsData, feedMessageBuilder.build());
+        results = stopSequenceValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
         TestUtils.assertResults(ValidationRules.E002, results, 0);
         
         /* Adding stop sequence 3. So, the stop sequence now is 1, 5, 3 which is unordered.
@@ -74,7 +74,7 @@ public class TripUpdateFeedTest extends FeedMessageTest {
         // StopTimeUpdate count should be 3
         assertEquals(3, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(gtfsData, feedMessageBuilder.build());
+        results = stopSequenceValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
         TestUtils.assertResults(ValidationRules.E002, results, 1);
 
         clearAndInitRequiredFeedFields();
@@ -102,7 +102,7 @@ public class TripUpdateFeedTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         // No errors, if vehicle id has a value.
-        results = vehicleIdValidator.validate(gtfsData, feedMessageBuilder.build());
+        results = vehicleIdValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
         TestUtils.assertResults(ValidationRules.W002, results, 0);
 
         // Test with empty string for Vehicle ID, which should generate warning
@@ -111,7 +111,7 @@ public class TripUpdateFeedTest extends FeedMessageTest {
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = vehicleIdValidator.validate(gtfsData, feedMessageBuilder.build());
+        results = vehicleIdValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
         TestUtils.assertResults(ValidationRules.W002, results, 1);
         
         clearAndInitRequiredFeedFields();

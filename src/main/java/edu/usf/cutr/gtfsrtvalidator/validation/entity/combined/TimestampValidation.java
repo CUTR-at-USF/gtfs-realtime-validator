@@ -20,6 +20,7 @@ package edu.usf.cutr.gtfsrtvalidator.validation.entity.combined;
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
+import edu.usf.cutr.gtfsrtvalidator.background.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
@@ -43,7 +44,7 @@ public class TimestampValidation implements FeedEntityValidator{
     private static final org.slf4j.Logger _log = LoggerFactory.getLogger(TimestampValidation.class);
 
     @Override
-    public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
+    public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage) {
         List<OccurrenceModel> w001List = new ArrayList<>();
         List<OccurrenceModel> e001List = new ArrayList<>();
         List<OccurrenceModel> e012List = new ArrayList<>();
