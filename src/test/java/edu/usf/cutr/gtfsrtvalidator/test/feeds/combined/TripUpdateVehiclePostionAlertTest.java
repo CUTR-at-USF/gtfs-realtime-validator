@@ -20,21 +20,21 @@ import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.test.FeedMessageTest;
 import edu.usf.cutr.gtfsrtvalidator.test.util.TestUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
-import edu.usf.cutr.gtfsrtvalidator.validation.entity.LocationTypeReferenceValidator;
+import edu.usf.cutr.gtfsrtvalidator.validation.entity.StopValidator;
 import org.junit.Test;
 
 /*
  * Tests all the warnings and rules that validate TripUpdate, VehiclePosition and Alerts feed.
- * Tests: E011 - "All stop_ids referenced in GTFS-rt feeds must have the 'location_type' = 0"
+ * Tests: E011 - All stop_ids referenced in GTFS-rt feed must appear in the GTFS feed
 */
 public class TripUpdateVehiclePostionAlertTest extends FeedMessageTest {
     
     public TripUpdateVehiclePostionAlertTest() throws Exception {}
     
     @Test
-    public void testLocationTypeValidation() {
-        
-        LocationTypeReferenceValidator locationValidator = new LocationTypeReferenceValidator();
+    public void testStopValidation() {
+
+        StopValidator locationValidator = new StopValidator();
         
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
         GtfsRealtime.TripUpdate.StopTimeUpdate.Builder stopTimeUpdateBuilder = GtfsRealtime.TripUpdate.StopTimeUpdate.newBuilder();

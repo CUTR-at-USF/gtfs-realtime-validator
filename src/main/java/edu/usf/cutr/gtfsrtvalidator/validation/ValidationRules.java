@@ -73,26 +73,12 @@ public class ValidationRules {
             "If a GTFS trip contains multiple references to the same stopId (i.e., the bus visits the same stopId more than once in the SAME trip), then in the GTFS-rt data the stop_sequence for each TripUpdate.StopTimeUpdate must be provided.",
             "does not contain stop_sequence");
 
-    /**
-     * Issue: https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/8
-     * Description: If location_type is used in stops.txt, all stops referenced in stop_times.txt must have location_type of 0
-     * Affected Feed Type(s): GTFS feed
-     * Reference(s): https://developers.google.com/transit/gtfs/reference?hl=en#stop_timestxt
-     */
     public static final ValidationRule E010 = new ValidationRule("E010", "ERROR", "location_type not 0 in stops.txt",
             "If location_type is used in stops.txt, all stops referenced in stop_times.txt must have location_type of 0",
             "is not location_type 0");
 
-    /**
-     * Type: Error (Implicitly stated in the GTFS specifications)
-     * Description: All stop_ids referenced in GTFS-rt feeds must have the "location_type" = 0
-     * Affected Feed Type(s): TripUpdate, VehiclePostion
-     * Reference(s): https://developers.google.com/transit/gtfs/reference?hl=en#stop_timestxt
-     */
-    public static final ValidationRule E011 = new ValidationRule("E011", "ERROR", "Location_type not 0 in GTFS-rt",
-            "All stop_ids referenced in GTFS-rt feeds must have the location_type = 0", "is not location_type 0");
-    //---------------------------------------------------------------------------------------
-    //endregion
+    public static final ValidationRule E011 = new ValidationRule("E011", "ERROR", "GTFS-rt stop_id does not appear in GTFS data",
+            "All stop_ids referenced in GTFS-rt feeds must appear in GTFS stops.txt", "does not appear in GTFS data stops.txt");
 
     public static final ValidationRule E012 = new ValidationRule("E012", "ERROR", "Header timestamp should be greater than or equal to all other timestamps",
             "No timestamps for individual entities (TripUpdate, VehiclePosition) in the feeds should be greater than the header timestamp",

@@ -18,7 +18,7 @@
 | [E003](#E003) | GTFS-rt `trip_id` does not appear in GTFS data
 | [E004](#E004) | GTFS-rt `route_id` does not appear in GTFS data
 | [E010](#E010) | `location_type` not `0` in `stops.txt` (Note that this is implemented but not executed because it's specific to GTFS - see #126)
-| [E011](#E011) | `location_type` not `0` in GTFS-rt
+| [E011](#E011) | GTFS-rt `stop_id` does not appear in GTFS data
 | [E012](#E012) | Header timestamp should be greater than or equal to all other timestamps
 | [E013](#E013) | Frequency type 0 trip schedule_relationship should be UNSCHEDULED or empty
 
@@ -89,9 +89,9 @@ If location_type is used in `stops.txt`, all stops referenced in `stop_times.txt
 
 <a name="E011"/>
 
-### E011 - `location_type` not `0` in GTFS-rt
+### E011 - GTFS-rt `stop_id` does not appear in GTFS data
 
-All `stop_ids` referenced in GTFS-rt feeds must have the `location_type` = `0`
+All `stop_ids` referenced in GTFS-rt feeds must appear in the GTFS data in `stops.txt`
 
 <a name="E012"/>
 

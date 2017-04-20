@@ -35,11 +35,11 @@ import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.E011;
 
 /**
  * ID: E011
- * Description: All stop_ids referenced in GTFS-rt feeds must have the "location_type" = 0
+ * Description: All stop_ids referenced in GTFS-rt feed must appear in the GTFS feed
  */
-public class LocationTypeReferenceValidator implements FeedEntityValidator {
+public class StopValidator implements FeedEntityValidator {
 
-    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(LocationTypeReferenceValidator.class);
+    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(StopValidator.class);
 
     @Override
     public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage) {
