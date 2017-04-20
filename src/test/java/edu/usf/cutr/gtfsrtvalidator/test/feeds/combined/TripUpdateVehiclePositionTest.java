@@ -27,9 +27,9 @@ import org.junit.Test;
 
 /* 
  * Tests all the warnings and rules that validate both TripUpdate and VehiclePositions feed.
- * Tests: w003 - "If both vehicle positions and trip updates are provided, VehicleDescriptor or TripDescriptor values should match between the two feeds"
- *        e003 - "All trip_ids provided in the GTFS-rt feed must appear in the GTFS data"
- *        e004 - "All route_ids provided in the GTFS-rt feed must appear in the GTFS data"
+ * Tests: w003 - If both vehicle positions and trip updates are provided, VehicleDescriptor or TripDescriptor values should match between the two feeds
+ *        e003 - All trip_ids provided in the GTFS-rt feed must appear in the GTFS data unless schedule_relationship is ADDED
+ *        e004 - All route_ids provided in the GTFS-rt feed must appear in the GTFS data
 */
 public class TripUpdateVehiclePositionTest extends FeedMessageTest {
     
@@ -89,6 +89,10 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
         clearAndInitRequiredFeedFields();
     }
 
+    /**
+     * E003 - All trip_ids provided in the GTFS-rt feed must appear in the GTFS data unless schedule_relationship is ADDED
+     * E004 - All route_ids provided in the GTFS-rt feed must appear in the GTFS data
+     */
     @Test
     public void testTripIdAndRouteIdValidation() {
         CheckRouteAndTripIds tripIdValidator = new CheckRouteAndTripIds();
