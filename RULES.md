@@ -21,6 +21,7 @@
 | [E011](#E011) | GTFS-rt `stop_id` does not appear in GTFS data
 | [E012](#E012) | Header timestamp should be greater than or equal to all other timestamps
 | [E013](#E013) | Frequency type 0 trip schedule_relationship should be UNSCHEDULED or empty
+| [E015](#E015) | All stop_ids referenced in GTFS-rt feeds must have the location_type = 0
 
 # Warnings
 
@@ -104,3 +105,9 @@ No timestamps for individual entities (TripUpdate, VehiclePosition, Alerts) in t
 ### E013 - Frequency type 0 trip schedule_relationship should be UNSCHEDULED or empty
 
 For frequency-based exact_times=0 trips, schedule_relationship should be UNSCHEDULED or empty.
+
+<a name="E015"/>
+
+### E015 - All stop_ids referenced in GTFS-rt feeds must have the location_type = 0
+
+All stop_ids referenced in GTFS-rt feeds must have the location_type = 0 in GTFS `stops.txt`

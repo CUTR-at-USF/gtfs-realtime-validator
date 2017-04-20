@@ -92,4 +92,8 @@ public class ValidationRules {
     public static final ValidationRule E014 = new ValidationRule("E014", "ERROR", "Predictions for trips are out-of-order in the block",
             "Arrival predictions for each trip in the feed must match the sequential order for the trips in the block. For example, if we have trip_ids 1, 2, and 3 that all belong to the same block, and the vehicle trips trip 1, then trip 2, and then trip 3, the arrival predictions should increase chronologically for trips 1, 2, and 3. For example, trip 3 predictions shouldn't be earlier in the feed than trip 2 predictions.",
             "predictions are not ordered by appearance in block");
+
+    public static final ValidationRule E015 = new ValidationRule("E014", "ERROR", "All stop_ids referenced in GTFS-rt feeds must have the location_type = 0",
+            "All stop_ids referenced in GTFS-rt feeds must have the location_type = 0 in GTFS stops.txt",
+            "does not have location_type=0 in GTFS stops.txt");
 }

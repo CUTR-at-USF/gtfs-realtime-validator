@@ -23,9 +23,7 @@ import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.Trip;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This is a container class for metadata about a GTFS feed that's used in rule validation
@@ -36,6 +34,14 @@ public class GtfsMetadata {
     private Set<String> tripIds = new HashSet<>();
     private Set<String> stopIds = new HashSet<>();
     private Set<String> exactTimesZeroTripIds = new HashSet<>();
+
+    /**
+     * key is stops.txt stop_id, value is stops.txt location_type
+     * <p>
+     * Note that we can't consolidate this with the stopIds HashSet, because location_type is an optional
+     * field in stops.txt and therefore can be null.
+     */
+    private Map<String, Integer> stopToLocationTypeMap = new HashMap<>();
 
     /**
      * Builds the metadata for a particular GTFS feed
@@ -55,10 +61,11 @@ public class GtfsMetadata {
             tripIds.add(trip.getId().getId());
         }
 
-        // Create a set of stop_ids from the GTFS feeds stops.txt
+        // Create a set of stop_ids from the GTFS feeds stops.txt, and store their location_type in a map
         Collection<Stop> stops = gtfsData.getAllStops();
         for (Stop stop : stops) {
             stopIds.add(stop.getId().getId());
+            stopToLocationTypeMap.put(stop.getId().getId(), stop.getLocationType());
         }
 
         // Create a set of all exact_times=0 trips
@@ -80,6 +87,15 @@ public class GtfsMetadata {
 
     public Set<String> getStopIds() {
         return stopIds;
+    }
+
+    /**
+     * Returns a map where key is stops.txt stop_id, value is stops.txt location_type
+     *
+     * @return a map where key is stops.txt stop_id, value is stops.txt location_type
+     */
+    public Map<String, Integer> getStopToLocationTypeMap() {
+        return stopToLocationTypeMap;
     }
 
     public Set<String> getExactTimesZeroTripIds() {
