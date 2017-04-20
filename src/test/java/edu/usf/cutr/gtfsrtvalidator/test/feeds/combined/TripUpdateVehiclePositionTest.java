@@ -133,6 +133,17 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
         results = tripIdValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
         TestUtils.assertResults(ValidationRules.E003, results, 2);
 
+        // Set that trip_id is ADDED - should go back to 1 error, as it's ok for trip_id to not be in the GTFS data
+        tripDescriptorBuilder.setScheduleRelationship(GtfsRealtime.TripDescriptor.ScheduleRelationship.ADDED);
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripIdValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
+        TestUtils.assertResults(ValidationRules.E003, results, 2);
+
         clearAndInitRequiredFeedFields();
     }
 }

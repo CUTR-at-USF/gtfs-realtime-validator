@@ -29,12 +29,14 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+import static edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils.isAddedTrip;
 import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.E003;
 import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.E004;
 
 /**
  * ID: E003
  * Description: All trip_ids provided in the GTFS-rt feed must appear in the GTFS data
+ * (unless schedule_relationship is ADDED)
  *
  * ID: E004
  * Description: All route_ids provided in the GTFS-rt feed must appear in the GTFS data
@@ -53,7 +55,7 @@ public class CheckRouteAndTripIds implements FeedEntityValidator {
             if (entity.hasTripUpdate()) {
                 String routeId = entity.getTripUpdate().getTrip().getRouteId();
                 String tripId = entity.getTripUpdate().getTrip().getTripId();
-                if (!gtfsMetadata.getTripIds().contains(tripId)) {
+                if (!gtfsMetadata.getTripIds().contains(tripId) && !isAddedTrip(entity.getTripUpdate().getTrip())) {
                     OccurrenceModel om = new OccurrenceModel("trip_id " + tripId);
                     errorListE003.add(om);
                     _log.debug(om.getPrefix() + " " + E003.getOccurrenceSuffix());
@@ -67,7 +69,7 @@ public class CheckRouteAndTripIds implements FeedEntityValidator {
             if (entity.hasVehicle() && entity.getVehicle().hasTrip()) {
                 String routeId = entity.getVehicle().getTrip().getRouteId();
                 String tripId = entity.getTripUpdate().getTrip().getTripId();
-                if (!StringUtil.isEmpty(tripId) && !gtfsMetadata.getTripIds().contains(tripId)) {
+                if (!StringUtil.isEmpty(tripId) && !gtfsMetadata.getTripIds().contains(tripId) && !isAddedTrip(entity.getTripUpdate().getTrip())) {
                     OccurrenceModel om = new OccurrenceModel("vehicle_id " + entity.getVehicle().getVehicle().getId() + " trip_id " + tripId);
                     errorListE003.add(om);
                     _log.debug(om.getPrefix() + " " + E003.getOccurrenceSuffix());

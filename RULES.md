@@ -71,7 +71,7 @@ See:
 
 ### E003 - GTFS-rt `trip_id` does not appear in GTFS data
 
-All `trip_ids` provided in the GTFS-rt feed must appear in the GTFS data
+All `trip_ids` provided in the GTFS-rt feed must appear in the GTFS data, unless their `schedule_relationship` is set to `ADDED`.
 
 <a name="E004"/>
 
