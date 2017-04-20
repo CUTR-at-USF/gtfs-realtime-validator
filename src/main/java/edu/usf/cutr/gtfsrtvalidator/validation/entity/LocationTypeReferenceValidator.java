@@ -20,14 +20,16 @@ package edu.usf.cutr.gtfsrtvalidator.validation.entity;
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
+import edu.usf.cutr.gtfsrtvalidator.background.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
-import org.onebusaway.gtfs.model.Stop;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.E011;
 
@@ -40,16 +42,9 @@ public class LocationTypeReferenceValidator implements FeedEntityValidator {
     private static final org.slf4j.Logger _log = LoggerFactory.getLogger(LocationTypeReferenceValidator.class);
 
     @Override
-    public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsRealtime.FeedMessage feedMessage) {
+    public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage) {
         List<OccurrenceModel> e011List = new ArrayList<>();
         List<GtfsRealtime.FeedEntity> allEntities = feedMessage.getEntityList();
-
-        // Create a set of stop_ids from the GTFS feeds stops.txt
-        Collection<Stop> stops = gtfsData.getAllStops();
-        Set<String> stopIds = new HashSet<>();
-        for (Stop stop : stops) {
-            stopIds.add(stop.getId().getId());
-        }
 
         // Checks all of the RT feeds entities and checks if matching stop_ids are available in the GTFS feed
         for (GtfsRealtime.FeedEntity entity : allEntities) {
@@ -58,7 +53,7 @@ public class LocationTypeReferenceValidator implements FeedEntityValidator {
                 GtfsRealtime.TripUpdate tripUpdate = entity.getTripUpdate();
                 List<GtfsRealtime.TripUpdate.StopTimeUpdate> stopTimeUpdateList = tripUpdate.getStopTimeUpdateList();
                 for (GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate : stopTimeUpdateList) {
-                    if (stopTimeUpdate.hasStopId() && !stopIds.contains(stopTimeUpdate.getStopId())) {
+                    if (stopTimeUpdate.hasStopId() && !gtfsMetadata.getStopIds().contains(stopTimeUpdate.getStopId())) {
                         OccurrenceModel om = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() + " stop_id " + stopTimeUpdate.getStopId());
                         e011List.add(om);
                         _log.debug(om.getPrefix() + " " + E011.getOccurrenceSuffix());
@@ -67,7 +62,7 @@ public class LocationTypeReferenceValidator implements FeedEntityValidator {
             }
             if (entity.hasVehicle()) {
                 GtfsRealtime.VehiclePosition v = entity.getVehicle();
-                if (v.hasStopId() && !stopIds.contains(v.getStopId())) {
+                if (v.hasStopId() && !gtfsMetadata.getStopIds().contains(v.getStopId())) {
                     OccurrenceModel om = new OccurrenceModel(v.hasVehicle() && v.getVehicle().hasId() ? "vehicle_id " + v.getVehicle().getId() + " " : "" + "stop_id " + v.getStopId());
                     e011List.add(om);
                 }
@@ -75,7 +70,7 @@ public class LocationTypeReferenceValidator implements FeedEntityValidator {
             if (entity.hasAlert()) {
                 List<GtfsRealtime.EntitySelector> informedEntityList = entity.getAlert().getInformedEntityList();
                 for (GtfsRealtime.EntitySelector entitySelector : informedEntityList) {
-                    if (entitySelector.hasStopId() && !stopIds.contains(entitySelector.getStopId())) {
+                    if (entitySelector.hasStopId() && !gtfsMetadata.getStopIds().contains(entitySelector.getStopId())) {
                         OccurrenceModel errorOccurrence = new OccurrenceModel("alert entity ID " + entityId + " stop_id " + entitySelector.getStopId());
                         e011List.add(errorOccurrence);
                     }

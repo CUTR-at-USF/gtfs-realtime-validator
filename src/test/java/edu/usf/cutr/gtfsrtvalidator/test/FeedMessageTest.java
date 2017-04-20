@@ -17,6 +17,7 @@
 package edu.usf.cutr.gtfsrtvalidator.test;
 
 import com.google.transit.realtime.GtfsRealtime;
+import edu.usf.cutr.gtfsrtvalidator.background.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import junit.framework.TestCase;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
@@ -32,12 +33,15 @@ public abstract class FeedMessageTest extends TestCase {
 
 
     public GtfsDaoImpl gtfsData;
+    public GtfsMetadata gtfsDataMetadata;
     public GtfsDaoImpl gtfsData2; // gtfsData2 contains location_type = 1 for stop_id
-    public GtfsDaoImpl bullRunnerGtfsData; // For Frequency-based exact_times=0 trips
+    public GtfsMetadata gtfsData2Metadata;
+    public GtfsDaoImpl bullRunnerGtfs; // For Frequency-based exact_times=0 trips
+    public GtfsMetadata bullRunnerGtfsMetadata;
     public GtfsReader reader;
-    public final File staticGtfs = new File("src/test/resources/testagency.zip");
-    public final File staticGtfs2 = new File("src/test/resources/testagency2.zip");
-    public final File bullRunnerGtfs = new File("src/test/resources/bullrunner-gtfs.zip");
+    public final File staticGtfsFile = new File("src/test/resources/testagency.zip");
+    public final File staticGtfs2File = new File("src/test/resources/testagency2.zip");
+    public final File bullRunnerGtfsFile = new File("src/test/resources/bullrunner-gtfs.zip");
     public final static String ENTITY_ID = "TEST_ENTITY";
     
     public List<ErrorListHelperModel> results;
@@ -64,21 +68,24 @@ public abstract class FeedMessageTest extends TestCase {
         // Read GTFS data into a GtfsDaoImpl
         gtfsData = new GtfsDaoImpl();
         reader = new GtfsReader();
-        reader.setInputLocation(staticGtfs);
+        reader.setInputLocation(staticGtfsFile);
         reader.setEntityStore(gtfsData);
         reader.run();
+        gtfsDataMetadata = new GtfsMetadata(gtfsData);
             
         gtfsData2 = new GtfsDaoImpl();
         reader = new GtfsReader();
-        reader.setInputLocation(staticGtfs2);
+        reader.setInputLocation(staticGtfs2File);
         reader.setEntityStore(gtfsData2);
         reader.run();
+        gtfsData2Metadata = new GtfsMetadata(gtfsData2);
 
-        bullRunnerGtfsData = new GtfsDaoImpl();
+        bullRunnerGtfs = new GtfsDaoImpl();
         reader = new GtfsReader();
-        reader.setInputLocation(bullRunnerGtfs);
-        reader.setEntityStore(bullRunnerGtfsData);
+        reader.setInputLocation(bullRunnerGtfsFile);
+        reader.setEntityStore(bullRunnerGtfs);
         reader.run();
+        bullRunnerGtfsMetadata = new GtfsMetadata(bullRunnerGtfs);
         
         clearAndInitRequiredFeedFields();
     }

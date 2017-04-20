@@ -52,14 +52,14 @@ public class TimestampValidationTest extends FeedMessageTest {
         tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        results = timestampValidation.validate(gtfsData, feedMessageBuilder.build());
+        results = timestampValidation.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
         TestUtils.assertResults(W001, results, 3);
 
         // Populate timestamp to any value greater than zero in FeedHeader
         feedHeaderBuilder.setTimestamp(MIN_POSIX_TIME);
         feedMessageBuilder.setHeader(feedHeaderBuilder.build());
         // Invalid timestamp in TripUpdate and VehiclePosition. Should return 2 results.
-        results = timestampValidation.validate(gtfsData, feedMessageBuilder.build());
+        results = timestampValidation.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
         TestUtils.assertResults(W001, results, 2);
 
         // TripDescriptor is a required field in tripUpdate
@@ -71,14 +71,14 @@ public class TimestampValidationTest extends FeedMessageTest {
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
         // Invalid timestamp only in VehiclePosition. Should return 1 results.
-        results = timestampValidation.validate(gtfsData, feedMessageBuilder.build());
+        results = timestampValidation.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
         TestUtils.assertResults(W001, results, 1);
 
         vehiclePositionBuilder.setTimestamp(MIN_POSIX_TIME);
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
         // Now timestamp is populated in FeedHeader, TripUpdate and VehiclePosition . Should return no error.
-        results = timestampValidation.validate(gtfsData, feedMessageBuilder.build());
+        results = timestampValidation.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
         TestUtils.assertResults(W001, results, 0);
 
         clearAndInitRequiredFeedFields();
@@ -104,7 +104,7 @@ public class TimestampValidationTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = timestampValidation.validate(gtfsData, feedMessageBuilder.build());
+        results = timestampValidation.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
         TestUtils.assertResults(E001, results, 0);
 
         /**
@@ -125,7 +125,7 @@ public class TimestampValidationTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = timestampValidation.validate(gtfsData, feedMessageBuilder.build());
+        results = timestampValidation.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
         TestUtils.assertResults(E001, results, 2);
 
         /**
@@ -136,7 +136,7 @@ public class TimestampValidationTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = timestampValidation.validate(gtfsData, feedMessageBuilder.build());
+        results = timestampValidation.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
         TestUtils.assertResults(E001, results, 3);
 
         /**
@@ -168,7 +168,7 @@ public class TimestampValidationTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = timestampValidation.validate(gtfsData, feedMessageBuilder.build());
+        results = timestampValidation.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
         TestUtils.assertResults(E001, results, 0);
 
         /**
@@ -189,7 +189,7 @@ public class TimestampValidationTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = timestampValidation.validate(gtfsData, feedMessageBuilder.build());
+        results = timestampValidation.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
         TestUtils.assertResults(E001, results, 4);
 
         // Remove bad POSIX StopTimeUpdates to prep for next assertion
@@ -208,7 +208,7 @@ public class TimestampValidationTest extends FeedMessageTest {
         feedEntityBuilder.setAlert(alertBuilder);
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        results = timestampValidation.validate(gtfsData, feedMessageBuilder.build());
+        results = timestampValidation.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
         TestUtils.assertResults(E001, results, 0);
 
         /**
@@ -221,7 +221,7 @@ public class TimestampValidationTest extends FeedMessageTest {
         feedEntityBuilder.setAlert(alertBuilder);
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        results = timestampValidation.validate(gtfsData, feedMessageBuilder.build());
+        results = timestampValidation.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
         TestUtils.assertResults(E001, results, 2);
 
         clearAndInitRequiredFeedFields();
@@ -248,7 +248,7 @@ public class TimestampValidationTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = timestampValidation.validate(gtfsData, feedMessageBuilder.build());
+        results = timestampValidation.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
         TestUtils.assertResults(E012, results, 0);
 
         /**
@@ -263,7 +263,7 @@ public class TimestampValidationTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = timestampValidation.validate(gtfsData, feedMessageBuilder.build());
+        results = timestampValidation.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
         TestUtils.assertResults(E012, results, 0);
 
         /**
@@ -278,7 +278,7 @@ public class TimestampValidationTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = timestampValidation.validate(gtfsData, feedMessageBuilder.build());
+        results = timestampValidation.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
         TestUtils.assertResults(E012, results, 1);
 
         /**
@@ -294,7 +294,7 @@ public class TimestampValidationTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         // Feed header timestamp is less than TripUpdate - we should see one error of type E012
-        results = timestampValidation.validate(gtfsData, feedMessageBuilder.build());
+        results = timestampValidation.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
         TestUtils.assertResults(E012, results, 1);
 
         /**
@@ -310,7 +310,7 @@ public class TimestampValidationTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         // Feed header timestamp is less than VehiclePosition and TripUpdate - we should see two results of type E012
-        results = timestampValidation.validate(gtfsData, feedMessageBuilder.build());
+        results = timestampValidation.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
         TestUtils.assertResults(E012, results, 2);
 
         clearAndInitRequiredFeedFields();
