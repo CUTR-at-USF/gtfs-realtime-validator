@@ -49,9 +49,9 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -64,7 +64,7 @@ public class GtfsFeed {
 
     private static final int BUFFER_SIZE = 4096;
     private static final String jsonFilePath = "target"+File.separator+"classes"+File.separator+"webroot";
-    public static Map<Integer, GtfsDaoImpl> GtfsDaoMap = new HashMap<>();
+    public static Map<Integer, GtfsDaoImpl> GtfsDaoMap = new ConcurrentHashMap<>();
 
     //DELETE {id} remove feed with the given id
     @DELETE
