@@ -42,8 +42,8 @@ public class ValidationRules {
             "stop_time_updates for a given trip_id must be sorted by increasing stop_sequence",
             "is not sorted by increasing stop_sequence");
     public static final ValidationRule E003 = new ValidationRule("E003", "ERROR", "GTFS-rt trip_id does not appear in GTFS data",
-            "All trip_ids provided in the GTFS-rt feed must appear in the GTFS data",
-            "does not appear in the GTFS data");
+            "All trip_ids provided in the GTFS-rt feed must appear in the GTFS data, unless the schedule_relationship is ADDED",
+            "does not appear in the GTFS data and does not have schedule_relationship of ADDED");
     public static final ValidationRule E004 = new ValidationRule("E004", "ERROR", "GTFS-rt route_id does not appear in GTFS data",
             "All route_ids provided in the GTFS-rt feed must appear in the GTFS data",
             "does not appear in the GTFS data");
