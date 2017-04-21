@@ -27,7 +27,7 @@ import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.TimeStampHelper;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.StopTimeSequenceValidator;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.StopValidator;
-import edu.usf.cutr.gtfsrtvalidator.validation.entity.VehicleIdValidator;
+import edu.usf.cutr.gtfsrtvalidator.validation.entity.VehicleValidator;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.CheckRouteAndTripIds;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.FrequencyTypeZero;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.TimestampValidation;
@@ -68,7 +68,7 @@ public class BackgroundTask implements Runnable {
         synchronized (mValidationRules) {
             if (mValidationRules.isEmpty()) {
                 mValidationRules.add(new VehicleTripDescriptorValidator()); // W001, E001, E012
-                mValidationRules.add(new VehicleIdValidator()); // W002
+                mValidationRules.add(new VehicleValidator()); // W002, W004
                 mValidationRules.add(new TimestampValidation()); // W003
                 mValidationRules.add(new StopTimeSequenceValidator()); // E002
                 mValidationRules.add(new CheckRouteAndTripIds()); // E003, E004

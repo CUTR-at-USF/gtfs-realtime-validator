@@ -31,37 +31,65 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.W002;
+import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.W004;
 
 
 /**
- * ID: W002
- * Description: vehicle_id should be populated in trip_update
+ * W002 - vehicle_id should be populated for TripUpdates and VehiclePositions
+ * W004 - VehiclePosition has unrealistic speed
  */
 
-public class VehicleIdValidator implements FeedEntityValidator {
+public class VehicleValidator implements FeedEntityValidator {
 
-    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(VehicleIdValidator.class);
+    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(VehicleValidator.class);
+
+    public static final float MAX_REALISTIC_SPEED_METERS_PER_SECOND = 26.0f;  // Approx. 60 miles per hour
 
     @Override
     public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage) {
         List<GtfsRealtime.FeedEntity> entityList = feedMessage.getEntityList();
-        List<OccurrenceModel> errorOccurrenceList = new ArrayList<>();
+        List<OccurrenceModel> w002List = new ArrayList<>();
+        List<OccurrenceModel> w004List = new ArrayList<>();
 
         for (GtfsRealtime.FeedEntity entity : entityList) {
             if (entity.hasTripUpdate()) {
                 GtfsRealtime.TripUpdate tripUpdate = entity.getTripUpdate();
-                //w002: vehicle_id should be populated in trip_update
+
+                // W002: vehicle_id should be populated in trip_update
                 if (StringUtil.isEmpty(tripUpdate.getVehicle().getId())) {
                     OccurrenceModel om = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId());
-                    errorOccurrenceList.add(om);
+                    w002List.add(om);
                     _log.debug(om.getPrefix() + " " + W002.getOccurrenceSuffix());
+                }
+            }
+            if (entity.hasVehicle()) {
+                GtfsRealtime.VehiclePosition v = entity.getVehicle();
+
+                // W002: vehicle_id should be populated in VehiclePosition
+                if (StringUtil.isEmpty(v.getVehicle().getId())) {
+                    OccurrenceModel om = new OccurrenceModel("entity ID " + entity.getId());
+                    w002List.add(om);
+                    _log.debug(om.getPrefix() + " " + W002.getOccurrenceSuffix());
+                }
+
+                // W004: VehiclePosition has unrealistic speed
+                if (v.hasPosition() && v.getPosition().hasSpeed()) {
+                    if (v.getPosition().getSpeed() > MAX_REALISTIC_SPEED_METERS_PER_SECOND ||
+                            v.getPosition().getSpeed() < 0f) {
+                        OccurrenceModel om = new OccurrenceModel(v.getVehicle().hasId() ? "vehicle_id " + v.getVehicle().getId() : "entity ID " + entity.getId() + " speed of " + v.getPosition().getSpeed() + " m/s");
+                        w004List.add(om);
+                        _log.debug(om.getPrefix() + " " + W004.getOccurrenceSuffix());
+                    }
                 }
             }
         }
 
         List<ErrorListHelperModel> errors = new ArrayList<>();
-        if (!errorOccurrenceList.isEmpty()) {
-            errors.add(new ErrorListHelperModel(new MessageLogModel(W002), errorOccurrenceList));
+        if (!w002List.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(W002), w002List));
+        }
+        if (!w004List.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(W004), w004List));
         }
         return errors;
     }

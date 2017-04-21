@@ -7,6 +7,7 @@
 | [W001](#W001) | `timestamps` not populated
 | [W002](#W002) | `vehicle_id` not populated
 | [W003](#W003) | `VehiclePosition` and `TripUpdate` feed mismatch
+| [W004](#W004) | VehiclePosition has unrealistic speed
 
 
 ### Table of Errors
@@ -35,13 +36,19 @@
 
 ### W002 - `vehicle_id` not populated
 
-`vehicle_id` should be populated in trip_update
+`vehicle_id` should be populated for TripUpdates and VehiclePositions
 
 <a name="W003"/>
 
 ### W003 - `VehiclePosition` and `TripUpdate` feed mismatch
 
 If both vehicle positions and trip updates are provided, `VehicleDescriptor` or `TripDescriptor` values should match between the two feeds
+
+<a name="W004"/>
+
+### W004 - VehiclePosition has unrealistic speed
+
+vehicle.position.speed has an unrealistic speed that may be incorrect
 
 # Errors
 
