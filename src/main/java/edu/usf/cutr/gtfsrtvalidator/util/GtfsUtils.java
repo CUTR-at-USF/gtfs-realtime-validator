@@ -32,4 +32,14 @@ public class GtfsUtils {
     public static boolean isAddedTrip(GtfsRealtime.TripDescriptor tripDescriptor) {
         return tripDescriptor.hasScheduleRelationship() && tripDescriptor.getScheduleRelationship() == GtfsRealtime.TripDescriptor.ScheduleRelationship.ADDED;
     }
+
+    /**
+     * Converts the provided speed in metersPerSecond to miles per hour
+     *
+     * @param metersPerSecond
+     * @return the provided speed in metersPerSecond converted to miles per hour
+     */
+    public static float toMilesPerHour(float metersPerSecond) {
+        return metersPerSecond * 2.23694f;
+    }
 }

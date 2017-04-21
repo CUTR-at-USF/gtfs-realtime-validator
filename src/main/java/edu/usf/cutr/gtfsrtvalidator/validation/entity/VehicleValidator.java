@@ -22,6 +22,7 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.background.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
+import edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.hsqldb.lib.StringUtil;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
@@ -76,7 +77,8 @@ public class VehicleValidator implements FeedEntityValidator {
                 if (v.hasPosition() && v.getPosition().hasSpeed()) {
                     if (v.getPosition().getSpeed() > MAX_REALISTIC_SPEED_METERS_PER_SECOND ||
                             v.getPosition().getSpeed() < 0f) {
-                        OccurrenceModel om = new OccurrenceModel(v.getVehicle().hasId() ? "vehicle_id " + v.getVehicle().getId() : "entity ID " + entity.getId() + " speed of " + v.getPosition().getSpeed() + " m/s");
+                        OccurrenceModel om = new OccurrenceModel((v.getVehicle().hasId() ? "vehicle_id " + v.getVehicle().getId() : "entity ID " + entity.getId()) +
+                                " speed of " + v.getPosition().getSpeed() + " m/s (" + String.format("%.2f", GtfsUtils.toMilesPerHour(v.getPosition().getSpeed())) + " mph)");
                         w004List.add(om);
                         _log.debug(om.getPrefix() + " " + W004.getOccurrenceSuffix());
                     }
