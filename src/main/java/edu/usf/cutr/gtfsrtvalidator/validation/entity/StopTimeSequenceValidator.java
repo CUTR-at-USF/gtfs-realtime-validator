@@ -63,7 +63,7 @@ public class StopTimeSequenceValidator implements FeedEntityValidator {
                         tripId = tripUpdate.getTrip().getTripId();
                     }
 
-                    OccurrenceModel om = new OccurrenceModel(tripId != null ? "trip_id " + tripId + " " : "" + "stop_sequence " + stopSequenceList.toString());
+                    OccurrenceModel om = new OccurrenceModel((tripId != null ? "trip_id " + tripId + " " : "") + "stop_sequence " + stopSequenceList.toString());
                     errorOccurrenceList.add(om);
                     _log.debug(om.getPrefix() + " " + E002.getOccurrenceSuffix());
                 }
