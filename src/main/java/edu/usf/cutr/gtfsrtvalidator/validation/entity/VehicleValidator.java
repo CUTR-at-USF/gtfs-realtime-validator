@@ -46,7 +46,7 @@ public class VehicleValidator implements FeedEntityValidator {
     public static final float MAX_REALISTIC_SPEED_METERS_PER_SECOND = 26.0f;  // Approx. 60 miles per hour
 
     @Override
-    public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage) {
+    public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage) {
         List<GtfsRealtime.FeedEntity> entityList = feedMessage.getEntityList();
         List<OccurrenceModel> w002List = new ArrayList<>();
         List<OccurrenceModel> w004List = new ArrayList<>();

@@ -25,6 +25,8 @@ import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.CheckRouteAndTrip
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.VehicleTripDescriptorValidator;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 /* 
  * Tests all the warnings and rules that validate both TripUpdate and VehiclePositions feed.
  * Tests: w003 - If both vehicle positions and trip updates are provided, VehicleDescriptor or TripDescriptor values should match between the two feeds
@@ -61,7 +63,7 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         // TripUpdate and VehiclePosition feed have same trip id = 1.1 and same vehicle id = 1. So, no results.
-        results = vehicleAndTripDescriptorValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
+        results = vehicleAndTripDescriptorValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         for (ErrorListHelperModel error : results) {
             assertEquals(0, error.getOccurrenceList().size());
         }
@@ -81,7 +83,7 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
         // 2 results. Unmatched trip id's and vechicle id's in TripUpdate and VehiclePosition feeds
-        results = vehicleAndTripDescriptorValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
+        results = vehicleAndTripDescriptorValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         for (ErrorListHelperModel error : results) {
             assertEquals(2, error.getOccurrenceList().size());
         }
@@ -108,7 +110,7 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = tripIdValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
+        results = tripIdValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(ValidationRules.E003, results, 0);
         TestUtils.assertResults(ValidationRules.E004, results, 0);
 
@@ -120,7 +122,7 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = tripIdValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
+        results = tripIdValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(ValidationRules.E004, results, 2);
 
         // Reset to valid route ID
@@ -134,7 +136,7 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = tripIdValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
+        results = tripIdValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(ValidationRules.E003, results, 2);
 
         // Set that trip_id is ADDED - should go back to 1 error, as it's ok for trip_id to not be in the GTFS data
@@ -145,7 +147,7 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = tripIdValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
+        results = tripIdValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(ValidationRules.E003, results, 2);
 
         clearAndInitRequiredFeedFields();
@@ -168,7 +170,7 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = tripIdValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
+        results = tripIdValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         // No schedule relationship - no errors
         TestUtils.assertResults(ValidationRules.E016, results, 0);
 
@@ -181,7 +183,7 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = tripIdValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
+        results = tripIdValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(ValidationRules.E016, results, 0);
 
         // Change to trip_id that's in the GTFS, with a ADDED schedule relationship - 2 errors
@@ -193,7 +195,7 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = tripIdValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
+        results = tripIdValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(ValidationRules.E016, results, 2);
 
         clearAndInitRequiredFeedFields();

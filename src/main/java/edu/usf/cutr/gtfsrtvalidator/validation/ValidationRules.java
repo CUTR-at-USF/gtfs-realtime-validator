@@ -103,4 +103,12 @@ public class ValidationRules {
     public static final ValidationRule E016 = new ValidationRule("E016", "ERROR", "trip_ids with schedule_relationship ADDED must not be in GTFS data",
             "Trips that have a schedule_relationship of ADDED must not be included in the GTFS data",
             "has a schedule_relationship of ADDED but appears in the GTFS data");
+
+    public static final ValidationRule E017 = new ValidationRule("E017", "ERROR", "GTFS-rt content changed but has the same header timestamp",
+            "The GTFS-rt header timestamp value should always change if the feed contents change - the feed contents must not change without updating the header timestamp",
+            "was the same for this and the previous feed iteration but the feed content was not the same");
+
+    public static final ValidationRule E018 = new ValidationRule("E018", "ERROR", "GTFS-rt header timestamp decreased between two sequential iterations",
+            "The GTFS-rt header timestamp should be monotonically increasing -  it should always be the same value or greater than previous feed iterations if the feed contents are different",
+            "from the previous feed iteration");
 }

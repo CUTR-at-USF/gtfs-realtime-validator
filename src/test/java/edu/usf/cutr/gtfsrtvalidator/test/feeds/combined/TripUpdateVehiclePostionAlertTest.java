@@ -66,7 +66,7 @@ public class TripUpdateVehiclePostionAlertTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         // all the feeds have valid stop id matching that in static Gtfs data. So, returns 0 results
-        results = locationValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
+        results = locationValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(ValidationRules.E011, results, 0);
         
         // setting stop id = "DUMMY" in TripUpdate feed that does not match with any stop id in static Gtfs data
@@ -74,14 +74,14 @@ public class TripUpdateVehiclePostionAlertTest extends FeedMessageTest {
         tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        results = locationValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
+        results = locationValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         // one error from TripUpdate feed stop_id = "DUMMY". VehiclePosition and Alert feeds have valid stop id = "A"
         TestUtils.assertResults(ValidationRules.E011, results, 1);
         
         vehiclePositionBuilder.setStopId("DUMMY");
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        results = locationValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
+        results = locationValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         // 2 results from TripUpdate and VehiclePosition feeds stop_id="DUMMY". Alert feed have valid stop id ="A"
         TestUtils.assertResults(ValidationRules.E011, results, 2);
         
@@ -89,7 +89,7 @@ public class TripUpdateVehiclePostionAlertTest extends FeedMessageTest {
         alertBuilder.addInformedEntity(entitySelectorBuilder.build());
         feedEntityBuilder.setAlert(alertBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        results = locationValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
+        results = locationValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         // 3 results from TripUpdate, VehiclePosition and alert feeds stop_id="DUMMY"
         TestUtils.assertResults(ValidationRules.E011, results, 3);
         
@@ -133,7 +133,7 @@ public class TripUpdateVehiclePostionAlertTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         // All the feeds have valid stop id with location_type = 0. So, returns 0 results
-        results = locationValidator.validate(gtfsData2, gtfsData2Metadata, feedMessageBuilder.build());
+        results = locationValidator.validate(gtfsData2, gtfsData2Metadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(ValidationRules.E015, results, 0);
 
         // Change to use stop_id "B", which has location-type 1
@@ -141,14 +141,14 @@ public class TripUpdateVehiclePostionAlertTest extends FeedMessageTest {
         tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        results = locationValidator.validate(gtfsData2, gtfsData2Metadata, feedMessageBuilder.build());
+        results = locationValidator.validate(gtfsData2, gtfsData2Metadata, feedMessageBuilder.build(), null);
         // one error from TripUpdate feed stop_id = "B", which is location_type 1
         TestUtils.assertResults(ValidationRules.E015, results, 1);
 
         vehiclePositionBuilder.setStopId("B");
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        results = locationValidator.validate(gtfsData2, gtfsData2Metadata, feedMessageBuilder.build());
+        results = locationValidator.validate(gtfsData2, gtfsData2Metadata, feedMessageBuilder.build(), null);
         // 2 results from TripUpdate and VehiclePosition feeds stop_id = "B", which is location_type 1
         TestUtils.assertResults(ValidationRules.E015, results, 2);
 
@@ -156,7 +156,7 @@ public class TripUpdateVehiclePostionAlertTest extends FeedMessageTest {
         alertBuilder.addInformedEntity(entitySelectorBuilder.build());
         feedEntityBuilder.setAlert(alertBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        results = locationValidator.validate(gtfsData2, gtfsData2Metadata, feedMessageBuilder.build());
+        results = locationValidator.validate(gtfsData2, gtfsData2Metadata, feedMessageBuilder.build(), null);
         // 3 results from TripUpdate, VehiclePosition and alert feeds stop_id = "B", which is location_type 1
         TestUtils.assertResults(ValidationRules.E015, results, 3);
 

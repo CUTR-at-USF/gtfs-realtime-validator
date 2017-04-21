@@ -26,6 +26,8 @@ import edu.usf.cutr.gtfsrtvalidator.validation.entity.VehicleValidator;
 import edu.usf.cutr.gtfsrtvalidator.validation.gtfs.StopLocationTypeValidator;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 /* 
  * Tests all the warnings and rules that validate TripUpdate feed.
  * Tests: W002 - "vehicle_id should be populated in trip_update"
@@ -61,7 +63,7 @@ public class TripUpdateFeedTest extends FeedMessageTest {
         // StopTimeUpdate count should be 2
         assertEquals(2, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
+        results = stopSequenceValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(ValidationRules.E002, results, 0);
         
         /* Adding stop sequence 3. So, the stop sequence now is 1, 5, 3 which is unordered.
@@ -74,7 +76,7 @@ public class TripUpdateFeedTest extends FeedMessageTest {
         // StopTimeUpdate count should be 3
         assertEquals(3, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
+        results = stopSequenceValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(ValidationRules.E002, results, 1);
 
         clearAndInitRequiredFeedFields();
@@ -106,7 +108,7 @@ public class TripUpdateFeedTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         // No errors, if vehicle id has a value.
-        results = vehicleValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
+        results = vehicleValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(ValidationRules.W002, results, 0);
 
         // Test with empty string for Vehicle ID, which should generate 2 warnings (one for TripUpdates and one for VehiclePositions)
@@ -117,7 +119,7 @@ public class TripUpdateFeedTest extends FeedMessageTest {
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = vehicleValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
+        results = vehicleValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(ValidationRules.W002, results, 2);
 
         clearAndInitRequiredFeedFields();
@@ -138,7 +140,7 @@ public class TripUpdateFeedTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         // No warnings, if speed isn't populated
-        results = vehicleValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
+        results = vehicleValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(ValidationRules.W004, results, 0);
 
         GtfsRealtime.Position.Builder positionBuilder = GtfsRealtime.Position.newBuilder();
@@ -158,7 +160,7 @@ public class TripUpdateFeedTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         // No warnings, for valid speed
-        results = vehicleValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
+        results = vehicleValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(ValidationRules.W004, results, 0);
 
         /**
@@ -172,7 +174,7 @@ public class TripUpdateFeedTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         // One warning for negative speed value
-        results = vehicleValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
+        results = vehicleValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(ValidationRules.W004, results, 1);
 
         /**
@@ -186,7 +188,7 @@ public class TripUpdateFeedTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         // One warning for abnormally large speed
-        results = vehicleValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
+        results = vehicleValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(ValidationRules.W004, results, 1);
 
         clearAndInitRequiredFeedFields();

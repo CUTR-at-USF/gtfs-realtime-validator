@@ -41,7 +41,7 @@ public class FrequencyTypeZeroTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         // Start with an empty schedule relationship - that should be fine for exact_times=0 trips - no errors
-        results = frequencyTypeZero.validate(bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build());
+        results = frequencyTypeZero.validate(bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(E013, results, 0);
 
         // Change to UNSCHEDULED schedule relationship - this is also ok for exact_times=0 trips
@@ -55,7 +55,7 @@ public class FrequencyTypeZeroTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = frequencyTypeZero.validate(bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build());
+        results = frequencyTypeZero.validate(bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(E013, results, 0);
 
         // Change to ADDED schedule relationship - not allowed for exact_times=0 trips - 1 error
@@ -69,7 +69,7 @@ public class FrequencyTypeZeroTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = frequencyTypeZero.validate(bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build());
+        results = frequencyTypeZero.validate(bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(E013, results, 1);
 
         // Change to CANCELED schedule relationship - not allowed for exact_times=0 trips - 1 error
@@ -83,7 +83,7 @@ public class FrequencyTypeZeroTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = frequencyTypeZero.validate(bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build());
+        results = frequencyTypeZero.validate(bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(E013, results, 1);
 
         // Change to SCHEDULED schedule relationship - not allowed for exact_times=0 trips - 1 error
@@ -97,7 +97,7 @@ public class FrequencyTypeZeroTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = frequencyTypeZero.validate(bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build());
+        results = frequencyTypeZero.validate(bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(E013, results, 1);
     }
 }

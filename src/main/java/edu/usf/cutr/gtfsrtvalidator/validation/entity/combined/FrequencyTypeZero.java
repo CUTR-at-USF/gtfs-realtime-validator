@@ -39,7 +39,7 @@ public class FrequencyTypeZero implements FeedEntityValidator {
     private static final org.slf4j.Logger _log = LoggerFactory.getLogger(FrequencyTypeZero.class);
 
     @Override
-    public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage) {
+    public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage) {
         List<OccurrenceModel> errorListE013 = new ArrayList<>();
 
         /**

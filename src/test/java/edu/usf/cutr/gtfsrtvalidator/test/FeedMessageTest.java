@@ -19,7 +19,6 @@ package edu.usf.cutr.gtfsrtvalidator.test;
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.background.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
-import junit.framework.TestCase;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.onebusaway.gtfs.serialization.GtfsReader;
 
@@ -28,8 +27,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-
-public abstract class FeedMessageTest extends TestCase {
+public abstract class FeedMessageTest {
 
 
     public GtfsDaoImpl gtfsData;

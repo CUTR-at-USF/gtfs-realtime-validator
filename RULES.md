@@ -24,6 +24,8 @@
 | [E013](#E013) | Frequency type 0 trip schedule_relationship should be UNSCHEDULED or empty
 | [E015](#E015) | All stop_ids referenced in GTFS-rt feeds must have the location_type = 0
 | [E016](#E016) | trip_ids with schedule_relationship ADDED must not be in GTFS data
+| [E017](#E017) | GTFS-rt content changed but has the same header timestamp
+| [E018](#E018) | GTFS-rt header timestamp decreased between two sequential iterations
 
 # Warnings
 
@@ -125,3 +127,29 @@ All stop_ids referenced in GTFS-rt feeds must have the location_type = 0 in GTFS
 ### E016 - trip_ids with schedule_relationship ADDED must not be in GTFS data
 
 Trips that have a schedule_relationship of ADDED must not be included in the GTFS data
+
+<a name="E017"/>
+
+### E017 - GTFS-rt content changed but has the same header timestamp
+
+The GTFS-rt header timestamp value should always change if the feed contents change - the feed contents must not change without updating the header timestamp.
+
+See:
+* [`header.timestamp`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-feedheader)
+
+*Common mistakes* - If there are multiple instances of GTFS-realtime feed behind a load balancer, each instance may be pulling information from the real-time data source and publishing it to consumers slightly out of sync.  If a GTFS-rt consumer makes two back-to-back requests, and each request is served by a different GTFS-rt feed instance, the same feed contents could potentially be returned to the consumer with different timestamps. 
+
+*Possible solution* - Configure the load balancer for "sticky routes", so that the consumer always receives the GTFS-rt feed contents from the same GTFS-rt instance. 
+
+<a name="E018"/>
+
+### E018 - GTFS-rt header timestamp decreased between two sequential iterations
+
+The GTFS-rt header timestamp should be monotonically increasing -  it should always be the same value or greater than previous feed iterations if the feed contents are different.
+
+See:
+* [`header.timestamp`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-feedheader)
+
+*Common mistakes* - If there are multiple instances of GTFS-realtime feed behind a load balancer, each instance may be pulling information from the real-time data source and publishing it to consumers slightly out of sync.  If a GTFS-rt consumer makes two back-to-back requests, and each request is served by a different GTFS-rt feed instance, the same feed contents could potentially be returned to the consumer with the most recent feed response having a timestamp that is less than the previous feed response.
+
+*Possible solution* - Configure the load balancer for "sticky routes", so that the GTFS-rt consumer always receives the GTFS-rt feed contents from the same GTFS-rt instance.

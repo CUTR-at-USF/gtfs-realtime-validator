@@ -43,7 +43,7 @@ public class StopValidator implements FeedEntityValidator {
     private static final org.slf4j.Logger _log = LoggerFactory.getLogger(StopValidator.class);
 
     @Override
-    public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage) {
+    public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage) {
         List<OccurrenceModel> e011List = new ArrayList<>();
         List<OccurrenceModel> e015List = new ArrayList<>();
         List<GtfsRealtime.FeedEntity> allEntities = feedMessage.getEntityList();

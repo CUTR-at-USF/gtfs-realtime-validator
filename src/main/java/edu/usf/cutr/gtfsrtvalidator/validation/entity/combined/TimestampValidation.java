@@ -35,19 +35,26 @@ import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
 
 /**
  * Implement validation rules related to feed entity timestamps:
- *  * W001 - Timestamp not populated
- *  * E001 - Not in POSIX time
- *  * E012 - Header timestamp should be greater than or equal to all other timestamps
+ *  W001 - Timestamp not populated
+ *  E001 - Not in POSIX time
+ *  E012 - Header timestamp should be greater than or equal to all other timestamps
+ *  E017 - GTFS-rt content changed but has the same timestamp
+ *  E018 - GTFS-rt header timestamp decreased between two sequential iterations
  */
 public class TimestampValidation implements FeedEntityValidator{
 
     private static final org.slf4j.Logger _log = LoggerFactory.getLogger(TimestampValidation.class);
 
     @Override
-    public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage) {
+    public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage) {
+        if (feedMessage.equals(previousFeedMessage)) {
+            throw new IllegalArgumentException("feedMessage and previousFeedMessage must not be the same");
+        }
         List<OccurrenceModel> w001List = new ArrayList<>();
         List<OccurrenceModel> e001List = new ArrayList<>();
         List<OccurrenceModel> e012List = new ArrayList<>();
+        List<OccurrenceModel> e017List = new ArrayList<>();
+        List<OccurrenceModel> e018List = new ArrayList<>();
 
         /**
          * Validate FeedHeader timestamp - W001 and E001
@@ -62,6 +69,19 @@ public class TimestampValidation implements FeedEntityValidator{
                 OccurrenceModel errorE001 = new OccurrenceModel("header.timestamp");
                 e001List.add(errorE001);
                 _log.debug(errorE001.getPrefix() + " " + E001.getOccurrenceSuffix());
+            }
+            if (previousFeedMessage != null && previousFeedMessage.getHeader().getTimestamp() != 0) {
+                if (headerTimestamp == previousFeedMessage.getHeader().getTimestamp()) {
+                    OccurrenceModel om = new OccurrenceModel("header.timestamp of " + headerTimestamp);
+                    e017List.add(om);
+                    _log.debug(om.getPrefix() + " " + E017.getOccurrenceSuffix());
+                }
+                if (headerTimestamp < previousFeedMessage.getHeader().getTimestamp()) {
+                    OccurrenceModel om = new OccurrenceModel("header.timestamp of " + headerTimestamp + " is less than the header.timestamp of " + previousFeedMessage.getHeader().getTimestamp());
+                    e018List.add(om);
+                    _log.debug(om.getPrefix() + " " + E018.getOccurrenceSuffix());
+                }
+
             }
         }
 
@@ -185,6 +205,12 @@ public class TimestampValidation implements FeedEntityValidator{
         }
         if (!e012List.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.E012), e012List));
+        }
+        if (!e017List.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.E017), e017List));
+        }
+        if (!e018List.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.E018), e018List));
         }
         return errors;
     }
