@@ -44,7 +44,7 @@ public class ValidationRules {
     public static final ValidationRule E002 = new ValidationRule("E002", "ERROR", "Unsorted stop_sequence",
             "stop_time_updates for a given trip_id must be sorted by increasing stop_sequence",
             "is not sorted by increasing stop_sequence");
-    public static final ValidationRule E003 = new ValidationRule("E003", "ERROR", "GTFS-rt trip_id does not exist in GTFS data",
+    public static final ValidationRule E003 = new ValidationRule("E003", "ERROR", "GTFS-rt trip_id does not exist in GTFS data and does not have schedule_relationship of ADDED",
             "All trip_ids provided in the GTFS-rt feed must exist in the GTFS data, unless the schedule_relationship is ADDED",
             "does not exist in the GTFS data and does not have schedule_relationship of ADDED");
     public static final ValidationRule E004 = new ValidationRule("E004", "ERROR", "GTFS-rt route_id does not exist in GTFS data",
