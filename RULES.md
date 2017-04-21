@@ -23,6 +23,7 @@
 | [E012](#E012) | Header timestamp should be greater than or equal to all other timestamps
 | [E013](#E013) | Frequency type 0 trip schedule_relationship should be UNSCHEDULED or empty
 | [E015](#E015) | All stop_ids referenced in GTFS-rt feeds must have the location_type = 0
+| [E016](#E016) | trip_ids with schedule_relationship ADDED must not be in GTFS data
 
 # Warnings
 
@@ -118,3 +119,9 @@ For frequency-based exact_times=0 trips, schedule_relationship should be UNSCHED
 ### E015 - All stop_ids referenced in GTFS-rt feeds must have the location_type = 0
 
 All stop_ids referenced in GTFS-rt feeds must have the location_type = 0 in GTFS `stops.txt`
+
+<a name="E016"/>
+
+### E016 - trip_ids with schedule_relationship ADDED must not be in GTFS data
+
+Trips that have a schedule_relationship of ADDED must not be included in the GTFS data

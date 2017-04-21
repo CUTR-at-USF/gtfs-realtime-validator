@@ -150,4 +150,52 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
 
         clearAndInitRequiredFeedFields();
     }
+
+    /**
+     * E016 - trip_ids with schedule_relationship ADDED must not be in GTFS data
+     */
+    @Test
+    public void testE016() {
+        CheckRouteAndTripIds tripIdValidator = new CheckRouteAndTripIds();
+
+        GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+
+        // Set trip_id = 1.1 that's in the GTFS data
+        tripDescriptorBuilder.setTripId("1.1");
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripIdValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
+        // No schedule relationship - no errors
+        TestUtils.assertResults(ValidationRules.E016, results, 0);
+
+        // Set trip_id = 100 that's not in GTFS, and ADDED schedule relationship - no errors
+        tripDescriptorBuilder.setTripId("100");
+        tripDescriptorBuilder.setScheduleRelationship(GtfsRealtime.TripDescriptor.ScheduleRelationship.ADDED);
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripIdValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
+        TestUtils.assertResults(ValidationRules.E016, results, 0);
+
+        // Change to trip_id that's in the GTFS, with a ADDED schedule relationship - 2 errors
+        tripDescriptorBuilder.setTripId("1.1");
+        tripDescriptorBuilder.setScheduleRelationship(GtfsRealtime.TripDescriptor.ScheduleRelationship.ADDED);
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripIdValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build());
+        TestUtils.assertResults(ValidationRules.E016, results, 2);
+
+        clearAndInitRequiredFeedFields();
+    }
 }

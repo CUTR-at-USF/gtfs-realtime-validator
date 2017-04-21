@@ -30,16 +30,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils.isAddedTrip;
-import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.E003;
-import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.E004;
+import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
 
 /**
- * ID: E003
- * Description: All trip_ids provided in the GTFS-rt feed must appear in the GTFS data
+ * E003 - All trip_ids provided in the GTFS-rt feed must appear in the GTFS data
  * (unless schedule_relationship is ADDED)
  *
- * ID: E004
- * Description: All route_ids provided in the GTFS-rt feed must appear in the GTFS data
+ * E004 - All route_ids provided in the GTFS-rt feed must appear in the GTFS data
+ *
+ * E016 - trip_ids with schedule_relationship ADDED must not be in GTFS data
  */
 public class CheckRouteAndTripIds implements FeedEntityValidator {
 
@@ -49,16 +48,27 @@ public class CheckRouteAndTripIds implements FeedEntityValidator {
     public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage) {
         List<OccurrenceModel> errorListE003 = new ArrayList<>();
         List<OccurrenceModel> errorListE004 = new ArrayList<>();
+        List<OccurrenceModel> errorListE016 = new ArrayList<>();
 
         // Check the route_id values against the values from the GTFS feed
         for (GtfsRealtime.FeedEntity entity : feedMessage.getEntityList()) {
             if (entity.hasTripUpdate()) {
                 String routeId = entity.getTripUpdate().getTrip().getRouteId();
                 String tripId = entity.getTripUpdate().getTrip().getTripId();
-                if (!gtfsMetadata.getTripIds().contains(tripId) && !isAddedTrip(entity.getTripUpdate().getTrip())) {
-                    OccurrenceModel om = new OccurrenceModel("trip_id " + tripId);
-                    errorListE003.add(om);
-                    _log.debug(om.getPrefix() + " " + E003.getOccurrenceSuffix());
+                if (!gtfsMetadata.getTripIds().contains(tripId)) {
+                    if (!isAddedTrip(entity.getTripUpdate().getTrip())) {
+                        // Trip isn't in GTFS data and isn't an ADDED trip
+                        OccurrenceModel om = new OccurrenceModel("trip_id " + tripId);
+                        errorListE003.add(om);
+                        _log.debug(om.getPrefix() + " " + E003.getOccurrenceSuffix());
+                    }
+                } else {
+                    if (isAddedTrip(entity.getTripUpdate().getTrip())) {
+                        // Trip is in GTFS data and is an ADDED trip
+                        OccurrenceModel om = new OccurrenceModel("trip_id " + tripId);
+                        errorListE016.add(om);
+                        _log.debug(om.getPrefix() + " " + E016.getOccurrenceSuffix());
+                    }
                 }
                 if (!StringUtil.isEmpty(routeId) && !gtfsMetadata.getRouteIds().contains(routeId)) {
                     OccurrenceModel om = new OccurrenceModel("route_id " + routeId);
@@ -69,10 +79,22 @@ public class CheckRouteAndTripIds implements FeedEntityValidator {
             if (entity.hasVehicle() && entity.getVehicle().hasTrip()) {
                 String routeId = entity.getVehicle().getTrip().getRouteId();
                 String tripId = entity.getTripUpdate().getTrip().getTripId();
-                if (!StringUtil.isEmpty(tripId) && !gtfsMetadata.getTripIds().contains(tripId) && !isAddedTrip(entity.getTripUpdate().getTrip())) {
-                    OccurrenceModel om = new OccurrenceModel("vehicle_id " + entity.getVehicle().getVehicle().getId() + " trip_id " + tripId);
-                    errorListE003.add(om);
-                    _log.debug(om.getPrefix() + " " + E003.getOccurrenceSuffix());
+                if (!StringUtil.isEmpty(tripId)) {
+                    if (!gtfsMetadata.getTripIds().contains(tripId)) {
+                        if (!isAddedTrip(entity.getTripUpdate().getTrip())) {
+                            // Trip isn't in GTFS data and isn't an ADDED trip
+                            OccurrenceModel om = new OccurrenceModel("vehicle_id " + entity.getVehicle().getVehicle().getId() + " trip_id " + tripId);
+                            errorListE003.add(om);
+                            _log.debug(om.getPrefix() + " " + E003.getOccurrenceSuffix());
+                        }
+                    } else {
+                        if (isAddedTrip(entity.getTripUpdate().getTrip())) {
+                            // Trip is in GTFS data and is an ADDED trip
+                            OccurrenceModel om = new OccurrenceModel("vehicle_id " + entity.getVehicle().getVehicle().getId() + " trip_id " + tripId);
+                            errorListE016.add(om);
+                            _log.debug(om.getPrefix() + " " + E016.getOccurrenceSuffix());
+                        }
+                    }
                 }
                 if (!StringUtil.isEmpty(routeId) && !gtfsMetadata.getRouteIds().contains(routeId)) {
                     OccurrenceModel om = new OccurrenceModel("vehicle_id " + entity.getVehicle().getVehicle().getId() + " route_id " + routeId);
@@ -87,6 +109,9 @@ public class CheckRouteAndTripIds implements FeedEntityValidator {
         }
         if (!errorListE004.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(E004), errorListE004));
+        }
+        if (!errorListE016.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E016), errorListE016));
         }
         return errors;
     }
