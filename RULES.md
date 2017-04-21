@@ -7,7 +7,7 @@
 | [W001](#W001) | `timestamps` not populated
 | [W002](#W002) | `vehicle_id` not populated
 | [W003](#W003) | `VehiclePosition` and `TripUpdate` feed mismatch
-| [W004](#W004) | VehiclePosition has unrealistic speed
+| [W004](#W004) | `VehiclePosition` has unrealistic speed
 
 
 ### Table of Errors
@@ -20,12 +20,12 @@
 | [E004](#E004) | GTFS-rt `route_id` does not exist in GTFS data
 | [E010](#E010) | `location_type` not `0` in `stops.txt` (Note that this is implemented but not executed because it's specific to GTFS - see #126)
 | [E011](#E011) | GTFS-rt `stop_id` does not exist in GTFS data
-| [E012](#E012) | Header timestamp should be greater than or equal to all other timestamps
-| [E013](#E013) | Frequency type 0 trip schedule_relationship should be UNSCHEDULED or empty
-| [E015](#E015) | All stop_ids referenced in GTFS-rt feeds must have the location_type = 0
-| [E016](#E016) | trip_ids with schedule_relationship ADDED must not be in GTFS data
-| [E017](#E017) | GTFS-rt content changed but has the same header timestamp
-| [E018](#E018) | GTFS-rt header timestamp decreased between two sequential iterations
+| [E012](#E012) | Header `timestamp` should be greater than or equal to all other timestamps
+| [E013](#E013) | Frequency type 0 trip `schedule_relationship` should be `UNSCHEDULED` or empty
+| [E015](#E015) | All `stop_ids` referenced in GTFS-rt feeds must have the `location_type` = 0
+| [E016](#E016) | `trip_ids` with `schedule_relationship` `ADDED` must not be in GTFS data
+| [E017](#E017) | GTFS-rt content changed but has the same header `timestamp`
+| [E018](#E018) | GTFS-rt header `timestamp` decreased between two sequential iterations
 
 # Warnings
 
@@ -51,7 +51,7 @@ If both vehicle positions and trip updates are provided, `VehicleDescriptor` or 
 
 ### W004 - VehiclePosition has unrealistic speed
 
-vehicle.position.speed has an unrealistic speed that may be incorrect
+`vehicle.position.speed` has an unrealistic speed that may be incorrect
 
 # Errors
 
@@ -106,33 +106,33 @@ All `stop_ids` referenced in GTFS-rt feeds must exist in the GTFS data in `stops
 
 <a name="E012"/>
 
-### E012 - Header timestamp should be greater than or equal to all other timestamps
+### E012 - Header `timestamp` should be greater than or equal to all other timestamps
 
 No timestamps for individual entities (TripUpdate, VehiclePosition, Alerts) in the feeds should be greater than the header timestamp.
 
 <a name="E013"/>
 
-### E013 - Frequency type 0 trip schedule_relationship should be UNSCHEDULED or empty
+### E013 - Frequency type 0 trip `schedule_relationship` should be `UNSCHEDULED` or empty
 
-For frequency-based exact_times=0 trips, schedule_relationship should be UNSCHEDULED or empty.
+For frequency-based exact_times=0 trips, schedule_relationship should be `UNSCHEDULED` or empty.
 
 <a name="E015"/>
 
-### E015 - All stop_ids referenced in GTFS-rt feeds must have the location_type = 0
+### E015 - All `stop_ids` referenced in GTFS-rt feeds must have the `location_type` = 0
 
-All stop_ids referenced in GTFS-rt feeds must have the location_type = 0 in GTFS `stops.txt`
+All `stop_ids` referenced in GTFS-rt feeds must have the `location_type` = 0 in GTFS `stops.txt`
 
 <a name="E016"/>
 
-### E016 - trip_ids with schedule_relationship ADDED must not be in GTFS data
+### E016 - `trip_ids` with `schedule_relationship` `ADDED` must not be in GTFS data
 
-Trips that have a schedule_relationship of ADDED must not be included in the GTFS data
+Trips that have a `schedule_relationship` of `ADDED` must not be included in the GTFS data
 
 <a name="E017"/>
 
-### E017 - GTFS-rt content changed but has the same header timestamp
+### E017 - GTFS-rt content changed but has the same header `timestamp`
 
-The GTFS-rt header timestamp value should always change if the feed contents change - the feed contents must not change without updating the header timestamp.
+The GTFS-rt header `timestamp` value should always change if the feed contents change - the feed contents must not change without updating the header `timestamp`.
 
 See:
 * [`header.timestamp`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-feedheader)
@@ -143,9 +143,9 @@ See:
 
 <a name="E018"/>
 
-### E018 - GTFS-rt header timestamp decreased between two sequential iterations
+### E018 - GTFS-rt header `timestamp` decreased between two sequential iterations
 
-The GTFS-rt header timestamp should be monotonically increasing -  it should always be the same value or greater than previous feed iterations if the feed contents are different.
+The GTFS-rt header `timestamp` should be monotonically increasing -  it should always be the same value or greater than previous feed iterations if the feed contents are different.
 
 See:
 * [`header.timestamp`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-feedheader)
