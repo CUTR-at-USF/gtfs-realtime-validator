@@ -30,7 +30,7 @@ public class ValidationRules {
             "does not have a vehicle_id");
     public static final ValidationRule W003 = new ValidationRule("W003", "WARNING", "VehiclePosition and TripUpdate feed mismatch",
             "If both vehicle positions and trip updates are provided, VehicleDescriptor or TripDescriptor values should match between the two feeds",
-            "does not appear in both VehiclePositions and TripUpdates feeds");
+            "does not exist in both VehiclePositions and TripUpdates feeds");
     public static final ValidationRule W004 = new ValidationRule("W004", "WARNING", "VehiclePosition has unrealistic speed",
             "vehicle.position.speed has an unrealistic speed that may be incorrect",
             "is unrealistic");
@@ -44,12 +44,12 @@ public class ValidationRules {
     public static final ValidationRule E002 = new ValidationRule("E002", "ERROR", "Unsorted stop_sequence",
             "stop_time_updates for a given trip_id must be sorted by increasing stop_sequence",
             "is not sorted by increasing stop_sequence");
-    public static final ValidationRule E003 = new ValidationRule("E003", "ERROR", "GTFS-rt trip_id does not appear in GTFS data",
-            "All trip_ids provided in the GTFS-rt feed must appear in the GTFS data, unless the schedule_relationship is ADDED",
-            "does not appear in the GTFS data and does not have schedule_relationship of ADDED");
-    public static final ValidationRule E004 = new ValidationRule("E004", "ERROR", "GTFS-rt route_id does not appear in GTFS data",
-            "All route_ids provided in the GTFS-rt feed must appear in the GTFS data",
-            "does not appear in the GTFS data");
+    public static final ValidationRule E003 = new ValidationRule("E003", "ERROR", "GTFS-rt trip_id does not exist in GTFS data",
+            "All trip_ids provided in the GTFS-rt feed must exist in the GTFS data, unless the schedule_relationship is ADDED",
+            "does not exist in the GTFS data and does not have schedule_relationship of ADDED");
+    public static final ValidationRule E004 = new ValidationRule("E004", "ERROR", "GTFS-rt route_id does not exist in GTFS data",
+            "All route_ids provided in the GTFS-rt feed must exist in the GTFS data",
+            "does not exist in the GTFS data");
 
     // TODO - implement
     public static final ValidationRule E005 = new ValidationRule("E005", "ERROR", "GTFS stop_times.txt does not contain arrival_times and/or departure_times for all stops referenced in the GTFS-rt feed",
@@ -80,8 +80,8 @@ public class ValidationRules {
             "If location_type is used in stops.txt, all stops referenced in stop_times.txt must have location_type of 0",
             "is not location_type 0");
 
-    public static final ValidationRule E011 = new ValidationRule("E011", "ERROR", "GTFS-rt stop_id does not appear in GTFS data",
-            "All stop_ids referenced in GTFS-rt feeds must appear in GTFS stops.txt", "does not appear in GTFS data stops.txt");
+    public static final ValidationRule E011 = new ValidationRule("E011", "ERROR", "GTFS-rt stop_id does not exist in GTFS data",
+            "All stop_ids referenced in GTFS-rt feeds must exist in GTFS stops.txt", "does not exist in GTFS data stops.txt");
 
     public static final ValidationRule E012 = new ValidationRule("E012", "ERROR", "Header timestamp should be greater than or equal to all other timestamps",
             "No timestamps for individual entities (TripUpdate, VehiclePosition) in the feeds should be greater than the header timestamp",
@@ -102,7 +102,7 @@ public class ValidationRules {
 
     public static final ValidationRule E016 = new ValidationRule("E016", "ERROR", "trip_ids with schedule_relationship ADDED must not be in GTFS data",
             "Trips that have a schedule_relationship of ADDED must not be included in the GTFS data",
-            "has a schedule_relationship of ADDED but appears in the GTFS data");
+            "has a schedule_relationship of ADDED but exists in the GTFS data");
 
     public static final ValidationRule E017 = new ValidationRule("E017", "ERROR", "GTFS-rt content changed but has the same header timestamp",
             "The GTFS-rt header timestamp value should always change if the feed contents change - the feed contents must not change without updating the header timestamp",
