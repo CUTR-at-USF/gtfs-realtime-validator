@@ -345,3 +345,7 @@ function hideTooltip(btn) {
         btn.tooltip('hide');
     }, 1000);
 }
+
+$(document).ready(function(){
+    $("body").tooltip({ selector: '[data-toggle=tooltip]' });
+});
