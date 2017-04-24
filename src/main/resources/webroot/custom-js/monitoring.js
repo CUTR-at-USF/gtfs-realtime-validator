@@ -293,13 +293,13 @@ function updatePaginationInfo(logOrSumary, index, paginationInfo) {
     }
 }
 
-function showFeedMessage(iterationId, timestamp, occurrence) {
+function showFeedMessage(rowId, iterationId, timestamp, occurrence) {
     $.get(server + "/api/gtfs-rt-feed/" + iterationId + "/feedMessage").done(function (data) {
         var jsonFeed = JSON.stringify(data, undefined, 2);
         var feedTemplateScript = $("#gtfs-rt-feed-message").html();
         $(".feedMessageDialog").html(feedTemplateScript);
         document.getElementById("feedMessage").innerHTML = jsonFeed;
-        $("#title-text").text("Iteration " + iterationId + " - " + timestamp + " (" + occurrence + ")");
+        $("#title-text").text("Iteration " + rowId + " - " + timestamp + " (" + occurrence + ")");
         $("#feed-message-modal").modal();
     });
 

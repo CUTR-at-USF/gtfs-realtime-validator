@@ -203,7 +203,7 @@
 <script id="feed-monitor-log-row-template" type="text/x-handlebars-template">
     {{#each this}}
     <tr>
-        <td><a href="#" onclick="showFeedMessage({{rowId}}, '{{formattedTimestamp}}', {{occurrence}}); return false;">{{rowId}}</a></td>
+        <td><a href="#" onclick="showFeedMessage({{rowId}}, {{iterationId}}, '{{formattedTimestamp}}', {{occurrence}}); return false;">{{rowId}}</a></td>
         <td>{{id}}</td>
         <td>{{title}}</td>
 
