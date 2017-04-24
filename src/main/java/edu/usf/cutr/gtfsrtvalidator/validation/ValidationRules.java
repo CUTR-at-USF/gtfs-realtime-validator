@@ -34,6 +34,12 @@ public class ValidationRules {
     public static final ValidationRule W004 = new ValidationRule("W004", "WARNING", "VehiclePosition has unrealistic speed",
             "vehicle.position.speed has an unrealistic speed that may be incorrect",
             "is unrealistic");
+    public static final ValidationRule W005 = new ValidationRule("W005", "WARNING", "Missing vehicle_id for frequency-based exact_times = 0",
+            "Frequency-based exact_times = 0 trip_updates and vehicle positions should contain vehicle_id",
+            "is missing vehicle_id, which is suggested for frequency-based exact_times=0 trips");
+    public static final ValidationRule W006 = new ValidationRule("W005", "WARNING", "trip_update missing trip_id",
+            "trip_updates should include a trip_id",
+            "trip_update does not contain a trip_id");
 
     /**
      * Errors
@@ -56,10 +62,9 @@ public class ValidationRules {
             "If only delay is provided in a stop_time_event (and not a time), then the GTFS stop_times.txt must contain arrival_times and/or departure_times for all stops referenced in the GTFS-rt feed (i.e., not just timepoints)",
             "has only delay but no arrival and/or departure time");
 
-    // TODO - implement - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/59
-    public static final ValidationRule E006 = new ValidationRule("E006", "ERROR", "Missing trip_id and start_time in Frequency-based trip_updates",
-            "Frequency-based trip_updates must contain trip_id, start_time, and start_date",
-            "is missing trip_id and/or start_time");
+    public static final ValidationRule E006 = new ValidationRule("E006", "ERROR", "Missing required trip field for frequency-based exact_times = 0",
+            "Frequency-based exact_times=0 trip_updates must contain trip_id, start_time, and start_date",
+            "which is required for frequency-based exact_times = 0 trips");
 
     // TODO - implement
     public static final ValidationRule E007 = new ValidationRule("E007", "ERROR", "Trips with same vehicle_id do not belong to the same block",

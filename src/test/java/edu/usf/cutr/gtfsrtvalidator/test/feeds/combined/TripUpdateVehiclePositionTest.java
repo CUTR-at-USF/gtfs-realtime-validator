@@ -94,12 +94,24 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
     /**
      * E003 - All trip_ids provided in the GTFS-rt feed must appear in the GTFS data unless schedule_relationship is ADDED
      * E004 - All route_ids provided in the GTFS-rt feed must appear in the GTFS data
+     * W006 - trip_update missing trip_id
      */
     @Test
     public void testTripIdAndRouteIdValidation() {
         CheckRouteAndTripIds tripIdValidator = new CheckRouteAndTripIds();
 
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+
+        // Don't set a trip_id - 2 warnings
+        tripDescriptorBuilder.setRouteId("1");
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripIdValidator.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.W006, results, 2);
 
         // setting valid trip_id = 1.1, route_id 1.1 that match with IDs in static Gtfs data
         tripDescriptorBuilder.setTripId("1.1");

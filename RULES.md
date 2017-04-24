@@ -8,6 +8,8 @@
 | [W002](#W002) | `vehicle_id` not populated
 | [W003](#W003) | `VehiclePosition` and `TripUpdate` feed mismatch
 | [W004](#W004) | `VehiclePosition` has unrealistic speed
+| [W005](#W005) | Missing `vehicle_id` in `trip_update` for frequency-based `exact_times` = 0
+| [W006](#W006) | trip_update missing trip_id
 
 
 ### Table of Errors
@@ -18,6 +20,7 @@
 | [E002](#E002) | Unsorted `stop_sequence`
 | [E003](#E003) | GTFS-rt `trip_id` does not exist in GTFS data
 | [E004](#E004) | GTFS-rt `route_id` does not exist in GTFS data
+| [E006](#E006) | Missing required trip field for frequency-based exact_times = 0
 | [E010](#E010) | `location_type` not `0` in `stops.txt` (Note that this is implemented but not executed because it's specific to GTFS - see #126)
 | [E011](#E011) | GTFS-rt `stop_id` does not exist in GTFS data
 | [E012](#E012) | Header `timestamp` should be greater than or equal to all other timestamps
@@ -52,6 +55,30 @@ If both vehicle positions and trip updates are provided, `VehicleDescriptor` or 
 ### W004 - VehiclePosition has unrealistic speed
 
 `vehicle.position.speed` has an unrealistic speed that may be incorrect
+
+<a name="W005"/>
+
+### W005 - Missing `vehicle_id` in `trip_update` for frequency-based exact_times = 0
+
+Frequency-based exact_times = 0 trip_updates should contain `vehicle_id`.  This helps disambiguate predictions in situations where more than one vehicle is running the same trip instance simultaneously.
+
+<a name="W006"/>
+
+### W006 - `trip_update` missing `trip_id`
+
+`trip_updates` should include a `trip_id`.  A missing `trip_id` is usually an error in the feed (especially for frequency-based `exact_times` = 0 trips - see [E006](https://github.com/CUTR-at-USF/gtfs-realtime-validator/blob/master/RULES.md#E006), although the section on "Alternative trip matching" includes one exception:
+
+>Trips which are not frequency based may also be uniquely identified by a TripDescriptor including the combination of:
+>
+> * `route_id`
+> * `direction_id`
+> * `start_time`
+> * `start_date`
+>
+> ...where `start_time` is the scheduled start time as defined in the static schedule, as long as the combination of ids provided resolves to a unique trip.
+
+See:
+* [`trip_update.trip`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#alternative-trip-matching)
 
 # Errors
 
@@ -89,6 +116,15 @@ All `trip_ids` provided in the GTFS-rt feed must exist in the GTFS data, unless 
 ### E004 - GTFS-rt `route_id` does not exist in GTFS data
 
 All `route_ids` provided in the GTFS-rt feed must exist in the GTFS data
+
+<a name="E006"/>
+
+### E006 - Missing required trip field for frequency-based exact_times = 0
+
+Frequency-based `exact_times` = 0 `trip_updates` must contain `trip_id`, `start_time`, and `start_date`.
+
+See:
+* [`trip_update.trip`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#systems-with-repeated-trip_ids)
 
 <a name="E010"/>
 
