@@ -35,7 +35,7 @@ public class GtfsFeedTest extends TestCase {
 
     GtfsFeed gtfsFeed;
 
-    protected void setUp() {
+    public void setUp() {
         gtfsFeed  = new GtfsFeed();
         HibernateUtil.configureSessionFactory();
         GTFSDB.InitializeDB();

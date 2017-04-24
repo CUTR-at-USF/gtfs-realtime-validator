@@ -24,26 +24,49 @@ import java.io.Serializable;
 @XmlRootElement
 @Entity
 @NamedNativeQuery(name = "ErrorLogByrtfeedID",
-        query = "SELECT ? AS rtFeedID, Error.errorID AS id, Error.title, " +
-                "Error.severity, errorLog.IterationID AS iterationId, " +
-                "errorLog.IterationTimestamp AS occurrence " +
+        query = // Retrieve the remaining columns, title and severity from Error and FinalResult tables on matching errorIds.
+                "SELECT rowIdentifier, ? AS rtFeedID, errorId AS id, " +
+                    "Error.title, Error.severity, iterationId, occurrence, loggingTime " +
                 "FROM Error " +
                 "INNER JOIN " +
-                    "(SELECT errorID, GtfsRtFeedIDIteration.IterationID, " +
-                    "GtfsRtFeedIDIteration.IterationTimestamp " +
+                    // Retrieve the other required column errorId on matching iterationId from MessageLog and UniqueRowIdResult tables.
+                    "(SELECT rowIdentifier, errorId, iterationId, " +
+                        "occurrence, loggingTime " +
                     "FROM MessageLog " +
-                    "INNER JOIN  " +
-                        "(SELECT IterationID, IterationTimestamp " +
-                        "FROM GtfsRtFeedIteration " +
-                        "WHERE rtFeedID = ?) GtfsRtFeedIDIteration " +
-                    "ON MessageLog.iterationID = GtfsRtFeedIDIteration.IterationID " +
-                    ") errorLog " +
-                "ON Error.errorID = errorLog.errorID " +
-                "WHERE Error.errorID NOT IN (:errorIds)" +
-                "ORDER BY iterationId DESC",
+                        "INNER JOIN " +
+                        // Retrieve ROWNUM here.
+                        "(SELECT ROWNUM() AS rowIdentifier, " +
+                            "IterationID AS iterationId, " +
+                            "feedTimestamp AS occurrence, " +
+                            "IterationTimestamp AS loggingTime " +
+                        "FROM " +
+                            // Retrieve unique IteraionID and IterationTimestamp to get ROWNUM in sequential order.
+                            "(SELECT DISTINCT errorLog.IterationID, errorLog.IterationTimestamp, errorLog.feedTimestamp " +
+                            "FROM " +
+                                "(SELECT GtfsRtFeedIDIteration.IterationID, " +
+                                    "GtfsRtFeedIDIteration.IterationTimestamp, " +
+                                    "GtfsRtFeedIDIteration.feedTimestamp " +
+                                "FROM MessageLog " +
+                                    "INNER JOIN " +
+                                    "(SELECT  IterationID, IterationTimestamp, feedTimestamp " +
+                                    "FROM GtfsRtFeedIteration " +
+                                    "WHERE rtFeedID = ?) GtfsRtFeedIDIteration " +
+                                    "ON MessageLog.iterationID = GtfsRtFeedIDIteration.IterationID " +
+                                        "AND IterationTimestamp > ? " +
+                                ") errorLog " +
+                            "ORDER BY IterationID " +
+                            ") " +
+                        ") UniqueRowIdResult " +
+                        "ON MessageLog.iterationId = UniqueRowIdResult.iterationId " +
+                    ") FinalResult " +
+                "ON Error.errorID = FinalResult.errorId " +
+                "WHERE Error.errorID NOT IN (:errorIds) " +
+                "ORDER BY iterationId DESC, id ",
         resultClass = ViewErrorLogModel.class)
 public class ViewErrorLogModel implements Serializable {
 
+    @Column(name = "rowIdentifier")
+    private int rowId;
     @Column(name = "rtFeedID")
     private int gtfsRtId;
     @Id
@@ -51,6 +74,8 @@ public class ViewErrorLogModel implements Serializable {
     private int iterationId;
     @Column(name = "occurrence")
     private long occurrence;
+    @Column(name = "loggingTime")
+    private long loggingTime;
     @Id
     @Column(name = "id")
     private String id; // error or warning ID
@@ -62,6 +87,14 @@ public class ViewErrorLogModel implements Serializable {
     private String formattedTimestamp;
     @Transient
     private String timeZone;
+
+    public int getRowId() {
+        return rowId;
+    }
+
+    public void setRowId(int rowId) {
+        this.rowId = rowId;
+    }
 
     public int getGtfsRtId() {
         return gtfsRtId;
@@ -85,6 +118,14 @@ public class ViewErrorLogModel implements Serializable {
 
     public void setOccurrence(long occurrence) {
         this.occurrence = occurrence;
+    }
+
+    public long getLoggingTime() {
+        return loggingTime;
+    }
+
+    public void setLoggingTime(long loggingTime) {
+        this.loggingTime = loggingTime;
     }
 
     public String getId() {
@@ -125,5 +166,24 @@ public class ViewErrorLogModel implements Serializable {
 
     public void setTimeZone(String timeZone) {
         this.timeZone = timeZone;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        ViewErrorLogModel that = (ViewErrorLogModel) o;
+        return this.id == null ? that.id == null : this.id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id == null ? 0 : id.hashCode();
     }
 }
