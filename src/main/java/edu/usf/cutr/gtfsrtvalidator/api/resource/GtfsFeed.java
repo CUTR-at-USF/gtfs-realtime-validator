@@ -176,7 +176,8 @@ public class GtfsFeed {
         File input = backend.getFeed(saveFilePath);
         FeedProcessor processor = new FeedProcessor(input);
         try {
-        processor.run();
+            _log.info("Running static GTFS validation on " + gtfsFeedUrl + "...");
+            processor.run();
         } catch (IOException ex) {
             Logger.getLogger(GtfsFeed.class.getName()).log(Level.SEVERE, null, ex);
             return generateError("Unable to access input GTFS " + input.getPath() + ".", "Does the file " + saveFilePath + "exist and do I have permission to read it?", Response.Status.NOT_FOUND);
@@ -190,7 +191,9 @@ public class GtfsFeed {
         saveFilePath = saveDir + File.separator + jsonFilePath + File.separator + fileName + "_out.json";
         try {     
             serializer.serializeToFile(new File(saveFilePath));
-        } catch (Exception ex) {//TODO: Parse error.
+            _log.info("Static GTFS validation data written to " + saveFilePath);
+        } catch (Exception e) {
+            e.printStackTrace();
         } 
         return Response.ok(gtfsFeed).build();
     }
