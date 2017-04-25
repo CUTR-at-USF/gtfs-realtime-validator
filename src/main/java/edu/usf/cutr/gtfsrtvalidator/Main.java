@@ -37,7 +37,7 @@ public class Main {
         // Parse command line parameters
         int port = getPortFromArgs(args);
         HibernateUtil.configureSessionFactory();
-        GTFSDB.InitializeDB();
+        GTFSDB.initializeDB();
 
         Server server = new Server(port);
         ServletContextHandler context = new ServletContextHandler();

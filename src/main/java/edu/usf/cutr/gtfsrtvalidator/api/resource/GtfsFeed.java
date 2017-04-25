@@ -69,7 +69,7 @@ public class GtfsFeed {
     @DELETE
     @Path("/{id}")
     public Response deleteGtfsFeed(@PathParam("id") String id) {
-        Session session = GTFSDB.InitSessionBeginTrans();
+        Session session = GTFSDB.initSessionBeginTrans();
         session.createQuery("DELETE FROM GtfsFeedModel WHERE feedID = "+ id).executeUpdate();
         GTFSDB.commitAndCloseSession(session);
         return Response.accepted().build();
@@ -81,7 +81,7 @@ public class GtfsFeed {
     public Response getGtfsFeeds() {
         List<GtfsFeedModel> gtfsFeeds = new ArrayList<>();
         try {
-            Session session = GTFSDB.InitSessionBeginTrans();
+            Session session = GTFSDB.initSessionBeginTrans();
             List<GtfsFeedModel> tempGtfsFeeds = session.createQuery(" FROM GtfsFeedModel").list();
             GTFSDB.commitAndCloseSession(session);
             if (tempGtfsFeeds != null) {
@@ -124,7 +124,7 @@ public class GtfsFeed {
         String fileName = saveFilePath.substring(saveFilePath.lastIndexOf(File.separator)+1, saveFilePath.lastIndexOf('.'));
         boolean canReturn = false;
         //Read gtfsFeedModel with the same URL in the database        
-        Session session = GTFSDB.InitSessionBeginTrans();
+        Session session = GTFSDB.initSessionBeginTrans();
         GtfsFeedModel gtfsFeed = (GtfsFeedModel) session.createQuery("FROM GtfsFeedModel "
                             + "WHERE gtfsUrl = '"+gtfsFeedUrl+"'").uniqueResult();
         Response.Status response = downloadGtfsFeed(saveFilePath, connection);
@@ -270,7 +270,7 @@ public class GtfsFeed {
         gtfsFeed.setChecksum(checksum);
 
         //Create GTFS feed row in database
-        Session session = GTFSDB.InitSessionBeginTrans();
+        Session session = GTFSDB.initSessionBeginTrans();
         session.save(gtfsFeed);
         GTFSDB.commitAndCloseSession(session);
         return gtfsFeed;
@@ -278,7 +278,7 @@ public class GtfsFeed {
 
     private GtfsFeedModel updateGtfsFeedModel(GtfsFeedModel gtfsFeed) {        
         //Update GTFS feed row in database
-        Session session = GTFSDB.InitSessionBeginTrans();
+        Session session = GTFSDB.initSessionBeginTrans();
         session.update(gtfsFeed);
         GTFSDB.commitAndCloseSession(session);
         return gtfsFeed;
@@ -371,7 +371,7 @@ public class GtfsFeed {
         }
 
         gtfsFeedModel.setErrorCount(errorCount);
-        Session session = GTFSDB.InitSessionBeginTrans();
+        Session session = GTFSDB.initSessionBeginTrans();
         session.update(gtfsFeedModel);
         GTFSDB.commitAndCloseSession(session);
     }
@@ -380,7 +380,7 @@ public class GtfsFeed {
     @Path("/{id : \\d+}/errorCount")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getFeedErrorCount(@PathParam("id") int id) {
-        Session session = GTFSDB.InitSessionBeginTrans();
+        Session session = GTFSDB.initSessionBeginTrans();
         GtfsFeedModel gtfsFeed = (GtfsFeedModel) session.createQuery(" FROM GtfsFeedModel WHERE feedId = " + id).uniqueResult();
         GTFSDB.commitAndCloseSession(session);
 

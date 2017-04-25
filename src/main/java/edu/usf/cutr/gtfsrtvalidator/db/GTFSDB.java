@@ -34,12 +34,12 @@ public class GTFSDB {
 
     private static final Logger _log = LoggerFactory.getLogger(GTFSDB.class);
 
-    public static void InitializeDB() {
+    public static void initializeDB() {
 
         //Use reflection to get the list of rules from the ValidataionRules class
         Field[] fields = ValidationRules.class.getDeclaredFields();
 
-        Session session = InitSessionBeginTrans();
+        Session session = initSessionBeginTrans();
 
         List<ValidationRule> rulesInClass = new ArrayList<>();
         for (Field field : fields) {
@@ -69,7 +69,8 @@ public class GTFSDB {
 
         _log.info("Table initialized successfully");
     }
-    public static Session InitSessionBeginTrans() {
+
+    public static Session initSessionBeginTrans() {
         Session session = null;
         Transaction tx = null;
         try{
@@ -97,7 +98,7 @@ public class GTFSDB {
         } finally {
                 if(session != null)
                     session.close();
-        }   
+        }
     }
 
     /**

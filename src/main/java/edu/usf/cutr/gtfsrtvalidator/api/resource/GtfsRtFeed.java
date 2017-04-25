@@ -39,7 +39,10 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.TimeZone;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -95,12 +98,12 @@ public class GtfsRtFeed {
             return generateError("The GTFS-RT URL given is not a valid feed");
         }
 
-        Session session = GTFSDB.InitSessionBeginTrans();
+        Session session = GTFSDB.initSessionBeginTrans();
         GtfsRtFeedModel storedFeedInfo = (GtfsRtFeedModel) session.createQuery(" FROM GtfsRtFeedModel WHERE "
                 + "gtfsUrl= '"+feedInfo.getGtfsUrl()+"' AND gtfsFeedModel.feedId = "+feedInfo.getGtfsFeedModel().getFeedId()).uniqueResult();
         GTFSDB.commitAndCloseSession(session);
         if(storedFeedInfo == null) {    //If null, create the gtfs-rt feed in the DB and return the feed
-            session = GTFSDB.InitSessionBeginTrans();
+            session = GTFSDB.initSessionBeginTrans();
             session.save(feedInfo);
             GTFSDB.commitAndCloseSession(session);
         }
@@ -114,7 +117,7 @@ public class GtfsRtFeed {
     public Response getRtFeeds() {
         List<GtfsRtFeedModel> gtfsFeeds = new ArrayList<>();
         try {
-            Session session = GTFSDB.InitSessionBeginTrans();
+            Session session = GTFSDB.initSessionBeginTrans();
             gtfsFeeds = session.createQuery(" FROM GtfsRtFeedModel").list();
             GTFSDB.commitAndCloseSession(session);
             } catch (Exception e) {
@@ -133,7 +136,7 @@ public class GtfsRtFeed {
         // Store the timestamp when we start monitoring feeds that can be used to query database
         currentTimestamp = System.currentTimeMillis();
         //Get RtFeedModel from id
-        Session session = GTFSDB.InitSessionBeginTrans();
+        Session session = GTFSDB.initSessionBeginTrans();
         GtfsRtFeedModel gtfsRtFeed = (GtfsRtFeedModel) session.createQuery(" FROM GtfsRtFeedModel "
                 + "WHERE rtFeedID = "+id).uniqueResult();
         GTFSDB.commitAndCloseSession(session);
@@ -158,7 +161,7 @@ public class GtfsRtFeed {
             @PathParam("logRowsPerPage") int logRowsPerPage) {
 
         MergeMonitorData mergeMonitorData = new MergeMonitorData();
-        Session session = GTFSDB.InitSessionBeginTrans();
+        Session session = GTFSDB.initSessionBeginTrans();
 
         ViewFeedIterationsCount iterationsCount;
         iterationsCount = (ViewFeedIterationsCount) session.createNamedQuery("feedIterationsCount", ViewFeedIterationsCount.class)
@@ -235,7 +238,7 @@ public class GtfsRtFeed {
              @PathParam("iterationId") int iterationId) {
 
         ViewFeedMessageModel feedMessageModel;
-        Session session = GTFSDB.InitSessionBeginTrans();
+         Session session = GTFSDB.initSessionBeginTrans();
         feedMessageModel = session.createNamedQuery("feedMessageByIterationId", ViewFeedMessageModel.class)
                 .setParameter(0, iterationId)
                 .uniqueResult();
@@ -249,7 +252,7 @@ public class GtfsRtFeed {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getMessageDetails(@PathParam("id") int id, @PathParam("iteration") int iterationId) {
         CombinedIterationMessageModel messageList = new CombinedIterationMessageModel();
-        Session session = GTFSDB.InitSessionBeginTrans();
+        Session session = GTFSDB.initSessionBeginTrans();
         GtfsRtFeedIterationModel iterationModel = (GtfsRtFeedIterationModel) session.
                             createQuery("  FROM GtfsRtFeedIterationModel WHERE IterationId = "+iterationId).uniqueResult();
 
@@ -311,7 +314,7 @@ public class GtfsRtFeed {
     }
 
     public String getDateFormat(long feedTimestamp, int gtfsRtId) {
-        Session session = GTFSDB.InitSessionBeginTrans();
+        Session session = GTFSDB.initSessionBeginTrans();
         GtfsRtFeedModel gtfsRtFeed = (GtfsRtFeedModel) session.createQuery(" FROM GtfsRtFeedModel "
                 + "WHERE rtFeedID = " + gtfsRtId).uniqueResult();
 

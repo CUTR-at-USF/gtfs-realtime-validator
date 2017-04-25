@@ -38,7 +38,7 @@ public class GtfsFeedTest extends TestCase {
     public void setUp() {
         gtfsFeed  = new GtfsFeed();
         HibernateUtil.configureSessionFactory();
-        GTFSDB.InitializeDB();
+        GTFSDB.initializeDB();
     }
 
     public void testGtfsFeed() {

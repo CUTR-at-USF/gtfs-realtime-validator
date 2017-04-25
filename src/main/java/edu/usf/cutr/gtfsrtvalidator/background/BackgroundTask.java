@@ -115,7 +115,7 @@ public class BackgroundTask implements Runnable {
                 byte[] prevFeedDigest = null;
                 byte[] currentFeedDigest = md.digest(gtfsRtProtobuf);
 
-                Session session = GTFSDB.InitSessionBeginTrans();
+                Session session = GTFSDB.initSessionBeginTrans();
                 feedIteration = (GtfsRtFeedIterationModel) session.createQuery("FROM GtfsRtFeedIterationModel"
                         + " WHERE rtFeedId = " + mCurrentGtfsRtFeed.getGtfsRtId()
                             + " ORDER BY IterationId DESC").setMaxResults(1).uniqueResult();
