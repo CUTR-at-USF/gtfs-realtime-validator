@@ -189,11 +189,11 @@ public class GtfsFeed {
         GetFile jarInfo = new GetFile();
         String saveDir = jarInfo.getJarLocation().getParentFile().getParentFile().getAbsolutePath();
         saveFilePath = saveDir + File.separator + jsonFilePath + File.separator + fileName + "_out.json";
-        try {     
+        try {
             serializer.serializeToFile(new File(saveFilePath));
             _log.info("Static GTFS validation data written to " + saveFilePath);
         } catch (Exception e) {
-            e.printStackTrace();
+            _log.error("Exception running static GTFS validation on " + gtfsFeedUrl + ": " + e.getMessage());
         } 
         return Response.ok(gtfsFeed).build();
     }
