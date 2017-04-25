@@ -21,7 +21,9 @@ From the command-line, run:
 
 `mvn package`
 
-This will generate an executable file in the `target/` directory with all the dependencies needed to run the application. 
+This will generate an executable file in the `target/` directory with all the dependencies needed to run the application.
+ 
+Alternately, you can load the project as Maven project in an IDE like [IntelliJ](https://www.jetbrains.com/idea/) or [Netbeans](https://netbeans.org/).  This is the fastest way to build and execute the project if you plan to change the source code.
 
 ### 3. Run the application
 
