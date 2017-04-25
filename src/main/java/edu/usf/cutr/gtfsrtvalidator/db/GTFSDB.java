@@ -80,9 +80,10 @@ public class GTFSDB {
         }
         return session;
     }
-    
-    /*
-     * commitAndCloseSession method is used for closing session opened for single READ-ONLY or any database UPDATE operations.
+
+    /**
+     * Closes a session opened for an UPDATE operation or single READ-ONLY operation
+     * @param session session to be committed and closed
      */
     public static void commitAndCloseSession(Session session) {
         Transaction tx = null;
@@ -99,10 +100,12 @@ public class GTFSDB {
         }   
     }
 
-    /*
-     * closeSession method can be used for closing session that is opened for READ-ONLY database operations.
-     * But, this method must be used for closing session opened for multiple READ-ONLY database operations.
-     */    
+    /**
+     * Closes a session used for multiple READ-ONLY operations -
+     * see https://github.com/CUTR-at-USF/gtfs-realtime-validator/pull/135#discussion_r113005572.
+     *
+     * @param session session to be closed
+     */
     public static void closeSession(Session session) {
         if(session != null) {
             session.close();
