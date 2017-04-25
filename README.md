@@ -1,14 +1,13 @@
 # GTFS-Realtime Validator [![Build Status](https://travis-ci.org/CUTR-at-USF/gtfs-realtime-validator.svg?branch=master)](https://travis-ci.org/CUTR-at-USF/gtfs-realtime-validator)
 Software that validates General Transit Feed Specification (GTFS)-realtime feeds
 
-## Building and Running the project 
-
 *Please note that this project is still under active development and is in an early alpha state.  It has a limited number of rules and the user interface to view warnings/errors is still under development.*
+
+## Building and Running the project 
 
 ### Prerequisites 
 
-The GTFS-Realtime Validator is built using Java technologies. Maven is the build management tool for this project.
-An instance of the Jetty embedded server is used to run the core application.
+The GTFS-Realtime Validator is implemented as a web application, with the backend code written in Java.  An instance of the [Jetty embedded server](http://www.eclipse.org/jetty/) is used to run the application.
 
 Following are the requirements to get the project up and running: 
 
