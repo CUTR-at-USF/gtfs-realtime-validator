@@ -182,9 +182,12 @@ public class BackgroundTask implements Runnable {
 
             GtfsRealtime.FeedMessage combinedFeed = feedMessageBuilder.build();
 
+            // Use the same current time for all rules for consistency
+            long currentTimeMillis = System.currentTimeMillis();
+
             // Run validation rules
             for (FeedEntityValidator rule : mValidationRules) {
-                validateEntity(combinedFeed, previousFeedMessage, gtfsData, gtfsMetadata, feedIteration, rule);
+                validateEntity(currentTimeMillis, combinedFeed, previousFeedMessage, gtfsData, gtfsMetadata, feedIteration, rule);
             }
 
             logDuration(startTimeNanos);
@@ -193,8 +196,8 @@ public class BackgroundTask implements Runnable {
         }
     }
 
-    private void validateEntity(GtfsRealtime.FeedMessage currentFeedMessage, GtfsRealtime.FeedMessage previousFeedMessage, GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRtFeedIterationModel feedIteration, FeedEntityValidator feedEntityValidator) {
-        List<ErrorListHelperModel> errorLists = feedEntityValidator.validate(gtfsData, gtfsMetadata, currentFeedMessage, previousFeedMessage);
+    private void validateEntity(long currentTimeMillis, GtfsRealtime.FeedMessage currentFeedMessage, GtfsRealtime.FeedMessage previousFeedMessage, GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRtFeedIterationModel feedIteration, FeedEntityValidator feedEntityValidator) {
+        List<ErrorListHelperModel> errorLists = feedEntityValidator.validate(currentTimeMillis, gtfsData, gtfsMetadata, currentFeedMessage, previousFeedMessage);
 
         if (errorLists != null) {
             for (ErrorListHelperModel errorList : errorLists) {

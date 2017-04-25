@@ -42,7 +42,7 @@ public class VehicleTripDescriptorValidator implements FeedEntityValidator {
      * Description: If both vehicle positions and trip updates are provided, VehicleDescriptor or TripDescriptor values should match between the two feeds.
      */
     @Override
-    public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage) {
+    public List<ErrorListHelperModel> validate(long currentTimeMillis, GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage) {
         List<GtfsRealtime.TripUpdate> tripUpdates = new ArrayList<>();
         List<GtfsRealtime.VehiclePosition> vehiclePositions = new ArrayList<>();
         List<GtfsRealtime.Alert> alerts = new ArrayList<>();

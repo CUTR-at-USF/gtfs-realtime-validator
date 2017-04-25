@@ -29,7 +29,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import static edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils.getAge;
 import static edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils.isPosix;
 import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
 
@@ -46,14 +48,16 @@ public class TimestampValidation implements FeedEntityValidator{
     private static final org.slf4j.Logger _log = LoggerFactory.getLogger(TimestampValidation.class);
 
     private static long MINIMUM_REFRESH_INTERVAL_SECONDS = 35L;
+    public static long MAX_AGE_SECONDS = 65L; // Maximum allowed age for GTFS-realtime feed, in seconds (W008)
 
     @Override
-    public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage) {
+    public List<ErrorListHelperModel> validate(long currentTimeMillis, GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage) {
         if (feedMessage.equals(previousFeedMessage)) {
             throw new IllegalArgumentException("feedMessage and previousFeedMessage must not be the same");
         }
         List<OccurrenceModel> w001List = new ArrayList<>();
         List<OccurrenceModel> w007List = new ArrayList<>();
+        List<OccurrenceModel> w008List = new ArrayList<>();
         List<OccurrenceModel> e001List = new ArrayList<>();
         List<OccurrenceModel> e012List = new ArrayList<>();
         List<OccurrenceModel> e017List = new ArrayList<>();
@@ -72,7 +76,18 @@ public class TimestampValidation implements FeedEntityValidator{
                 OccurrenceModel errorE001 = new OccurrenceModel("header.timestamp");
                 e001List.add(errorE001);
                 _log.debug(errorE001.getPrefix() + " " + E001.getOccurrenceSuffix());
+            } else {
+                long age = getAge(currentTimeMillis, headerTimestamp);
+                if (age > TimeUnit.SECONDS.toMillis(MAX_AGE_SECONDS)) {
+                    // W008
+                    long ageMinutes = TimeUnit.MILLISECONDS.toMinutes(age);
+                    long ageSeconds = TimeUnit.MILLISECONDS.toSeconds(age);
+                    OccurrenceModel om = new OccurrenceModel(String.format("header.timestamp is " + ageMinutes + " min " + ageSeconds % 60 + " sec"));
+                    w008List.add(om);
+                    _log.debug(om.getPrefix() + " " + W008.getOccurrenceSuffix());
+                }
             }
+
             if (previousFeedMessage != null && previousFeedMessage.getHeader().getTimestamp() != 0) {
                 long previousTimestamp = previousFeedMessage.getHeader().getTimestamp();
                 long interval = headerTimestamp - previousTimestamp;
@@ -209,6 +224,9 @@ public class TimestampValidation implements FeedEntityValidator{
         }
         if (!w007List.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(W007), w007List));
+        }
+        if (!w008List.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(W008), w008List));
         }
         if (!e001List.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(E001), e001List));

@@ -47,7 +47,7 @@ public class CheckRouteAndTripIds implements FeedEntityValidator {
     private static final org.slf4j.Logger _log = LoggerFactory.getLogger(CheckRouteAndTripIds.class);
 
     @Override
-    public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage) {
+    public List<ErrorListHelperModel> validate(long currentTimeMillis, GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage) {
         List<OccurrenceModel> errorListE003 = new ArrayList<>();
         List<OccurrenceModel> errorListE004 = new ArrayList<>();
         List<OccurrenceModel> errorListE016 = new ArrayList<>();

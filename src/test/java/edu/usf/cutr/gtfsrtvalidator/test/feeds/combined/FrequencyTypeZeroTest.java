@@ -46,7 +46,7 @@ public class FrequencyTypeZeroTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         // Start with no start date or time - 2 errors
-        results = frequencyTypeZero.validate(bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = frequencyTypeZero.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(E006, results, 2);
 
         // Set start date - 1 error
@@ -61,7 +61,7 @@ public class FrequencyTypeZeroTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         // No start_time - 1 error
-        results = frequencyTypeZero.validate(bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = frequencyTypeZero.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(E006, results, 1);
 
         // Set start time - 0 error
@@ -76,7 +76,7 @@ public class FrequencyTypeZeroTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         // No errors
-        results = frequencyTypeZero.validate(bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = frequencyTypeZero.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(E006, results, 0);
 
         clearAndInitRequiredFeedFields();
@@ -101,7 +101,7 @@ public class FrequencyTypeZeroTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         // Start with an empty schedule relationship - that should be fine for exact_times=0 trips - no errors
-        results = frequencyTypeZero.validate(bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = frequencyTypeZero.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(E013, results, 0);
 
         // Change to UNSCHEDULED schedule relationship - this is also ok for exact_times=0 trips
@@ -115,7 +115,7 @@ public class FrequencyTypeZeroTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = frequencyTypeZero.validate(bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = frequencyTypeZero.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(E013, results, 0);
 
         // Change to ADDED schedule relationship - not allowed for exact_times=0 trips - 1 error
@@ -129,7 +129,7 @@ public class FrequencyTypeZeroTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = frequencyTypeZero.validate(bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = frequencyTypeZero.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(E013, results, 1);
 
         // Change to CANCELED schedule relationship - not allowed for exact_times=0 trips - 1 error
@@ -143,7 +143,7 @@ public class FrequencyTypeZeroTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = frequencyTypeZero.validate(bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = frequencyTypeZero.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(E013, results, 1);
 
         // Change to SCHEDULED schedule relationship - not allowed for exact_times=0 trips - 1 error
@@ -157,7 +157,7 @@ public class FrequencyTypeZeroTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = frequencyTypeZero.validate(bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = frequencyTypeZero.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(E013, results, 1);
 
         clearAndInitRequiredFeedFields();
@@ -185,7 +185,7 @@ public class FrequencyTypeZeroTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         // No vehicle Id in trip update or vehicle position - 2 warnings
-        results = frequencyTypeZero.validate(bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = frequencyTypeZero.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(W005, results, 2);
 
         // Add vehicle_id to vehicle position - 1 warning
@@ -196,7 +196,7 @@ public class FrequencyTypeZeroTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         // No vehicle Id in trip update - 1 warning
-        results = frequencyTypeZero.validate(bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = frequencyTypeZero.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(W005, results, 1);
 
         // Add vehicle_id to trip update - no warnings
@@ -207,7 +207,7 @@ public class FrequencyTypeZeroTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         // Both have vehicle_id - no warnings
-        results = frequencyTypeZero.validate(bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = frequencyTypeZero.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(W005, results, 1);
 
         clearAndInitRequiredFeedFields();

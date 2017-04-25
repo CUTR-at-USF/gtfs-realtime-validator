@@ -43,6 +43,9 @@ public class ValidationRules {
     public static final ValidationRule W007 = new ValidationRule("W007", "WARNING", "Refresh interval is more than 35 seconds",
             "GTFS-realtime feeds should be refreshed at least every 30 seconds",
             "which is less than the recommended interval of 35 seconds");
+    public static final ValidationRule W008 = new ValidationRule("W008", "WARNING", "Header timestamp is older than 65 seconds",
+            "The data in a GTFS-realtime feed should always be less than one minute old",
+            "old which is greater than the recommended age of 65 seconds");
 
     /**
      * Errors

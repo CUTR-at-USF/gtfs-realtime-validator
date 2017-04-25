@@ -20,6 +20,7 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.test.util.TestUtils;
+import edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
 import org.junit.Test;
 
@@ -27,9 +28,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils.MIN_POSIX_TIME;
+import static org.junit.Assert.assertEquals;
 
 /**
- * Tests the utility meethods used in tests
+ * Test utility methods
  */
 public class UtilTest {
 
@@ -61,5 +63,14 @@ public class UtilTest {
     public void testAssertResultsThrowException() {
         // Make sure we throw an exception if the results list is null
         TestUtils.assertResults(ValidationRules.E001, null, 0);
+    }
+
+    @Test
+    public void testGetAge() {
+        long currentTimeMillis = 1104537600000L;
+        long headerTimestampSec = 1104527600L;
+
+        long age = TimestampUtils.getAge(currentTimeMillis, headerTimestampSec);
+        assertEquals(10000000L, age);
     }
 }

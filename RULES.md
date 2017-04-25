@@ -87,6 +87,12 @@ See:
 
 GTFS-realtime feeds should be refreshed at least every 30 seconds.
 
+<a name="W008"/>
+
+### W008 - Header timestamp is older than 65 seconds
+
+The data in a GTFS-realtime feed should always be less than one minute old.
+
 # Errors
 
 <a name="E001"/>

@@ -16,6 +16,8 @@
  */
 package edu.usf.cutr.gtfsrtvalidator.util;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * Utility methods that help in processing timestamps
  */
@@ -32,5 +34,17 @@ public class TimestampUtils {
      */
     public static boolean isPosix(long timestamp) {
         return timestamp >= MIN_POSIX_TIME && timestamp <= MAX_POSIX_TIME;
+    }
+
+    /**
+     * Returns the age of the GTFS-realtime feed, based on the provided current time and GTFS-realtime header time, in milliseconds
+     *
+     * @param currentTimeMillis  current time in milliseconds
+     * @param headerTimestampSec the timestamp of the GTFS-realtime header, in SECONDS (POSIX time)
+     * @return the age of the GTFS-realtime feed, based on the provided current time and GTFS-realtime header time, in milliseconds
+     */
+    public static long getAge(long currentTimeMillis, long headerTimestampSec) {
+        long headerTimeMillis = TimeUnit.SECONDS.toMillis(headerTimestampSec);
+        return currentTimeMillis - headerTimeMillis;
     }
 }
