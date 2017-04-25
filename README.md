@@ -43,11 +43,15 @@ Once the application has been started, you can enter URLs for the feeds you'd li
  
 **Logging**
 
-If you'd like to change the logging level to see all debug statements, in `src/main/resources/simplelogger.properties` change the following line to say `DEBUG`:
+If you'd like to change the logging level, for example to see all debug statements, in `src/main/resources/simplelogger.properties` change the following line to say `DEBUG`:
  
  ~~~
  org.slf4j.simpleLogger.defaultLogLevel=DEBUG
  ~~~
+
+`DEBUG` level will show the output for all rule validation in the log.
+
+`WARN` will show a smaller number of informational messages.
 
  **Port number**
  
