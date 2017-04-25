@@ -10,7 +10,7 @@
 | [W004](#W004) | `VehiclePosition` has unrealistic speed
 | [W005](#W005) | Missing `vehicle_id` in `trip_update` for frequency-based `exact_times` = 0
 | [W006](#W006) | trip_update missing trip_id
-| [W007](#W007) | Refresh interval more than 35 seconds
+| [W007](#W007) | Refresh interval is more than 35 seconds
 
 
 ### Table of Errors
@@ -83,7 +83,7 @@ See:
 
 <a name="W007"/>
 
-### W007 - Refresh interval more than 35 seconds
+### W007 - Refresh interval is more than 35 seconds
 
 GTFS-realtime feeds should be refreshed at least every 30 seconds.
 

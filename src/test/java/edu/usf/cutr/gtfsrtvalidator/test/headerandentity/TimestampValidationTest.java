@@ -86,7 +86,7 @@ public class TimestampValidationTest extends FeedMessageTest {
     }
 
     /**
-     * W007 - Refresh interval more than 35 seconds
+     * W007 - Refresh interval is more than 35 seconds
      */
     @Test
     public void testTimestampValidationW007() {
