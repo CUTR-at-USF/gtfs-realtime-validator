@@ -32,6 +32,7 @@ import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
 /*
  * Tests all the warnings and rules that validate timestamps:
  *  * W001 - Timestamps should be populated for all elements
+ *  * W007 - Refresh interval more than 35 seconds
  *  * E001 - Not in POSIX time
  *  * E012 - Header timestamp should be greater than or equal to all other timestamps
 */
@@ -80,6 +81,74 @@ public class TimestampValidationTest extends FeedMessageTest {
         // Now timestamp is populated in FeedHeader, TripUpdate and VehiclePosition . Should return no error.
         results = timestampValidation.validate(gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(W001, results, 0);
+
+        clearAndInitRequiredFeedFields();
+    }
+
+    /**
+     * W007 - Refresh interval more than 35 seconds
+     */
+    @Test
+    public void testTimestampValidationW007() {
+        TimestampValidation timestampValidation = new TimestampValidation();
+        GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+        // Set valid trip_id = 1.1
+        tripDescriptorBuilder.setTripId("1.1");
+
+        /**
+         * No previous feed message (i.e., it's the first iteration) - no warnings
+         */
+        feedHeaderBuilder.setTimestamp(MIN_POSIX_TIME + 36);
+        feedMessageBuilder.setHeader(feedHeaderBuilder.build());
+
+        tripUpdateBuilder.setTimestamp(MIN_POSIX_TIME + 36);
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder);
+
+        vehiclePositionBuilder.setTimestamp(MIN_POSIX_TIME + 36);
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+
+        GtfsRealtime.FeedMessage currentIteration = feedMessageBuilder.setEntity(0, feedEntityBuilder.build()).build();
+
+        // No previous iteration - no errors
+        results = timestampValidation.validate(gtfsData, gtfsDataMetadata, currentIteration, null);
+        TestUtils.assertResults(W007, results, 0);
+
+        /**
+         * Set the previous iteration header timestamp so interval is than TimestampValidation.MINIMUM_REFRESH_INTERVAL_SECONDS - no warnings
+         */
+        feedHeaderBuilder.setTimestamp(MIN_POSIX_TIME + 10);
+        feedMessageBuilder.setHeader(feedHeaderBuilder.build());
+
+        tripUpdateBuilder.setTimestamp(MIN_POSIX_TIME + 10);
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder);
+
+        vehiclePositionBuilder.setTimestamp(MIN_POSIX_TIME + 10);
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+
+        GtfsRealtime.FeedMessage previousIteration = feedMessageBuilder.setEntity(0, feedEntityBuilder.build()).build();
+
+        results = timestampValidation.validate(gtfsData, gtfsDataMetadata, currentIteration, previousIteration);
+        TestUtils.assertResults(W007, results, 0);
+
+        /**
+         * Set the previous iteration header timestamp so interval is more TimestampValidation.MINIMUM_REFRESH_INTERVAL_SECONDS - 1 warning
+         */
+        feedHeaderBuilder.setTimestamp(MIN_POSIX_TIME);
+        feedMessageBuilder.setHeader(feedHeaderBuilder.build());
+
+        tripUpdateBuilder.setTimestamp(MIN_POSIX_TIME);
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder);
+
+        vehiclePositionBuilder.setTimestamp(MIN_POSIX_TIME);
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+
+        previousIteration = feedMessageBuilder.setEntity(0, feedEntityBuilder.build()).build();
+
+        results = timestampValidation.validate(gtfsData, gtfsDataMetadata, currentIteration, previousIteration);
+        TestUtils.assertResults(W007, results, 1);
 
         clearAndInitRequiredFeedFields();
     }

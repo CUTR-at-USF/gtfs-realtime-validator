@@ -10,6 +10,7 @@
 | [W004](#W004) | `VehiclePosition` has unrealistic speed
 | [W005](#W005) | Missing `vehicle_id` in `trip_update` for frequency-based `exact_times` = 0
 | [W006](#W006) | trip_update missing trip_id
+| [W007](#W007) | Refresh interval more than 35 seconds
 
 
 ### Table of Errors
@@ -79,6 +80,12 @@ Frequency-based exact_times = 0 trip_updates should contain `vehicle_id`.  This 
 
 See:
 * [`trip_update.trip`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#alternative-trip-matching)
+
+<a name="W007"/>
+
+### W007 - Refresh interval more than 35 seconds
+
+GTFS-realtime feeds should be refreshed at least every 30 seconds.
 
 # Errors
 

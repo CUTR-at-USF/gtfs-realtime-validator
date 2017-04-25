@@ -40,6 +40,9 @@ public class ValidationRules {
     public static final ValidationRule W006 = new ValidationRule("W006", "WARNING", "trip_update missing trip_id",
             "trip_updates should include a trip_id",
             "trip_update does not contain a trip_id");
+    public static final ValidationRule W007 = new ValidationRule("W007", "WARNING", "Refresh interval more than 35 seconds",
+            "GTFS-realtime feeds should be refreshed at least every 30 seconds",
+            "which is less than the recommended interval of 35 seconds");
 
     /**
      * Errors
