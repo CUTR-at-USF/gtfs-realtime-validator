@@ -41,7 +41,7 @@ public class TestUtils {
             throw new IllegalArgumentException("results cannot be null - it must be a list of errors or warnings");
         }
         if (results.isEmpty() && totalExpectedErrorsWarnings > 0) {
-            throw new IllegalArgumentException("If at least one error is expected results cannot be empty");
+            throw new IllegalArgumentException("If at least one error or warning is expected (totalExpectedErrorsWarnings), the results list cannot be empty");
         }
         for (ErrorListHelperModel error : results) {
             if (error.getErrorMessage().getValidationRule().getErrorId().equals(rule.getErrorId())) {
