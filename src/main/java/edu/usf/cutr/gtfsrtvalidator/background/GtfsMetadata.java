@@ -22,13 +22,18 @@ import org.onebusaway.gtfs.model.Frequency;
 import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.Trip;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
+
+import static edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils.logDuration;
 
 /**
  * This is a container class for metadata about a GTFS feed that's used in rule validation
  */
 public class GtfsMetadata {
+
+    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(GtfsMetadata.class);
 
     private Set<String> routeIds = new HashSet<>();
     private Set<String> tripIds = new HashSet<>();
@@ -49,6 +54,8 @@ public class GtfsMetadata {
      * @param gtfsData GTFS feed to build the metadata for
      */
     public GtfsMetadata(GtfsDaoImpl gtfsData) {
+        long startTime = System.nanoTime();
+
         // Get all route_ids from the GTFS feed
         Collection<Route> gtfsRouteList = gtfsData.getAllRoutes();
         for (Route r : gtfsRouteList) {
@@ -75,6 +82,8 @@ public class GtfsMetadata {
                 exactTimesZeroTripIds.add(f.getTrip().getId().getAgencyId());
             }
         }
+
+        logDuration(_log, "Built GtfsMetadata in ", startTime);
     }
 
     public Set<String> getRouteIds() {

@@ -48,6 +48,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import static edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils.logDuration;
+
 public class BackgroundTask implements Runnable {
 
     private static final org.slf4j.Logger _log = LoggerFactory.getLogger(BackgroundTask.class);
@@ -190,7 +192,7 @@ public class BackgroundTask implements Runnable {
                 validateEntity(currentTimeMillis, combinedFeed, previousFeedMessage, gtfsData, gtfsMetadata, feedIteration, rule);
             }
 
-            logDuration(startTimeNanos);
+            logDuration(_log, "Processed " + mCurrentGtfsRtFeed.getGtfsUrl() + " in ", startTimeNanos);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -209,18 +211,5 @@ public class BackgroundTask implements Runnable {
                 }
             }
         }
-    }
-
-    /**
-     * Logs the amount of time that this validation iteration took
-     *
-     * @param startTimeNanos the starting time of this iteration, in nanoseconds (e.g., System.nanoTime())
-     */
-    private void logDuration(long startTimeNanos) {
-        long durationNanos = System.nanoTime() - startTimeNanos;
-        long durationMillis = TimeUnit.NANOSECONDS.toMillis(durationNanos);
-        long durationSeconds = TimeUnit.NANOSECONDS.toSeconds(durationNanos);
-
-        _log.debug("Processed " + mCurrentGtfsRtFeed.getGtfsUrl() + " in " + durationSeconds + "." + durationMillis + " seconds");
     }
 }
