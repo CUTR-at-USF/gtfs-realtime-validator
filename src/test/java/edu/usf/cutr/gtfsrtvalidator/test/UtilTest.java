@@ -60,9 +60,15 @@ public class UtilTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testAssertResultsThrowException() {
+    public void testAssertResultsThrowExceptionNullResults() {
         // Make sure we throw an exception if the results list is null
         TestUtils.assertResults(ValidationRules.E001, null, 0);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testAssertResultsThrowExceptionEmptyResults() {
+        // Make sure we throw an exception if the results list is empty but we expect at least one error
+        TestUtils.assertResults(ValidationRules.E001, new ArrayList<>(), 1);
     }
 
     @Test

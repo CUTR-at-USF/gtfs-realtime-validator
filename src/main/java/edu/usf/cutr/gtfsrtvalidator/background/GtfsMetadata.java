@@ -39,6 +39,8 @@ public class GtfsMetadata {
     private Set<String> tripIds = new HashSet<>();
     private Set<String> stopIds = new HashSet<>();
     private Set<String> exactTimesZeroTripIds = new HashSet<>();
+    // Maps trip_id to a list of Frequency objects
+    private Map<String, List<Frequency>> exactTimesOneTrips = new HashMap<>();
 
     /**
      * key is stops.txt stop_id, value is stops.txt location_type
@@ -79,7 +81,14 @@ public class GtfsMetadata {
         Collection<Frequency> frequencies = gtfsData.getAllFrequencies();
         for (Frequency f : frequencies) {
             if (f.getExactTimes() == 0) {
-                exactTimesZeroTripIds.add(f.getTrip().getId().getAgencyId());
+                exactTimesZeroTripIds.add(f.getTrip().getId().getId());
+            } else if (f.getExactTimes() == 1) {
+                List<Frequency> frequencyList = exactTimesOneTrips.get(f.getTrip().getId().getId());
+                if (frequencyList == null) {
+                    frequencyList = new ArrayList<>();
+                }
+                frequencyList.add(f);
+                exactTimesOneTrips.put(f.getTrip().getId().getId(), frequencyList);
             }
         }
 
@@ -109,5 +118,14 @@ public class GtfsMetadata {
 
     public Set<String> getExactTimesZeroTripIds() {
         return exactTimesZeroTripIds;
+    }
+
+    /**
+     * Returns a map where key is trips.txt trip_id, value is a list of Frequency objects representing frequencies.txt data for that trip_id
+     *
+     * @return a map where key is trips.txt trip_id, value is a list of Frequency objects representing frequencies.txt data for that trip_id
+     */
+    public Map<String, List<Frequency>> getExactTimesOneTrips() {
+        return exactTimesOneTrips;
     }
 }

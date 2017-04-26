@@ -202,3 +202,7 @@ See:
 *Common mistakes* - If there are multiple instances of GTFS-realtime feed behind a load balancer, each instance may be pulling information from the real-time data source and publishing it to consumers slightly out of sync.  If a GTFS-rt consumer makes two back-to-back requests, and each request is served by a different GTFS-rt feed instance, the same feed contents could potentially be returned to the consumer with the most recent feed response having a timestamp that is less than the previous feed response.
 
 *Possible solution* - Configure the load balancer for "sticky routes", so that the GTFS-rt consumer always receives the GTFS-rt feed contents from the same GTFS-rt instance.
+
+### E019 - GTFS-rt frequency type 1 trip `start_time` must be a multiple of GTFS data `start_time`
+
+For frequency-based trips defined in `frequencies.txt` with `exact_times` = 1, the GTFS-rt trip `start_time` must be some multiple (including zero) of `headway_secs` later than the `start_time` in file `frequencies.txt` for the corresponding time period.  Note that this doesn't not apply to frequency-based trips defined in `frequencies.txt` with `exact_times` = 0.

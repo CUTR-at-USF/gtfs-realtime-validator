@@ -122,4 +122,8 @@ public class ValidationRules {
     public static final ValidationRule E018 = new ValidationRule("E018", "ERROR", "GTFS-rt header timestamp decreased between two sequential iterations",
             "The GTFS-rt header timestamp should be monotonically increasing -  it should always be the same value or greater than previous feed iterations if the feed contents are different",
             "from the previous feed iteration");
+
+    public static final ValidationRule E019 = new ValidationRule("E019", "ERROR", "GTFS-rt frequency type 1 trip start_time must be a multiple of GTFS headway_secs later than GTFS start_time",
+            "For frequency-based trips defined in frequencies.txt with exact_times = 1, the GTFS-rt trip start_time must be some multiple (including zero) of headway_secs later than the start_time in file frequencies.txt for the corresponding time period.  Note that this doesn't not apply to frequency-based trips defined in frequencies.txt with exact_times = 0.",
+            "- the GTFS-rt start_time is not a multiple of headway_secs later than GTFS start_time");
 }
