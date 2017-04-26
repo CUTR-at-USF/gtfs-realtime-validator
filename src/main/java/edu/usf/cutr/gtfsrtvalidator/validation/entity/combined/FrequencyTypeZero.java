@@ -74,7 +74,7 @@ public class FrequencyTypeZero implements FeedEntityValidator {
                     /**
                      * E013 - Validate schedule_relationship is UNSCHEDULED or empty
                      */
-                    if (!(tripUpdate.getTrip().hasScheduleRelationship() || tripUpdate.getTrip().getScheduleRelationship().equals(GtfsRealtime.TripDescriptor.ScheduleRelationship.UNSCHEDULED))) {
+                    if (!(!tripUpdate.getTrip().hasScheduleRelationship() || tripUpdate.getTrip().getScheduleRelationship().equals(GtfsRealtime.TripDescriptor.ScheduleRelationship.UNSCHEDULED))) {
                         OccurrenceModel om = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() + " schedule_relationship " + tripUpdate.getTrip().getScheduleRelationship());
                         errorListE013.add(om);
                         _log.debug(om.getPrefix() + " " + E013.getOccurrenceSuffix());
@@ -118,7 +118,7 @@ public class FrequencyTypeZero implements FeedEntityValidator {
                     /**
                      * E013 - Validate schedule_relationship is UNSCHEDULED or empty
                      */
-                    if (!(vehiclePosition.getTrip().hasScheduleRelationship() || vehiclePosition.getTrip().getScheduleRelationship().equals(GtfsRealtime.TripDescriptor.ScheduleRelationship.UNSCHEDULED))) {
+                    if (!(!vehiclePosition.getTrip().hasScheduleRelationship() || vehiclePosition.getTrip().getScheduleRelationship().equals(GtfsRealtime.TripDescriptor.ScheduleRelationship.UNSCHEDULED))) {
                         OccurrenceModel om = new OccurrenceModel("vehicle_id " + vehiclePosition.getVehicle().getId() + " trip_id " + vehiclePosition.getTrip().getTripId() + " schedule_relationship " + vehiclePosition.getTrip().getScheduleRelationship());
                         errorListE013.add(om);
                         _log.debug(om.getPrefix() + " " + E013.getOccurrenceSuffix());

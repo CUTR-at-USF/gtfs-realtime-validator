@@ -114,7 +114,7 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
         results = tripIdValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(ValidationRules.W006, results, 2);
 
-        // setting valid trip_id = 1.1, route_id 1.1 that match with IDs in static Gtfs data
+        // setting valid trip_id = 1.1, route_id 1.1 that match with IDs in static Gtfs data - no errors
         tripDescriptorBuilder.setTripId("1.1");
         tripDescriptorBuilder.setRouteId("1");
         tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
@@ -152,7 +152,7 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
         results = tripIdValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(ValidationRules.E003, results, 2);
 
-        // Set that trip_id is ADDED - should go back to 1 error, as it's ok for trip_id to not be in the GTFS data
+        // Set that trip_id is ADDED - should go back to 0 errors, as it's ok for trip_id to not be in the GTFS data if schedule_relationship is ADDED
         tripDescriptorBuilder.setScheduleRelationship(GtfsRealtime.TripDescriptor.ScheduleRelationship.ADDED);
         tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
         vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
@@ -161,7 +161,7 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         results = tripIdValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(ValidationRules.E003, results, 2);
+        TestUtils.assertResults(ValidationRules.E003, results, 0);
 
         clearAndInitRequiredFeedFields();
     }

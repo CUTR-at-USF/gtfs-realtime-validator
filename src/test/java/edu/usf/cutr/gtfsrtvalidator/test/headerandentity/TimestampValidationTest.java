@@ -164,7 +164,8 @@ public class TimestampValidationTest extends FeedMessageTest {
         // Set valid trip_id = 1.1
         tripDescriptorBuilder.setTripId("1.1");
 
-        long currentTimeSec = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
+        long currentTimeMillis = System.currentTimeMillis();
+        long currentTimeSec = TimeUnit.MILLISECONDS.toSeconds(currentTimeMillis);
 
         /**
          * Use current time - no warnings
@@ -181,7 +182,7 @@ public class TimestampValidationTest extends FeedMessageTest {
 
         GtfsRealtime.FeedMessage currentIteration = feedMessageBuilder.setEntity(0, feedEntityBuilder.build()).build();
 
-        results = timestampValidation.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, currentIteration, null);
+        results = timestampValidation.validate(currentTimeMillis, gtfsData, gtfsDataMetadata, currentIteration, null);
         TestUtils.assertResults(W008, results, 0);
 
         /**
@@ -199,7 +200,7 @@ public class TimestampValidationTest extends FeedMessageTest {
 
         currentIteration = feedMessageBuilder.setEntity(0, feedEntityBuilder.build()).build();
 
-        results = timestampValidation.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, currentIteration, null);
+        results = timestampValidation.validate(currentTimeMillis, gtfsData, gtfsDataMetadata, currentIteration, null);
         TestUtils.assertResults(W008, results, 1);
 
         clearAndInitRequiredFeedFields();
@@ -231,16 +232,20 @@ public class TimestampValidationTest extends FeedMessageTest {
         /**
          * Header isn't POSIX - should be 1 error
          */
-        feedHeaderBuilder.setTimestamp(TimeUnit.SECONDS.toMillis(MIN_POSIX_TIME));
+        // Convert a valid POSIX time to milliseconds - this is a common error in feeds (providing time in milliseconds past epoch instead of seconds)
+        final long BAD_TIME = TimeUnit.SECONDS.toMillis(MIN_POSIX_TIME);
+
+        feedHeaderBuilder.setTimestamp(BAD_TIME);
         feedMessageBuilder.setHeader(feedHeaderBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
+        results = timestampValidation.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(E001, results, 1);
 
         /**
          * Header and TripUpdate aren't POSIX - 2 errors
          */
-        tripUpdateBuilder.setTimestamp(TimeUnit.SECONDS.toMillis(MIN_POSIX_TIME));
+        tripUpdateBuilder.setTimestamp(BAD_TIME);
         tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder);
 
@@ -252,7 +257,7 @@ public class TimestampValidationTest extends FeedMessageTest {
         /**
          * Header, TripUpdate, and VehiclePosition aren't POSIX - 3 errors
          */
-        vehiclePositionBuilder.setTimestamp(TimeUnit.SECONDS.toMillis(MIN_POSIX_TIME));
+        vehiclePositionBuilder.setTimestamp(BAD_TIME);
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
@@ -297,13 +302,13 @@ public class TimestampValidationTest extends FeedMessageTest {
          */
 
         // First StopTimeUpdate
-        stopTimeUpdateBuilder.setArrival(stopTimeEventBuilder.setTime(TimeUnit.SECONDS.toMillis(MIN_POSIX_TIME)));
-        stopTimeUpdateBuilder.setDeparture(stopTimeEventBuilder.setTime(TimeUnit.SECONDS.toMillis(MIN_POSIX_TIME)));
+        stopTimeUpdateBuilder.setArrival(stopTimeEventBuilder.setTime(BAD_TIME));
+        stopTimeUpdateBuilder.setDeparture(stopTimeEventBuilder.setTime(BAD_TIME));
         tripUpdateBuilder.addStopTimeUpdate(0, stopTimeUpdateBuilder.build());
 
         // Second StopTimeUpdate
-        stopTimeUpdateBuilder.setArrival(stopTimeEventBuilder.setTime(TimeUnit.SECONDS.toMillis(MAX_POSIX_TIME)));
-        stopTimeUpdateBuilder.setDeparture(stopTimeEventBuilder.setTime(TimeUnit.SECONDS.toMillis(MAX_POSIX_TIME)));
+        stopTimeUpdateBuilder.setArrival(stopTimeEventBuilder.setTime(BAD_TIME));
+        stopTimeUpdateBuilder.setDeparture(stopTimeEventBuilder.setTime(BAD_TIME));
         tripUpdateBuilder.addStopTimeUpdate(1, stopTimeUpdateBuilder.build());
 
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder);
@@ -335,8 +340,8 @@ public class TimestampValidationTest extends FeedMessageTest {
         /**
          * Alert active_period ranges - neither start nor end are valid POSIX, so 2 errors
          */
-        timeRangeBuilder.setStart(MIN_POSIX_TIME - 1);
-        timeRangeBuilder.setEnd(MIN_POSIX_TIME - 1);
+        timeRangeBuilder.setStart(BAD_TIME);
+        timeRangeBuilder.setEnd(BAD_TIME);
 
         alertBuilder.addActivePeriod(timeRangeBuilder.build());
         feedEntityBuilder.setAlert(alertBuilder);
@@ -375,6 +380,9 @@ public class TimestampValidationTest extends FeedMessageTest {
         /**
          * Header timestamp equal to other entities - no error
          */
+        feedHeaderBuilder.setTimestamp(MIN_POSIX_TIME);
+        feedMessageBuilder.setHeader(feedHeaderBuilder.build());
+
         tripUpdateBuilder.setTimestamp(MIN_POSIX_TIME);
         tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder);

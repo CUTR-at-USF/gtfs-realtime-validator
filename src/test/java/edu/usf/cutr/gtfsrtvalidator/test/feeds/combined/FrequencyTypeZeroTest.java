@@ -30,26 +30,34 @@ public class FrequencyTypeZeroTest extends FeedMessageTest {
     @Test
     public void testMissingStartDateAndTimeE006() {
         FrequencyTypeZero frequencyTypeZero = new FrequencyTypeZero();
+        // Set valid trip_id
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+        tripDescriptorBuilder.setTripId("1");
+
+        // Set valid vehicle_id so no warnings for these
+        GtfsRealtime.VehicleDescriptor.Builder vehicleDescriptorBuilder = GtfsRealtime.VehicleDescriptor.newBuilder();
+        vehicleDescriptorBuilder.setId("vehicle_A");
 
         feedHeaderBuilder.setTimestamp(MIN_POSIX_TIME);
         feedMessageBuilder.setHeader(feedHeaderBuilder.build());
 
         tripUpdateBuilder.setTimestamp(MIN_POSIX_TIME);
         tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        tripUpdateBuilder.setVehicle(vehicleDescriptorBuilder.build());
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder);
 
         vehiclePositionBuilder.setTimestamp(MIN_POSIX_TIME);
         vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        // Start with no start date or time - 2 errors
+        // Start with no start date or time - 4 errors
         results = frequencyTypeZero.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(E006, results, 2);
+        TestUtils.assertResults(E006, results, 4);
 
-        // Set start date - 1 error
+        // Set start date - 2 errors
         tripDescriptorBuilder.setStartDate("4-24-2016");
 
         tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
@@ -60,9 +68,8 @@ public class FrequencyTypeZeroTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        // No start_time - 1 error
         results = frequencyTypeZero.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(E006, results, 1);
+        TestUtils.assertResults(E006, results, 2);
 
         // Set start time - 0 error
         tripDescriptorBuilder.setStartTime("08:00:00AM");
@@ -85,24 +92,36 @@ public class FrequencyTypeZeroTest extends FeedMessageTest {
     @Test
     public void testScheduleRelationshipE013() {
         FrequencyTypeZero frequencyTypeZero = new FrequencyTypeZero();
+        // Set valid trip_id, start_date, and start_time so no errors/warnings for these attributes
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+        tripDescriptorBuilder.setTripId("1");
+        tripDescriptorBuilder.setStartDate("4-24-2016");
+        tripDescriptorBuilder.setStartTime("08:00:00AM");
+        tripDescriptorBuilder.clearScheduleRelationship();  // FIXME - This should result in no SCHEDULE_RELATIONSHIP, but it results in SCHEDULED (see first assertion below)
+
+        // Set valid vehicle_id so no warnings for these
+        GtfsRealtime.VehicleDescriptor.Builder vehicleDescriptorBuilder = GtfsRealtime.VehicleDescriptor.newBuilder();
+        vehicleDescriptorBuilder.setId("vehicle_A");
 
         feedHeaderBuilder.setTimestamp(MIN_POSIX_TIME);
         feedMessageBuilder.setHeader(feedHeaderBuilder.build());
 
         tripUpdateBuilder.setTimestamp(MIN_POSIX_TIME);
         tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        tripUpdateBuilder.setVehicle(vehicleDescriptorBuilder.build());
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder);
 
         vehiclePositionBuilder.setTimestamp(MIN_POSIX_TIME);
+        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
         vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         // Start with an empty schedule relationship - that should be fine for exact_times=0 trips - no errors
-        results = frequencyTypeZero.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(E013, results, 0);
+        // FIXME - For some reason it seems we can't clear the SCHEDULE_RELATIONSHIP, so right now we can't test for this scenario
+        //results = frequencyTypeZero.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        //TestUtils.assertResults(E013, results, 0);
 
         // Change to UNSCHEDULED schedule relationship - this is also ok for exact_times=0 trips
         tripDescriptorBuilder.setScheduleRelationship(GtfsRealtime.TripDescriptor.ScheduleRelationship.UNSCHEDULED);
@@ -118,7 +137,7 @@ public class FrequencyTypeZeroTest extends FeedMessageTest {
         results = frequencyTypeZero.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(E013, results, 0);
 
-        // Change to ADDED schedule relationship - not allowed for exact_times=0 trips - 1 error
+        // Change to ADDED schedule relationship - not allowed for exact_times=0 trips - 2 errors
         tripDescriptorBuilder.setScheduleRelationship(GtfsRealtime.TripDescriptor.ScheduleRelationship.ADDED);
 
         tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
@@ -130,9 +149,9 @@ public class FrequencyTypeZeroTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         results = frequencyTypeZero.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(E013, results, 1);
+        TestUtils.assertResults(E013, results, 2);
 
-        // Change to CANCELED schedule relationship - not allowed for exact_times=0 trips - 1 error
+        // Change to CANCELED schedule relationship - not allowed for exact_times=0 trips - 2 errors
         tripDescriptorBuilder.setScheduleRelationship(GtfsRealtime.TripDescriptor.ScheduleRelationship.CANCELED);
 
         tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
@@ -144,9 +163,9 @@ public class FrequencyTypeZeroTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         results = frequencyTypeZero.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(E013, results, 1);
+        TestUtils.assertResults(E013, results, 2);
 
-        // Change to SCHEDULED schedule relationship - not allowed for exact_times=0 trips - 1 error
+        // Change to SCHEDULED schedule relationship - not allowed for exact_times=0 trips - 2 errors
         tripDescriptorBuilder.setScheduleRelationship(GtfsRealtime.TripDescriptor.ScheduleRelationship.SCHEDULED);
 
         tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
@@ -158,7 +177,7 @@ public class FrequencyTypeZeroTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         results = frequencyTypeZero.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(E013, results, 1);
+        TestUtils.assertResults(E013, results, 2);
 
         clearAndInitRequiredFeedFields();
     }
@@ -167,6 +186,10 @@ public class FrequencyTypeZeroTest extends FeedMessageTest {
     public void testMissingVehicleIdW005() {
         FrequencyTypeZero frequencyTypeZero = new FrequencyTypeZero();
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+        // Set valid trip_id, start_date, and start_time so no errors/warnings for these attributes
+        tripDescriptorBuilder.setTripId("1");
+        tripDescriptorBuilder.setStartDate("4-24-2016");
+        tripDescriptorBuilder.setStartTime("08:00:00AM");
         GtfsRealtime.VehicleDescriptor.Builder vehicleDescriptorBuilder = GtfsRealtime.VehicleDescriptor.newBuilder();
 
         feedHeaderBuilder.setTimestamp(MIN_POSIX_TIME);
@@ -208,7 +231,7 @@ public class FrequencyTypeZeroTest extends FeedMessageTest {
 
         // Both have vehicle_id - no warnings
         results = frequencyTypeZero.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(W005, results, 1);
+        TestUtils.assertResults(W005, results, 0);
 
         clearAndInitRequiredFeedFields();
     }
