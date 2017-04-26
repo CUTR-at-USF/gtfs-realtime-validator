@@ -31,8 +31,9 @@ import java.util.List;
 import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
 
 /**
- * ID: E013
- * Description: Frequency type 0 trip schedule_relationship should be UNSCHEDULED or empty
+ * E006 - Missing required vehicle_position trip field for frequency-based exact_times = 0
+ * E013 - Frequency type 0 trip schedule_relationship should be UNSCHEDULED or empty *
+ * W005 - Missing vehicle_id in trip_update for frequency-based exact_times = 0
  */
 public class FrequencyTypeZero implements FeedEntityValidator {
 
