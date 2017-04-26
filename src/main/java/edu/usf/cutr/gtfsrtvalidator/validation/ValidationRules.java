@@ -63,24 +63,24 @@ public class ValidationRules {
             "All route_ids provided in the GTFS-rt feed must exist in the GTFS data",
             "does not exist in the GTFS data");
 
-    // TODO - implement
-    public static final ValidationRule E005 = new ValidationRule("E005", "ERROR", "GTFS stop_times.txt does not contain arrival_times and/or departure_times for all stops referenced in the GTFS-rt feed",
-            "If only delay is provided in a stop_time_event (and not a time), then the GTFS stop_times.txt must contain arrival_times and/or departure_times for all stops referenced in the GTFS-rt feed (i.e., not just timepoints)",
-            "has only delay but no arrival and/or departure time");
+    // TODO - implement - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/155
+    public static final ValidationRule E005 = new ValidationRule("E005", "ERROR", "stop_time_update contains only delay (no times) and GTFS stop_times.txt does not contain corresponding arrival and/or departure_time for that stop",
+            "If only delay is provided in a stop_time_update arrival or departure (and not a time), then the GTFS stop_times.txt must contain arrival_times and/or departure_times for these corresponding stops",
+            "has only delay but no stops_times.txt arrival and/or departure time");
 
     public static final ValidationRule E006 = new ValidationRule("E006", "ERROR", "Missing required trip field for frequency-based exact_times = 0",
             "Frequency-based exact_times=0 trip_updates must contain trip_id, start_time, and start_date",
             "which is required for frequency-based exact_times = 0 trips");
 
-    // TODO - implement
-    public static final ValidationRule E007 = new ValidationRule("E007", "ERROR", "Trips with same vehicle_id do not belong to the same block",
-            "If more than one trip_update has the same vehicle_id, then all trips must belong to the same block",
+    // TODO - implement - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/156
+    public static final ValidationRule E007 = new ValidationRule("E007", "ERROR", "Trips with same vehicle_id are not in the same block",
+            "If more than one trip_update has the same vehicle_id, then these trips must belong to the same GTFS trips.txt block_id",
             "do not belong to the same block but have the same vehicle_id");
 
-    // TODO - implement
-    public static final ValidationRule E008 = new ValidationRule("E008", "ERROR", "trip_id for each TripUpdate.TripDescriptor is not provided",
+    // TODO - implement - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/157
+    public static final ValidationRule E008 = new ValidationRule("E008", "ERROR", "trip_id not provided for blocks with reoccurring stop_ids",
             "If a GTFS block contains multiple references to the same stopId (i.e., the bus visits the same stopId more than once in the same block), but in different trips, then in the GTFS-rt data the tripId for each TripUpdate.TripDescriptor must be provided. In this case, the bus wouldn't visit the same stopId more than once in the same trip.",
-            "does not have a trip_id");
+            "does not have a trip_id but visits the same stop_id more than once in the block");
 
     // TODO - implement - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/17
     public static final ValidationRule E009 = new ValidationRule("E009", "ERROR", "The stop_sequence for each TripUpdate.StopTimeUpdate is not provided",
@@ -102,9 +102,9 @@ public class ValidationRules {
             "For frequency-based exact_times=0 trips, schedule_relationship should be UNSCHEDULED or empty.",
             "schedule_relationship is not UNSCHEDULED or empty");
 
-    // TODO - implement
+    // TODO - implement - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/158
     public static final ValidationRule E014 = new ValidationRule("E014", "ERROR", "Predictions for trips are out-of-order in the block",
-            "Arrival predictions for each trip in the feed must match the sequential order for the trips in the block. For example, if we have trip_ids 1, 2, and 3 that all belong to the same block, and the vehicle trips trip 1, then trip 2, and then trip 3, the arrival predictions should increase chronologically for trips 1, 2, and 3. For example, trip 3 predictions shouldn't be earlier in the feed than trip 2 predictions.",
+            "trip_updates for each trip in the feed must match the sequential order for the trips in the block. For example, if we have trip_ids 1, 2, and 3 that all belong to the same block, and the vehicle travels trip 1, then trip 2, and then trip 3, the trip_updates should occur in the GTFS-rt feed in the order trips 1, 2, and 3. For example, trip 3 predictions shouldn't occur in the feed prior to trip 2 predictions.",
             "predictions are not ordered by appearance in block");
 
     public static final ValidationRule E015 = new ValidationRule("E015", "ERROR", "All stop_ids referenced in GTFS-rt feeds must have the location_type = 0",
