@@ -68,7 +68,7 @@ public class StopTimeSequenceValidator implements FeedEntityValidator {
                     _log.debug(om.getPrefix() + " " + E002.getOccurrenceSuffix());
                 }
 
-                // TODO - detect out-of-order stops when stop_sequence isn't provided
+                // TODO - detect out-of-order stops when stop_sequence isn't provided - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/159
             }
         }
 
