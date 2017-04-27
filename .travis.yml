@@ -4,3 +4,12 @@ jdk: oraclejdk8
 cache:
   directories:
   - $HOME/.m2
+
+addons:
+  artifacts:
+    paths:
+    - $HOME/travis/.m2/repository/edu/usf/cutr/gtfs-rt-validator/1.0-SNAPSHOT/gtfs-rt-validator-1.0-SNAPSHOT.jar
+
+deploy:
+  provider: s3
+  upload-dir: travis-builds
