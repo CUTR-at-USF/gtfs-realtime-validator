@@ -203,6 +203,8 @@ See:
 
 *Possible solution* - Configure the load balancer for "sticky routes", so that the GTFS-rt consumer always receives the GTFS-rt feed contents from the same GTFS-rt instance.
 
+<a name="E019"/>
+
 ### E019 - GTFS-rt frequency type 1 trip `start_time` must be a multiple of GTFS data `start_time`
 
 For frequency-based trips defined in `frequencies.txt` with `exact_times` = 1, the GTFS-rt trip `start_time` must be some multiple (including zero) of `headway_secs` later than the `start_time` in file `frequencies.txt` for the corresponding time period.  Note that this doesn't not apply to frequency-based trips defined in `frequencies.txt` with `exact_times` = 0.
