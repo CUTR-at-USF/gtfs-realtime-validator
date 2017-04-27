@@ -136,6 +136,6 @@ public class ValidationRules {
             "which is not the valid format of YYYYMMDD");
 
     public static final ValidationRule E022 = new ValidationRule("E022", "ERROR", "trip stop_time_update times are not increasing",
-            "Sequential stop_time_update arrival/departure times should increase - they should never be the same or decrease between two sequential stops.",
+            "Sequential stop_time_update arrival/departure times should increase - they should never be the same or decrease between two sequential stops.  Within the same stop_time_update, arrival and departures times can be the same, or the departure time can be later than the arrival time - the departure time should never come before the arrival time.",
             " - times must be same or increasing within same stop_time_update and must always be increasing between two sequential updates");
 }

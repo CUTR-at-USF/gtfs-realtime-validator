@@ -33,6 +33,7 @@
 | [E019](#E019) | GTFS-rt frequency type 1 trip `start_time` must be a multiple of GTFS `headway_secs` later than GTFS `start_time`
 | [E020](#E020) | Invalid `start_time` format
 | [E021](#E021) | Invalid `start_date` format
+| [E022](#E022) | trip `stop_time_update` times are not increasing
 
 # Warnings
 
@@ -226,6 +227,15 @@ See:
 ### E021 - Invalid `start_date` format
 
 `start_date` must be in the `YYYYMMDD` format.
+
+See:
+* [trip.start_date](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
+
+<a name="E022"/>
+
+### E022 - trip `stop_time_update` times are not increasing
+
+Sequential `stop_time_update` arrival/departure times should increase - they should never be the same or decrease between two sequential stops.  Within the same `stop_time_update`, arrival and departures times can be the same, or the departure time can be later than the arrival time - the departure time should never come before the arrival time.
 
 See:
 * [trip.start_date](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
