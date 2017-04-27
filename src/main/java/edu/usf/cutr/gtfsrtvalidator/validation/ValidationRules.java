@@ -134,4 +134,8 @@ public class ValidationRules {
     public static final ValidationRule E021 = new ValidationRule("E021", "ERROR", "Invalid start_date format",
             "start_date must be in the YYYYMMDD format",
             "which is not the valid format of YYYYMMDD");
+
+    public static final ValidationRule E022 = new ValidationRule("E022", "ERROR", "trip stop_time_update times are not increasing",
+            "Sequential stop_time_update arrival/departure times should increase - they should never be the same or decrease between two sequential stops.",
+            " - times must be same or increasing within same stop_time_update and must always be increasing between two sequential updates");
 }

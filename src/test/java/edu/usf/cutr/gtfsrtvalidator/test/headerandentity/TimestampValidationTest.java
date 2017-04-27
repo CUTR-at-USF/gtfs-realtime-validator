@@ -304,12 +304,12 @@ public class TimestampValidationTest extends FeedMessageTest {
         // First StopTimeUpdate
         stopTimeUpdateBuilder.setArrival(stopTimeEventBuilder.setTime(BAD_TIME));
         stopTimeUpdateBuilder.setDeparture(stopTimeEventBuilder.setTime(BAD_TIME));
-        tripUpdateBuilder.addStopTimeUpdate(0, stopTimeUpdateBuilder.build());
+        tripUpdateBuilder.setStopTimeUpdate(0, stopTimeUpdateBuilder.build());
 
         // Second StopTimeUpdate
-        stopTimeUpdateBuilder.setArrival(stopTimeEventBuilder.setTime(BAD_TIME));
-        stopTimeUpdateBuilder.setDeparture(stopTimeEventBuilder.setTime(BAD_TIME));
-        tripUpdateBuilder.addStopTimeUpdate(1, stopTimeUpdateBuilder.build());
+        stopTimeUpdateBuilder.setArrival(stopTimeEventBuilder.setTime(BAD_TIME + 1));
+        stopTimeUpdateBuilder.setDeparture(stopTimeEventBuilder.setTime(BAD_TIME + 1));
+        tripUpdateBuilder.setStopTimeUpdate(1, stopTimeUpdateBuilder.build());
 
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder);
 
@@ -577,6 +577,301 @@ public class TimestampValidationTest extends FeedMessageTest {
 
         results = timestampValidation.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, currentIteration, previousIteration);
         TestUtils.assertResults(E018, results, 1);
+
+        clearAndInitRequiredFeedFields();
+    }
+
+    /**
+     * E022 - trip stop_time_update times are not increasing
+     */
+    @Test
+    public void testTimestampValidationE022() {
+        TimestampValidation timestampValidation = new TimestampValidation();
+        GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+
+        /**
+         * Set timestamps on objects (without StopTimeUpdates first) so no errors
+         */
+        feedHeaderBuilder.setTimestamp(MIN_POSIX_TIME);
+        feedMessageBuilder.setHeader(feedHeaderBuilder.build());
+
+        tripUpdateBuilder.setTimestamp(MIN_POSIX_TIME);
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder);
+
+        vehiclePositionBuilder.setTimestamp(MIN_POSIX_TIME);
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = timestampValidation.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(E022, results, 0);
+
+        /**
+         * Each StopTimeUpdates have same departures (no arrivals), and StopTimeUpdate 0 times are less than StopTimeUpdate 1 - no errors
+         */
+        GtfsRealtime.TripUpdate.StopTimeUpdate.Builder stopTimeUpdateBuilder = GtfsRealtime.TripUpdate.StopTimeUpdate.newBuilder();
+        GtfsRealtime.TripUpdate.StopTimeEvent.Builder stopTimeEventBuilder = GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder();
+
+        // First StopTimeUpdate
+        stopTimeUpdateBuilder.clearArrival();
+        stopTimeUpdateBuilder.setDeparture(stopTimeEventBuilder.setTime(MIN_POSIX_TIME));
+        tripUpdateBuilder.addStopTimeUpdate(0, stopTimeUpdateBuilder.build());
+
+        // Second StopTimeUpdate
+        stopTimeUpdateBuilder.clearArrival();
+        stopTimeUpdateBuilder.setDeparture(stopTimeEventBuilder.setTime(MIN_POSIX_TIME + 1));
+        tripUpdateBuilder.addStopTimeUpdate(1, stopTimeUpdateBuilder.build());
+
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder);
+
+        vehiclePositionBuilder.setTimestamp(MIN_POSIX_TIME);
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = timestampValidation.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(E022, results, 0);
+
+        /**
+         * Each StopTimeUpdates have same arrivals (no departures), and StopTimeUpdate 0 times are less than StopTimeUpdate 1 - no errors
+         */
+
+        // First StopTimeUpdate
+        stopTimeUpdateBuilder.clearDeparture();
+        stopTimeUpdateBuilder.setArrival(stopTimeEventBuilder.setTime(MIN_POSIX_TIME));
+        tripUpdateBuilder.setStopTimeUpdate(0, stopTimeUpdateBuilder.build());
+
+        // Second StopTimeUpdate
+        stopTimeUpdateBuilder.clearDeparture();
+        stopTimeUpdateBuilder.setArrival(stopTimeEventBuilder.setTime(MIN_POSIX_TIME + 1));
+        tripUpdateBuilder.setStopTimeUpdate(1, stopTimeUpdateBuilder.build());
+
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder);
+
+        vehiclePositionBuilder.setTimestamp(MIN_POSIX_TIME);
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = timestampValidation.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(E022, results, 0);
+
+        /**
+         * Each StopTimeUpdates have same arrivals and departures, and StopTimeUpdate 0 times are less than StopTimeUpdate 1 - no errors
+         */
+        // First StopTimeUpdate
+        stopTimeUpdateBuilder.setArrival(stopTimeEventBuilder.setTime(MIN_POSIX_TIME));
+        stopTimeUpdateBuilder.setDeparture(stopTimeEventBuilder.setTime(MIN_POSIX_TIME));
+        tripUpdateBuilder.setStopTimeUpdate(0, stopTimeUpdateBuilder.build());
+
+        // Second StopTimeUpdate
+        stopTimeUpdateBuilder.setArrival(stopTimeEventBuilder.setTime(MIN_POSIX_TIME + 1));
+        stopTimeUpdateBuilder.setDeparture(stopTimeEventBuilder.setTime(MIN_POSIX_TIME + 1));
+        tripUpdateBuilder.setStopTimeUpdate(1, stopTimeUpdateBuilder.build());
+
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder);
+
+        vehiclePositionBuilder.setTimestamp(MIN_POSIX_TIME);
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = timestampValidation.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(E022, results, 0);
+
+        /**
+         * Each StopTimeUpdate has sequential arrivals and departures, and StopTimeUpdate 0 times are less than StopTimeUpdate 1 - no errors
+         */
+
+        // First StopTimeUpdate
+        stopTimeUpdateBuilder.setArrival(stopTimeEventBuilder.setTime(MIN_POSIX_TIME));
+        stopTimeUpdateBuilder.setDeparture(stopTimeEventBuilder.setTime(MIN_POSIX_TIME + 1));
+        tripUpdateBuilder.setStopTimeUpdate(0, stopTimeUpdateBuilder.build());
+
+        // Second StopTimeUpdate
+        stopTimeUpdateBuilder.setArrival(stopTimeEventBuilder.setTime(MIN_POSIX_TIME + 2));
+        stopTimeUpdateBuilder.setDeparture(stopTimeEventBuilder.setTime(MIN_POSIX_TIME + 3));
+        tripUpdateBuilder.setStopTimeUpdate(1, stopTimeUpdateBuilder.build());
+
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder);
+
+        vehiclePositionBuilder.setTimestamp(MIN_POSIX_TIME);
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = timestampValidation.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(E022, results, 0);
+
+        /**
+         * Each StopTimeUpdate 0 has departure time and arrival time equal to StopTimeUpdate - 4 errors
+         */
+
+        // First StopTimeUpdate
+        stopTimeUpdateBuilder.setArrival(stopTimeEventBuilder.setTime(MIN_POSIX_TIME));
+        stopTimeUpdateBuilder.setDeparture(stopTimeEventBuilder.setTime(MIN_POSIX_TIME));
+        tripUpdateBuilder.setStopTimeUpdate(0, stopTimeUpdateBuilder.build());
+
+        // Second StopTimeUpdate
+        stopTimeUpdateBuilder.setArrival(stopTimeEventBuilder.setTime(MIN_POSIX_TIME));
+        stopTimeUpdateBuilder.setDeparture(stopTimeEventBuilder.setTime(MIN_POSIX_TIME));
+        tripUpdateBuilder.setStopTimeUpdate(1, stopTimeUpdateBuilder.build());
+
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder);
+
+        vehiclePositionBuilder.setTimestamp(MIN_POSIX_TIME);
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = timestampValidation.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(E022, results, 4);
+
+        /**
+         * Each StopTimeUpdate 0 has departure time less than StopTimeUpdate 0 arrival time - 1 error
+         */
+
+        // First StopTimeUpdate
+        stopTimeUpdateBuilder.setArrival(stopTimeEventBuilder.setTime(MIN_POSIX_TIME + 1));
+        stopTimeUpdateBuilder.setDeparture(stopTimeEventBuilder.setTime(MIN_POSIX_TIME));
+        tripUpdateBuilder.setStopTimeUpdate(0, stopTimeUpdateBuilder.build());
+
+        // Second StopTimeUpdate
+        stopTimeUpdateBuilder.setArrival(stopTimeEventBuilder.setTime(MIN_POSIX_TIME + 2));
+        stopTimeUpdateBuilder.setDeparture(stopTimeEventBuilder.setTime(MIN_POSIX_TIME + 3));
+        tripUpdateBuilder.setStopTimeUpdate(1, stopTimeUpdateBuilder.build());
+
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder);
+
+        vehiclePositionBuilder.setTimestamp(MIN_POSIX_TIME);
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = timestampValidation.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(E022, results, 1);
+
+        /**
+         * Each StopTimeUpdate 1 has arrival time less than StopTimeUpdate 0 arrival time and StopTimeUpdate 1 departure time - 2 errors
+         */
+
+        // First StopTimeUpdate
+        stopTimeUpdateBuilder.setArrival(stopTimeEventBuilder.setTime(MIN_POSIX_TIME));
+        stopTimeUpdateBuilder.setDeparture(stopTimeEventBuilder.setTime(MIN_POSIX_TIME + 1));
+        tripUpdateBuilder.setStopTimeUpdate(0, stopTimeUpdateBuilder.build());
+
+        // Second StopTimeUpdate
+        stopTimeUpdateBuilder.setArrival(stopTimeEventBuilder.setTime(MIN_POSIX_TIME));
+        stopTimeUpdateBuilder.setDeparture(stopTimeEventBuilder.setTime(MIN_POSIX_TIME + 3));
+        tripUpdateBuilder.setStopTimeUpdate(1, stopTimeUpdateBuilder.build());
+
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder);
+
+        vehiclePositionBuilder.setTimestamp(MIN_POSIX_TIME);
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = timestampValidation.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(E022, results, 2);
+
+        /**
+         * Each StopTimeUpdate 1 has arrival time equal to StopTimeUpdate 0 arrival time and StopTimeUpdate 1 departure time - 2 errors
+         */
+
+        // First StopTimeUpdate
+        stopTimeUpdateBuilder.setArrival(stopTimeEventBuilder.setTime(MIN_POSIX_TIME));
+        stopTimeUpdateBuilder.setDeparture(stopTimeEventBuilder.setTime(MIN_POSIX_TIME));
+        tripUpdateBuilder.setStopTimeUpdate(0, stopTimeUpdateBuilder.build());
+
+        // Second StopTimeUpdate
+        stopTimeUpdateBuilder.setArrival(stopTimeEventBuilder.setTime(MIN_POSIX_TIME));
+        stopTimeUpdateBuilder.setDeparture(stopTimeEventBuilder.setTime(MIN_POSIX_TIME + 3));
+        tripUpdateBuilder.setStopTimeUpdate(1, stopTimeUpdateBuilder.build());
+
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder);
+
+        vehiclePositionBuilder.setTimestamp(MIN_POSIX_TIME);
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = timestampValidation.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(E022, results, 2);
+
+        /**
+         * Each StopTimeUpdate 1 has arrival time less than StopTimeUpdate 0 arrival time and StopTimeUpdate 1 departure time - 2 errors
+         */
+
+        // First StopTimeUpdate
+        stopTimeUpdateBuilder.setArrival(stopTimeEventBuilder.setTime(MIN_POSIX_TIME + 1));
+        stopTimeUpdateBuilder.setDeparture(stopTimeEventBuilder.setTime(MIN_POSIX_TIME + 1));
+        tripUpdateBuilder.setStopTimeUpdate(0, stopTimeUpdateBuilder.build());
+
+        // Second StopTimeUpdate
+        stopTimeUpdateBuilder.setArrival(stopTimeEventBuilder.setTime(MIN_POSIX_TIME));
+        stopTimeUpdateBuilder.setDeparture(stopTimeEventBuilder.setTime(MIN_POSIX_TIME + 3));
+        tripUpdateBuilder.setStopTimeUpdate(1, stopTimeUpdateBuilder.build());
+
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder);
+
+        vehiclePositionBuilder.setTimestamp(MIN_POSIX_TIME);
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = timestampValidation.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(E022, results, 2);
+
+        /**
+         * Each StopTimeUpdate 1 has departure time less than StopTimeUpdate 0 departure time and StopTimeUpdate 1 arrival time - 2 error
+         */
+
+        // First StopTimeUpdate
+        stopTimeUpdateBuilder.setArrival(stopTimeEventBuilder.setTime(MIN_POSIX_TIME + 1));
+        stopTimeUpdateBuilder.setDeparture(stopTimeEventBuilder.setTime(MIN_POSIX_TIME + 3));
+        tripUpdateBuilder.setStopTimeUpdate(0, stopTimeUpdateBuilder.build());
+
+        // Second StopTimeUpdate
+        stopTimeUpdateBuilder.setArrival(stopTimeEventBuilder.setTime(MIN_POSIX_TIME + 4));
+        stopTimeUpdateBuilder.setDeparture(stopTimeEventBuilder.setTime(MIN_POSIX_TIME + 2));
+        tripUpdateBuilder.setStopTimeUpdate(1, stopTimeUpdateBuilder.build());
+
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder);
+
+        vehiclePositionBuilder.setTimestamp(MIN_POSIX_TIME);
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = timestampValidation.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(E022, results, 2);
+
+        /**
+         * Each StopTimeUpdate 1 has departure time less than StopTimeUpdate 0 arrival time and StopTimeUpdate 1 arrival time - 3 error
+         */
+
+        // First StopTimeUpdate
+        stopTimeUpdateBuilder.setArrival(stopTimeEventBuilder.setTime(MIN_POSIX_TIME + 2));
+        stopTimeUpdateBuilder.setDeparture(stopTimeEventBuilder.setTime(MIN_POSIX_TIME + 3));
+        tripUpdateBuilder.setStopTimeUpdate(0, stopTimeUpdateBuilder.build());
+
+        // Second StopTimeUpdate
+        stopTimeUpdateBuilder.setArrival(stopTimeEventBuilder.setTime(MIN_POSIX_TIME + 4));
+        stopTimeUpdateBuilder.setDeparture(stopTimeEventBuilder.setTime(MIN_POSIX_TIME + 1));
+        tripUpdateBuilder.setStopTimeUpdate(1, stopTimeUpdateBuilder.build());
+
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder);
+
+        vehiclePositionBuilder.setTimestamp(MIN_POSIX_TIME);
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = timestampValidation.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(E022, results, 3);
+
 
         clearAndInitRequiredFeedFields();
     }
