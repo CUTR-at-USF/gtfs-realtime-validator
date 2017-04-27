@@ -21,6 +21,7 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.background.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
+import edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.hsqldb.lib.StringUtil;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
@@ -40,38 +41,45 @@ import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
  *
  * E016 - trip_ids with schedule_relationship ADDED must not be in GTFS data
  *
+ * E020 - Invalid start_time format
+ *
+ * E021 - Invalid start_date format
+ *
  * W006 - trip_update missing trip_id
  */
-public class CheckRouteAndTripIds implements FeedEntityValidator {
+public class CheckTripDescriptor implements FeedEntityValidator {
 
-    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(CheckRouteAndTripIds.class);
+    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(CheckTripDescriptor.class);
 
     @Override
     public List<ErrorListHelperModel> validate(long currentTimeMillis, GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage) {
         List<OccurrenceModel> errorListE003 = new ArrayList<>();
         List<OccurrenceModel> errorListE004 = new ArrayList<>();
         List<OccurrenceModel> errorListE016 = new ArrayList<>();
+        List<OccurrenceModel> errorListE020 = new ArrayList<>();
+        List<OccurrenceModel> errorListE021 = new ArrayList<>();
         List<OccurrenceModel> errorListW006 = new ArrayList<>();
 
         // Check the route_id values against the values from the GTFS feed
         for (GtfsRealtime.FeedEntity entity : feedMessage.getEntityList()) {
             if (entity.hasTripUpdate()) {
-                if (!entity.getTripUpdate().getTrip().hasTripId()) {
+                GtfsRealtime.TripUpdate tripUpdate = entity.getTripUpdate();
+                if (!tripUpdate.getTrip().hasTripId()) {
                     // W006 - No trip_id
                     OccurrenceModel om = new OccurrenceModel("entity ID " + entity.getId());
                     errorListW006.add(om);
                     _log.debug(om.getPrefix() + " " + W006.getOccurrenceSuffix());
                 } else {
-                    String tripId = entity.getTripUpdate().getTrip().getTripId();
+                    String tripId = tripUpdate.getTrip().getTripId();
                     if (!gtfsMetadata.getTripIds().contains(tripId)) {
-                        if (!isAddedTrip(entity.getTripUpdate().getTrip())) {
+                        if (!isAddedTrip(tripUpdate.getTrip())) {
                             // Trip isn't in GTFS data and isn't an ADDED trip - E003
                             OccurrenceModel om = new OccurrenceModel("trip_id " + tripId);
                             errorListE003.add(om);
                             _log.debug(om.getPrefix() + " " + E003.getOccurrenceSuffix());
                         }
                     } else {
-                        if (isAddedTrip(entity.getTripUpdate().getTrip())) {
+                        if (isAddedTrip(tripUpdate.getTrip())) {
                             // Trip is in GTFS data and is an ADDED trip - E016
                             OccurrenceModel om = new OccurrenceModel("trip_id " + tripId);
                             errorListE016.add(om);
@@ -80,7 +88,25 @@ public class CheckRouteAndTripIds implements FeedEntityValidator {
                     }
                 }
 
-                String routeId = entity.getTripUpdate().getTrip().getRouteId();
+                if (tripUpdate.getTrip().hasStartTime()) {
+                    if (!GtfsUtils.isValidTimeFormat(tripUpdate.getTrip().getStartTime())) {
+                        // E020 - Invalid start_time format
+                        OccurrenceModel om = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() + " start_time is " + tripUpdate.getTrip().getStartTime());
+                        errorListE020.add(om);
+                        _log.debug(om.getPrefix() + " " + E020.getOccurrenceSuffix());
+                    }
+                }
+
+                if (tripUpdate.getTrip().hasStartDate()) {
+                    if (!GtfsUtils.isValidDateFormat(tripUpdate.getTrip().getStartDate())) {
+                        // E021 - Invalid start_date format
+                        OccurrenceModel om = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() + " start_date is " + tripUpdate.getTrip().getStartDate());
+                        errorListE021.add(om);
+                        _log.debug(om.getPrefix() + " " + E021.getOccurrenceSuffix());
+                    }
+                }
+
+                String routeId = tripUpdate.getTrip().getRouteId();
                 if (!StringUtil.isEmpty(routeId) && !gtfsMetadata.getRouteIds().contains(routeId)) {
                     // E004 - route_id not in GTFS data
                     OccurrenceModel om = new OccurrenceModel("route_id " + routeId);
@@ -89,23 +115,24 @@ public class CheckRouteAndTripIds implements FeedEntityValidator {
                 }
             }
             if (entity.hasVehicle() && entity.getVehicle().hasTrip()) {
-                if (!entity.getVehicle().getTrip().hasTripId()) {
+                GtfsRealtime.TripDescriptor tripDescriptor = entity.getVehicle().getTrip();
+                if (!tripDescriptor.hasTripId()) {
                     // W006 - No trip_id
                     OccurrenceModel om = new OccurrenceModel("entity ID " + entity.getId());
                     errorListW006.add(om);
                     _log.debug(om.getPrefix() + " " + W006.getOccurrenceSuffix());
                 } else {
-                    String tripId = entity.getTripUpdate().getTrip().getTripId();
+                    String tripId = tripDescriptor.getTripId();
                     if (!StringUtil.isEmpty(tripId)) {
                         if (!gtfsMetadata.getTripIds().contains(tripId)) {
-                            if (!isAddedTrip(entity.getTripUpdate().getTrip())) {
+                            if (!isAddedTrip(tripDescriptor)) {
                                 // Trip isn't in GTFS data and isn't an ADDED trip - E003
                                 OccurrenceModel om = new OccurrenceModel("vehicle_id " + entity.getVehicle().getVehicle().getId() + " trip_id " + tripId);
                                 errorListE003.add(om);
                                 _log.debug(om.getPrefix() + " " + E003.getOccurrenceSuffix());
                             }
                         } else {
-                            if (isAddedTrip(entity.getTripUpdate().getTrip())) {
+                            if (isAddedTrip(tripDescriptor)) {
                                 // Trip is in GTFS data and is an ADDED trip - E016
                                 OccurrenceModel om = new OccurrenceModel("vehicle_id " + entity.getVehicle().getVehicle().getId() + " trip_id " + tripId);
                                 errorListE016.add(om);
@@ -114,6 +141,25 @@ public class CheckRouteAndTripIds implements FeedEntityValidator {
                         }
                     }
                 }
+
+                if (tripDescriptor.hasStartTime()) {
+                    if (!GtfsUtils.isValidTimeFormat(tripDescriptor.getStartTime())) {
+                        // E020 - Invalid start_time format
+                        OccurrenceModel om = new OccurrenceModel("vehicle_id " + entity.getVehicle().getVehicle().getId() + " trip_id " + tripDescriptor.getTripId() + " start_time is " + tripDescriptor.getStartTime());
+                        errorListE020.add(om);
+                        _log.debug(om.getPrefix() + " " + E020.getOccurrenceSuffix());
+                    }
+                }
+
+                if (tripDescriptor.hasStartDate()) {
+                    if (!GtfsUtils.isValidDateFormat(tripDescriptor.getStartDate())) {
+                        // E021 - Invalid start_date format
+                        OccurrenceModel om = new OccurrenceModel("vehicle_id " + entity.getVehicle().getVehicle().getId() + " trip_id " + tripDescriptor.getTripId() + " start_date is " + tripDescriptor.getStartDate());
+                        errorListE021.add(om);
+                        _log.debug(om.getPrefix() + " " + E021.getOccurrenceSuffix());
+                    }
+                }
+
                 String routeId = entity.getVehicle().getTrip().getRouteId();
                 if (!StringUtil.isEmpty(routeId) && !gtfsMetadata.getRouteIds().contains(routeId)) {
                     // E004 - route_id not in GTFS data
@@ -132,6 +178,12 @@ public class CheckRouteAndTripIds implements FeedEntityValidator {
         }
         if (!errorListE016.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(E016), errorListE016));
+        }
+        if (!errorListE020.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E020), errorListE020));
+        }
+        if (!errorListE021.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E021), errorListE021));
         }
         if (!errorListW006.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(W006), errorListW006));

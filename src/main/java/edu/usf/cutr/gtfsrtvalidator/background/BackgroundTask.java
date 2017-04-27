@@ -69,7 +69,7 @@ public class BackgroundTask implements Runnable {
                 mValidationRules.add(new VehicleValidator()); // W002, W004
                 mValidationRules.add(new TimestampValidation()); // W003
                 mValidationRules.add(new StopTimeSequenceValidator()); // E002
-                mValidationRules.add(new CheckRouteAndTripIds()); // E003, E004
+                mValidationRules.add(new CheckTripDescriptor()); // E003, E004, E020, E021
                 mValidationRules.add(new StopValidator()); // E011
                 mValidationRules.add(new FrequencyTypeZero()); // E013
                 mValidationRules.add(new FrequencyTypeOne()); // E019

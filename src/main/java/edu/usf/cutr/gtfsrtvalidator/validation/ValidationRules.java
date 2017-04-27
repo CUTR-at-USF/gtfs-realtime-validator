@@ -126,4 +126,12 @@ public class ValidationRules {
     public static final ValidationRule E019 = new ValidationRule("E019", "ERROR", "GTFS-rt frequency type 1 trip start_time must be a multiple of GTFS headway_secs later than GTFS start_time",
             "For frequency-based trips defined in frequencies.txt with exact_times = 1, the GTFS-rt trip start_time must be some multiple (including zero) of headway_secs later than the start_time in file frequencies.txt for the corresponding time period.  Note that this doesn't not apply to frequency-based trips defined in frequencies.txt with exact_times = 0.",
             "- the GTFS-rt start_time is not a multiple of headway_secs later than GTFS start_time");
+
+    public static final ValidationRule E020 = new ValidationRule("E020", "ERROR", "Invalid start_time format",
+            "start_time must be in the format 25:15:35",
+            "which is not the valid format of 25:15:35");
+
+    public static final ValidationRule E021 = new ValidationRule("E021", "ERROR", "Invalid start_date format",
+            "start_date must be in the YYYYMMDD format",
+            "which is not the valid format of YYYYMMDD");
 }

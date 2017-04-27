@@ -21,7 +21,7 @@ import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.test.FeedMessageTest;
 import edu.usf.cutr.gtfsrtvalidator.test.util.TestUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
-import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.CheckRouteAndTripIds;
+import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.CheckTripDescriptor;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.VehicleTripDescriptorValidator;
 import org.junit.Test;
 
@@ -99,7 +99,7 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
      */
     @Test
     public void testTripIdAndRouteIdValidation() {
-        CheckRouteAndTripIds tripIdValidator = new CheckRouteAndTripIds();
+        CheckTripDescriptor tripIdValidator = new CheckTripDescriptor();
 
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
 
@@ -171,7 +171,7 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
      */
     @Test
     public void testE016() {
-        CheckRouteAndTripIds tripIdValidator = new CheckRouteAndTripIds();
+        CheckTripDescriptor tripIdValidator = new CheckTripDescriptor();
 
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
 
@@ -210,6 +210,98 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
 
         results = tripIdValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(ValidationRules.E016, results, 2);
+
+        clearAndInitRequiredFeedFields();
+    }
+
+    /**
+     * E020 - Invalid start_time format
+     */
+    @Test
+    public void testE020() {
+        CheckTripDescriptor tripIdValidator = new CheckTripDescriptor();
+
+        GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+
+        // Set valid trip_id = 1.1 that's in the GTFS data
+        tripDescriptorBuilder.setTripId("1.1");
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripIdValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        // No start_time - no errors
+        TestUtils.assertResults(ValidationRules.E020, results, 0);
+
+        // Set valid start_time - no errors
+        tripDescriptorBuilder.setStartTime("14:12:15");
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripIdValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E020, results, 0);
+
+        // Set invalid start_time - 2 errors
+        tripDescriptorBuilder.setStartTime("5:15:35");
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripIdValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E020, results, 2);
+
+        clearAndInitRequiredFeedFields();
+    }
+
+    /**
+     * E021 - Invalid start_date format
+     */
+    @Test
+    public void testE021() {
+        CheckTripDescriptor tripIdValidator = new CheckTripDescriptor();
+
+        GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+
+        // Set valid trip_id = 1.1 that's in the GTFS data
+        tripDescriptorBuilder.setTripId("1.1");
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripIdValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        // No start_date - no errors
+        TestUtils.assertResults(ValidationRules.E021, results, 0);
+
+        // Set valid start_date - no errors
+        tripDescriptorBuilder.setStartDate("20170101");
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripIdValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E021, results, 0);
+
+        // Set invalid start_date - 2 errors
+        tripDescriptorBuilder.setStartDate("01-01-2017");
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripIdValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E021, results, 2);
 
         clearAndInitRequiredFeedFields();
     }

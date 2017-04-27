@@ -30,6 +30,9 @@
 | [E016](#E016) | `trip_ids` with `schedule_relationship` `ADDED` must not be in GTFS data
 | [E017](#E017) | GTFS-rt content changed but has the same header `timestamp`
 | [E018](#E018) | GTFS-rt header `timestamp` decreased between two sequential iterations
+| [E019](#E019) | GTFS-rt frequency type 1 trip `start_time` must be a multiple of GTFS `headway_secs` later than GTFS `start_time`
+| [E020](#E020) | Invalid `start_time` format
+| [E021](#E021) | Invalid `start_date` format
 
 # Warnings
 
@@ -208,3 +211,21 @@ See:
 ### E019 - GTFS-rt frequency type 1 trip `start_time` must be a multiple of GTFS data `start_time`
 
 For frequency-based trips defined in `frequencies.txt` with `exact_times` = 1, the GTFS-rt trip `start_time` must be some multiple (including zero) of `headway_secs` later than the `start_time` in file `frequencies.txt` for the corresponding time period.  Note that this doesn't not apply to frequency-based trips defined in `frequencies.txt` with `exact_times` = 0.
+
+<a name="E020"/>
+
+### E020 - Invalid `start_time` format
+
+`start_time` must be in the format `25:15:35`.  Note that times can exceed 24 hrs if service goes into the next service day.
+
+See:
+* [trip.start_Time](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
+
+<a name="E021"/>
+
+### E021 - Invalid `start_date` format
+
+`start_date` must be in the `YYYYMMDD` format.
+
+See:
+* [trip.start_date](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
