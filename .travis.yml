@@ -7,5 +7,4 @@ cache:
 
 addons:
   artifacts: true
-    paths:
-    - $HOME/target/*.jar
+    paths: $HOME/target/*.jar
