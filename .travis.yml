@@ -8,4 +8,4 @@ cache:
 addons:
   artifacts:
     paths:
-    - $HOME/target/*.jar
+    - $HOME/travis/.m2/repository/edu/usf/cutr/gtfs-rt-validator/**/*.jar
