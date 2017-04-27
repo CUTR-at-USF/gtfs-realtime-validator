@@ -89,6 +89,9 @@ public class UtilTest {
         String validDate = "20170101";
         assertEquals(true, GtfsUtils.isValidDateFormat(validDate));
 
+        validDate = "20170427";
+        assertEquals(true, GtfsUtils.isValidDateFormat(validDate));
+
         /**
          * Bad dates
          */

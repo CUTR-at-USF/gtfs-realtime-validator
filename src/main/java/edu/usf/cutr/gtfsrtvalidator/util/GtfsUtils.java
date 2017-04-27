@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
  */
 public class GtfsUtils {
 
-    private static DateFormat mDateFormat = new SimpleDateFormat("YYYYMMDD");
+    private static DateFormat mDateFormat = new SimpleDateFormat("yyyyMMdd");
     private static Pattern mTimePattern = Pattern.compile("^[0-2][0-9]:[0-5][0-9]:[0-5][0-9]$"); // Up to 29 hrs
 
     /**
