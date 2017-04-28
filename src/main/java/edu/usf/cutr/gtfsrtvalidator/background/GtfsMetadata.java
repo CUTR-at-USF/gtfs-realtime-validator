@@ -18,10 +18,7 @@
 package edu.usf.cutr.gtfsrtvalidator.background;
 
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
-import org.onebusaway.gtfs.model.Frequency;
-import org.onebusaway.gtfs.model.Route;
-import org.onebusaway.gtfs.model.Stop;
-import org.onebusaway.gtfs.model.Trip;
+import org.onebusaway.gtfs.model.*;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
@@ -37,6 +34,8 @@ public class GtfsMetadata {
 
     private Set<String> routeIds = new HashSet<>();
     private Set<String> tripIds = new HashSet<>();
+    // Maps trip_ids to a list of StopTimes
+    private Map<String, List<StopTime>> tripStopTimes = new HashMap<>();
     private Set<String> stopIds = new HashSet<>();
     private Set<String> exactTimesZeroTripIds = new HashSet<>();
     // Maps trip_id to a list of Frequency objects
@@ -64,10 +63,26 @@ public class GtfsMetadata {
             routeIds.add(r.getId().getId());
         }
 
+        // Get all StopTimes and map them to trip_ids
+        for (StopTime stopTime : gtfsData.getAllStopTimes()) {
+            String tripId = stopTime.getTrip().getId().getId();
+
+            // If there isn't already a list for this trip, create one
+            List<StopTime> stopTimes = tripStopTimes.computeIfAbsent(tripId, k -> new ArrayList<>());
+            stopTimes.add(stopTime);
+        }
+
         // Get all trip_ids from the GTFS feed
         Collection<Trip> gtfsTripList = gtfsData.getAllTrips();
         for (Trip trip : gtfsTripList) {
-            tripIds.add(trip.getId().getId());
+            String tripId = trip.getId().getId();
+            tripIds.add(tripId);
+
+            List<StopTime> stopTimes = tripStopTimes.get(tripId);
+            if (stopTimes != null) {
+                // Make sure StopTimes are sorted by stop_sequence for this trip (stop_times.txt isn't necessary sorted)
+                stopTimes.sort(Comparator.comparing(stopTime -> (stopTime.getStopSequence())));
+            }
         }
 
         // Create a set of stop_ids from the GTFS feeds stops.txt, and store their location_type in a map
@@ -127,5 +142,14 @@ public class GtfsMetadata {
      */
     public Map<String, List<Frequency>> getExactTimesOneTrips() {
         return exactTimesOneTrips;
+    }
+
+    /**
+     * Returns a map where key is trips.txt trip_id, and the value is a list of StopTime objects from stop_times.txt sorted by stop_sequence
+     *
+     * @return a map where key is trips.txt trip_id, and the value is a list of StopTime objects from stop_times.txt sorted by stop_sequence
+     */
+    public Map<String, List<StopTime>> getTripStopTimes() {
+        return tripStopTimes;
     }
 }

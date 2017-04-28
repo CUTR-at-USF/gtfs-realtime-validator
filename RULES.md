@@ -34,6 +34,7 @@
 | [E020](#E020) | Invalid `start_time` format
 | [E021](#E021) | Invalid `start_date` format
 | [E022](#E022) | trip `stop_time_update` times are not increasing
+| [E023](#E023) | trip `start_time` does not match first GTFS `arrival_time`
 
 # Warnings
 
@@ -236,3 +237,9 @@ See:
 ### E022 - trip `stop_time_update` times are not increasing
 
 Sequential `stop_time_update` arrival/departure times should increase - they should never be the same or decrease between two sequential stops.  Within the same `stop_time_update`, arrival and departures times can be the same, or the departure time can be later than the arrival time - the departure time should never come before the arrival time.
+
+<a name="E023"/>
+
+### E023 - trip `start_time` does not match first GTFS `arrival_time`
+
+For normal scheduled trips (i.e., not defined in `frequencies.txt`), the GTFS-realtime trip `start_time` must match the first GTFS `arrival_time` in `stop_times.txt` for this trip.

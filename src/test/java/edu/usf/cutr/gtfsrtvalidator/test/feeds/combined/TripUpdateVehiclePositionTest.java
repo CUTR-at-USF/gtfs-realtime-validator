@@ -223,27 +223,27 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
 
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
 
-        // Set valid trip_id = 1.1 that's in the GTFS data
-        tripDescriptorBuilder.setTripId("1.1");
+        // Set valid trip_id = 1.1 that's in the Bull Runner GTFS data
+        tripDescriptorBuilder.setTripId("1");
         tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
         vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = tripIdValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = tripIdValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
         // No start_time - no errors
         TestUtils.assertResults(ValidationRules.E020, results, 0);
 
         // Set valid start_time - no errors
-        tripDescriptorBuilder.setStartTime("14:12:15");
+        tripDescriptorBuilder.setStartTime("00:20:00");
         tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
         vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = tripIdValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = tripIdValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(ValidationRules.E020, results, 0);
 
         // Set invalid start_time - 2 errors
@@ -254,7 +254,7 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = tripIdValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = tripIdValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(ValidationRules.E020, results, 2);
 
         clearAndInitRequiredFeedFields();
@@ -302,6 +302,60 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
 
         results = tripIdValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(ValidationRules.E021, results, 2);
+
+        clearAndInitRequiredFeedFields();
+    }
+
+    /**
+     * E023 - start_time does not match GTFS initial arrival_time
+     */
+    @Test
+    public void testE023() {
+        /**
+         * In testagency.txt, trip 1.2 has the following:
+         *
+         * trip_id,arrival_time,departure_time,stop_id,stop_sequence,shape_dist_traveled,pickup_type,drop_off_type
+         * 1.2,00:20:00,00:20:00,A,1,,0,0
+         * 1.2,00:30:00,00:30:00,B,2,,0,0
+         *
+         * So, initial arrival_time is 00:20:00.
+         */
+        CheckTripDescriptor tripIdValidator = new CheckTripDescriptor();
+
+        GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+        tripDescriptorBuilder.setTripId("1.2");
+
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripIdValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        // No start_time - no errors
+        TestUtils.assertResults(ValidationRules.E023, results, 0);
+
+        // Set valid start_time - no errors
+        tripDescriptorBuilder.setStartTime("00:20:00");
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripIdValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E023, results, 0);
+
+        // Set invalid start_time - 2 errors
+        tripDescriptorBuilder.setStartTime("00:30:00");
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripIdValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E023, results, 2);
 
         clearAndInitRequiredFeedFields();
     }

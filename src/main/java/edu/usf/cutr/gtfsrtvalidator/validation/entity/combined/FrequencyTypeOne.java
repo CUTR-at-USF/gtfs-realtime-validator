@@ -21,6 +21,7 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.background.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
+import edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.onebusaway.gtfs.model.Frequency;
@@ -60,7 +61,7 @@ public class FrequencyTypeOne implements FeedEntityValidator {
                         // See if the GTFS-rt start_time matches at least one multiple of GTFS start_time for this frequency
                         while (startTime < f.getEndTime()) {
                             // Convert seconds after midnight to 24hr clock time like "06:00:00"
-                            gtfsStartTimeString = String.format("%02d:%02d:%02d", startTime / 3600, startTime % 360, startTime % 60);
+                            gtfsStartTimeString = TimestampUtils.secondsAfterMidnightToClock(startTime);
                             headwaySecs = f.getHeadwaySecs();
                             _log.debug("start time = " + startTime);
                             _log.debug("formatted start time = " + gtfsStartTimeString);

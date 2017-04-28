@@ -137,5 +137,9 @@ public class ValidationRules {
 
     public static final ValidationRule E022 = new ValidationRule("E022", "ERROR", "trip stop_time_update times are not increasing",
             "Sequential stop_time_update arrival/departure times should increase - they should never be the same or decrease between two sequential stops.  Within the same stop_time_update, arrival and departures times can be the same, or the departure time can be later than the arrival time - the departure time should never come before the arrival time.",
-            " - times must be same or increasing within same stop_time_update and must always be increasing between two sequential updates");
+            "- times must be same or increasing within same stop_time_update and must always be increasing between two sequential updates");
+
+    public static final ValidationRule E023 = new ValidationRule("E023", "ERROR", "trip start_time does not match first GTFS arrival_time",
+            "For normal scheduled trips (i.e., not defined in frequencies.txt), the GTFS-realtime trip start_time must match the first GTFS arrival_time in stop_times.txt for this trip",
+            "- times do not match");
 }
