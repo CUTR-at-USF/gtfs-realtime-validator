@@ -62,19 +62,45 @@
 }
 
 #feedMessage {
-    height: 500px;
-    width: 550px;
+    height: 550px;
     overflow: auto;
+}
+
+.feed-padding {
+    padding-top: 70px;
 }
 
 #copy-clipboard {
     cursor: pointer;
     position: fixed;
     font-size: 3em;
-    right: 70px;
-    bottom: 30px;
+    left: 600px;
+    top: 550px;
+}
+
+.iteration-issues {
+    padding-top: 20px;
+    height: 500px;
+    overflow: auto;
 }
 
 .modal-title {
     text-align: center;
+}
+
+.feed-padding .content-well {
+    margin: 0;
+    padding-top: 10px;
+}
+
+.each-card {
+    background-color: #ffffff;
+}
+
+.iterations-thead {
+	background-color: rgba(85, 85, 85, 0.62);
+}
+
+.iterations-td {
+	background-color: rgba(85, 85, 85, 0.11);
 }
