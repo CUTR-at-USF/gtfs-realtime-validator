@@ -53,6 +53,13 @@ public class GtfsRtFeedIterationModel implements Serializable {
     @Column(name = "feedHash")
     private byte[] feedHash;
 
+    /*
+     * '@Transient' does not persist 'dateFormat' to the database i.e., 'dateFormat' is not added as a column in this table.
+     * If 'dateFormat' is set, it contains the date format representation of 'feedTimestamp'.
+     */
+    @Transient
+    private String dateFormat;
+
     public GtfsRtFeedModel getGtfsRtFeedModel() {
         return gtfsRtFeedModel;
     }
@@ -99,5 +106,13 @@ public class GtfsRtFeedIterationModel implements Serializable {
 
     public void setFeedHash(byte[] feedHash) {
         this.feedHash = feedHash;
+    }
+
+    public String getDateFormat() {
+        return dateFormat;
+    }
+
+    public void setDateFormat(String dateFormat) {
+        this.dateFormat = dateFormat;
     }
 }

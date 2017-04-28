@@ -101,7 +101,6 @@
 
     </div>
 
-    <div class="feedMessageDialog"> </div>
 </div>
 <!-- /.container -->
 <!-- script references -->
@@ -204,7 +203,7 @@
 <script id="feed-monitor-log-row-template" type="text/x-handlebars-template">
     {{#each this}}
     <tr>
-        <td><a href="#" onclick="showFeedMessage({{rowId}}, {{iterationId}}, '{{formattedTimestamp}}', {{occurrence}}); return false;">{{rowId}}</a></td>
+        <td><a href="iteration.html?iteration={{iterationId}}&sessionIteration={{rowId}}" target="_blank" onclick="storeFeedMessageDetails({{rowId}}, {{iterationId}})">{{rowId}}</a></td>
         <td>{{id}}</td>
         <td>{{title}}</td>
 
@@ -212,26 +211,6 @@
         <td title="Time zone: {{timeZone}}">{{formattedTimestamp}} ({{occurrence}})</td>
     </tr>
     {{/each}}
-</script>
-
-<script id="gtfs-rt-feed-message" type="text/x-handlebars-template">
-    <div id="feed-message-modal" class="modal fade" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="title-text"></h4>
-                </div>
-                <div class="modal-body">
-                    <pre id="feedMessage"></pre>
-                    <div class="pull-left" id="copy-clipboard">
-                        <span class="glyphicon glyphicon-copy" data-placement="top" data-trigger="click" id="clipboard" data-clipboard-target="#feedMessage">
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </script>
 
 <script src="custom-js/monitoring.js"></script>
