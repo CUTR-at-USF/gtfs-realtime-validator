@@ -27,5 +27,6 @@
     <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.ViewFeedMessageModel"/>
     <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.ViewGtfsRtFeedErrorCountModel"/>
     <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.ViewMessageDetailsModel"/>
+    <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.ViewIterationErrorsModel"/>
   </session-factory>
 </hibernate-configuration>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Iteration details</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="navbar navbar-default navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <span class="navbar-brand" id="title-text">
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 feed-padding">
+                <pre id="feedMessage"></pre>
+                <div class="pull-left" id="copy-clipboard">
+                    <span class="glyphicon glyphicon-copy" data-placement="top" data-trigger="click" id="clipboard" data-clipboard-target="#feedMessage">
+                    </span>
+                </div>
+            </div>
+
+
+            <div class="col-md-6 feed-padding">
+                <div class="well content-well ">
+                    <span class="info-text" id="error-count">0</span>
+                    &nbsperror(s),
+                    <span class="info-text" id="warning-count">0</span>
+                    &nbspwarning(s)
+                </div>
+
+                <div class="well content-well iteration-issues">
+                    <div id="error-cards">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="js/jquery-2.1.4.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/clipboard.min.js"></script>
+    <script src="js/handlebars.js"></script>
+
+    <script id="error-each-card-template" type="text/x-handlebars-template">
+        {{#each this}}
+        <div id="error-card-{{@index}}">
+        </div>
+        {{/each}}
+    </script>
+
+    <script id="error-card-table-template" type="text/x-handlebars-template">
+        {{#each this}}
+        <div class="well each-card">
+            <h4>{{errorId}} - {{title}}</h4>
+            <hr/>
+            <table class="table">
+                <thead class="iterations-thead">
+                <tr>
+                    <th>OccurrenceId</th>
+                    <th>Summary</th>
+                </tr>
+                </thead>
+                <tbody id="error-card-body-{{@index}}">
+                </tbody>
+            </table>
+            <div>
+                <a class="show-more-{{@index}}" href="#" onclick="showEntireList({{@index}}); return false;">...and {{errorOccurrences}} more</a>
+            </div>
+            <div>
+                <a class="show-less-{{@index}}" href="#" onclick="showLessErrors({{@index}}); return false;" style="display: none;">...show less</a>
+            </div>
+        </div>
+        {{/each}}
+    </script>
+
+    <script id="error-card-body-template" type="text/x-handlebars-template">
+        {{#each this}}
+        <tr>
+            <td class="iterations-td">{{rowId}}</td>
+            <td class="iterations-td">{{occurrencePrefix}} {{occurrenceSuffix}}</td>
+        </tr>
+        {{/each}}
+    </script>
+
+    <script src="custom-js/iteration.js"></script>
+</body>
+</html>
