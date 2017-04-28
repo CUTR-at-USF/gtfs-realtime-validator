@@ -26,10 +26,12 @@ function addInput(){
         var count = (counter + 1);
         var HTMLString;
 
-        HTMLString = "<div class=\"form-group\"> <label for=\"gtfsrt-feed-"+ count +"\">GTFS-Realtime Feed "+ count +"</label>";
-        HTMLString += "<input class=\"form-control\" name=\"gtfsrt-feed-"+ count+ "\"/></div>";
+        HTMLString = "<div class=\"form-group has-feedback has-clear\"> <label for=\"gtfsrt-feed-"+ count +"\">GTFS-Realtime Feed "+ count +"</label>";
+        HTMLString += "<input type=\"text\" class=\"form-control\" name=\"gtfsrt-feed-"+ count+ "\"/>";
+        HTMLString += "<span class=\"form-control-clear glyphicon glyphicon-remove form-control-feedback hidden\"></span> </div>"
         newdiv.innerHTML = HTMLString;
         $("#dynamicInput").append(newdiv);
+        removeTextInput();
         counter++;
     }
 }
@@ -46,10 +48,16 @@ function removeInput(){
 //Checking if there is text on both GTFS and GTFS-RT fields
 var gtfsURLField = $('#gtfsrt-feed-1');
 var gtfsrtURLField = $('#gtfs');
+// Adding clear text field functionality to each of input type='text'
+removeTextInput();
 var $submit = $('input[type="submit"]');
 var reset = $('input[type="reset"]');
 reset.on('click', disableSubmit);
-$submit.prop('disabled', true);
+/*
+ * 'checkStatus' method call here ensures submit button is disabled/enabled based on text input values
+ *   when we come back from loading.html to welcome page.
+ */
+checkStatus();
 
 gtfsURLField.bind('input', checkStatus);
 gtfsrtURLField.bind('input', checkStatus);
@@ -61,4 +69,30 @@ function checkStatus() {
 
 function disableSubmit() {
     $submit.prop('disabled', true);
+    $('.form-control-clear').toggleClass('hidden', true);
 }
+
+/*
+ * Make visible the remove glyphicon in input text field on entering text in it
+ *  and upon clicking the remove glyphicon, clears the input text.
+ */
+function removeTextInput() {
+    $('.has-clear input[type="text"]').on('input propertychange', function() {
+      var $this = $(this);
+      var visible = Boolean($this.val());
+      $this.siblings('.form-control-clear').toggleClass('hidden', !visible);
+    }).trigger('propertychange');
+
+    $('.form-control-clear').click(function() {
+      $(this).siblings('input[type="text"]').val('')
+        .trigger('propertychange').focus();
+      checkStatus();
+    });
+}
+
+// Trim spaces for each of input type="text", before submitting the form.
+$('input[type="submit"]').click(function () {
+    $('input[type="text"]').each(function(){
+      this.value=$(this).val().trim();
+    })
+});
