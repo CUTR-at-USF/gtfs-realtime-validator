@@ -26,6 +26,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 
 import static edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils.MIN_POSIX_TIME;
 import static org.junit.Assert.assertEquals;
@@ -204,7 +205,9 @@ public class UtilTest {
     @Test
     public void testPosixToClock() {
         int time = 1493383886;  // POSIX time
-        String clockTime = TimestampUtils.posixToClock(time);
+        String timeZoneText = "America/New_York";
+        TimeZone timeZone = TimeZone.getTimeZone(timeZoneText);
+        String clockTime = TimestampUtils.posixToClock(time, timeZone);
         assertEquals("08:51:26", clockTime);
     }
 }

@@ -19,6 +19,7 @@ package edu.usf.cutr.gtfsrtvalidator.util;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -71,9 +72,13 @@ public class TimestampUtils {
      * Convert POSIX time to 24hr clock time like "06:00:00"
      *
      * @param posixTime POSIX time
+     * @param timeZone the timezone used to generate the clock time, or null if the current time zone should be used.  Please refer to http://en.wikipedia.org/wiki/List_of_tz_zones for a list of valid values.
      * @return A converted version of time in 24hr clock time like "06:00:00"
      */
-    public static String posixToClock(int posixTime) {
+    public static String posixToClock(int posixTime, TimeZone timeZone) {
+        if (timeZone != null) {
+            mTimeFormat.setTimeZone(timeZone);
+        }
         return mTimeFormat.format(TimeUnit.SECONDS.toMillis(posixTime));
     }
 
