@@ -112,17 +112,6 @@ public class TimestampUtils {
             return false;
         }
 
-        int months;
-        try {
-            months = Integer.parseInt(startDate.substring(4, 6));
-        } catch (NumberFormatException e) {
-            return false;
-        }
-        if (months > 12) {
-            // SimpleDateFormat doesn't catch 20171301 as bad format, so check that months are less than 13
-            return false;
-        }
-
         try {
             mDateFormat.parse(startDate);
         } catch (ParseException e) {
