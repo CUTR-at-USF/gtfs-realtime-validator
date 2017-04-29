@@ -227,6 +227,7 @@ function getTimeElapsed() {
     var hours = Math.floor(minutes / 60);
 
     var sec = TrimSecondsMinutes(seconds);
+    var min = TrimSecondsMinutes(minutes);
 
     function TrimSecondsMinutes(elapsed) {
         if (elapsed >= 60)
@@ -234,7 +235,7 @@ function getTimeElapsed() {
         return elapsed;
     }
 
-    $("#time-elapsed").text(hours + "h " + minutes + "m " + sec + "s");
+    $("#time-elapsed").text(hours + "h " + min + "m " + sec + "s");
 }
 
 //Call time elapsed to update the clock evey second
