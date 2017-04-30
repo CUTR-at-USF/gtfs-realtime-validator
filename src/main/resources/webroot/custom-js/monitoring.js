@@ -253,6 +253,9 @@ function showOrHideError(gtfsRtId, errorId) {
     else {
         hideErrors[gtfsRtId].splice(hideErrors[gtfsRtId].indexOf(errorId), 1);
     }
+    // If toggled data is changed, update Log pagination currentPage and userSelPage to default values.
+    paginationLog[gtfsRtId]["currentPage"] = 1;
+    paginationLog[gtfsRtId]["userSelPage"] = 1;
     // Store current position for later use
     var scrollPosition = document.body.scrollTop;
 
@@ -283,7 +286,7 @@ function updatePaginationLogData(index, data) {
 function updatePaginationInfo(logOrSumary, index, paginationInfo) {
     var pagination = paginationInfo;
     pagination[index]["totalPages"] = Math.ceil(pagination[index]["totalRows"] / pagination[index]["rowsPerPage"]);
-    // If user selected a page and is less than totalPages, currentPage is user selected page.
+    // If there are 'userSelPage' and 'currentPage' values, give priority to 'userSelPage'.
     if (pagination[index]["userSelPage"] > 0) {
         pagination[index]["currentPage"] = pagination[index]["userSelPage"];
     }
