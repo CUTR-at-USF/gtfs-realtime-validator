@@ -61,22 +61,62 @@
     background-color: #FFFF88;
 }
 
-#feedMessage {
-    height: 500px;
-    width: 550px;
+#feed-display {
+    height: 105vh;
     overflow: auto;
+    outline: 2px solid rgb(229, 229, 229);
+}
+
+#feedMessage{
+    border-radius: 0px;
+}
+
+.feed-padding {
+    padding-top: 70px;
 }
 
 #copy-clipboard {
     cursor: pointer;
-    position: fixed;
+    position: absolute;
     font-size: 3em;
-    right: 70px;
-    bottom: 30px;
+    /* right and bottom are relative to the parent element #feed-display*/
+    right: 7vh;
+    bottom: 3vh;
+}
+
+.iteration-issues {
+    padding-top: 20px;
+    height: 100vh;
+    overflow: auto;
 }
 
 .modal-title {
     text-align: center;
+}
+
+.feed-padding .content-well {
+    margin: 0;
+    padding-top: 10px;
+}
+
+.each-card {
+    background-color: #ffffff;
+}
+
+.iterations-thead {
+	background-color: rgba(85, 85, 85, 0.62);
+}
+
+.iterations-td {
+	background-color: rgba(85, 85, 85, 0.11);
+}
+
+.loader {
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	z-index: 9999;
+	background: url('images/page-loader.gif') no-repeat center center #ffffff;
 }
 
 ::-ms-clear {

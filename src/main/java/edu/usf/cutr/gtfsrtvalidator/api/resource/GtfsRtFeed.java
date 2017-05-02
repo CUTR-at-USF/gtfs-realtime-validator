@@ -23,6 +23,7 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.combined.CombinedIterationMessageM
 import edu.usf.cutr.gtfsrtvalidator.api.model.combined.CombinedMessageOccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.background.BackgroundTask;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
+import edu.usf.cutr.gtfsrtvalidator.helper.IterationErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.MergeMonitorData;
 import org.hibernate.Session;
 import org.slf4j.LoggerFactory;
@@ -246,6 +247,88 @@ public class GtfsRtFeed {
         feedMessageModel.setJsonFeedMessage(feedMessageModel.getByteFeedMessage());
         return feedMessageModel.getJsonFeedMessage();
      }
+
+    // Returns feed errors/warnings for a requested iteration.
+    @GET
+    @Path("/{iterationId : \\d+}/iterationErrors")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getIterationErrors(
+            @PathParam("iterationId") int iterationId)  {
+
+        List<ViewIterationErrorsModel> viewIterationErrorsModelList;
+        IterationErrorListHelperModel iterationErrorListHelperModel;
+        List<IterationErrorListHelperModel> iterationErrorListHelperModelList = new ArrayList<>();
+
+        List<Integer> messageIdList;
+        Session session = GTFSDB.initSessionBeginTrans();
+
+        /*
+         * Get the list of messageIds for an iteration that helps in retrieving error/warning list from Occurrence table
+         * Each messageId corresponds to an errorId whose list of error occurrences are retrieved from Occurrence table
+         * ORDER BY errorId helps to have errors/warnings in ascending order i.e., first errors in ascending order then warnings in ascending order
+         */
+        messageIdList = session.createQuery(" SELECT messageId FROM MessageLogModel" +
+                                                " WHERE iterationId = " + iterationId +
+                                                " ORDER BY errorId")
+                                            .list();
+
+        GTFSDB.closeSession(session);
+
+        /*
+         * Each messageId corresponds to an error/warning that occurred in a particular iteration.
+         * Iterates over those rule/warning and retrieves list of occurrences of that error/warning and
+         *  adds it to the list of IterationErrorListHelperModel.
+         * We separately retrieve list of ViewIterationErrorsModel for each error/warning so that we can have
+         *  rowIds in increasing order starting from 1 and have separate list for each error/warning.
+         */
+        for (int messageId: messageIdList) {
+            session = GTFSDB.initSessionBeginTrans();
+            viewIterationErrorsModelList = session.createNamedQuery("IterationIdErrors", ViewIterationErrorsModel.class)
+                    .setParameter(0, iterationId)
+                    .setParameter(1, messageId)
+                    .list();
+            GTFSDB.closeSession(session);
+            if (!viewIterationErrorsModelList.isEmpty()) {
+                iterationErrorListHelperModel = new IterationErrorListHelperModel();
+
+                // viewIterationErrorsModelList contains the table data to display in each error/warning card.
+                iterationErrorListHelperModel.setViewIterationErrorsModelList(viewIterationErrorsModelList);
+
+                // Add errorId and title to IterationErrorListHelperModel that is used to display "ErrorId - Title" for each error/warning card in iteration.html
+                iterationErrorListHelperModel.setErrorId(viewIterationErrorsModelList.get(0).getErrorId());
+                iterationErrorListHelperModel.setTitle(viewIterationErrorsModelList.get(0).getTitle());
+                // Get the number of occurrences of each error/warning
+                iterationErrorListHelperModel.setErrorOccurrences(viewIterationErrorsModelList.size());
+
+                iterationErrorListHelperModelList.add(iterationErrorListHelperModel);
+            }
+        }
+
+        GenericEntity<List<IterationErrorListHelperModel>> iterationErrorList = new GenericEntity<List<IterationErrorListHelperModel>>(iterationErrorListHelperModelList) {
+        };
+        return Response.ok(iterationErrorList).build();
+    }
+
+    // Returns iteration details.
+    @GET
+    @Path("/{iterationId : \\d+}/iterationDetails")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getIterationDetails(
+            @PathParam("iterationId") int iterationId) {
+
+        GtfsRtFeedIterationModel gtfsRtFeedIterationModel;
+        Session session = GTFSDB.initSessionBeginTrans();
+
+        gtfsRtFeedIterationModel = (GtfsRtFeedIterationModel) session.createQuery(" FROM GtfsRtFeedIterationModel" +
+                                                                                      " WHERE IterationId = " + iterationId)
+                                                                                      .uniqueResult();
+
+        GTFSDB.closeSession(session);
+        gtfsRtFeedIterationModel.setDateFormat(getDateFormat(gtfsRtFeedIterationModel.getFeedTimestamp(), gtfsRtFeedIterationModel.getGtfsRtFeedModel().getGtfsRtId()));
+        // Converting feedTimestamp from Milli seconds to seconds as we display timestamp in seconds at client side
+        gtfsRtFeedIterationModel.setFeedTimestamp(TimeUnit.MILLISECONDS.toSeconds(gtfsRtFeedIterationModel.getFeedTimestamp()));
+        return Response.ok(gtfsRtFeedIterationModel).build();
+    }
 
     @GET
     @Path("/{id}/{iteration}")
