@@ -244,4 +244,16 @@ public class UtilTest {
         text = GtfsUtils.getVehicleAndRouteId(vehiclePositionBuilder.build());
         assertEquals(text, "vehicle_id A route_id 1");
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testAssertVehicleAndTripIdThrowException() {
+        // Make sure we throw an exception if the method is provided objects other than TripUpdate or VehiclePosition
+        GtfsUtils.getVehicleAndTripId(GtfsRealtime.TripDescriptor.newBuilder().setTripId("1").build());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testAssertVehicleAndRouteIdThrowException() {
+        // Make sure we throw an exception if the method is provided objects other than TripUpdate or VehiclePosition
+        GtfsUtils.getVehicleAndRouteId(GtfsRealtime.TripDescriptor.newBuilder().setRouteId("1").build());
+    }
 }
