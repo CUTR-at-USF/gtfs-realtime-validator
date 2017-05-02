@@ -16,10 +16,12 @@
  */
 package edu.usf.cutr.gtfsrtvalidator.test;
 
+import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.test.util.TestUtils;
+import edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils;
 import edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
 import org.junit.Test;
@@ -209,5 +211,21 @@ public class UtilTest {
         TimeZone timeZone = TimeZone.getTimeZone(timeZoneText);
         String clockTime = TimestampUtils.posixToClock(time, timeZone);
         assertEquals("08:51:26", clockTime);
+    }
+
+    @Test
+    public void testGetVehicleAndTripId() {
+        String text;
+
+        GtfsRealtime.TripUpdate.Builder tripUpdateBuilder = GtfsRealtime.TripUpdate.newBuilder();
+        tripUpdateBuilder.setTrip(GtfsRealtime.TripDescriptor.newBuilder().setTripId("1"));
+        text = GtfsUtils.getVehicleAndTripId(tripUpdateBuilder.build());
+        assertEquals(text, "trip_id 1");
+
+        GtfsRealtime.VehiclePosition.Builder vehiclePositionBuilder = GtfsRealtime.VehiclePosition.newBuilder();
+        vehiclePositionBuilder.setVehicle(GtfsRealtime.VehicleDescriptor.newBuilder().setId("A"));
+        vehiclePositionBuilder.setTrip(GtfsRealtime.TripDescriptor.newBuilder().setTripId("1"));
+        text = GtfsUtils.getVehicleAndTripId(vehiclePositionBuilder.build());
+        assertEquals(text, "vehicle_id A trip_id 1");
     }
 }

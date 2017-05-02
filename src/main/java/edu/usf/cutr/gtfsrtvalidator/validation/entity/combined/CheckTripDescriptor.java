@@ -21,6 +21,7 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.background.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
+import edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils;
 import edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.hsqldb.lib.StringUtil;
@@ -135,17 +136,7 @@ public class CheckTripDescriptor implements FeedEntityValidator {
                     _log.debug(om.getPrefix() + " " + E004.getOccurrenceSuffix());
                 }
 
-                if (tripUpdate.getTrip().hasDirectionId()) {
-                    int directionId = tripUpdate.getTrip().getDirectionId();
-                    Trip trip = gtfsMetadata.getTrips().get(tripUpdate.getTrip().getTripId());
-                    if (trip != null &&
-                            (trip.getDirectionId() == null || !trip.getDirectionId().equals(String.valueOf(directionId)))) {
-                        // E024 - trip direction_id does not match GTFS data
-                        OccurrenceModel om = new OccurrenceModel("GTFS-rt trip.direction_id is " + directionId + " but GTFS trip.direction_id is " + trip.getDirectionId());
-                        errorListE024.add(om);
-                        _log.debug(om.getPrefix() + " " + E024.getOccurrenceSuffix());
-                    }
-                }
+                checkE024(tripUpdate, tripUpdate.getTrip(), gtfsMetadata, errorListE024);
             }
             if (entity.hasVehicle() && entity.getVehicle().hasTrip()) {
                 GtfsRealtime.TripDescriptor tripDescriptor = entity.getVehicle().getTrip();
@@ -215,18 +206,7 @@ public class CheckTripDescriptor implements FeedEntityValidator {
                     _log.debug(om.getPrefix() + " " + E004.getOccurrenceSuffix());
                 }
 
-
-                if (entity.getVehicle().getTrip().hasDirectionId()) {
-                    int directionId = entity.getVehicle().getTrip().getDirectionId();
-                    Trip trip = gtfsMetadata.getTrips().get(entity.getVehicle().getTrip().getTripId());
-                    if (trip != null &&
-                            (trip.getDirectionId() == null || !trip.getDirectionId().equals(String.valueOf(directionId)))) {
-                        // E024 - trip direction_id does not match GTFS data
-                        OccurrenceModel om = new OccurrenceModel("GTFS-rt vehicle_id " + entity.getVehicle().getVehicle().getId() + " trip.direction_id is " + directionId + " but GTFS trip.direction_id is " + trip.getDirectionId());
-                        errorListE024.add(om);
-                        _log.debug(om.getPrefix() + " " + E024.getOccurrenceSuffix());
-                    }
-                }
+                checkE024(entity.getVehicle(), entity.getVehicle().getTrip(), gtfsMetadata, errorListE024);
             }
         }
         List<ErrorListHelperModel> errors = new ArrayList<>();
@@ -255,5 +235,29 @@ public class CheckTripDescriptor implements FeedEntityValidator {
             errors.add(new ErrorListHelperModel(new MessageLogModel(W006), errorListW006));
         }
         return errors;
+    }
+
+    /**
+     * Checks rule E024 - trip direction_id does not match GTFS data and adds any errors that are found to the provided error list
+     *
+     * @param entity       The VehiclePosition or TripUpdate that contains the data to be evaluated for rule E024
+     * @param trip         The TripDescriptor be evaluated for rule E024
+     * @param gtfsMetadata metadata for the static GTFS data
+     * @param errors       list to add any errors for E024 to
+     */
+    private void checkE024(Object entity, GtfsRealtime.TripDescriptor trip, GtfsMetadata gtfsMetadata, List<OccurrenceModel> errors) {
+        if (trip.hasDirectionId()) {
+            int directionId = trip.getDirectionId();
+            Trip gtfsTrip = gtfsMetadata.getTrips().get(trip.getTripId());
+            if (gtfsTrip != null &&
+                    (gtfsTrip.getDirectionId() == null || !gtfsTrip.getDirectionId().equals(String.valueOf(directionId)))) {
+                String ids = GtfsUtils.getVehicleAndTripId(entity);
+                // E024 - trip direction_id does not match GTFS data
+                OccurrenceModel om = new OccurrenceModel("GTFS-rt " + ids + " trip.direction_id is " + directionId +
+                        " but GTFS trip.direction_id is " + gtfsTrip.getDirectionId());
+                errors.add(om);
+                _log.debug(om.getPrefix() + " " + E024.getOccurrenceSuffix());
+            }
+        }
     }
 }
