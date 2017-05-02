@@ -22,7 +22,6 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.background.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
-import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.slf4j.LoggerFactory;
@@ -285,16 +284,16 @@ public class TimestampValidation implements FeedEntityValidator{
             errors.add(new ErrorListHelperModel(new MessageLogModel(E001), e001List));
         }
         if (!e012List.isEmpty()) {
-            errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.E012), e012List));
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E012), e012List));
         }
         if (!e017List.isEmpty()) {
-            errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.E017), e017List));
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E017), e017List));
         }
         if (!e018List.isEmpty()) {
-            errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.E018), e018List));
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E018), e018List));
         }
         if (!e022List.isEmpty()) {
-            errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.E022), e022List));
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E022), e022List));
         }
         return errors;
     }
