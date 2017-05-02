@@ -224,8 +224,7 @@ public class CheckTripDescriptor implements FeedEntityValidator {
     private void checkE004(Object entity, GtfsRealtime.TripDescriptor trip, GtfsMetadata gtfsMetadata, List<OccurrenceModel> errors) {
         String routeId = trip.getRouteId();
         if (!StringUtil.isEmpty(routeId) && !gtfsMetadata.getRouteIds().contains(routeId)) {
-            String ids = GtfsUtils.getVehicleAndRouteId(entity);
-            OccurrenceModel om = new OccurrenceModel(ids);
+            OccurrenceModel om = new OccurrenceModel(GtfsUtils.getVehicleAndRouteId(entity));
             errors.add(om);
             _log.debug(om.getPrefix() + " " + E004.getOccurrenceSuffix());
         }
