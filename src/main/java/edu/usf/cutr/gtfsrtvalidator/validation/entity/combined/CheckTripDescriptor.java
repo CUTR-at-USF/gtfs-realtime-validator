@@ -103,9 +103,7 @@ public class CheckTripDescriptor implements FeedEntityValidator {
                 }
 
                 checkE021(tripUpdate, tripUpdate.getTrip(), errorListE021);
-
                 checkE004(tripUpdate, tripUpdate.getTrip(), gtfsMetadata, errorListE004);
-
                 checkE024(tripUpdate, tripUpdate.getTrip(), gtfsMetadata, errorListE024);
             }
             if (entity.hasVehicle() && entity.getVehicle().hasTrip()) {
@@ -143,9 +141,7 @@ public class CheckTripDescriptor implements FeedEntityValidator {
                 }
 
                 checkE004(entity.getVehicle(), trip, gtfsMetadata, errorListE004);
-
                 checkE021(entity.getVehicle(), trip, errorListE021);
-
                 checkE024(entity.getVehicle(), trip, gtfsMetadata, errorListE024);
             }
         }
