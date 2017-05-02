@@ -81,4 +81,25 @@ public class GtfsUtils {
         }
         return ids;
     }
+
+    /**
+     * Returns vehicle and route IDs text (vehicle_id X route_id = Y) for the given entity if the entity is a VehiclePosition, or the route ID text (route_id = Y) for the given entity if the entity is a TripUpdate
+     *
+     * @param entity Either the VehiclePosition or TripUpdate for which to generate the ID text
+     * @return vehicle and route IDs text (vehicle_id X route_id = Y) for the given entity if the entity is a VehiclePosition, or the route ID text (route_id = Y) for the given entity if the entity is a TripUpdate
+     */
+    public static String getVehicleAndRouteId(Object entity) {
+        if (!(entity instanceof GtfsRealtime.VehiclePosition || entity instanceof GtfsRealtime.TripUpdate)) {
+            throw new IllegalArgumentException("entity must be instance of VehiclePosition or TripUpdate");
+        }
+        String ids = null;
+        if (entity instanceof GtfsRealtime.VehiclePosition) {
+            GtfsRealtime.VehiclePosition vp = (GtfsRealtime.VehiclePosition) entity;
+            ids = "vehicle_id " + vp.getVehicle().getId() + " route_id " + vp.getTrip().getRouteId();
+        } else if (entity instanceof GtfsRealtime.TripUpdate) {
+            GtfsRealtime.TripUpdate tu = (GtfsRealtime.TripUpdate) entity;
+            ids = "route_id " + tu.getTrip().getRouteId();
+        }
+        return ids;
+    }
 }

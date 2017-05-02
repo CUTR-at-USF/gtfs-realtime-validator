@@ -228,4 +228,20 @@ public class UtilTest {
         text = GtfsUtils.getVehicleAndTripId(vehiclePositionBuilder.build());
         assertEquals(text, "vehicle_id A trip_id 1");
     }
+
+    @Test
+    public void testGetVehicleAndRouteId() {
+        String text;
+
+        GtfsRealtime.TripUpdate.Builder tripUpdateBuilder = GtfsRealtime.TripUpdate.newBuilder();
+        tripUpdateBuilder.setTrip(GtfsRealtime.TripDescriptor.newBuilder().setRouteId("1"));
+        text = GtfsUtils.getVehicleAndRouteId(tripUpdateBuilder.build());
+        assertEquals(text, "route_id 1");
+
+        GtfsRealtime.VehiclePosition.Builder vehiclePositionBuilder = GtfsRealtime.VehiclePosition.newBuilder();
+        vehiclePositionBuilder.setVehicle(GtfsRealtime.VehicleDescriptor.newBuilder().setId("A"));
+        vehiclePositionBuilder.setTrip(GtfsRealtime.TripDescriptor.newBuilder().setRouteId("1"));
+        text = GtfsUtils.getVehicleAndRouteId(vehiclePositionBuilder.build());
+        assertEquals(text, "vehicle_id A route_id 1");
+    }
 }

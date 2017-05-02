@@ -128,13 +128,7 @@ public class CheckTripDescriptor implements FeedEntityValidator {
                     }
                 }
 
-                String routeId = tripUpdate.getTrip().getRouteId();
-                if (!StringUtil.isEmpty(routeId) && !gtfsMetadata.getRouteIds().contains(routeId)) {
-                    // E004 - route_id not in GTFS data
-                    OccurrenceModel om = new OccurrenceModel("route_id " + routeId);
-                    errorListE004.add(om);
-                    _log.debug(om.getPrefix() + " " + E004.getOccurrenceSuffix());
-                }
+                checkE004(tripUpdate, tripUpdate.getTrip(), gtfsMetadata, errorListE004);
 
                 checkE024(tripUpdate, tripUpdate.getTrip(), gtfsMetadata, errorListE024);
             }
@@ -198,13 +192,7 @@ public class CheckTripDescriptor implements FeedEntityValidator {
                     }
                 }
 
-                String routeId = entity.getVehicle().getTrip().getRouteId();
-                if (!StringUtil.isEmpty(routeId) && !gtfsMetadata.getRouteIds().contains(routeId)) {
-                    // E004 - route_id not in GTFS data
-                    OccurrenceModel om = new OccurrenceModel("vehicle_id " + entity.getVehicle().getVehicle().getId() + " route_id " + routeId);
-                    errorListE004.add(om);
-                    _log.debug(om.getPrefix() + " " + E004.getOccurrenceSuffix());
-                }
+                checkE004(entity.getVehicle(), entity.getVehicle().getTrip(), gtfsMetadata, errorListE004);
 
                 checkE024(entity.getVehicle(), entity.getVehicle().getTrip(), gtfsMetadata, errorListE024);
             }
@@ -237,8 +225,28 @@ public class CheckTripDescriptor implements FeedEntityValidator {
         return errors;
     }
 
+
     /**
-     * Checks rule E024 - trip direction_id does not match GTFS data and adds any errors that are found to the provided error list
+     * Checks rule E004 - "All route_ids provided in the GTFS-rt feed must appear in the GTFS data", and adds any errors
+     * that are found to the provided error list
+     *
+     * @param entity       The VehiclePosition or TripUpdate that contains the data to be evaluated for rule E004
+     * @param trip         The TripDescriptor be evaluated for rule E004
+     * @param gtfsMetadata metadata for the static GTFS data
+     * @param errors       list to add any errors for E004 to
+     */
+    private void checkE004(Object entity, GtfsRealtime.TripDescriptor trip, GtfsMetadata gtfsMetadata, List<OccurrenceModel> errors) {
+        String routeId = trip.getRouteId();
+        if (!StringUtil.isEmpty(routeId) && !gtfsMetadata.getRouteIds().contains(routeId)) {
+            String ids = GtfsUtils.getVehicleAndRouteId(entity);
+            OccurrenceModel om = new OccurrenceModel(ids);
+            errors.add(om);
+            _log.debug(om.getPrefix() + " " + E004.getOccurrenceSuffix());
+        }
+    }
+
+    /**
+     * Checks rule E024 - "trip direction_id does not match GTFS data" and adds any errors that are found to the provided error list
      *
      * @param entity       The VehiclePosition or TripUpdate that contains the data to be evaluated for rule E024
      * @param trip         The TripDescriptor be evaluated for rule E024
