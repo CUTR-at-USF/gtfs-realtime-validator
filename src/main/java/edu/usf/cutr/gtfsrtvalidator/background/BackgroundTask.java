@@ -197,7 +197,9 @@ public class BackgroundTask implements Runnable {
     }
 
     private void validateEntity(long currentTimeMillis, GtfsRealtime.FeedMessage currentFeedMessage, GtfsRealtime.FeedMessage previousFeedMessage, GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRtFeedIterationModel feedIteration, FeedEntityValidator feedEntityValidator) {
+        long startTimeNanos = System.nanoTime();
         List<ErrorListHelperModel> errorLists = feedEntityValidator.validate(currentTimeMillis, gtfsData, gtfsMetadata, currentFeedMessage, previousFeedMessage);
+        logDuration(_log, "Processed " + feedEntityValidator.getClass().getSimpleName() + " in ", startTimeNanos);
 
         if (errorLists != null) {
             for (ErrorListHelperModel errorList : errorLists) {

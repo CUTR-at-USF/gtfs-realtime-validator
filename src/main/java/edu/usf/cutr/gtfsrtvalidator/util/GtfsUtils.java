@@ -58,6 +58,6 @@ public class GtfsUtils {
         long durationMillis = TimeUnit.NANOSECONDS.toMillis(durationNanos);
         long durationSeconds = TimeUnit.NANOSECONDS.toSeconds(durationNanos);
 
-        log.debug(prefix + durationSeconds + "." + durationMillis + " seconds");
+        log.info(prefix + durationSeconds + "." + durationMillis + " seconds");
     }
 }
