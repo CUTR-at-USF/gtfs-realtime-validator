@@ -359,4 +359,115 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
 
         clearAndInitRequiredFeedFields();
     }
+
+    /**
+     * E024 - trip direction_id does not match GTFS data
+     */
+    @Test
+    public void testE024() {
+        /**
+         * In testagency2.txt, trips.txt has the following:
+         *
+         * route_id,service_id,trip_id,shape_id,block_id,wheelchair_accessible,trip_bikes_allowed,direction_id
+         * 1,alldays,1.1,,,1,,0
+         * 1,alldays,1.2,,,1,,0
+         * 1,alldays,1.3,,,1,,0
+         * 2,alldays,2.1,,,0,2,1
+         * 2,alldays,2.2,,,0,2,1
+         * 3,alldays,3.1,,,1,,
+         *
+         * So, direction_id for trip 1.1 is 0, and direction_id for trip 2.1 is 1.  trip 3.1 has no direction_id
+         */
+        CheckTripDescriptor tripIdValidator = new CheckTripDescriptor();
+
+        GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+        tripDescriptorBuilder.setTripId("1.1");
+
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripIdValidator.validate(MIN_POSIX_TIME, gtfsData2, gtfsData2Metadata, feedMessageBuilder.build(), null);
+        // No GTFS-rt direction_id - no errors
+        TestUtils.assertResults(ValidationRules.E024, results, 0);
+
+        /**
+         * Correct GTFS-rt direction_id value 0 - no errors
+         */
+        tripDescriptorBuilder.setTripId("1.1");
+        tripDescriptorBuilder.setDirectionId(0);
+
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripIdValidator.validate(MIN_POSIX_TIME, gtfsData2, gtfsData2Metadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E024, results, 0);
+
+        /**
+         * Correct GTFS-rt direction_id value 1 - no errors
+         */
+        tripDescriptorBuilder.setTripId("2.1");
+        tripDescriptorBuilder.setDirectionId(1);
+
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripIdValidator.validate(MIN_POSIX_TIME, gtfsData2, gtfsData2Metadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E024, results, 0);
+
+        /**
+         * Wrong GTFS-rt direction_id value 1 - 2 errors
+         */
+        tripDescriptorBuilder.setTripId("1.1");
+        tripDescriptorBuilder.setDirectionId(1);
+
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripIdValidator.validate(MIN_POSIX_TIME, gtfsData2, gtfsData2Metadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E024, results, 2);
+
+        /**
+         * Wrong GTFS-rt direction_id value 0 - 2 errors
+         */
+        tripDescriptorBuilder.setTripId("2.1");
+        tripDescriptorBuilder.setDirectionId(0);
+
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripIdValidator.validate(MIN_POSIX_TIME, gtfsData2, gtfsData2Metadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E024, results, 2);
+
+        /**
+         * GTFS-rt direction_id = 0, but no GTFS direction_id - 2 errors
+         */
+        tripDescriptorBuilder.setTripId("3.1");
+        tripDescriptorBuilder.setDirectionId(0);
+
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripIdValidator.validate(MIN_POSIX_TIME, gtfsData2, gtfsData2Metadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E024, results, 2);
+
+        clearAndInitRequiredFeedFields();
+    }
 }

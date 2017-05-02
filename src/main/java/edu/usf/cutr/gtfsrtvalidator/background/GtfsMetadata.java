@@ -33,7 +33,8 @@ public class GtfsMetadata {
     private static final org.slf4j.Logger _log = LoggerFactory.getLogger(GtfsMetadata.class);
 
     private Set<String> routeIds = new HashSet<>();
-    private Set<String> tripIds = new HashSet<>();
+    // Maps trip_ids to the GTFS trip
+    private Map<String, Trip> trips = new HashMap<>();
     // Maps trip_ids to a list of StopTimes
     private Map<String, List<StopTime>> tripStopTimes = new HashMap<>();
     private Set<String> stopIds = new HashSet<>();
@@ -76,7 +77,7 @@ public class GtfsMetadata {
         Collection<Trip> gtfsTripList = gtfsData.getAllTrips();
         for (Trip trip : gtfsTripList) {
             String tripId = trip.getId().getId();
-            tripIds.add(tripId);
+            trips.put(tripId, trip);
 
             List<StopTime> stopTimes = tripStopTimes.get(tripId);
             if (stopTimes != null) {
@@ -114,8 +115,13 @@ public class GtfsMetadata {
         return routeIds;
     }
 
-    public Set<String> getTripIds() {
-        return tripIds;
+    /**
+     * Returns a map where key is trips.txt trip_id, and value is an object representing the GTFS trip
+     *
+     * @return a map where key is trips.txt trip_id, and value is an object representing the GTFS trip
+     */
+    public Map<String, Trip> getTrips() {
+        return trips;
     }
 
     public Set<String> getStopIds() {

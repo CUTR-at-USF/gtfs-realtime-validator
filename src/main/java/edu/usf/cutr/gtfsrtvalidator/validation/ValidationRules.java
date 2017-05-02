@@ -142,4 +142,8 @@ public class ValidationRules {
     public static final ValidationRule E023 = new ValidationRule("E023", "ERROR", "trip start_time does not match first GTFS arrival_time",
             "For normal scheduled trips (i.e., not defined in frequencies.txt), the GTFS-realtime trip start_time must match the first GTFS arrival_time in stop_times.txt for this trip",
             "- times do not match");
+
+    public static final ValidationRule E024 = new ValidationRule("E024", "ERROR", "trip direction_id does not match GTFS data",
+            "GTFS-rt trip direction_id must match the direction_id in GTFS trips.txt",
+            "- direction_id does not match");
 }
