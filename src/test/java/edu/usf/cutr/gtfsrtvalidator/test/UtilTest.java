@@ -219,13 +219,13 @@ public class UtilTest {
 
         GtfsRealtime.TripUpdate.Builder tripUpdateBuilder = GtfsRealtime.TripUpdate.newBuilder();
         tripUpdateBuilder.setTrip(GtfsRealtime.TripDescriptor.newBuilder().setTripId("1"));
-        text = GtfsUtils.getVehicleAndTripId(tripUpdateBuilder.build());
+        text = GtfsUtils.getVehicleAndTripIdText(tripUpdateBuilder.build());
         assertEquals(text, "trip_id 1");
 
         GtfsRealtime.VehiclePosition.Builder vehiclePositionBuilder = GtfsRealtime.VehiclePosition.newBuilder();
         vehiclePositionBuilder.setVehicle(GtfsRealtime.VehicleDescriptor.newBuilder().setId("A"));
         vehiclePositionBuilder.setTrip(GtfsRealtime.TripDescriptor.newBuilder().setTripId("1"));
-        text = GtfsUtils.getVehicleAndTripId(vehiclePositionBuilder.build());
+        text = GtfsUtils.getVehicleAndTripIdText(vehiclePositionBuilder.build());
         assertEquals(text, "vehicle_id A trip_id 1");
     }
 
@@ -248,7 +248,7 @@ public class UtilTest {
     @Test(expected = IllegalArgumentException.class)
     public void testAssertVehicleAndTripIdThrowException() {
         // Make sure we throw an exception if the method is provided objects other than TripUpdate or VehiclePosition
-        GtfsUtils.getVehicleAndTripId(GtfsRealtime.TripDescriptor.newBuilder().setTripId("1").build());
+        GtfsUtils.getVehicleAndTripIdText(GtfsRealtime.TripDescriptor.newBuilder().setTripId("1").build());
     }
 
     @Test(expected = IllegalArgumentException.class)

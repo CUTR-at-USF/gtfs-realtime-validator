@@ -67,7 +67,7 @@ public class GtfsUtils {
      * @param entity Either the VehiclePosition or TripUpdate for which to generate the ID text
      * @return vehicle and trip IDs text (vehicle_id X trip_id = Y) for the given entity if the entity is a VehiclePosition, or the trip ID text (trip_id = Y) for the given entity if the entity is a TripUpdate
      */
-    public static String getVehicleAndTripId(Object entity) {
+    public static String getVehicleAndTripIdText(Object entity) {
         if (!(entity instanceof GtfsRealtime.VehiclePosition || entity instanceof GtfsRealtime.TripUpdate)) {
             throw new IllegalArgumentException("entity must be instance of VehiclePosition or TripUpdate");
         }
