@@ -32,6 +32,8 @@ public class GtfsMetadata {
 
     private static final org.slf4j.Logger _log = LoggerFactory.getLogger(GtfsMetadata.class);
 
+    String feedUrl;
+
     private Set<String> routeIds = new HashSet<>();
     // Maps trip_ids to the GTFS trip
     private Map<String, Trip> trips = new HashMap<>();
@@ -53,10 +55,13 @@ public class GtfsMetadata {
     /**
      * Builds the metadata for a particular GTFS feed
      *
+     * @param feedUrl URL for the GTFS zip file
      * @param gtfsData GTFS feed to build the metadata for
      */
-    public GtfsMetadata(GtfsDaoImpl gtfsData) {
+    public GtfsMetadata(String feedUrl, GtfsDaoImpl gtfsData) {
         long startTime = System.nanoTime();
+
+        this.feedUrl = feedUrl;
 
         // Get all route_ids from the GTFS feed
         Collection<Route> gtfsRouteList = gtfsData.getAllRoutes();
@@ -108,7 +113,7 @@ public class GtfsMetadata {
             }
         }
 
-        logDuration(_log, "Built GtfsMetadata in ", startTime);
+        logDuration(_log, "Built GtfsMetadata for " + feedUrl + " in ", startTime);
     }
 
     public Set<String> getRouteIds() {

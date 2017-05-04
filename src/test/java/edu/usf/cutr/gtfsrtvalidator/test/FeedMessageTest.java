@@ -69,21 +69,21 @@ public abstract class FeedMessageTest {
         reader.setInputLocation(staticGtfsFile);
         reader.setEntityStore(gtfsData);
         reader.run();
-        gtfsDataMetadata = new GtfsMetadata(gtfsData);
+        gtfsDataMetadata = new GtfsMetadata("testagency.zip", gtfsData);
             
         gtfsData2 = new GtfsDaoImpl();
         reader = new GtfsReader();
         reader.setInputLocation(staticGtfs2File);
         reader.setEntityStore(gtfsData2);
         reader.run();
-        gtfsData2Metadata = new GtfsMetadata(gtfsData2);
+        gtfsData2Metadata = new GtfsMetadata("testagency2.zip", gtfsData2);
 
         bullRunnerGtfs = new GtfsDaoImpl();
         reader = new GtfsReader();
         reader.setInputLocation(bullRunnerGtfsFile);
         reader.setEntityStore(bullRunnerGtfs);
         reader.run();
-        bullRunnerGtfsMetadata = new GtfsMetadata(bullRunnerGtfs);
+        bullRunnerGtfsMetadata = new GtfsMetadata("bullrunner-gtfs.zip", bullRunnerGtfs);
         
         clearAndInitRequiredFeedFields();
     }

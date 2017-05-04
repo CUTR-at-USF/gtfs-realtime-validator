@@ -93,7 +93,7 @@ public class BackgroundTask implements Runnable {
             gtfsData = GtfsFeed.GtfsDaoMap.get(mCurrentGtfsRtFeed.getGtfsFeedModel().getFeedId());
             // Create the GTFS metadata if it doesn't already exist
             gtfsMetadata = mGtfsMetadata.computeIfAbsent(mCurrentGtfsRtFeed.getGtfsFeedModel().getFeedId(),
-                    k -> new GtfsMetadata(gtfsData));
+                    k -> new GtfsMetadata(mCurrentGtfsRtFeed.getGtfsFeedModel().getGtfsUrl(), gtfsData));
 
             // Read the GTFS-rt feed from the feed URL
             URL gtfsRtFeedUrl;
