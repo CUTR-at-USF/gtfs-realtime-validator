@@ -246,28 +246,7 @@ public class TimestampValidation implements FeedEntityValidator{
              * Validate Alert time ranges - E001
              */
             if (entity.hasAlert()) {
-                GtfsRealtime.Alert alert = entity.getAlert();
-                if (alert != null) {
-                    List<GtfsRealtime.TimeRange> activePeriods = alert.getActivePeriodList();
-                    if (activePeriods != null) {
-                        for (GtfsRealtime.TimeRange range : activePeriods) {
-                            if (range.hasStart()) {
-                                if (!isPosix(range.getStart())) {
-                                    OccurrenceModel errorE001 = new OccurrenceModel("alert in entity " + entity + " active_period.start " + range.getStart());
-                                    e001List.add(errorE001);
-                                    _log.debug(errorE001.getPrefix() + " " + E001.getOccurrenceSuffix());
-                                }
-                            }
-                            if (range.hasEnd()) {
-                                if (!isPosix(range.getEnd())) {
-                                    OccurrenceModel errorE001 = new OccurrenceModel("alert in entity " + entity + " active_period.end " + range.getEnd());
-                                    e001List.add(errorE001);
-                                    _log.debug(errorE001.getPrefix() + " " + E001.getOccurrenceSuffix());
-                                }
-                            }
-                        }
-                    }
-                }
+                checkAlertE001(entity, e001List);
             }
         }
         List<ErrorListHelperModel> errors = new ArrayList<>();
@@ -296,5 +275,34 @@ public class TimestampValidation implements FeedEntityValidator{
             errors.add(new ErrorListHelperModel(new MessageLogModel(E022), e022List));
         }
         return errors;
+    }
+
+    /**
+     * Validate Alert time ranges - E001
+     *
+     * @param entity entity that has alerts to check
+     * @param errors list to which any errors can be added
+     */
+    private void checkAlertE001(GtfsRealtime.FeedEntity entity, List<OccurrenceModel> errors) {
+        GtfsRealtime.Alert alert = entity.getAlert();
+        List<GtfsRealtime.TimeRange> activePeriods = alert.getActivePeriodList();
+        if (activePeriods != null) {
+            for (GtfsRealtime.TimeRange range : activePeriods) {
+                if (range.hasStart()) {
+                    if (!isPosix(range.getStart())) {
+                        OccurrenceModel om = new OccurrenceModel("alert in entity " + entity.getId() + " active_period.start " + range.getStart());
+                        errors.add(om);
+                        _log.debug(om.getPrefix() + " " + E001.getOccurrenceSuffix());
+                    }
+                }
+                if (range.hasEnd()) {
+                    if (!isPosix(range.getEnd())) {
+                        OccurrenceModel om = new OccurrenceModel("alert in entity " + entity.getId() + " active_period.end " + range.getEnd());
+                        errors.add(om);
+                        _log.debug(om.getPrefix() + " " + E001.getOccurrenceSuffix());
+                    }
+                }
+            }
+        }
     }
 }
