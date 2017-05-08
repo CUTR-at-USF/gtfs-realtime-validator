@@ -20,12 +20,15 @@ import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.background.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
+import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.serialization.GtfsReader;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.TimeZone;
 
 public abstract class FeedMessageTest {
 
@@ -62,6 +65,8 @@ public abstract class FeedMessageTest {
         tripUpdateBuilder = GtfsRealtime.TripUpdate.newBuilder();
         vehiclePositionBuilder = GtfsRealtime.VehiclePosition.newBuilder();
         alertBuilder = GtfsRealtime.Alert.newBuilder();
+
+        String timeZoneText = null;
         
         // Read GTFS data into a GtfsDaoImpl
         gtfsData = new GtfsDaoImpl();
@@ -69,21 +74,36 @@ public abstract class FeedMessageTest {
         reader.setInputLocation(staticGtfsFile);
         reader.setEntityStore(gtfsData);
         reader.run();
-        gtfsDataMetadata = new GtfsMetadata("testagency.zip", gtfsData);
+        Collection<Agency> agencies = gtfsData.getAllAgencies();
+        for (Agency agency : agencies) {
+            timeZoneText = agency.getTimezone();
+            break;
+        }
+        gtfsDataMetadata = new GtfsMetadata("testagency.zip", TimeZone.getTimeZone(timeZoneText), gtfsData);
             
         gtfsData2 = new GtfsDaoImpl();
         reader = new GtfsReader();
         reader.setInputLocation(staticGtfs2File);
         reader.setEntityStore(gtfsData2);
         reader.run();
-        gtfsData2Metadata = new GtfsMetadata("testagency2.zip", gtfsData2);
+        agencies = gtfsData.getAllAgencies();
+        for (Agency agency : agencies) {
+            timeZoneText = agency.getTimezone();
+            break;
+        }
+        gtfsData2Metadata = new GtfsMetadata("testagency2.zip", TimeZone.getTimeZone(timeZoneText), gtfsData2);
 
         bullRunnerGtfs = new GtfsDaoImpl();
         reader = new GtfsReader();
         reader.setInputLocation(bullRunnerGtfsFile);
         reader.setEntityStore(bullRunnerGtfs);
         reader.run();
-        bullRunnerGtfsMetadata = new GtfsMetadata("bullrunner-gtfs.zip", bullRunnerGtfs);
+        agencies = gtfsData.getAllAgencies();
+        for (Agency agency : agencies) {
+            timeZoneText = agency.getTimezone();
+            break;
+        }
+        bullRunnerGtfsMetadata = new GtfsMetadata("bullrunner-gtfs.zip", TimeZone.getTimeZone(timeZoneText), bullRunnerGtfs);
         
         clearAndInitRequiredFeedFields();
     }

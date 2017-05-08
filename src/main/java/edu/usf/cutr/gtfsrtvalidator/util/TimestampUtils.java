@@ -75,7 +75,7 @@ public class TimestampUtils {
      * @param timeZone the timezone used to generate the clock time, or null if the current time zone should be used.  Please refer to http://en.wikipedia.org/wiki/List_of_tz_zones for a list of valid values.
      * @return A converted version of time in 24hr clock time like "06:00:00"
      */
-    public static String posixToClock(int posixTime, TimeZone timeZone) {
+    public static String posixToClock(long posixTime, TimeZone timeZone) {
         if (timeZone != null) {
             mTimeFormat.setTimeZone(timeZone);
         }

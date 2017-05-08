@@ -135,9 +135,9 @@ public class ValidationRules {
             "start_date must be in the YYYYMMDD format",
             "which is not the valid format of YYYYMMDD");
 
-    public static final ValidationRule E022 = new ValidationRule("E022", "ERROR", "trip stop_time_update times are not increasing",
-            "Sequential stop_time_update arrival/departure times should increase - they should never be the same or decrease between two sequential stops.  Within the same stop_time_update, arrival and departures times can be the same, or the departure time can be later than the arrival time - the departure time should never come before the arrival time.",
-            "- times must be same or increasing within same stop_time_update and must always be increasing between two sequential updates");
+    public static final ValidationRule E022 = new ValidationRule("E022", "ERROR", "trip stop_time_updates time are not increasing",
+            "Sequential stop_time_update arrival/departure times should always increase - they should never be the same or decrease between two sequential stops.",
+            "- times must increase between two sequential updates");
 
     public static final ValidationRule E023 = new ValidationRule("E023", "ERROR", "trip start_time does not match first GTFS arrival_time",
             "For normal scheduled trips (i.e., not defined in frequencies.txt), the GTFS-realtime trip start_time must match the first GTFS arrival_time in stop_times.txt for this trip",
@@ -146,4 +146,8 @@ public class ValidationRules {
     public static final ValidationRule E024 = new ValidationRule("E024", "ERROR", "trip direction_id does not match GTFS data",
             "GTFS-rt trip direction_id must match the direction_id in GTFS trips.txt",
             "- direction_id does not match");
+
+    public static final ValidationRule E025 = new ValidationRule("E025", "ERROR", "stop_time_update departure time is before arrival time",
+            "Within the same stop_time_update, arrival and departures times can be the same, or the departure time can be later than the arrival time - the departure time should never come before the arrival time.",
+            "- departure time must be equal to or greater than arrival time");
 }

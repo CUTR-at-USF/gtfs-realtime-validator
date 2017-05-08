@@ -36,6 +36,7 @@
 | [E022](#E022) | trip `stop_time_update` times are not increasing
 | [E023](#E023) | trip `start_time` does not match first GTFS `arrival_time`
 | [E024](#E024) | trip `direction_id` does not match GTFS data
+| [E025](#E025) | `stop_time_update` departure time is before arrival time
 
 # Warnings
 
@@ -237,7 +238,7 @@ See:
 
 ### E022 - trip `stop_time_update` times are not increasing
 
-Sequential `stop_time_update` arrival/departure times should increase - they should never be the same or decrease between two sequential stops.  Within the same `stop_time_update`, arrival and departures times can be the same, or the departure time can be later than the arrival time - the departure time should never come before the arrival time.
+Sequential `stop_time_update` arrival/departure times should always increase - they should never be the same or decrease between two sequential stops.  Within the same `stop_time_update`, arrival and departures times can be the same, or the departure time can be later than the arrival time - the departure time should never come before the arrival time.
 
 <a name="E023"/>
 
@@ -250,3 +251,9 @@ For normal scheduled trips (i.e., not defined in `frequencies.txt`), the GTFS-re
 ### E024 - trip `direction_id` does not match GTFS data
 
 GTFS-rt trip `direction_id` must match the `direction_id` in GTFS `trips.txt`.
+
+<a name="E025"/>
+
+### E025 - `stop_time_update` departure time is before arrival time
+
+Within the same `stop_time_update`, arrival and departures times can be the same, or the departure time can be later than the arrival time - the departure time should never come before the arrival time.

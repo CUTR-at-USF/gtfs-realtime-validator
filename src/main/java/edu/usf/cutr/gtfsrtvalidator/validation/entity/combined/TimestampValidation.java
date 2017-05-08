@@ -22,12 +22,14 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.background.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
+import edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils.getAge;
@@ -63,6 +65,8 @@ public class TimestampValidation implements FeedEntityValidator{
         List<OccurrenceModel> e017List = new ArrayList<>();
         List<OccurrenceModel> e018List = new ArrayList<>();
         List<OccurrenceModel> e022List = new ArrayList<>();
+        List<OccurrenceModel> e025List = new ArrayList<>();
+
 
         /**
          * Validate FeedHeader timestamp - W001 and E001
@@ -140,14 +144,19 @@ public class TimestampValidation implements FeedEntityValidator{
                 if (stopTimeUpdates != null) {
 
                     Long previousArrivalTime = null;
+                    String previousArrivalTimeText = null;
                     Long previousDepartureTime = null;
+                    String previousDepartureTimeText = null;
                     for (GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate : stopTimeUpdates) {
                         String stopDescription = stopTimeUpdate.hasStopSequence() ? " stop_sequence " + stopTimeUpdate.getStopSequence() : " stop_id " + stopTimeUpdate.getStopId();
                         Long arrivalTime = null;
+                        String arrivalTimeText;
                         Long departureTime = null;
+                        String departureTimeText;
                         if (stopTimeUpdate.hasArrival()) {
                             if (stopTimeUpdate.getArrival().hasTime()) {
                                 arrivalTime = stopTimeUpdate.getArrival().getTime();
+                                arrivalTimeText = TimestampUtils.posixToClock(arrivalTime, gtfsMetadata.getTimeZone());
 
                                 if (!isPosix(arrivalTime)) {
                                     // E001
@@ -156,17 +165,31 @@ public class TimestampValidation implements FeedEntityValidator{
                                     e001List.add(errorE001);
                                     _log.debug(errorE001.getPrefix() + " " + E001.getOccurrenceSuffix());
                                 }
-                                if (previousArrivalTime != null && arrivalTime <= previousArrivalTime) {
-                                    // E022 - this stop arrival time is <= previous stop arrival time
+                                if (previousArrivalTime != null && arrivalTime < previousArrivalTime) {
+                                    // E022 - this stop arrival time is < previous stop arrival time
                                     OccurrenceModel om = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() +
-                                            stopDescription + " arrival_time " + arrivalTime + " is less than or equal to previous stop arrival_time " + previousArrivalTime);
+                                            stopDescription + " arrival_time " + arrivalTimeText + " (" + arrivalTime + ") is less than previous stop arrival_time " + previousArrivalTimeText + " (" + previousArrivalTime + ")");
                                     e022List.add(om);
                                     _log.debug(om.getPrefix() + " " + E022.getOccurrenceSuffix());
                                 }
-                                if (previousDepartureTime != null && arrivalTime <= previousDepartureTime) {
-                                    // E022 - this stop arrival time is <= previous stop departure time
+                                if (previousArrivalTime != null && Objects.equals(arrivalTime, previousArrivalTime)) {
+                                    // E022 - this stop arrival time is == previous stop arrival time
                                     OccurrenceModel om = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() +
-                                            stopDescription + " arrival_time " + arrivalTime + " is less than or equal to previous stop departure_time " + previousDepartureTime);
+                                            stopDescription + " arrival_time " + arrivalTimeText + " (" + arrivalTime + ") is equal to previous stop arrival_time " + previousArrivalTimeText + " (" + previousArrivalTime + ")");
+                                    e022List.add(om);
+                                    _log.debug(om.getPrefix() + " " + E022.getOccurrenceSuffix());
+                                }
+                                if (previousDepartureTime != null && arrivalTime < previousDepartureTime) {
+                                    // E022 - this stop arrival time is < previous stop departure time
+                                    OccurrenceModel om = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() +
+                                            stopDescription + " arrival_time " + arrivalTimeText + " (" + arrivalTime + ") is less than previous stop departure_time " + previousDepartureTimeText + " (" + previousDepartureTime + ")");
+                                    e022List.add(om);
+                                    _log.debug(om.getPrefix() + " " + E022.getOccurrenceSuffix());
+                                }
+                                if (previousDepartureTime != null && Objects.equals(arrivalTime, previousDepartureTime)) {
+                                    // E022 - this stop arrival time is == previous stop departure time
+                                    OccurrenceModel om = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() +
+                                            stopDescription + " arrival_time " + arrivalTimeText + " (" + arrivalTime + ") is equal to previous stop departure_time " + previousDepartureTimeText + " (" + previousDepartureTime + ")");
                                     e022List.add(om);
                                     _log.debug(om.getPrefix() + " " + E022.getOccurrenceSuffix());
                                 }
@@ -176,6 +199,7 @@ public class TimestampValidation implements FeedEntityValidator{
                         if (stopTimeUpdate.hasDeparture()) {
                             if (stopTimeUpdate.getDeparture().hasTime()) {
                                 departureTime = stopTimeUpdate.getDeparture().getTime();
+                                departureTimeText = TimestampUtils.posixToClock(departureTime, gtfsMetadata.getTimeZone());
 
                                 if (!isPosix(departureTime)) {
                                     // E001
@@ -184,34 +208,53 @@ public class TimestampValidation implements FeedEntityValidator{
                                     e001List.add(errorE001);
                                     _log.debug(errorE001.getPrefix() + " " + E001.getOccurrenceSuffix());
                                 }
-                                if (previousDepartureTime != null && departureTime <= previousDepartureTime) {
-                                    // E022 - this stop departure time is <= previous stop departure time
+                                if (previousDepartureTime != null && departureTime < previousDepartureTime) {
+                                    // E022 - this stop departure time is < previous stop departure time
                                     OccurrenceModel om = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() +
-                                            stopDescription + " departure_time " + departureTime + " is less than or equal to previous stop departure_time " + previousDepartureTime);
+                                            stopDescription + " departure_time " + departureTimeText + " (" + departureTime + ") is less than previous stop departure_time " + previousDepartureTimeText + " (" + previousDepartureTime + ")");
                                     e022List.add(om);
                                     _log.debug(om.getPrefix() + " " + E022.getOccurrenceSuffix());
                                 }
-                                if (previousArrivalTime != null && departureTime <= previousArrivalTime) {
-                                    // E022 - this stop departure time is <= previous stop arrival time
+                                if (previousDepartureTime != null && Objects.equals(departureTime, previousDepartureTime)) {
+                                    // E022 - this stop departure time is == previous stop departure time
                                     OccurrenceModel om = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() +
-                                            stopDescription + " departure_time " + departureTime + " is less than or equal to previous stop arrival_time " + previousArrivalTime);
+                                            stopDescription + " departure_time " + departureTimeText + " (" + departureTime + ") is equal to previous stop departure_time " + previousDepartureTimeText + " (" + previousDepartureTime + ")");
+                                    e022List.add(om);
+                                    _log.debug(om.getPrefix() + " " + E022.getOccurrenceSuffix());
+                                }
+                                if (previousArrivalTime != null && departureTime < previousArrivalTime) {
+                                    // E022 - this stop departure time is < previous stop arrival time
+                                    OccurrenceModel om = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() +
+                                            stopDescription + " departure_time " + departureTimeText + " (" + departureTime + ") is less than previous stop arrival_time " + previousArrivalTimeText + " (" + previousArrivalTime + ")");
+                                    e022List.add(om);
+                                    _log.debug(om.getPrefix() + " " + E022.getOccurrenceSuffix());
+                                }
+                                if (previousArrivalTime != null && Objects.equals(departureTime, previousArrivalTime)) {
+                                    // E022 - this stop departure time is == previous stop arrival time
+                                    OccurrenceModel om = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() +
+                                            stopDescription + " departure_time " + departureTimeText + " (" + departureTime + ") is equal to previous stop arrival_time " + previousArrivalTimeText + " (" + previousArrivalTime + ")");
                                     e022List.add(om);
                                     _log.debug(om.getPrefix() + " " + E022.getOccurrenceSuffix());
                                 }
                                 if (stopTimeUpdate.getArrival().hasTime() && departureTime < stopTimeUpdate.getArrival().getTime()) {
-                                    // E022 - this stop departure time is before the same stop arrival time
+                                    // E025 - stop_time_update departure time is before arrival time
                                     OccurrenceModel om = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() +
-                                            stopDescription + " departure_time " + departureTime + " is less than the same stop arrival_time " + stopTimeUpdate.getArrival().getTime());
-                                    e022List.add(om);
-                                    _log.debug(om.getPrefix() + " " + E022.getOccurrenceSuffix());
+                                            stopDescription + " departure_time " + departureTimeText
+                                            + " (" + departureTime + ") is less than the same stop arrival_time " +
+                                            TimestampUtils.posixToClock(stopTimeUpdate.getArrival().getTime(), gtfsMetadata.getTimeZone())
+                                            + " (" + stopTimeUpdate.getArrival().getTime() + ")");
+                                    e025List.add(om);
+                                    _log.debug(om.getPrefix() + " " + E025.getOccurrenceSuffix());
                                 }
                             }
                         }
                         if (arrivalTime != null) {
                             previousArrivalTime = arrivalTime;
+                            previousArrivalTimeText = TimestampUtils.posixToClock(previousArrivalTime, gtfsMetadata.getTimeZone());
                         }
                         if (departureTime != null) {
                             previousDepartureTime = departureTime;
+                            previousDepartureTimeText = TimestampUtils.posixToClock(previousDepartureTime, gtfsMetadata.getTimeZone());
                         }
                     }
                 }
@@ -273,6 +316,9 @@ public class TimestampValidation implements FeedEntityValidator{
         }
         if (!e022List.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(E022), e022List));
+        }
+        if (!e025List.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E025), e025List));
         }
         return errors;
     }

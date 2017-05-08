@@ -33,6 +33,7 @@ public class GtfsMetadata {
     private static final org.slf4j.Logger _log = LoggerFactory.getLogger(GtfsMetadata.class);
 
     String feedUrl;
+    TimeZone timeZone;
 
     private Set<String> routeIds = new HashSet<>();
     // Maps trip_ids to the GTFS trip
@@ -56,12 +57,14 @@ public class GtfsMetadata {
      * Builds the metadata for a particular GTFS feed
      *
      * @param feedUrl URL for the GTFS zip file
+     * @param timeZone the agency_timezone from GTFS agency.txt, or null if the current time zone should be used.
      * @param gtfsData GTFS feed to build the metadata for
      */
-    public GtfsMetadata(String feedUrl, GtfsDaoImpl gtfsData) {
+    public GtfsMetadata(String feedUrl, TimeZone timeZone, GtfsDaoImpl gtfsData) {
         long startTime = System.nanoTime();
 
         this.feedUrl = feedUrl;
+        this.timeZone = timeZone;
 
         // Get all route_ids from the GTFS feed
         Collection<Route> gtfsRouteList = gtfsData.getAllRoutes();
@@ -162,5 +165,14 @@ public class GtfsMetadata {
      */
     public Map<String, List<StopTime>> getTripStopTimes() {
         return tripStopTimes;
+    }
+
+    /**
+     * Returns the agency_timezone from GTFS agency.txt, or null if the current time zone should be used.  Please refer to http://en.wikipedia.org/wiki/List_of_tz_zones for a list of valid values.
+     *
+     * @return the agency_timezone from GTFS agency.txt, or null if the current time zone should be used.  Please refer to http://en.wikipedia.org/wiki/List_of_tz_zones for a list of valid values.
+     */
+    public TimeZone getTimeZone() {
+        return timeZone;
     }
 }
