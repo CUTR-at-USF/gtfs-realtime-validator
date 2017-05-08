@@ -11,7 +11,7 @@
 | [W005](#W005) | Missing `vehicle_id` in `trip_update` for frequency-based `exact_times` = 0
 | [W006](#W006) | trip_update missing trip_id
 | [W007](#W007) | Refresh interval is more than 35 seconds
-
+| [W008](#W008) | Header timestamp is older than 65 seconds
 
 ### Table of Errors
 
