@@ -40,6 +40,7 @@ Rules are defined in the [`ValidationRules` class](https://github.com/CUTR-at-US
 | [E024](#E024) | trip `direction_id` does not match GTFS data
 | [E025](#E025) | `stop_time_update` departure time is before arrival time
 | [E026](#E026) | Invalid vehicle `position`
+| [E027](#E027) | Invalid vehicle `bearing`
 
 # Warnings
 
@@ -271,3 +272,14 @@ Vehicle position must be valid WGS84 coordinates - latitude must be between -90 
 
 See:
 * [vehicle.position](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-position)
+
+<a name="E027"/>
+
+### E027 - Invalid vehicle `bearing`
+
+Vehicle bearing must be between 0 and 360 degrees (inclusive).  The GTFS-rt spec says bearing is:
+
+>...in degrees, clockwise from True North, i.e., 0 is North and 90 is East. This can be the compass bearing, or the direction towards the next stop or intermediate location. This should not be deduced from the sequence of previous positions, which clients can compute from previous data.
+
+See:
+* [vehicle.position.bearing](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-position)

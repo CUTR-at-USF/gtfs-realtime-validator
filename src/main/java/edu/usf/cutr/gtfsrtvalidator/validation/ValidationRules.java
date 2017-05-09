@@ -154,4 +154,8 @@ public class ValidationRules {
     public static final ValidationRule E026 = new ValidationRule("E026", "ERROR", "Invalid vehicle position",
             "Vehicle position latitude must be between -90 and 90 (inclusive), and vehicle longitude must be between -180  and 180 (inclusive)",
             "- these are invalid WGS84 coordinates");
+
+    public static final ValidationRule E027 = new ValidationRule("E027", "ERROR", "Invalid vehicle bearing",
+            "Vehicle bearing must be between 0 and 360 degrees (inclusive)",
+            "- bearing must be between 0 and 360 degrees (inclusive)");
 }

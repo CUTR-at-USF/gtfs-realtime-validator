@@ -291,6 +291,35 @@ public class UtilTest {
         assertEquals(false, GtfsUtils.isPositionValid(positionBuilder.build()));
     }
 
+    @Test
+    public void testValidBearing() {
+        GtfsRealtime.Position.Builder positionBuilder = GtfsRealtime.Position.newBuilder();
+        positionBuilder.setLatitude(0);
+        positionBuilder.setLongitude(0);
+
+        /**
+         * Valid bearing
+         */
+        positionBuilder.setBearing(0);
+
+        assertEquals(true, GtfsUtils.isBearingValid(positionBuilder.build()));
+
+        positionBuilder.setBearing(360);
+
+        assertEquals(true, GtfsUtils.isBearingValid(positionBuilder.build()));
+
+        /**
+         * Bad bearing
+         */
+        positionBuilder.setBearing(-1);
+
+        assertEquals(false, GtfsUtils.isBearingValid(positionBuilder.build()));
+
+        positionBuilder.setBearing(361);
+
+        assertEquals(false, GtfsUtils.isBearingValid(positionBuilder.build()));
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void testAssertVehicleAndTripIdThrowException() {
         // Make sure we throw an exception if the method is provided objects other than TripUpdate or VehiclePosition

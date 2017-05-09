@@ -258,6 +258,79 @@ public class TripUpdateFeedTest extends FeedMessageTest {
     }
 
     /**
+     * E027 - Invalid vehicle bearing
+     */
+    @Test
+    public void testInvalidVehicleBearing() {
+        VehicleValidator vehicleValidator = new VehicleValidator();
+
+        GtfsRealtime.VehicleDescriptor.Builder vehicleDescriptorBuilder = GtfsRealtime.VehicleDescriptor.newBuilder();
+        vehicleDescriptorBuilder.setId("1");
+
+        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        // No warnings, if position isn't populated
+        results = vehicleValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E027, results, 0);
+
+        GtfsRealtime.Position.Builder positionBuilder = GtfsRealtime.Position.newBuilder();
+
+        // Set valid lat and long (Tampa, FL), as they are required fields
+        positionBuilder.setLatitude(27.9506f);
+        positionBuilder.setLongitude(-82.4572f);
+
+        vehiclePositionBuilder.setPosition(positionBuilder.build());
+
+        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        // No warnings, if bearing isn't populated
+        results = vehicleValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E027, results, 0);
+
+        // Valid bearing - no errors
+        positionBuilder.setBearing(15);
+
+        vehiclePositionBuilder.setPosition(positionBuilder.build());
+
+        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = vehicleValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E027, results, 0);
+
+        // Invalid bearing - 1 error
+        positionBuilder.setBearing(-1);
+
+        vehiclePositionBuilder.setPosition(positionBuilder.build());
+
+        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = vehicleValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E027, results, 1);
+
+        // Invalid bearing - 1 error
+        positionBuilder.setBearing(361);
+
+        vehiclePositionBuilder.setPosition(positionBuilder.build());
+
+        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = vehicleValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E027, results, 1);
+
+        clearAndInitRequiredFeedFields();
+    }
+
+    /**
      * E010 - If location_type is used in stops.txt, all stops referenced in stop_times.txt must have location_type of 0
      */
     @Test

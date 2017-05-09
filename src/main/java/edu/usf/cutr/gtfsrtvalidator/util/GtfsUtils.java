@@ -118,4 +118,20 @@ public class GtfsUtils {
         }
         return true;
     }
+
+    /**
+     * Returns true if this position has valid bearing, and false if it does not
+     *
+     * @param position Vehicle position to validate
+     * @return true if this position has valid bearing, and false if it does not
+     */
+    public static boolean isBearingValid(GtfsRealtime.Position position) {
+        if (!position.hasBearing()) {
+            return true;
+        }
+        if (position.getBearing() < 0 || position.getBearing() > 360) {
+            return false;
+        }
+        return true;
+    }
 }
