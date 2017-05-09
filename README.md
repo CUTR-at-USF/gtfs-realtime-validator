@@ -37,7 +37,7 @@ Alternately, you can load the project as Maven project in an IDE like [IntelliJ]
 
 From the command-line, run: 
 
-`java -jar target/gtfs-rt-validator-1.0-SNAPSHOT.jar`
+`java -jar target/gtfs-rt-validator-1.0.0-SNAPSHOT.jar`
 
 You should see some output, and a message saying `Go to http://localhost:8080 in your browser`. 
 
@@ -65,7 +65,7 @@ If you'd like to change the logging level, for example to see all debug statemen
  
  Port `8080` is used by default.  If you'd like to change the port number (e.g., port `80`), you can use the command line parameter `-port 80`:
  
- `java -jar target/gtfs-rt-validator-1.0-SNAPSHOT.jar -port 80`
+ `java -jar target/gtfs-rt-validator-1.0.0-SNAPSHOT.jar -port 80`
  
 
 
