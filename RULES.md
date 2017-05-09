@@ -1,5 +1,7 @@
 # Implemented rules
 
+Rules are defined in the [`ValidationRules` class](https://github.com/CUTR-at-USF/gtfs-realtime-validator/blob/master/src/main/java/edu/usf/cutr/gtfsrtvalidator/validation/ValidationRules.java).  Below are details of currently implemented rules.
+
 ### Table of Warnings
 
 | Warning ID    | Warning Title             |
