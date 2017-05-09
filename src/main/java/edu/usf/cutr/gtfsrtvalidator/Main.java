@@ -25,12 +25,13 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.glassfish.jersey.servlet.ServletContainer;
 import org.slf4j.LoggerFactory;
 
 public class Main {
     private static final org.slf4j.Logger _log = LoggerFactory.getLogger(Main.class);
 
-    static String BASE_RESOURCE = "./target/classes/webroot";
+    static String BASE_RESOURCE = Main.class.getResource("/webroot").toExternalForm();
     private static String PORT_NUMBER_OPTION = "port";
 
     public static void main(String[] args) throws InterruptedException, ParseException {
@@ -49,7 +50,7 @@ public class Main {
         context.addServlet(GetFeedJSON.class, "/getFeed");
         context.addServlet(DefaultServlet.class, "/");
 
-        ServletHolder jerseyServlet = context.addServlet(org.glassfish.jersey.servlet.ServletContainer.class, "/api/*");
+        ServletHolder jerseyServlet = context.addServlet(ServletContainer.class, "/api/*");
         jerseyServlet.setInitOrder(1);
         jerseyServlet.setInitParameter("jersey.config.server.provider.classnames", "org.glassfish.jersey.moxy.json.MoxyJsonFeature");
         jerseyServlet.setInitParameter("jersey.config.server.provider.packages", "edu.usf.cutr.gtfsrtvalidator.api.resource");
