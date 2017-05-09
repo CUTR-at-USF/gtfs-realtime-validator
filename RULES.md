@@ -24,7 +24,7 @@ Rules are defined in the [`ValidationRules` class](https://github.com/CUTR-at-US
 | [E003](#E003) | GTFS-rt `trip_id` does not exist in GTFS data
 | [E004](#E004) | GTFS-rt `route_id` does not exist in GTFS data
 | [E006](#E006) | Missing required trip field for frequency-based exact_times = 0
-| [E010](#E010) | `location_type` not `0` in `stops.txt` (Note that this is implemented but not executed because it's specific to GTFS - see #126)
+| [E010](#E010) | `location_type` not `0` in `stops.txt` (Note that this is implemented but not executed because it's specific to GTFS - see [issue #126](https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/126))
 | [E011](#E011) | GTFS-rt `stop_id` does not exist in GTFS data
 | [E012](#E012) | Header `timestamp` should be greater than or equal to all other timestamps
 | [E013](#E013) | Frequency type 0 trip `schedule_relationship` should be `UNSCHEDULED` or empty
@@ -156,7 +156,7 @@ See:
 
 ### E010 - `location_type` not `0` in stops.txt
 
-(Note that this is implemented but not executed because it's specific to GTFS - see #126)
+(Note that this is implemented but not executed because it's specific to GTFS - see [issue #126](https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/126)
 
 If location_type is used in `stops.txt`, all stops referenced in `stop_times.txt` must have `location_type` of `0`
 
