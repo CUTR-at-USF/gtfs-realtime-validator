@@ -1,7 +1,15 @@
 # GTFS-Realtime Validator [![Build Status](https://travis-ci.org/CUTR-at-USF/gtfs-realtime-validator.svg?branch=master)](https://travis-ci.org/CUTR-at-USF/gtfs-realtime-validator) [![Join the GTFS-realtime chat](https://gtfs.herokuapp.com/badge.svg)](https://gtfs.herokuapp.com/)
 Software that validates General Transit Feed Specification (GTFS)-realtime feeds
 
+## Validation Rules
+
 *Please note that this project is still under active development and is in an early alpha state.  It has a limited number of rules and the user interface to view warnings/errors is still under development.*
+
+* [Implemented rules](Rules.md)
+* [Planned future rules](https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues?q=is%3Aissue+is%3Aopen+label%3A%22new+rule%22)
+
+Have a suggestion for a new rule?  Open an issue with the ["new rule" label](https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues?q=is%3Aissue+is%3Aopen+label%3A%22new+rule%22).
+
 
 ## Building and Running the project 
 
