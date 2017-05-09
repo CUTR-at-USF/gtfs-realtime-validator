@@ -11,9 +11,9 @@ Rules are defined in the [`ValidationRules` class](https://github.com/CUTR-at-US
 | [W003](#W003) | `VehiclePosition` and `TripUpdate` feed mismatch
 | [W004](#W004) | `VehiclePosition` has unrealistic speed
 | [W005](#W005) | Missing `vehicle_id` in `trip_update` for frequency-based `exact_times` = 0
-| [W006](#W006) | trip_update missing trip_id
+| [W006](#W006) | `trip_update` missing `trip_id`
 | [W007](#W007) | Refresh interval is more than 35 seconds
-| [W008](#W008) | Header timestamp is older than 65 seconds
+| [W008](#W008) | Header `timestamp` is older than 65 seconds
 
 ### Table of Errors
 
@@ -23,10 +23,10 @@ Rules are defined in the [`ValidationRules` class](https://github.com/CUTR-at-US
 | [E002](#E002) | Unsorted `stop_sequence`
 | [E003](#E003) | GTFS-rt `trip_id` does not exist in GTFS data
 | [E004](#E004) | GTFS-rt `route_id` does not exist in GTFS data
-| [E006](#E006) | Missing required trip field for frequency-based exact_times = 0
+| [E006](#E006) | Missing required trip field for frequency-based `exact_times` = 0
 | [E010](#E010) | `location_type` not `0` in `stops.txt` (Note that this is implemented but not executed because it's specific to GTFS - see [issue #126](https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/126))
 | [E011](#E011) | GTFS-rt `stop_id` does not exist in GTFS data
-| [E012](#E012) | Header `timestamp` should be greater than or equal to all other timestamps
+| [E012](#E012) | Header `timestamp` should be greater than or equal to all other `timestamps`
 | [E013](#E013) | Frequency type 0 trip `schedule_relationship` should be `UNSCHEDULED` or empty
 | [E015](#E015) | All `stop_ids` referenced in GTFS-rt feeds must have the `location_type` = 0
 | [E016](#E016) | `trip_ids` with `schedule_relationship` `ADDED` must not be in GTFS data
@@ -100,7 +100,7 @@ GTFS-realtime feeds should be refreshed at least every 30 seconds.
 
 <a name="W008"/>
 
-### W008 - Header timestamp is older than 65 seconds
+### W008 - Header `timestamp` is older than 65 seconds
 
 The data in a GTFS-realtime feed should always be less than one minute old.
 
