@@ -150,4 +150,8 @@ public class ValidationRules {
     public static final ValidationRule E025 = new ValidationRule("E025", "ERROR", "stop_time_update departure time is before arrival time",
             "Within the same stop_time_update, arrival and departures times can be the same, or the departure time can be later than the arrival time - the departure time should never come before the arrival time.",
             "- departure time must be equal to or greater than arrival time");
+
+    public static final ValidationRule E026 = new ValidationRule("E026", "ERROR", "Invalid vehicle position",
+            "Vehicle position latitude must be between -90 and 90 (inclusive), and vehicle longitude must be between -180  and 180 (inclusive)",
+            "- these are invalid WGS84 coordinates");
 }

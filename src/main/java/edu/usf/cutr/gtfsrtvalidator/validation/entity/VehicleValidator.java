@@ -31,11 +31,11 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.W002;
-import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.W004;
+import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
 
 
 /**
+ * E026 - Invalid vehicle position
  * W002 - vehicle_id should be populated for TripUpdates and VehiclePositions
  * W004 - VehiclePosition has unrealistic speed
  */
@@ -49,6 +49,7 @@ public class VehicleValidator implements FeedEntityValidator {
     @Override
     public List<ErrorListHelperModel> validate(long currentTimeMillis, GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage) {
         List<GtfsRealtime.FeedEntity> entityList = feedMessage.getEntityList();
+        List<OccurrenceModel> e026List = new ArrayList<>();
         List<OccurrenceModel> w002List = new ArrayList<>();
         List<OccurrenceModel> w004List = new ArrayList<>();
 
@@ -83,10 +84,30 @@ public class VehicleValidator implements FeedEntityValidator {
                         _log.debug(om.getPrefix() + " " + W004.getOccurrenceSuffix());
                     }
                 }
+
+                // E026: Invalid vehicle position
+                if (v.hasPosition()) {
+                    GtfsRealtime.Position position = v.getPosition();
+                    String id = (v.getVehicle().hasId() ? "vehicle_id " + v.getVehicle().getId() : "entity ID " + entity.getId());
+                    if (!position.hasLatitude() || !position.hasLongitude()) {
+                        // Missing lat/long
+                        OccurrenceModel om = new OccurrenceModel(id + " position is missing lat/long");
+                        e026List.add(om);
+                        _log.debug(om.getPrefix() + " " + E026.getOccurrenceSuffix());
+                    }
+                    if (!GtfsUtils.isPositionValid(position)) {
+                        OccurrenceModel om = new OccurrenceModel(id + " has latitude/longitude of (" + position.getLatitude() + "," + position.getLongitude() + ")");
+                        e026List.add(om);
+                        _log.debug(om.getPrefix() + " " + E026.getOccurrenceSuffix());
+                    }
+                }
             }
         }
 
         List<ErrorListHelperModel> errors = new ArrayList<>();
+        if (!e026List.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E026), e026List));
+        }
         if (!w002List.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(W002), w002List));
         }

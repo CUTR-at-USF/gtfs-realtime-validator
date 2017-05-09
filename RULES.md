@@ -39,6 +39,7 @@ Rules are defined in the [`ValidationRules` class](https://github.com/CUTR-at-US
 | [E023](#E023) | trip `start_time` does not match first GTFS `arrival_time`
 | [E024](#E024) | trip `direction_id` does not match GTFS data
 | [E025](#E025) | `stop_time_update` departure time is before arrival time
+| [E026](#E026) | Invalid vehicle `position`
 
 # Warnings
 
@@ -261,3 +262,12 @@ GTFS-rt trip `direction_id` must match the `direction_id` in GTFS `trips.txt`.
 ### E025 - `stop_time_update` departure time is before arrival time
 
 Within the same `stop_time_update`, arrival and departures times can be the same, or the departure time can be later than the arrival time - the departure time should never come before the arrival time.
+
+<a name="E026"/>
+
+### E026 - Invalid vehicle `position`
+
+Vehicle position must be valid WGS84 coordinates - latitude must be between -90 and 90 (inclusive), and vehicle longitude must be between -180  and 180 (inclusive).
+
+See:
+* [vehicle.position](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-position)

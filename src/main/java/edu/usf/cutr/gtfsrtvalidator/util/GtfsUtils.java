@@ -102,4 +102,20 @@ public class GtfsUtils {
         }
         return ids;
     }
+
+    /**
+     * Returns true if this position has valid latitude and longitude values, and false if it does not
+     *
+     * @param position Vehicle position to validate
+     * @return true if this position has valid latitude and longitude values, and false if it does not
+     */
+    public static boolean isPositionValid(GtfsRealtime.Position position) {
+        if (position.getLatitude() < -90f || position.getLatitude() > 90f) {
+            return false;
+        }
+        if (position.getLongitude() < -180f || position.getLongitude() > 180f) {
+            return false;
+        }
+        return true;
+    }
 }

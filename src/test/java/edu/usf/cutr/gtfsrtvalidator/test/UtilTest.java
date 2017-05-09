@@ -245,6 +245,52 @@ public class UtilTest {
         assertEquals(text, "vehicle_id A route_id 1");
     }
 
+    @Test
+    public void testValidPosition() {
+        GtfsRealtime.Position.Builder positionBuilder = GtfsRealtime.Position.newBuilder();
+
+        /**
+         * Valid lat/longs
+         */
+        positionBuilder.setLatitude(0);
+        positionBuilder.setLongitude(0);
+
+        assertEquals(true, GtfsUtils.isPositionValid(positionBuilder.build()));
+
+        positionBuilder.setLatitude(-90);
+        positionBuilder.setLongitude(-180);
+
+        assertEquals(true, GtfsUtils.isPositionValid(positionBuilder.build()));
+
+        positionBuilder.setLatitude(90);
+        positionBuilder.setLongitude(180);
+
+        assertEquals(true, GtfsUtils.isPositionValid(positionBuilder.build()));
+
+        /**
+         * Bad lat or long
+         */
+        positionBuilder.setLatitude(-91);
+        positionBuilder.setLongitude(0);
+
+        assertEquals(false, GtfsUtils.isPositionValid(positionBuilder.build()));
+
+        positionBuilder.setLatitude(0);
+        positionBuilder.setLongitude(-181);
+
+        assertEquals(false, GtfsUtils.isPositionValid(positionBuilder.build()));
+
+        positionBuilder.setLatitude(91);
+        positionBuilder.setLongitude(0);
+
+        assertEquals(false, GtfsUtils.isPositionValid(positionBuilder.build()));
+
+        positionBuilder.setLatitude(0);
+        positionBuilder.setLongitude(181);
+
+        assertEquals(false, GtfsUtils.isPositionValid(positionBuilder.build()));
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void testAssertVehicleAndTripIdThrowException() {
         // Make sure we throw an exception if the method is provided objects other than TripUpdate or VehiclePosition

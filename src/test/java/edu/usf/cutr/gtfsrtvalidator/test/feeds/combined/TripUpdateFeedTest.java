@@ -196,6 +196,68 @@ public class TripUpdateFeedTest extends FeedMessageTest {
     }
 
     /**
+     * E026 - Invalid vehicle position
+     */
+    @Test
+    public void testInvalidVehiclePosition() {
+        VehicleValidator vehicleValidator = new VehicleValidator();
+
+        GtfsRealtime.VehicleDescriptor.Builder vehicleDescriptorBuilder = GtfsRealtime.VehicleDescriptor.newBuilder();
+        vehicleDescriptorBuilder.setId("1");
+
+        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        // No warnings, if position isn't populated
+        results = vehicleValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E026, results, 0);
+
+        GtfsRealtime.Position.Builder positionBuilder = GtfsRealtime.Position.newBuilder();
+
+        // Valid lat and long (Tampa, FL)
+        positionBuilder.setLatitude(27.9506f);
+        positionBuilder.setLongitude(-82.4572f);
+
+        vehiclePositionBuilder.setPosition(positionBuilder.build());
+
+        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = vehicleValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E026, results, 0);
+
+        // Invalid lat - 1 error
+        positionBuilder.setLatitude(1000f);
+        positionBuilder.setLongitude(-82.4572f);
+
+        vehiclePositionBuilder.setPosition(positionBuilder.build());
+
+        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = vehicleValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E026, results, 1);
+
+        // Invalid long - 1 error
+        positionBuilder.setLatitude(27.9506f);
+        positionBuilder.setLongitude(-1000);
+
+        vehiclePositionBuilder.setPosition(positionBuilder.build());
+
+        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = vehicleValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E026, results, 1);
+
+        clearAndInitRequiredFeedFields();
+    }
+
+    /**
      * E010 - If location_type is used in stops.txt, all stops referenced in stop_times.txt must have location_type of 0
      */
     @Test
