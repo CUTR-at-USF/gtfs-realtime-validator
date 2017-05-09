@@ -129,7 +129,7 @@ See:
 
 `stop_time_updates` for a given `trip_id` must be sorted by increasing stop_sequence.
 
-Note that this currently implemented when `stop_sequence` is provided in the GTFS-rt feed, but not when `stop_sequence is omitted from the GTFS-rt feed (see [issue #159](https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/159)).
+Note that this currently implemented when `stop_sequence` is provided in the GTFS-rt feed, but not when `stop_sequence` is omitted from the GTFS-rt feed (see [issue #159](https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/159)).
 
 <a name="E003"/>
 
