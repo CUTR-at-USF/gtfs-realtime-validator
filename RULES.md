@@ -125,7 +125,9 @@ See:
 
 ### E002 - Unsorted `stop_sequence`
 
-`stop_time_updates` for a given `trip_id` must be sorted by increasing stop_sequence (this should always be enforced whether or not the feed contains the stop_sequence field). A TripUpdate can have multiple stop_time_updates (e.g., one prediction per stop) - so, this shouldn't be monitored across multiple feed messages, just in a single message.
+`stop_time_updates` for a given `trip_id` must be sorted by increasing stop_sequence.
+
+Note that this currently implemented when `stop_sequence` is provided in the GTFS-rt feed, but not when `stop_sequence is omitted from the GTFS-rt feed (see [issue #159](https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/159)).
 
 <a name="E003"/>
 
