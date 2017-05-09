@@ -131,6 +131,9 @@ See:
 
 Note that this currently implemented when `stop_sequence` is provided in the GTFS-rt feed, but not when `stop_sequence` is omitted from the GTFS-rt feed (see [issue #159](https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/159)).
 
+See:
+* [`trip_update.stop_time_updates`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#stop-time-updates)
+
 <a name="E003"/>
 
 ### E003 - GTFS-rt `trip_id` does not exist in GTFS data
