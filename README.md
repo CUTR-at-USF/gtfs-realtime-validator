@@ -1,19 +1,32 @@
 # GTFS-Realtime Validator [![Build Status](https://travis-ci.org/CUTR-at-USF/gtfs-realtime-validator.svg?branch=master)](https://travis-ci.org/CUTR-at-USF/gtfs-realtime-validator) [![Join the GTFS-realtime chat](https://gtfs.herokuapp.com/badge.svg)](https://gtfs.herokuapp.com/)
-Software that validates General Transit Feed Specification (GTFS)-realtime feeds
 
-## Validation Rules
+A software tool that validates [General Transit Feed Specification (GTFS)-realtime](https://developers.google.com/transit/gtfs-realtime/) feeds
+
+
+<img src="https://cloud.githubusercontent.com/assets/928045/25874575/2afaa3b0-34e1-11e7-92a4-b0a68f233748.png" width="1000">
+
+
+## Quick start
 
 *Please note that this project is still under active development and is in an early alpha state.  It has a limited number of rules and the user interface to view warnings/errors is still under development.*
+
+1. Install [Java Development Kit (JDK) 1.8 or higher](http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html)
+2. Download the latest alpha build:
+    * [gtfs-rt-validator-1.0.0-SNAPSHOT.jar](https://s3.amazonaws.com/gtfs-rt-validator/travis_builds/gtfs-rt-validator-1.0.0-SNAPSHOT.jar)
+3. From the command line run `java -jar gtfs-rt-validator-1.0.0-SNAPSHOT.jar`
+4. When prompted, in your browser go to `http://localhost:8080`
+5. Enter your [General Transit Feed Specification (GTFS)-realtime](https://developers.google.com/transit/gtfs-realtime/) and [GTFS](https://developers.google.com/transit/gtfs/) feed URLs and click "Start"
+
+#### Rules
 
 * [Implemented rules](RULES.md)
 * [Planned future rules](https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues?q=is%3Aissue+is%3Aopen+label%3A%22new+rule%22)
 
 Have a suggestion for a new rule?  Open an issue with the ["new rule" label](https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues?q=is%3Aissue+is%3Aopen+label%3A%22new+rule%22).
 
+## Building the project 
 
-## Building and Running the project 
-
-### Prerequisites 
+#### Prerequisites 
 
 The GTFS-Realtime Validator is implemented as a web application, with the backend code written in Java.  An instance of the [Jetty embedded server](http://www.eclipse.org/jetty/) is used to run the application.
 
@@ -23,7 +36,7 @@ Following are the requirements to get the project up and running:
 * [Apache Maven](https://maven.apache.org/)
 * [Java Cryptography Extension (JCE)](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html) - If you're downloading GTFS or GTFS-rt from secure HTTPS URLs, you may need to install the JCE Extension.  You will need to replace the `US_export_policy.jar` and `local_policy.jar` files in your JVM `/security` directory, such as `C:\Program Files\Java\jdk1.8.0_73\jre\lib\security`, with the JAR files in the JCE Extension download. 
 
-### 1. Build the project 
+#### 1. Build the project 
 
 From the command-line, run:
 
@@ -33,7 +46,7 @@ This will generate an executable file in the `target/` directory with all the de
  
 Alternately, you can load the project as Maven project in an IDE like [IntelliJ](https://www.jetbrains.com/idea/) or [Netbeans](https://netbeans.org/).  This is the fastest way to build and execute the project if you plan to change the source code.
 
-### 3. Run the application
+#### 2. Run the application
 
 From the command-line, run: 
 
@@ -41,13 +54,13 @@ From the command-line, run:
 
 You should see some output, and a message saying `Go to http://localhost:8080 in your browser`. 
 
-### 4. View the application 
+#### 3. View the application 
 
 Once the application has been started, you can enter URLs for the feeds you'd like to have validated at:
  
  http://localhost:8080
 
-### Configuration
+## Configuration
  
 **Logging**
 
