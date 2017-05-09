@@ -244,7 +244,7 @@ See:
 
 ### E022 - Sequential trip `stop_time_update` times are not increasing
 
-Sequential `stop_time_update` arrival/departure times should always increase - they should never be the same or decrease between two sequential stops.  Within the same `stop_time_update`, arrival and departures times can be the same, or the departure time can be later than the arrival time - the departure time should never come before the arrival time.
+`stop_time_update` arrival/departure times between sequential stops should always increase - they should never be the same or decrease.
 
 <a name="E023"/>
 

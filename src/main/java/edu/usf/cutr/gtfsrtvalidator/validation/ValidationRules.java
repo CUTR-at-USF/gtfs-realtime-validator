@@ -136,8 +136,8 @@ public class ValidationRules {
             "which is not the valid format of YYYYMMDD");
 
     public static final ValidationRule E022 = new ValidationRule("E022", "ERROR", "Sequential trip stop_time_update times are not increasing",
-            "Sequential stop_time_update arrival/departure times should always increase - they should never be the same or decrease between two sequential stops.",
-            "- times must increase between two sequential updates");
+            "stop_time_update arrival/departure times between sequential stops should always increase - they should never be the same or decrease.",
+            "- times must increase between two sequential stops");
 
     public static final ValidationRule E023 = new ValidationRule("E023", "ERROR", "trip start_time does not match first GTFS arrival_time",
             "For normal scheduled trips (i.e., not defined in frequencies.txt), the GTFS-realtime trip start_time must match the first GTFS arrival_time in stop_times.txt for this trip",
