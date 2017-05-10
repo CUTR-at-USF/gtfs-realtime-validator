@@ -60,7 +60,7 @@ Once the application has been started, you can enter URLs for the feeds you'd li
  
  http://localhost:8080
 
-## Configuration
+## Configuration options
  
 **Logging**
 
@@ -80,7 +80,18 @@ If you'd like to change the logging level, for example to see all debug statemen
  
  `java -jar target/gtfs-rt-validator-1.0.0-SNAPSHOT.jar -port 80`
  
-
+ **Database**
+ 
+ We use [Hibernate](http://hibernate.org/) to manage data persistence to a database.  To allow you to get the tool up and running quickly, we use the embedded [HSQLDB](http://hsqldb.org/) by default.  This is not recommended for a production deployment.
+ 
+ Hibernate configuration can be changed in [`src/main/resources/hibernate.cfg.xml`](https://github.com/CUTR-at-USF/gtfs-realtime-validator/blob/master/src/main/resources/hibernate.cfg.xml) to store data in any relational database.  You might want to check out the following resources for getting started:
+ 
+ * [MySQL](https://docs.jboss.org/hibernate/orm/3.3/reference/en-US/html/session-configuration.html#configuration-xmlconfig)
+ * [PostgreSQL](http://stackoverflow.com/a/16572156/937715)
+ * [Microsoft SQL Server](http://stackoverflow.com/a/3588652/937715)
+ * [Oracle](https://docs.oracle.com/cd/E11035_01/workshop102/ormworkbench/hibernate-tutorial/tutHibernate9.html)
+ 
+ A list of all the dialect properties for specific database versions is shown [here](http://www.tutorialspoint.com/hibernate/hibernate_configuration.htm).
 
 ## Acknowledgements
 
