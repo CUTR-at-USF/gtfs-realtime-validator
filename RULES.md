@@ -89,7 +89,7 @@ Frequency-based exact_times = 0 trip_updates should contain `vehicle_id`.  This 
 >
 > ...where `start_time` is the scheduled start time as defined in the static schedule, as long as the combination of ids provided resolves to a unique trip.
 
-See:
+***References:***
 * [`trip_update.trip`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#alternative-trip-matching)
 
 <a name="W007"/>
@@ -112,16 +112,16 @@ The data in a GTFS-realtime feed should always be less than one minute old.
 
 All times and timestamps must be in POSIX time (i.e., number of **seconds** since January 1st 1970 00:00:00 UTC).
 
-See:
+*Common mistakes* - Accidentally using Java's `System.currentTimeMillis()`, which is the number of **milliseconds** since January 1st 1970 00:00:00 UTC.  
+
+*Possible solution* - Use `TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis())` to convert from milliseconds to seconds.
+
+***References:***
 * [`header.timestamp`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-feedheader)
 * [`trip_update.timestamp`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripupdate)
 * [`vehicle_postion.timestamp`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-vehicleposition)
 * [`stop_time_update.arrival/departure.time`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeevent)
 * [`alert.active_period.start` and `alert.active_period.end`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-timerange)
-
-*Common mistakes* - Accidentally using Java's `System.currentTimeMillis()`, which is the number of **milliseconds** since January 1st 1970 00:00:00 UTC.  
-
-*Possible solution* - Use `TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis())` to convert from milliseconds to seconds.
 
 <a name="E002"/>
 
@@ -135,7 +135,7 @@ Note that this currently implemented when `stop_sequence` is provided in the GTF
 
 *Possible solution* - Group the GTFS `stop_times.txt` records by `trip_id` and sort by `stop_sequence`.
 
-See:
+***References:***
 * [`trip_update.stop_time_updates`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#stop-time-updates)
 
 <a name="E003"/>
@@ -156,7 +156,7 @@ All `route_ids` provided in the GTFS-rt feed must exist in the GTFS data
 
 Frequency-based `exact_times` = 0 `trip_updates` must contain `trip_id`, `start_time`, and `start_date`.
 
-See:
+***References:***
 * [`trip_update.trip`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#systems-with-repeated-trip_ids)
 
 <a name="E010"/>
@@ -203,12 +203,12 @@ Trips that have a `schedule_relationship` of `ADDED` must not be included in the
 
 The GTFS-rt header `timestamp` value should always change if the feed contents change - the feed contents must not change without updating the header `timestamp`.
 
-See:
-* [`header.timestamp`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-feedheader)
-
 *Common mistakes* - If there are multiple instances of GTFS-realtime feed behind a load balancer, each instance may be pulling information from the real-time data source and publishing it to consumers slightly out of sync.  If a GTFS-rt consumer makes two back-to-back requests, and each request is served by a different GTFS-rt feed instance, the same feed contents could potentially be returned to the consumer with different timestamps. 
 
-*Possible solution* - Configure the load balancer for "sticky routes", so that the consumer always receives the GTFS-rt feed contents from the same GTFS-rt instance. 
+*Possible solution* - Configure the load balancer for "sticky routes", so that the consumer always receives the GTFS-rt feed contents from the same GTFS-rt instance.
+ 
+***References:***
+ * [`header.timestamp`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-feedheader)
 
 <a name="E018"/>
 
@@ -216,12 +216,12 @@ See:
 
 The GTFS-rt header `timestamp` should be monotonically increasing -  it should always be the same value or greater than previous feed iterations if the feed contents are different.
 
-See:
-* [`header.timestamp`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-feedheader)
-
 *Common mistakes* - If there are multiple instances of GTFS-realtime feed behind a load balancer, each instance may be pulling information from the real-time data source and publishing it to consumers slightly out of sync.  If a GTFS-rt consumer makes two back-to-back requests, and each request is served by a different GTFS-rt feed instance, the same feed contents could potentially be returned to the consumer with the most recent feed response having a timestamp that is less than the previous feed response.
 
 *Possible solution* - Configure the load balancer for "sticky routes", so that the GTFS-rt consumer always receives the GTFS-rt feed contents from the same GTFS-rt instance.
+
+***References:***
+* [`header.timestamp`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-feedheader)
 
 <a name="E019"/>
 
@@ -235,7 +235,7 @@ For frequency-based trips defined in `frequencies.txt` with `exact_times` = 1, t
 
 `start_time` must be in the format `25:15:35`.  Note that times can exceed 24 hrs if service goes into the next service day.
 
-See:
+***References:***
 * [trip.start_Time](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
 
 <a name="E021"/>
@@ -244,7 +244,7 @@ See:
 
 `start_date` must be in the `YYYYMMDD` format.
 
-See:
+***References:***
 * [trip.start_date](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
 
 <a name="E022"/>
@@ -277,7 +277,7 @@ Within the same `stop_time_update`, arrival and departures times can be the same
 
 Vehicle position must be valid WGS84 coordinates - latitude must be between -90 and 90 (inclusive), and vehicle longitude must be between -180  and 180 (inclusive).
 
-See:
+***References:***
 * [vehicle.position](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-position)
 
 <a name="E027"/>
@@ -288,5 +288,5 @@ Vehicle bearing must be between 0 and 360 degrees (inclusive).  The GTFS-rt spec
 
 >...in degrees, clockwise from True North, i.e., 0 is North and 90 is East. This can be the compass bearing, or the direction towards the next stop or intermediate location. This should not be deduced from the sequence of previous positions, which clients can compute from previous data.
 
-See:
+***References:***
 * [vehicle.position.bearing](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-position)
