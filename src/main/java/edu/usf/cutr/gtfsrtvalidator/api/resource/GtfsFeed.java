@@ -62,7 +62,7 @@ public class GtfsFeed {
     private static final org.slf4j.Logger _log = LoggerFactory.getLogger(GtfsFeed.class);
 
     private static final int BUFFER_SIZE = 4096;
-    private static final String jsonFilePath = "target"+File.separator+"classes"+File.separator+"webroot";
+    private static final String jsonFilePath = "classes"+File.separator+"webroot";
     public static Map<Integer, GtfsDaoImpl> GtfsDaoMap = new ConcurrentHashMap<>();
 
     //DELETE {id} remove feed with the given id
@@ -146,7 +146,7 @@ public class GtfsFeed {
             // If file digest are equal, check whether validated json file exists
             if (MessageDigest.isEqual(newChecksum, oldChecksum)) {
                 _log.info("GTFS data hasn't changed since last execution");
-                String projectPath = new GetFile().getJarLocation().getParentFile().getParentFile().getAbsolutePath();
+                String projectPath = new GetFile().getJarLocation().getParentFile().getAbsolutePath();
                 if(new File(projectPath +File.separator+ jsonFilePath +File.separator+ fileName + "_out.json").exists())
                     canReturn = true;
             } else {
@@ -187,7 +187,7 @@ public class GtfsFeed {
         JsonSerializer serializer = new JsonSerializer(results);
         //get the location of the executed jar file
         GetFile jarInfo = new GetFile();
-        String saveDir = jarInfo.getJarLocation().getParentFile().getParentFile().getAbsolutePath();
+        String saveDir = jarInfo.getJarLocation().getParentFile().getAbsolutePath();
         saveFilePath = saveDir + File.separator + jsonFilePath + File.separator + fileName + "_out.json";
         try {
             serializer.serializeToFile(new File(saveFilePath));
