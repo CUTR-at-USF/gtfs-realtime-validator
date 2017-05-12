@@ -30,6 +30,12 @@ A tool that validates [General Transit Feed Specification (GTFS)-realtime](https
 
 Have a suggestion for a new rule?  Open an issue with the ["new rule" label](https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues?q=is%3Aissue+is%3Aopen+label%3A%22new+rule%22).
 
+#### Finding feeds
+
+Find feeds for your agency at:
+ * [Transitfeeds.com](http://transitfeeds.com/search?q=gtfsrt)
+ * [Transitland Feed Registry](https://transit.land/feed-registry/)
+ 
 ## Building the project 
 
 #### Prerequisites 
