@@ -99,6 +99,10 @@ If you'd like to change the logging level, for example to see all debug statemen
  * [Oracle](https://docs.oracle.com/cd/E11035_01/workshop102/ormworkbench/hibernate-tutorial/tutHibernate9.html)
  
  A list of all the dialect properties for specific database versions is shown [here](http://www.tutorialspoint.com/hibernate/hibernate_configuration.htm).
+ 
+ **Docker**
+ 
+ Want to run this in [Docker](https://www.docker.com/)?  Check out [gtfs-realtime-validator-docker](https://github.com/scrudden/gtfs-realtime-validator-docker).
 
 ## Acknowledgements
 
