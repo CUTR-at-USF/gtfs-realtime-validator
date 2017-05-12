@@ -15,7 +15,13 @@ A tool that validates [General Transit Feed Specification (GTFS)-realtime](https
     * [gtfs-rt-validator-1.0.0-SNAPSHOT.jar](https://s3.amazonaws.com/gtfs-rt-validator/travis_builds/gtfs-rt-validator-1.0.0-SNAPSHOT.jar)
 3. From the command line run `java -jar gtfs-rt-validator-1.0.0-SNAPSHOT.jar`
 4. When prompted, in your browser go to `http://localhost:8080`
-5. Enter your [General Transit Feed Specification (GTFS)-realtime](https://developers.google.com/transit/gtfs-realtime/) and [GTFS](https://developers.google.com/transit/gtfs/) feed URLs and click "Start"
+5. Enter your [General Transit Feed Specification (GTFS)-realtime](https://developers.google.com/transit/gtfs-realtime/) and [GTFS](https://developers.google.com/transit/gtfs/) feed URLs and click "Start".  Example feeds:
+    * HART (Tampa, FL)
+        * GTFS-realtime - http://api.tampa.onebusaway.org:8088/trip-updates
+        * GTFS - http://gohart.org/google/google_transit.zip
+    * MBTA (Boston, MA)
+        * GTFS-realtime - http://developer.mbta.com/lib/GTRTFS/Alerts/TripUpdates.pb
+        * GTFS - http://www.mbta.com/uploadedfiles/MBTA_GTFS.zip
 
 #### Rules
 
