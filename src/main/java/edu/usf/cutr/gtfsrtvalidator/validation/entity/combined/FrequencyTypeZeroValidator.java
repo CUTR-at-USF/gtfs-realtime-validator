@@ -37,9 +37,9 @@ import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
  * E013 - Frequency type 0 trip schedule_relationship should be UNSCHEDULED or empty
  * W005 - Missing vehicle_id in trip_update for frequency-based exact_times = 0
  */
-public class FrequencyTypeZero implements FeedEntityValidator {
+public class FrequencyTypeZeroValidator implements FeedEntityValidator {
 
-    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(FrequencyTypeZero.class);
+    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(FrequencyTypeZeroValidator.class);
 
     @Override
     public List<ErrorListHelperModel> validate(long currentTimeMillis, GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage) {

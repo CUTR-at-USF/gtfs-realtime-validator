@@ -68,12 +68,12 @@ public class BackgroundTask implements Runnable {
             if (mValidationRules.isEmpty()) {
                 mValidationRules.add(new VehicleTripDescriptorValidator()); // W001, E001, E012
                 mValidationRules.add(new VehicleValidator()); // W002, W004
-                mValidationRules.add(new TimestampValidation()); // W003
+                mValidationRules.add(new TimestampValidator()); // W003
                 mValidationRules.add(new StopTimeSequenceValidator()); // E002
-                mValidationRules.add(new CheckTripDescriptor()); // E003, E004, E020, E021
+                mValidationRules.add(new TripDescriptorValidator()); // E003, E004, E020, E021
                 mValidationRules.add(new StopValidator()); // E011
-                mValidationRules.add(new FrequencyTypeZero()); // E013
-                mValidationRules.add(new FrequencyTypeOne()); // E019
+                mValidationRules.add(new FrequencyTypeZeroValidator()); // E013
+                mValidationRules.add(new FrequencyTypeOneValidator()); // E019
             }
         }
     }

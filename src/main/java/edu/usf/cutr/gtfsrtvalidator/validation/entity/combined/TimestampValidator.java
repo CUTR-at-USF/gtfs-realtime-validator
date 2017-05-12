@@ -45,9 +45,9 @@ import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
  *  E018 - GTFS-rt header timestamp decreased between two sequential iterations
  *  E022 - trip stop_time_update times are not increasing
  */
-public class TimestampValidation implements FeedEntityValidator{
+public class TimestampValidator implements FeedEntityValidator {
 
-    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(TimestampValidation.class);
+    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(TimestampValidator.class);
 
     private static long MINIMUM_REFRESH_INTERVAL_SECONDS = 35L;
     public static long MAX_AGE_SECONDS = 65L; // Maximum allowed age for GTFS-realtime feed, in seconds (W008)

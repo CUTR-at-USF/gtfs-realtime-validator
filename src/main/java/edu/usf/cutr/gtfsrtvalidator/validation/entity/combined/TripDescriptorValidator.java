@@ -53,9 +53,9 @@ import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
  *
  * W006 - trip_update missing trip_id
  */
-public class CheckTripDescriptor implements FeedEntityValidator {
+public class TripDescriptorValidator implements FeedEntityValidator {
 
-    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(CheckTripDescriptor.class);
+    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(TripDescriptorValidator.class);
 
     @Override
     public List<ErrorListHelperModel> validate(long currentTimeMillis, GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage) {

@@ -21,7 +21,7 @@ import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.test.FeedMessageTest;
 import edu.usf.cutr.gtfsrtvalidator.test.util.TestUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
-import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.CheckTripDescriptor;
+import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.TripDescriptorValidator;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.VehicleTripDescriptorValidator;
 import org.junit.Test;
 
@@ -99,7 +99,7 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
      */
     @Test
     public void testTripIdAndRouteIdValidation() {
-        CheckTripDescriptor tripIdValidator = new CheckTripDescriptor();
+        TripDescriptorValidator tripIdValidator = new TripDescriptorValidator();
 
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
 
@@ -171,7 +171,7 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
      */
     @Test
     public void testE016() {
-        CheckTripDescriptor tripIdValidator = new CheckTripDescriptor();
+        TripDescriptorValidator tripIdValidator = new TripDescriptorValidator();
 
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
 
@@ -219,7 +219,7 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
      */
     @Test
     public void testE020() {
-        CheckTripDescriptor tripIdValidator = new CheckTripDescriptor();
+        TripDescriptorValidator tripIdValidator = new TripDescriptorValidator();
 
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
 
@@ -265,7 +265,7 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
      */
     @Test
     public void testE021() {
-        CheckTripDescriptor tripIdValidator = new CheckTripDescriptor();
+        TripDescriptorValidator tripIdValidator = new TripDescriptorValidator();
 
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
 
@@ -320,7 +320,7 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
          *
          * So, initial arrival_time is 00:20:00.
          */
-        CheckTripDescriptor tripIdValidator = new CheckTripDescriptor();
+        TripDescriptorValidator tripIdValidator = new TripDescriptorValidator();
 
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
         tripDescriptorBuilder.setTripId("1.2");
@@ -378,7 +378,7 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
          *
          * So, direction_id for trip 1.1 is 0, and direction_id for trip 2.1 is 1.  trip 3.1 has no direction_id
          */
-        CheckTripDescriptor tripIdValidator = new CheckTripDescriptor();
+        TripDescriptorValidator tripIdValidator = new TripDescriptorValidator();
 
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
         tripDescriptorBuilder.setTripId("1.1");

@@ -37,9 +37,9 @@ import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.E019;
  * <p>
  * E019 - GTFS-rt frequency type 1 trip start_time must be a multiple of GTFS data start_time
  */
-public class FrequencyTypeOne implements FeedEntityValidator {
+public class FrequencyTypeOneValidator implements FeedEntityValidator {
 
-    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(FrequencyTypeOne.class);
+    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(FrequencyTypeOneValidator.class);
 
     @Override
     public List<ErrorListHelperModel> validate(long currentTimeMillis, GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage) {

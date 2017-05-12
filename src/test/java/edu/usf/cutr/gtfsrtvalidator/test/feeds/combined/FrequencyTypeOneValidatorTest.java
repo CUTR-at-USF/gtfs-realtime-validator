@@ -19,7 +19,7 @@ package edu.usf.cutr.gtfsrtvalidator.test.feeds.combined;
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.test.FeedMessageTest;
 import edu.usf.cutr.gtfsrtvalidator.test.util.TestUtils;
-import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.FrequencyTypeOne;
+import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.FrequencyTypeOneValidator;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -34,10 +34,10 @@ import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.E019;
  * <p>
  * E019 - GTFS-rt frequency type 1 trip start_time must be a multiple of GTFS data start_time
  */
-public class FrequencyTypeOneTest extends FeedMessageTest {
+public class FrequencyTypeOneValidatorTest extends FeedMessageTest {
 
 
-    public FrequencyTypeOneTest() throws IOException {
+    public FrequencyTypeOneValidatorTest() throws IOException {
     }
 
     /**
@@ -51,7 +51,7 @@ public class FrequencyTypeOneTest extends FeedMessageTest {
         /**
          * Set start_time to match GTFS start_time exactly - 6am - no errors
          */
-        FrequencyTypeOne frequencyTypeOne = new FrequencyTypeOne();
+        FrequencyTypeOneValidator frequencyTypeOneValidator = new FrequencyTypeOneValidator();
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
         tripDescriptorBuilder.setTripId("15.1");
         tripDescriptorBuilder.setStartTime("06:00:00");
@@ -69,7 +69,7 @@ public class FrequencyTypeOneTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = frequencyTypeOne.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = frequencyTypeOneValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(E019, results, 0);
 
         /**
@@ -92,7 +92,7 @@ public class FrequencyTypeOneTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = frequencyTypeOne.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = frequencyTypeOneValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(E019, results, 0);
 
         /**
@@ -115,7 +115,7 @@ public class FrequencyTypeOneTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = frequencyTypeOne.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = frequencyTypeOneValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(E019, results, 2);
 
         clearAndInitRequiredFeedFields();
