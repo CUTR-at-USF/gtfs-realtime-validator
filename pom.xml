@@ -177,6 +177,12 @@
             <artifactId>hibernate-core</artifactId>
             <version>5.2.2.Final</version>
         </dependency>
+        <!-- Spatial operations -->
+        <dependency>
+            <groupId>org.locationtech.spatial4j</groupId>
+            <artifactId>spatial4j</artifactId>
+            <version>0.6</version>
+        </dependency>
     </dependencies>
 
     <build>

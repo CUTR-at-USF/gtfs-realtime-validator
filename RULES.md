@@ -41,6 +41,8 @@ Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-U
 | [E025](#E025) | `stop_time_update` departure time is before arrival time
 | [E026](#E026) | Invalid vehicle `position`
 | [E027](#E027) | Invalid vehicle `bearing`
+| [E028](#E028) | Vehicle `position` outside agency coverage area
+| [E029](#E029) | Vehicle `position` outside trip shape buffer
 
 # Warnings
 
@@ -290,3 +292,19 @@ Vehicle bearing must be between 0 and 360 degrees (inclusive).  The GTFS-rt spec
 
 #### References:
 * [vehicle.position.bearing](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-position)
+
+<a name="E028"/>
+
+### E028 - Vehicle `position` outside agency coverage area
+
+The vehicle `position` should be inside the agency coverage area.  This is defined as within roughly 1/8 of a mile (200 meters) of the GTFS `shapes.txt` data, or `stops.txt` locations if the GTFS feed doesn't include `shapes.txt`.
+
+Buffer is defined by `GtfsMetadata.REGION_BUFFER_METERS`, and is currently 1609 meters (roughly 1 mile).
+
+<a name="E029"/>
+
+### E029 - Vehicle `position` outside trip shape buffer
+
+The vehicle `position` should be within the buffer of the GTFS `shapes.txt` data for the current trip unless there is an `alert` with the `effect` of `DETOUR` for this `trip_id`.
+
+Buffer is defined by `GtfsMetadata.TRIP_BUFFER_METERS`, and is currently 200 meters (roughly 1/8 of a mile).
