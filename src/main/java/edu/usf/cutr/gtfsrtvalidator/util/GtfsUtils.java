@@ -17,8 +17,13 @@
 package edu.usf.cutr.gtfsrtvalidator.util;
 
 import com.google.transit.realtime.GtfsRealtime;
+import org.locationtech.spatial4j.shape.Shape;
+import org.locationtech.spatial4j.shape.ShapeFactory;
+import org.locationtech.spatial4j.shape.SpatialRelation;
 
 import java.util.concurrent.TimeUnit;
+
+import static org.locationtech.spatial4j.context.SpatialContext.GEO;
 
 /**
  * Utilities for working with GTFS and GTFS-realtime objects
@@ -43,6 +48,16 @@ public class GtfsUtils {
      */
     public static float toMilesPerHour(float metersPerSecond) {
         return metersPerSecond * 2.23694f;
+    }
+
+    /**
+     * Converts the provided distance in meters to miles
+     *
+     * @param meters
+     * @return the provided distance in meters converted to miles
+     */
+    public static double toMiles(double meters) {
+        return meters * 0.000621371d;
     }
 
 
@@ -133,5 +148,18 @@ public class GtfsUtils {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Returns true if the provided vehiclePosition is within the provided shape, false if it is not
+     *
+     * @param vehiclePosition the vehiclePosition to test against the shape
+     * @param bounds          the shape to test against the vehiclePosition
+     * @return true if the provided vehiclePosition is within the provided shape, false if it is not
+     */
+    public static boolean isPositionWithinShape(GtfsRealtime.Position vehiclePosition, Shape bounds) {
+        ShapeFactory sf = GEO.getShapeFactory();
+        org.locationtech.spatial4j.shape.Point p = sf.pointXY(vehiclePosition.getLongitude(), vehiclePosition.getLatitude());
+        return bounds.relate(p).equals(SpatialRelation.CONTAINS);
     }
 }
