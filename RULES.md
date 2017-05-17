@@ -2,19 +2,6 @@
 
 Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-USF/gtfs-realtime-validator/blob/master/src/main/java/edu/usf/cutr/gtfsrtvalidator/validation/ValidationRules.java).  Below are details of currently implemented rules.
 
-### Table of Warnings
-
-| Warning ID    | Warning Title             |
-|---------------|---------------------------|
-| [W001](#W001) | `timestamps` not populated
-| [W002](#W002) | `vehicle_id` not populated
-| [W003](#W003) | `VehiclePosition` and `TripUpdate` feed mismatch
-| [W004](#W004) | `VehiclePosition` has unrealistic speed
-| [W005](#W005) | Missing `vehicle_id` in `trip_update` for frequency-based `exact_times` = 0
-| [W006](#W006) | `trip_update` missing `trip_id`
-| [W007](#W007) | Refresh interval is more than 35 seconds
-| [W008](#W008) | Header `timestamp` is older than 65 seconds
-
 ### Table of Errors
 
 | Error ID      | Error Title         |
@@ -44,67 +31,18 @@ Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-U
 | [E028](#E028) | Vehicle `position` outside agency coverage area
 | [E029](#E029) | Vehicle `position` outside trip shape buffer
 
-# Warnings
+### Table of Warnings
 
-<a name="W001"/>
-
-### W001 - `timestamp` not populated
-
-`timestamps` should be populated for `FeedHeader`, `TripUpdates`, `VehiclePositions`, and `Alerts`
-
-<a name="W002"/>
-
-### W002 - `vehicle_id` not populated
-
-`vehicle_id` should be populated for TripUpdates and VehiclePositions
-
-<a name="W003"/>
-
-### W003 - `VehiclePosition` and `TripUpdate` feed mismatch
-
-If both vehicle positions and trip updates are provided, `VehicleDescriptor` or `TripDescriptor` values should match between the two feeds
-
-<a name="W004"/>
-
-### W004 - VehiclePosition has unrealistic speed
-
-`vehicle.position.speed` has an unrealistic speed that may be incorrect
-
-<a name="W005"/>
-
-### W005 - Missing `vehicle_id` in `trip_update` for frequency-based exact_times = 0
-
-Frequency-based exact_times = 0 trip_updates should contain `vehicle_id`.  This helps disambiguate predictions in situations where more than one vehicle is running the same trip instance simultaneously.
-
-<a name="W006"/>
-
-### W006 - `trip_update` missing `trip_id`
-
-`trip_updates` should include a `trip_id`.  A missing `trip_id` is usually an error in the feed (especially for frequency-based `exact_times` = 0 trips - see [E006](https://github.com/CUTR-at-USF/gtfs-realtime-validator/blob/master/RULES.md#E006), although the section on "Alternative trip matching" includes one exception:
-
->Trips which are not frequency based may also be uniquely identified by a TripDescriptor including the combination of:
->
-> * `route_id`
-> * `direction_id`
-> * `start_time`
-> * `start_date`
->
-> ...where `start_time` is the scheduled start time as defined in the static schedule, as long as the combination of ids provided resolves to a unique trip.
-
-#### References:
-* [`trip_update.trip`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#alternative-trip-matching)
-
-<a name="W007"/>
-
-### W007 - Refresh interval is more than 35 seconds
-
-GTFS-realtime feeds should be refreshed at least every 30 seconds.
-
-<a name="W008"/>
-
-### W008 - Header `timestamp` is older than 65 seconds
-
-The data in a GTFS-realtime feed should always be less than one minute old.
+| Warning ID    | Warning Title             |
+|---------------|---------------------------|
+| [W001](#W001) | `timestamps` not populated
+| [W002](#W002) | `vehicle_id` not populated
+| [W003](#W003) | `VehiclePosition` and `TripUpdate` feed mismatch
+| [W004](#W004) | `VehiclePosition` has unrealistic speed
+| [W005](#W005) | Missing `vehicle_id` in `trip_update` for frequency-based `exact_times` = 0
+| [W006](#W006) | `trip_update` missing `trip_id`
+| [W007](#W007) | Refresh interval is more than 35 seconds
+| [W008](#W008) | Header `timestamp` is older than 65 seconds
 
 # Errors
 
@@ -308,3 +246,65 @@ Buffer is defined by `GtfsMetadata.REGION_BUFFER_METERS`, and is currently 1609 
 The vehicle `position` should be within the buffer of the GTFS `shapes.txt` data for the current trip unless there is an `alert` with the `effect` of `DETOUR` for this `trip_id`.
 
 Buffer is defined by `GtfsMetadata.TRIP_BUFFER_METERS`, and is currently 200 meters (roughly 1/8 of a mile).
+
+# Warnings
+
+<a name="W001"/>
+
+### W001 - `timestamp` not populated
+
+`timestamps` should be populated for `FeedHeader`, `TripUpdates`, `VehiclePositions`, and `Alerts`
+
+<a name="W002"/>
+
+### W002 - `vehicle_id` not populated
+
+`vehicle_id` should be populated for TripUpdates and VehiclePositions
+
+<a name="W003"/>
+
+### W003 - `VehiclePosition` and `TripUpdate` feed mismatch
+
+If both vehicle positions and trip updates are provided, `VehicleDescriptor` or `TripDescriptor` values should match between the two feeds
+
+<a name="W004"/>
+
+### W004 - VehiclePosition has unrealistic speed
+
+`vehicle.position.speed` has an unrealistic speed that may be incorrect
+
+<a name="W005"/>
+
+### W005 - Missing `vehicle_id` in `trip_update` for frequency-based exact_times = 0
+
+Frequency-based exact_times = 0 trip_updates should contain `vehicle_id`.  This helps disambiguate predictions in situations where more than one vehicle is running the same trip instance simultaneously.
+
+<a name="W006"/>
+
+### W006 - `trip_update` missing `trip_id`
+
+`trip_updates` should include a `trip_id`.  A missing `trip_id` is usually an error in the feed (especially for frequency-based `exact_times` = 0 trips - see [E006](https://github.com/CUTR-at-USF/gtfs-realtime-validator/blob/master/RULES.md#E006), although the section on "Alternative trip matching" includes one exception:
+
+>Trips which are not frequency based may also be uniquely identified by a TripDescriptor including the combination of:
+>
+> * `route_id`
+> * `direction_id`
+> * `start_time`
+> * `start_date`
+>
+> ...where `start_time` is the scheduled start time as defined in the static schedule, as long as the combination of ids provided resolves to a unique trip.
+
+#### References:
+* [`trip_update.trip`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#alternative-trip-matching)
+
+<a name="W007"/>
+
+### W007 - Refresh interval is more than 35 seconds
+
+GTFS-realtime feeds should be refreshed at least every 30 seconds.
+
+<a name="W008"/>
+
+### W008 - Header `timestamp` is older than 65 seconds
+
+The data in a GTFS-realtime feed should always be less than one minute old.
