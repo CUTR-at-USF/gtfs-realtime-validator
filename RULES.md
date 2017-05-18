@@ -281,7 +281,9 @@ Populating `vehicle_ids` in TripUpdates is important so consumers can relate a g
 
 ### W003 - `VehiclePosition` and `TripUpdate` feed mismatch
 
-If both vehicle positions and trip updates are provided, `VehicleDescriptor` or `TripDescriptor` values should match between the two feeds
+If separate vehicle positions and trip updates feeds are provided, `VehicleDescriptor` or `TripDescriptor` values should match between the two feeds.  
+
+In other words, if the `VehiclePosition` has a `vehicle_id` A that is assigned to `trip_id` 4, then the `TripUpdate` feed should have a prediction for `trip_id` 4 that includes a reference to `vehicle_id` A.
 
 <a name="W004"/>
 
