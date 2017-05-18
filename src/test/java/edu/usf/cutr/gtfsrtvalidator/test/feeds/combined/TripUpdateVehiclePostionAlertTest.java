@@ -46,6 +46,8 @@ public class TripUpdateVehiclePostionAlertTest extends FeedMessageTest {
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
         GtfsRealtime.TripUpdate.StopTimeUpdate.Builder stopTimeUpdateBuilder = GtfsRealtime.TripUpdate.StopTimeUpdate.newBuilder();
         GtfsRealtime.EntitySelector.Builder entitySelectorBuilder = GtfsRealtime.EntitySelector.newBuilder();
+        GtfsRealtime.VehicleDescriptor.Builder vehicleDescriptorBuilder = GtfsRealtime.VehicleDescriptor.newBuilder();
+        vehicleDescriptorBuilder.setId("1");
         
         // tripDescriptor is a required field in tripUpdate
         tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
@@ -59,6 +61,7 @@ public class TripUpdateVehiclePostionAlertTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
         
         vehiclePositionBuilder.setStopId("A");
+        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
         
