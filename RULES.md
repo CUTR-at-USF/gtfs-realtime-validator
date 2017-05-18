@@ -289,7 +289,16 @@ In other words, if the `VehiclePosition` has a `vehicle_id` A that is assigned t
 
 ### W004 - VehiclePosition has unrealistic speed
 
-`vehicle.position.speed` has an unrealistic speed that may be incorrect
+`vehicle.position.speed` has an unrealistic speed that may be incorrect.  
+
+Speeds are flagged as unrealistic if they are greater than `VehicleValidator.MAX_REALISTIC_SPEED_METERS_PER_SECOND`, which is currently set to 26 meters per second (approx. 60 miles per hour). 
+
+*Common mistakes* - Accidentally setting the speed value in *miles per hour*, instead of *meters per second*. 
+
+*Possible solution* - Check to make sure the speed units are *meters per second*.
+
+#### References:
+* [vehicle.position.speed](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-position)
 
 <a name="W005"/>
 
