@@ -50,7 +50,7 @@ Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-U
 
 ### E001 - Not in POSIX time
 
-All times and timestamps must be in POSIX time (i.e., number of **seconds** since January 1st 1970 00:00:00 UTC).
+All times and timestamps must be in [POSIX time](https://en.wikipedia.org/wiki/Unix_time) (i.e., number of **seconds** since January 1st 1970 00:00:00 UTC).
 
 *Common mistakes* - Accidentally using Java's `System.currentTimeMillis()`, which is the number of **milliseconds** since January 1st 1970 00:00:00 UTC.  
 
