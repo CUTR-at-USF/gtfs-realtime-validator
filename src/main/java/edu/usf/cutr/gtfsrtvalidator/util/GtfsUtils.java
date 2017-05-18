@@ -20,7 +20,11 @@ import com.google.transit.realtime.GtfsRealtime;
 import org.locationtech.spatial4j.shape.Shape;
 import org.locationtech.spatial4j.shape.ShapeFactory;
 import org.locationtech.spatial4j.shape.SpatialRelation;
+import org.onebusaway.gtfs.model.ServiceCalendar;
+import org.onebusaway.gtfs.model.ServiceCalendarDate;
 
+import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.concurrent.TimeUnit;
 
 import static org.locationtech.spatial4j.context.SpatialContext.GEO;
@@ -161,5 +165,65 @@ public class GtfsUtils {
         ShapeFactory sf = GEO.getShapeFactory();
         org.locationtech.spatial4j.shape.Point p = sf.pointXY(vehiclePosition.getLongitude(), vehiclePosition.getLatitude());
         return bounds.relate(p).equals(SpatialRelation.CONTAINS);
+    }
+
+    /**
+     * Returns true if today is an active service date, based on GTFS calendar.txt (serviceCalendar) and GTFS calendar_dates.txt (serviceCalendarDate), false if it is not.
+     * If serviceCalendar and serviceCalendarDate are both null, it will return true and assume service is active.
+     *
+     * @param today               today's date, set to the same timezone as the GTFS data
+     * @param serviceCalendar     GTFS data from calendar.txt
+     * @param serviceCalendarDate GTFS data from calendar_dates.txt
+     * @return true if today is an active service date, based on GTFS calendar.txt (serviceCalendar) and GTFS calendar_dates.txt (serviceCalendarDate), false if it is not.  If serviceCalendar and serviceCalendarDate are both null, it will return true and assume service is active.
+     */
+    public static boolean isServiceActive(ZonedDateTime today, ServiceCalendar serviceCalendar, ServiceCalendarDate serviceCalendarDate) {
+        if (serviceCalendar == null && serviceCalendarDate == null) {
+            // No date information - assume active
+            return true;
+        }
+        if (serviceCalendar != null &&
+                serviceCalendar.getStartDate().getAsDate().toInstant().isBefore(today.toInstant()) &&
+                serviceCalendar.getEndDate().getAsDate().toInstant().isAfter(today.toInstant())) {
+//            // GTFS calendar.txt says there is service - check for exceptions from calendar_dates.txt
+//            if (serviceCalendarDate != null) {
+//                Instant serviceCalendarDateInstant = serviceCalendarDate.getDate().getAsDate().toInstant();
+//                if (isSameDayMonthYear(today, serviceCalendarDateInstant.atZone(today.getZone()))
+//                        && serviceCalendarDate.getExceptionType() == ServiceCalendarDate.EXCEPTION_TYPE_REMOVE) {
+//                    // calendar_dates.txt removed service for this day - return false
+//                    return false;
+//                }
+//            }
+            return true;
+        }
+        if (serviceCalendarDate != null) {
+            Instant serviceCalendarDateInstant = serviceCalendarDate.getDate().getAsDate().toInstant();
+            if (isSameDayMonthYear(today, serviceCalendarDateInstant.atZone(today.getZone()))) {
+                // Dates match - check whether service is added or removed on this day
+                if (serviceCalendarDate.getExceptionType() == ServiceCalendarDate.EXCEPTION_TYPE_ADD) {
+                    return true;
+                }
+                if (serviceCalendarDate.getExceptionType() == ServiceCalendarDate.EXCEPTION_TYPE_REMOVE) {
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if the two dates have the same day, month, and year, false if they do not
+     *
+     * @param date1
+     * @param date2
+     * @return true if the two dates have the same day, month, and year, false if they do not
+     */
+    private static boolean isSameDayMonthYear(ZonedDateTime date1, ZonedDateTime date2) {
+        if (date1.getDayOfMonth() == date2.getDayOfMonth() &&
+                date1.getMonthValue() == date2.getMonthValue() &&
+                date1.getYear() == date2.getYear()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

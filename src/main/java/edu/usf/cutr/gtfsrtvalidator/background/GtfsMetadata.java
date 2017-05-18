@@ -17,6 +17,7 @@
 
 package edu.usf.cutr.gtfsrtvalidator.background;
 
+import edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils;
 import org.locationtech.spatial4j.context.jts.JtsSpatialContext;
 import org.locationtech.spatial4j.distance.DistanceUtils;
 import org.locationtech.spatial4j.shape.Rectangle;
@@ -26,6 +27,7 @@ import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.onebusaway.gtfs.model.*;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
 import java.util.*;
 
 import static edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils.logDuration;
@@ -58,6 +60,10 @@ public class GtfsMetadata {
     private Map<String, List<ShapePoint>> mShapePoints = new HashMap<>();
     // Map trip_id to a buffered polygon of the trip shape from shapes.txt
     private Map<String, Shape> mTripShapes = new HashMap<>();
+    // Map service_id to calendar from calendar.txt
+    Map<String, ServiceCalendar> mCalendars = new HashMap<>();
+//    // Map service_id to calendar date from calendar_dates.txt
+//    Map<String, ServiceCalendarDate> mCalendarDates = new HashMap<>();
 
     // A geographic bounding box that includes all the stops from GTFS stops.txt
     private Rectangle mStopBoundingBox;
@@ -98,6 +104,20 @@ public class GtfsMetadata {
         for (Route r : gtfsRouteList) {
             mRouteIds.add(r.getId().getId());
         }
+
+        /**
+         * Process GTFS calendar.txt and calendar_dates.txt
+         */
+        Collection<ServiceCalendar> calendars = gtfsData.getAllCalendars();
+        for (ServiceCalendar c : calendars) {
+            mCalendars.put(c.getServiceId().getId(), c);
+        }
+
+        // FIXME - this should be a list of ServiceCalendarDates for each service ID, but this will get huge for agencies that express all service in calendar_dates.txt instead of calendar.txt - what to do?
+//        Collection<ServiceCalendarDate> calendarDates = gtfsData.getAllCalendarDates();
+//        for (ServiceCalendarDate c : calendarDates) {
+//            mCalendarDates.put(c.getServiceId().getId(), c);
+//        }
 
         /**
          * Process GTFS shapes.txt
@@ -162,13 +182,20 @@ public class GtfsMetadata {
             AgencyAndId shapeAgencyAndId = trip.getShapeId();
             if (shapeAgencyAndId != null && !isEmpty(shapeAgencyAndId.getId())) {
                 List<ShapePoint> tripShape = mShapePoints.get(shapeAgencyAndId.getId());
+                ServiceCalendar calendar = mCalendars.get(trip.getServiceId().getId());
+                //ServiceCalendarDate calendarDate = mCalendarDates.get(trip.getServiceId().getId());
                 if (tripShape != null) {
-                    ShapeFactory.LineStringBuilder lineBuilder = sf.lineString();
-                    for (ShapePoint p : tripShape) {
-                        lineBuilder.pointXY(p.getLon(), p.getLat());
+                    if (GtfsUtils.isServiceActive(Instant.now().atZone(mTimeZone.toZoneId()), calendar, null)) {
+                        _log.debug("Building shape for trip_id " + tripId + "...");
+                        ShapeFactory.LineStringBuilder lineBuilder = sf.lineString();
+                        for (ShapePoint p : tripShape) {
+                            lineBuilder.pointXY(p.getLon(), p.getLat());
+                        }
+                        // FIXME - This takes REAAAALLY long - need to optimize - see #199
+                        mTripShapes.put(tripId, lineBuilder.buffer(tripBufferDegrees).build());
+                    } else {
+                        _log.debug("Not building shape for trip_id " + tripId + " - outside of service date");
                     }
-                    // FIXME - This takes REAAAALLY long - need to optimize - see #199
-                    //mTripShapes.put(tripId, lineBuilder.buffer(tripBufferDegrees).build());
                 }
             }
         }
