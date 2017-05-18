@@ -32,7 +32,6 @@ import org.locationtech.spatial4j.shape.*;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Map;
 
 import static edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils.MIN_POSIX_TIME;
 import static org.junit.Assert.assertEquals;
@@ -415,20 +414,20 @@ public class TripUpdateFeedTest extends FeedMessageTest {
         assertNotEquals(SpatialRelation.CONTAINS, spatialRelation);
 
         /**
-         * Point is inside of USF Bull Runner Route A polygon (buffer surrounding shapes.txt shape)
+         * Point is inside of USF Bull Runner Route A (trip_id=2) polygon (buffer surrounding shapes.txt shape)
          */
-        Map<String, Shape> tripShapes = bullRunnerGtfsMetadata.getTripShapes();
-        Shape routeA = tripShapes.get("2");
+        String tripId = "2";
+        Shape routeABuffered = bullRunnerGtfsMetadata.getBufferedTripShape(tripId);
 
         p = sf.pointXY(-82.4131679534912, 28.064065878608385);  // USF Marshall Center
-        spatialRelation = routeA.relate(p);
+        spatialRelation = routeABuffered.relate(p);
         assertEquals(SpatialRelation.CONTAINS, spatialRelation);
 
         /**
          * Point is outside of USF Bull Runner Route A polygon (buffer surrounding shapes.txt shape)
          */
         p = sf.pointXY(-82.43475437164307, 28.057438520876673);  // University Mall
-        spatialRelation = routeA.relate(p);
+        spatialRelation = routeABuffered.relate(p);
         assertNotEquals(SpatialRelation.CONTAINS, spatialRelation);
 
         /**
@@ -450,8 +449,8 @@ public class TripUpdateFeedTest extends FeedMessageTest {
         shpWriter.write(writer, shapeBoundingBoxWithBuffer);
         writer.flush();
 
-        writer.append("\nUSF Bull Runner Route A trip shape output --------------\n");
-        shpWriter.write(writer, routeA);
+        writer.append("\nUSF Bull Runner Route A (trip_id=2) trip shape output --------------\n");
+        shpWriter.write(writer, routeABuffered);
         writer.flush();
 
         Rectangle gtfsBoundingBox = gtfsDataMetadata.getStopBoundingBox();

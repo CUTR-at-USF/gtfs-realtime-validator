@@ -31,8 +31,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
+import static edu.usf.cutr.gtfsrtvalidator.background.GtfsMetadata.TRIP_BUFFER_METERS;
 import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
 
 
@@ -206,17 +206,13 @@ public class VehicleValidator implements FeedEntityValidator {
         GtfsRealtime.Position position = v.getPosition();
         String id = (v.getVehicle().hasId() ? "vehicle_id " + v.getVehicle().getId() : "entity ID " + entity.getId());
 
-        Map<String, Shape> tripShapes = gtfsMetadata.getTripShapes();
-        if (tripShapes == null) {
-            // No shapes - can't check E029
+        Shape bufferedShape = gtfsMetadata.getBufferedTripShape(tripId);
+        if (bufferedShape == null) {
+            // No shape data for this trip, so we can't check E029 - return
             return;
         }
-        Shape s = tripShapes.get(tripId);
-        if (s == null) {
-            // No shape for this trip_id - can't check E029
-            return;
-        }
-        if (!GtfsUtils.isPositionWithinShape(position, s)) {
+
+        if (!GtfsUtils.isPositionWithinShape(position, bufferedShape)) {
             if (hasDetourAlert(entityList, tripId, routeId)) {
                 // There is a DETOUR alert for this vehicle's trip_id or route_id, so it's allowed to be outside the trip shape
                 return;
@@ -224,7 +220,7 @@ public class VehicleValidator implements FeedEntityValidator {
 
             // E029 - Vehicle position is outside of trip shape buffer and it's not on DETOUR
             OccurrenceModel om = new OccurrenceModel(id + " trip_id " + tripId + " at (" + position.getLatitude() + "," + position.getLongitude() +
-                    ") is more than " + GtfsMetadata.TRIP_BUFFER_METERS + " meters (" + String.format("%.2f", GtfsUtils.toMiles(GtfsMetadata.TRIP_BUFFER_METERS)) + " mile(s)) outside GTFS trip shape buffer");
+                    ") is more than " + TRIP_BUFFER_METERS + " meters (" + String.format("%.2f", GtfsUtils.toMiles(TRIP_BUFFER_METERS)) + " mile(s)) from the GTFS trip shape");
             errors.add(om);
             _log.debug(om.getPrefix() + " " + E029.getOccurrenceSuffix());
         }

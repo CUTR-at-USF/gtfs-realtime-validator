@@ -27,6 +27,7 @@ import org.onebusaway.gtfs.model.*;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils.logDuration;
 import static org.hibernate.internal.util.StringHelper.isEmpty;
@@ -41,6 +42,7 @@ public class GtfsMetadata {
     // Spatial operation buffer values
     public static final double REGION_BUFFER_METERS = 1609; // Roughly 1 mile
     public static final double TRIP_BUFFER_METERS = 200; // Roughly 1/8 of a mile
+    public static final double TRIP_BUFFER_DEGREES = DistanceUtils.KM_TO_DEG * (TRIP_BUFFER_METERS / 1000.0d);
 
     String mFeedUrl;
     TimeZone mTimeZone;
@@ -56,8 +58,10 @@ public class GtfsMetadata {
     private Map<String, List<Frequency>> mExactTimesOneTrips = new HashMap<>();
     // Maps shape_id to a list of ShapePoints
     private Map<String, List<ShapePoint>> mShapePoints = new HashMap<>();
-    // Map trip_id to a buffered polygon of the trip shape from shapes.txt
+    // Map trip_id to a polyline of the trip shape from shapes.txt
     private Map<String, Shape> mTripShapes = new HashMap<>();
+    // Map trip_id to a buffered polyline of the trip shape from shapes.txt
+    private Map<String, Shape> mTripShapesBuffered = new ConcurrentHashMap<>();
 
     // A geographic bounding box that includes all the stops from GTFS stops.txt
     private Rectangle mStopBoundingBox;
@@ -103,7 +107,6 @@ public class GtfsMetadata {
          * Process GTFS shapes.txt
          */
         double regionBufferDegrees = DistanceUtils.KM_TO_DEG * (REGION_BUFFER_METERS / 1000.0d);
-        double tripBufferDegrees = DistanceUtils.KM_TO_DEG * (TRIP_BUFFER_METERS / 1000.0d);
 
         ShapeFactory sf = JtsSpatialContext.GEO.getShapeFactory();
         ShapeFactory.MultiPointBuilder shapeBuilder = sf.multiPoint();
@@ -158,7 +161,7 @@ public class GtfsMetadata {
                 stopTimes.sort(Comparator.comparing(stopTime -> (stopTime.getStopSequence())));
             }
 
-            // Create a buffered polygon for each trip if the GTFS shapes.txt data exists
+            // Create a polyline for each trip if the GTFS shapes.txt data exists
             AgencyAndId shapeAgencyAndId = trip.getShapeId();
             if (shapeAgencyAndId != null && !isEmpty(shapeAgencyAndId.getId())) {
                 List<ShapePoint> tripShape = mShapePoints.get(shapeAgencyAndId.getId());
@@ -167,12 +170,11 @@ public class GtfsMetadata {
                     for (ShapePoint p : tripShape) {
                         lineBuilder.pointXY(p.getLon(), p.getLat());
                     }
-                    // FIXME - This takes REAAAALLY long - need to optimize - see #199
-                    //mTripShapes.put(tripId, lineBuilder.buffer(tripBufferDegrees).build());
+                    mTripShapes.put(tripId, lineBuilder.build());
                 }
             }
         }
-        logDuration(_log, "Trips and trip shape buffers processed for " + feedUrl + " in ", tripStartTime);
+        logDuration(_log, "Trips polylines processed for " + feedUrl + " in ", tripStartTime);
 
         /**
          * Process GTFS stops.txt
@@ -316,11 +318,34 @@ public class GtfsMetadata {
     }
 
     /**
-     * Returns a map of GTFS trip_ids to a buffered representation (TRIP_BUFFER_METERS) of that trip's shape from shapes.txt
+     * Returns a map of GTFS trip_ids to a polyline of that trip's shape from shapes.txt
      *
-     * @return a map of GTFS trip_ids to a buffered representation (TRIP_BUFFER_METERS) of that trip's shape from shapes.txt
+     * @return a map of GTFS trip_ids to a polyline of that trip's shape from shapes.txt
      */
     public Map<String, Shape> getTripShapes() {
         return mTripShapes;
+    }
+
+    /**
+     * Returns a buffered representation (TRIP_BUFFER_METERS) of a GTFS trip shape from shapes.txt for the given tripId,
+     * or null if a shape doesn't exist for the given tripId.
+     * <p>
+     *
+     * @param tripId the GTFS trip_id to retrieve a buffered trip shape for
+     * @return a buffered representation (TRIP_BUFFER_METERS) of a GTFS trip shape from shapes.txt for the given tripId,
+     * or null if a shape doesn't exist for the given trip.
+     */
+    public Shape getBufferedTripShape(String tripId) {
+        if (mTripShapes == null) {
+            // No shapes at all
+            return null;
+        }
+        Shape s = mTripShapes.get(tripId);
+        if (s == null) {
+            // No shape for this trip_id
+            return null;
+        }
+        // Create the buffered version of the trip shape if it doesn't yet exist
+        return mTripShapesBuffered.computeIfAbsent(tripId, k -> s.getBuffered(TRIP_BUFFER_DEGREES, s.getContext()));
     }
 }
