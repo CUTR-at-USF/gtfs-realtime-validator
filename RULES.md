@@ -273,7 +273,9 @@ For example, when a vehicle position is shown on a map, the marker may say "Data
 
 ### W002 - `vehicle_id` not populated
 
-`vehicle_id` should be populated for TripUpdates and VehiclePositions
+`vehicle_id` should be populated for TripUpdates and VehiclePositions.  
+
+Populating `vehicle_ids` in TripUpdates is important so consumers can relate a given arrival/departure prediction to a particular vehicle.
 
 <a name="W003"/>
 
