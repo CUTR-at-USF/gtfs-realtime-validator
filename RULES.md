@@ -239,6 +239,9 @@ The vehicle `position` should be inside the agency coverage area.  This is defin
 
 Buffer is defined by `GtfsMetadata.REGION_BUFFER_METERS`, and is currently 1609 meters (roughly 1 mile).
 
+#### References:
+* [vehicle.position](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-position)
+
 <a name="E029"/>
 
 ### E029 - Vehicle `position` far from trip shape
@@ -246,6 +249,11 @@ Buffer is defined by `GtfsMetadata.REGION_BUFFER_METERS`, and is currently 1609 
 The vehicle `position` should be within the buffer of the GTFS `shapes.txt` data for the current trip unless there is an `alert` with the `effect` of `DETOUR` for this `trip_id`.
 
 Buffer is defined by `GtfsMetadata.TRIP_BUFFER_METERS`, and is currently 200 meters (roughly 1/8 of a mile).
+
+#### References:
+* [GTFS shapes.txt](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#shapestxt)
+* [vehicle.position](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-position)
+* [alert.effect.DETOUR](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#enum-effect)
 
 # Warnings
 
