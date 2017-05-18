@@ -167,7 +167,8 @@ public class GtfsMetadata {
                     for (ShapePoint p : tripShape) {
                         lineBuilder.pointXY(p.getLon(), p.getLat());
                     }
-                    mTripShapes.put(tripId, lineBuilder.buffer(tripBufferDegrees).build());
+                    // FIXME - This takes REAAAALLY long - need to optimize - see #199
+                    //mTripShapes.put(tripId, lineBuilder.buffer(tripBufferDegrees).build());
                 }
             }
         }

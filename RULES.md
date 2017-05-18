@@ -247,6 +247,8 @@ The vehicle `position` should be within the buffer of the GTFS `shapes.txt` data
 
 Buffer is defined by `GtfsMetadata.TRIP_BUFFER_METERS`, and is currently 200 meters (roughly 1/8 of a mile).
 
+***NOTE*** - This rule is temporarily disabled for performance reasons - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/199.
+
 # Warnings
 
 <a name="W001"/>
