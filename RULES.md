@@ -306,6 +306,10 @@ Speeds are flagged as unrealistic if they are greater than `VehicleValidator.MAX
 
 Frequency-based exact_times = 0 trip_updates should contain `vehicle_id`.  This helps disambiguate predictions in situations where more than one vehicle is running the same trip instance simultaneously.
 
+#### References:
+* [`trip_update.trip`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#alternative-trip-matching)
+* [GTFS `frequencies.txt` `exact_times` = 0](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#frequenciestxt)
+
 <a name="W006"/>
 
 ### W006 - `trip_update` missing `trip_id`
