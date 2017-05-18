@@ -29,7 +29,7 @@ Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-U
 | [E026](#E026) | Invalid vehicle `position`
 | [E027](#E027) | Invalid vehicle `bearing`
 | [E028](#E028) | Vehicle `position` outside agency coverage area
-| [E029](#E029) | Vehicle `position` outside trip shape buffer
+| [E029](#E029) | Vehicle `position` far from trip shape
 
 ### Table of Warnings
 
@@ -241,7 +241,7 @@ Buffer is defined by `GtfsMetadata.REGION_BUFFER_METERS`, and is currently 1609 
 
 <a name="E029"/>
 
-### E029 - Vehicle `position` outside trip shape buffer
+### E029 - Vehicle `position` far from trip shape
 
 The vehicle `position` should be within the buffer of the GTFS `shapes.txt` data for the current trip unless there is an `alert` with the `effect` of `DETOUR` for this `trip_id`.
 
