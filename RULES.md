@@ -261,7 +261,13 @@ Buffer is defined by `GtfsMetadata.TRIP_BUFFER_METERS`, and is currently 200 met
 
 ### W001 - `timestamp` not populated
 
-`timestamps` should be populated for `FeedHeader`, `TripUpdates`, `VehiclePositions`, and `Alerts`
+`timestamps` should be populated for `FeedHeader`, `TripUpdates`, `VehiclePositions`, and `Alerts`.  
+
+Including `timestamps` enhances the transit rider experience, as consumers can show `timestamp` information to end users give them an idea of how old certain information is.  
+
+For example, when a vehicle position is shown on a map, the marker may say "Data updated 17 sec ago" (see screenshot below).  If vehicle position `timestamps` aren't included, then the consumer must use the GTFS-rt header timestamp, which may be much more recent than the actual vehicle position, resulting in misleading information being show to end users.
+
+![image](https://cloud.githubusercontent.com/assets/928045/26214158/55b82cb4-3bc9-11e7-9421-0e029cf198cb.png)
 
 <a name="W002"/>
 
