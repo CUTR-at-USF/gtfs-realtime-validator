@@ -36,13 +36,11 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
@@ -120,14 +118,18 @@ public class GtfsFeed {
             return generateError("Can't read from URL", "Failed to establish a connection to the GTFS URL.", Response.Status.BAD_REQUEST);
         }
 
-        String saveFilePath = getSaveFilePath(gtfsFeedUrl, connection);
-        String fileName = saveFilePath.substring(saveFilePath.lastIndexOf(File.separator)+1, saveFilePath.lastIndexOf('.'));
+        String saveFileName = null;
+        try {
+            saveFileName = URLEncoder.encode(gtfsFeedUrl, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
         boolean canReturn = false;
         //Read gtfsFeedModel with the same URL in the database        
         Session session = GTFSDB.initSessionBeginTrans();
         GtfsFeedModel gtfsFeed = (GtfsFeedModel) session.createQuery("FROM GtfsFeedModel "
                             + "WHERE gtfsUrl = '"+gtfsFeedUrl+"'").uniqueResult();
-        Response.Status response = downloadGtfsFeed(saveFilePath, connection);
+        Response.Status response = downloadGtfsFeed(saveFileName, connection);
         if (response == Response.Status.BAD_REQUEST) {
             return generateError("Download Failed", "Downloading static GTFS feed from provided Url failed.", Response.Status.BAD_REQUEST);
         } else if (response == Response.Status.FORBIDDEN) {
@@ -138,7 +140,7 @@ public class GtfsFeed {
 
         //TODO: Move to one method
         if (gtfsFeed == null) {
-            gtfsFeed = createGtfsFeedModel(gtfsFeedUrl, saveFilePath);
+            gtfsFeed = createGtfsFeedModel(gtfsFeedUrl, saveFileName);
         } else {
             _log.info("GTFS URL already exists exists in database - checking if data has changed...");
             byte[] newChecksum = calculateMD5checksum(gtfsFeed.getFeedLocation());
@@ -147,7 +149,7 @@ public class GtfsFeed {
             if (MessageDigest.isEqual(newChecksum, oldChecksum)) {
                 _log.info("GTFS data hasn't changed since last execution");
                 String projectPath = new GetFile().getJarLocation().getParentFile().getAbsolutePath();
-                if(new File(projectPath +File.separator+ jsonFilePath +File.separator+ fileName + "_out.json").exists())
+                if (new File(projectPath + File.separator + jsonFilePath + File.separator + saveFileName + "_out.json").exists())
                     canReturn = true;
             } else {
                 _log.info("GTFS data has changed, updating database...");
@@ -173,14 +175,14 @@ public class GtfsFeed {
         
         FileSystemFeedBackend backend = new FileSystemFeedBackend();
         FeedValidationResultSet results = new FeedValidationResultSet();
-        File input = backend.getFeed(saveFilePath);
+        File input = backend.getFeed(saveFileName);
         FeedProcessor processor = new FeedProcessor(input);
         try {
             _log.info("Running static GTFS validation on " + gtfsFeedUrl + "...");
             processor.run();
         } catch (IOException ex) {
             Logger.getLogger(GtfsFeed.class.getName()).log(Level.SEVERE, null, ex);
-            return generateError("Unable to access input GTFS " + input.getPath() + ".", "Does the file " + saveFilePath + "exist and do I have permission to read it?", Response.Status.NOT_FOUND);
+            return generateError("Unable to access input GTFS " + input.getPath() + ".", "Does the file " + saveFileName + "exist and do I have permission to read it?", Response.Status.NOT_FOUND);
         }
         results.add(processor.getOutput());
         saveGtfsErrorCount(gtfsFeed, processor.getOutput());
@@ -188,10 +190,10 @@ public class GtfsFeed {
         //get the location of the executed jar file
         GetFile jarInfo = new GetFile();
         String saveDir = jarInfo.getJarLocation().getParentFile().getAbsolutePath();
-        saveFilePath = saveDir + File.separator + jsonFilePath + File.separator + fileName + "_out.json";
+        saveFileName = saveDir + File.separator + jsonFilePath + File.separator + saveFileName + "_out.json";
         try {
-            serializer.serializeToFile(new File(saveFilePath));
-            _log.info("Static GTFS validation data written to " + saveFilePath);
+            serializer.serializeToFile(new File(saveFileName));
+            _log.info("Static GTFS validation data written to " + saveFileName);
         } catch (Exception e) {
             _log.error("Exception running static GTFS validation on " + gtfsFeedUrl + ": " + e.getMessage());
         } 
@@ -228,35 +230,6 @@ public class GtfsFeed {
             connection = null;
         }
         return connection;
-    }
-
-    private String getSaveFilePath(String gtfsFeedUrl, HttpURLConnection connection) {
-        String saveFilePath;
-        String fileName = "";
-        String disposition = connection.getHeaderField("Content-Disposition");
-
-        if (disposition == null) {
-            //Extracts file name from URL
-            fileName = gtfsFeedUrl.substring(gtfsFeedUrl.lastIndexOf("/") + 1,
-                    gtfsFeedUrl.length());
-        } else {
-            //Extracts file name from header field
-            int index = disposition.indexOf("filename=");
-            int filenameLastIndex = disposition.indexOf("\"", index + 10);
-            if (index > 0) {
-                fileName = disposition.substring(index + 10, filenameLastIndex);
-            }
-        }
-
-        //get the location of the executed jar file
-        GetFile jarInfo = new GetFile();
-
-        //remove file.jar from the path to get the folder where the jar is
-        File jarLocation = jarInfo.getJarLocation().getParentFile();
-        String saveDir = jarLocation.toString();
-
-        saveFilePath = saveDir + File.separator + fileName;
-        return saveFilePath;
     }
 
     private GtfsFeedModel createGtfsFeedModel(String gtfsFeedUrl, String saveFilePath) {

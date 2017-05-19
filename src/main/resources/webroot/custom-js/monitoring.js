@@ -65,7 +65,7 @@ function loadGtfsErrorCount(gtfsFeedId) {
     $.get(server + "/api/gtfs-feed/" + gtfsFeedId + "/errorCount").done(function (data)  {
         $("#gtfs-error").text(data["errorCount"]);
 
-        var linkToReport = '<a href = ' + localStorage.getItem("reportURL") + localStorage.getItem("gtfsFileName") + '_out.json target="_blank">' + data["errorCount"] + ' error(s)/warning(s)</a>';
+        var linkToReport = '<a href = ' + localStorage.getItem("reportURL") + encodeURIComponent(encodeURIComponent(localStorage.getItem("gtfsFileName"))) + '_out.json target="_blank">' + data["errorCount"] + ' error(s)/warning(s)</a>';
         $(".GTFS-report-link").html(linkToReport);
     });
 }
