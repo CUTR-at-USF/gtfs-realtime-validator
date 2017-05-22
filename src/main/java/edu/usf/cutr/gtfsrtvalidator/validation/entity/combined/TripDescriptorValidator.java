@@ -51,6 +51,14 @@ import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
  *
  * E024 - trip direction_id does not match GTFS data
  *
+ * E030 - Alert trip_id does not belong to alert route_id
+ *
+ * E031 - Alert informed_entity.route_id does not match informed_entity.trip.route_id
+ *
+ * E032 - Alert does not have an informed_entity
+ *
+ * E033 - Alert informed_entity does not have any specifiers
+ *
  * W006 - trip_update missing trip_id
  */
 public class TripDescriptorValidator implements FeedEntityValidator {
@@ -66,6 +74,10 @@ public class TripDescriptorValidator implements FeedEntityValidator {
         List<OccurrenceModel> errorListE021 = new ArrayList<>();
         List<OccurrenceModel> errorListE023 = new ArrayList<>();
         List<OccurrenceModel> errorListE024 = new ArrayList<>();
+        List<OccurrenceModel> errorListE030 = new ArrayList<>();
+        List<OccurrenceModel> errorListE031 = new ArrayList<>();
+        List<OccurrenceModel> errorListE032 = new ArrayList<>();
+        List<OccurrenceModel> errorListE033 = new ArrayList<>();
         List<OccurrenceModel> errorListW006 = new ArrayList<>();
 
         // Check the route_id values against the values from the GTFS feed
@@ -144,6 +156,24 @@ public class TripDescriptorValidator implements FeedEntityValidator {
                 checkE021(entity.getVehicle(), trip, errorListE021);
                 checkE024(entity.getVehicle(), trip, gtfsMetadata, errorListE024);
             }
+            if (entity.hasAlert()) {
+                GtfsRealtime.Alert alert = entity.getAlert();
+                List<GtfsRealtime.EntitySelector> entitySelectors = alert.getInformedEntityList();
+                if (entitySelectors != null && entitySelectors.size() > 0) {
+                    for (GtfsRealtime.EntitySelector entitySelector : entitySelectors) {
+                        checkE033(entity, entitySelector, errorListE033);
+                        if (entitySelector.hasRouteId() && entitySelector.hasTrip()) {
+                            checkE030(entity, entitySelector, gtfsMetadata, errorListE030);
+                            checkE031(entity, entitySelector, errorListE031);
+                        }
+                    }
+                } else {
+                    // E032 - Alert does not have an informed_entity
+                    OccurrenceModel om = new OccurrenceModel("alert ID " + entity.getId() + " does not have an informed_entity");
+                    errorListE032.add(om);
+                    _log.debug(om.getPrefix() + " " + E032.getOccurrenceSuffix());
+                }
+            }
         }
         List<ErrorListHelperModel> errors = new ArrayList<>();
         if (!errorListE003.isEmpty()) {
@@ -166,6 +196,18 @@ public class TripDescriptorValidator implements FeedEntityValidator {
         }
         if (!errorListE024.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(E024), errorListE024));
+        }
+        if (!errorListE030.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E030), errorListE030));
+        }
+        if (!errorListE031.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E031), errorListE031));
+        }
+        if (!errorListE032.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E032), errorListE032));
+        }
+        if (!errorListE033.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E033), errorListE033));
         }
         if (!errorListW006.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(W006), errorListW006));
@@ -268,6 +310,80 @@ public class TripDescriptorValidator implements FeedEntityValidator {
                         " but GTFS trip.direction_id is " + gtfsTrip.getDirectionId());
                 errors.add(om);
                 _log.debug(om.getPrefix() + " " + E024.getOccurrenceSuffix());
+            }
+        }
+    }
+
+    /**
+     * Checks rule E030 - "GTFS-rt alert trip_id does not belong to GTFS-rt alert route_id in GTFS trips.txt" and adds
+     * any errors that are found to the provided errors list
+     *
+     * @param entity         feed entity to examine that contains an alert
+     * @param entitySelector EntitySelector that has both a routeId and a tripDescriptor
+     * @param gtfsMetadata   metadata for the static GTFS data
+     * @param errors         list to add any errors for E030 to
+     */
+    private void checkE030(GtfsRealtime.FeedEntity entity, GtfsRealtime.EntitySelector entitySelector, GtfsMetadata gtfsMetadata, List<OccurrenceModel> errors) {
+        String routeId = entitySelector.getRouteId();
+        GtfsRealtime.TripDescriptor tripDescriptor = entitySelector.getTrip();
+        if (tripDescriptor.hasTripId()) {
+            Trip gtfsTrip = gtfsMetadata.getTrips().get(tripDescriptor.getTripId());
+            if (gtfsTrip != null && !routeId.equals(gtfsTrip.getRoute().getId().getId())) {
+                // E030 - Alert trip_id does not belong to alert route_id
+                OccurrenceModel om = new OccurrenceModel("alert ID " + entity.getId() + " informed_entity.trip.trip_id "
+                        + tripDescriptor.getTripId() + " does not belong to informed_entity.route_id " + routeId + " (GTFS says it belongs to route_id " + gtfsTrip.getRoute().getId().getId() + ")");
+                errors.add(om);
+                _log.debug(om.getPrefix() + " " + E030.getOccurrenceSuffix());
+            }
+        }
+    }
+
+    /**
+     * Checks rule E031 - "Alert informed_entity.route_id does not match informed_entity.trip.route_id" and adds
+     * any errors that are found to the provided errors list
+     *
+     * @param entity         feed entity to examine that contains an alert
+     * @param entitySelector EntitySelector that has both a routeId and a tripDescriptor
+     * @param errors         list to add any errors for E031 to
+     */
+    private void checkE031(GtfsRealtime.FeedEntity entity, GtfsRealtime.EntitySelector entitySelector, List<OccurrenceModel> errors) {
+        if (entitySelector.getTrip().hasRouteId()) {
+            String routeId = entitySelector.getRouteId();
+            if (!entitySelector.getTrip().getRouteId().equals(routeId)) {
+                // E031 - Alert informed_entity.route_id does not match informed_entity.trip.route_id
+                OccurrenceModel om = new OccurrenceModel("alert ID " + entity.getId() + " informed_entity.route_id " + routeId + " does not equal informed_entity.trip.route_id " + entitySelector.getTrip().getRouteId());
+                errors.add(om);
+                _log.debug(om.getPrefix() + " " + E031.getOccurrenceSuffix());
+            }
+        }
+    }
+
+    /**
+     * Checks rule E033 - "Alert informed_entity does not have any specifiers" and adds
+     * any errors that are found to the provided errors list
+     *
+     * @param entity         feed entity to examine that contains an alert
+     * @param entitySelector EntitySelector to examine for specifiers
+     * @param errors         list to add any errors for E033 to
+     */
+    private void checkE033(GtfsRealtime.FeedEntity entity, GtfsRealtime.EntitySelector entitySelector, List<OccurrenceModel> errors) {
+        GtfsRealtime.TripDescriptor trip = null;
+        if (entitySelector.hasTrip()) {
+            trip = entitySelector.getTrip();
+        }
+
+        if (!entitySelector.hasAgencyId() &&
+                !entitySelector.hasRouteId() &&
+                !entitySelector.hasRouteType() &&
+                !entitySelector.hasStopId()) {
+            // informed_entity isn't populated - check TripDescriptor
+            if (trip == null ||
+                    (!trip.hasTripId() &&
+                            !trip.hasRouteId())) {
+                // E033 - Alert informed_entity does not have any specifiers
+                OccurrenceModel om = new OccurrenceModel("alert ID " + entity.getId() + " informed_entity and informed_entity.trip do not not reference any agency, route, trip, or stop");
+                errors.add(om);
+                _log.debug(om.getPrefix() + " " + E033.getOccurrenceSuffix());
             }
         }
     }
