@@ -47,12 +47,12 @@
             <div class="well content-well">
                 <h3>What is the GTFS-Realtime Validator?</h3>
                 <hr/>
-                <p>This tool takes a GTFS and GTFS-rt feeds as inputs, and examines the GTFS-rt feed to determine if it
-                    properly meets GTFS-rt best practices, both those explicitly listed in the spec and those based on
-                    the needs of consuming applications.</p>
+                <p>This tool takes GTFS and GTFS-realtime feeds as inputs, and examines the GTFS-realtime
+                    feed to determine if it properly meets GTFS-realtime best practices,
+                    both those explicitly listed in the spec and those based on the needs of consuming applications.</p>
 
-                <p>The rules that this tool validates against are listed <a
-                        href="https://github.com/CUTR-at-USF/gtfs-realtime-validator/wiki/List-of-Validation-Rules">here</a>
+                <p>The rules that this tool uses to validate feeds are listed
+                    <a href="https://github.com/CUTR-at-USF/gtfs-realtime-validator/blob/master/RULES.md">here</a>
                 </p>
             </div>
         </div>
@@ -62,16 +62,13 @@
                 <h3>Getting Started</h3>
                 <hr/>
                 <ol>
-                    <li>Input a GTFS feed link (Having at least one feed is mandatory)</li>
-                    <li>Press "<span class="glyphicon glyphicon-plus"></span> Add Feed" if more feed needs to be
+                    <li>Add a link to your GTFS feed zip file (e.g., http://mygtfs.org/gtfs.zip)</li>
+                    <li>Add a link to your GTFS-realtime feed (e.g., http://mygtfs.org/trip-updates)</li>
+                    <li>Press " <span class="glyphicon glyphicon-plus"></span> Add Feed " if more feed needs to be
                         monitored
                     </li>
-                    <li>The "<span class="glyphicon glyphicon-minus"></span> Remove Feed" can be used for removing any
-                        fields added accidentally
-                    </li>
-                    <li>Add the associated GTFS feed link on the "GTFS feed" field.</li>
-                    <li>Press the start button to start the monitoring process.</li>
-                    <li>Reset button can be used to reset all fields.</li>
+                    <li>Press the Start button to begin validation</li>
+                    <li>Reset button can be used to reset all fields</li>
 
                 </ol>
             </div>
@@ -87,7 +84,18 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="well">
-                                <h4>Step 1: add your the URL/file of your RT feed</h4>
+                                <h4>Step 1: Add the URL for your GTFS zip file</h4>
+                                <hr/>
+                                <div class="form-group has-feedback has-clear">
+                                    <label for="gtfs">GTFS feed</label>
+                                    <input type="text" class="form-control" name="gtfs" id="gtfs"/>
+                                    <span class="form-control-clear glyphicon glyphicon-remove form-control-feedback hidden"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="well">
+                                <h4>Step 2: Add the URL for your GTFS-realtime feed</h4>
                                 <hr/>
 
                                 <div id="dynamicInput">
@@ -105,7 +113,7 @@
                                                 class="glyphicon glyphicon-minus-sign"></span> Remove Feed</a>
                                     </div>
                                     <div class="col-md-6">
-                                        <span class="pull-right">Interval (sec.):
+                                        <span class="pull-right">Interval (seconds):
                                         <input name="updateInterval" type="number" value="10" min="1" step="1"
                                                oninvalid="setCustomValidity('Interval must be at least 1 second')"
                                                onchange="try{setCustomValidity('')}catch(e){}"/></span>
@@ -113,17 +121,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="well">
-                                <h4>Step 2: add your GTFS feed</h4>
-                                <hr/>
-                                <div class="form-group has-feedback has-clear">
-                                    <label for="gtfs">GTFS feed</label>
-                                    <input type="text" class="form-control" name="gtfs" id="gtfs"/>
-                                    <span class="form-control-clear glyphicon glyphicon-remove form-control-feedback hidden"></span>
-                                </div>
-                            </div>
-                        </div>
+
                     </div>
                     <div align="right">
                         <input class="btn btn-primary" type="reset" value="Reset"/>
