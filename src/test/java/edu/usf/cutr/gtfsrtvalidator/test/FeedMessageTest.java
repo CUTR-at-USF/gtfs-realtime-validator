@@ -39,10 +39,13 @@ public abstract class FeedMessageTest {
     public GtfsMetadata gtfsData2Metadata;
     public GtfsDaoImpl bullRunnerGtfs; // For Frequency-based exact_times=0 trips
     public GtfsMetadata bullRunnerGtfsMetadata;
+    public GtfsDaoImpl bullRunnerGtfsNoShapes; // Missing shapes.txt
+    public GtfsMetadata bullRunnerGtfsNoShapesMetadata;
     public GtfsReader reader;
     public final File staticGtfsFile = new File("src/test/resources/testagency.zip");
     public final File staticGtfs2File = new File("src/test/resources/testagency2.zip");
     public final File bullRunnerGtfsFile = new File("src/test/resources/bullrunner-gtfs.zip");
+    public final File bullRunnerNoShapesGtfsFile = new File("src/test/resources/bullrunner-gtfs-no-shapes.zip");
     public final static String ENTITY_ID = "TEST_ENTITY";
     
     public List<ErrorListHelperModel> results;
@@ -86,7 +89,7 @@ public abstract class FeedMessageTest {
         reader.setInputLocation(staticGtfs2File);
         reader.setEntityStore(gtfsData2);
         reader.run();
-        agencies = gtfsData.getAllAgencies();
+        agencies = gtfsData2.getAllAgencies();
         for (Agency agency : agencies) {
             timeZoneText = agency.getTimezone();
             break;
@@ -98,12 +101,24 @@ public abstract class FeedMessageTest {
         reader.setInputLocation(bullRunnerGtfsFile);
         reader.setEntityStore(bullRunnerGtfs);
         reader.run();
-        agencies = gtfsData.getAllAgencies();
+        agencies = bullRunnerGtfs.getAllAgencies();
         for (Agency agency : agencies) {
             timeZoneText = agency.getTimezone();
             break;
         }
         bullRunnerGtfsMetadata = new GtfsMetadata("bullrunner-gtfs.zip", TimeZone.getTimeZone(timeZoneText), bullRunnerGtfs);
+
+        bullRunnerGtfsNoShapes = new GtfsDaoImpl();
+        reader = new GtfsReader();
+        reader.setInputLocation(bullRunnerNoShapesGtfsFile);
+        reader.setEntityStore(bullRunnerGtfsNoShapes);
+        reader.run();
+        agencies = bullRunnerGtfsNoShapes.getAllAgencies();
+        for (Agency agency : agencies) {
+            timeZoneText = agency.getTimezone();
+            break;
+        }
+        bullRunnerGtfsNoShapesMetadata = new GtfsMetadata("bullrunner-gtfs.zip", TimeZone.getTimeZone(timeZoneText), bullRunnerGtfsNoShapes);
         
         clearAndInitRequiredFeedFields();
     }

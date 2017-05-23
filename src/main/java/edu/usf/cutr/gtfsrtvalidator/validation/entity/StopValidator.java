@@ -75,12 +75,12 @@ public class StopValidator implements FeedEntityValidator {
                 GtfsRealtime.VehiclePosition v = entity.getVehicle();
                 if (v.hasStopId()) {
                     if (!gtfsMetadata.getStopIds().contains(v.getStopId())) {
-                        OccurrenceModel om = new OccurrenceModel(v.hasVehicle() && v.getVehicle().hasId() ? "vehicle_id " + v.getVehicle().getId() + " " : "" + "stop_id " + v.getStopId());
+                        OccurrenceModel om = new OccurrenceModel((v.hasVehicle() && v.getVehicle().hasId() ? "vehicle_id " + v.getVehicle().getId() + " " : "") + "stop_id " + v.getStopId());
                         e011List.add(om);
                     }
                     Integer locationType = gtfsMetadata.getStopToLocationTypeMap().get(v.getStopId());
                     if (locationType != null && locationType != 0) {
-                        OccurrenceModel om = new OccurrenceModel(v.hasVehicle() && v.getVehicle().hasId() ? "vehicle_id " + v.getVehicle().getId() + " " : "" + "stop_id " + v.getStopId());
+                        OccurrenceModel om = new OccurrenceModel((v.hasVehicle() && v.getVehicle().hasId() ? "vehicle_id " + v.getVehicle().getId() + " " : "") + "stop_id " + v.getStopId());
                         e015List.add(om);
                         _log.debug(om.getPrefix() + " " + E015.getOccurrenceSuffix());
                     }

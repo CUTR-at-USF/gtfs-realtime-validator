@@ -158,4 +158,12 @@ public class ValidationRules {
     public static final ValidationRule E027 = new ValidationRule("E027", "ERROR", "Invalid vehicle bearing",
             "Vehicle bearing must be between 0 and 360 degrees (inclusive)",
             "- bearing must be between 0 and 360 degrees (inclusive)");
+
+    public static final ValidationRule E028 = new ValidationRule("E028", "ERROR", "Vehicle position outside agency coverage area",
+            "The vehicle position should be inside the agency coverage area.  This is defined as within roughly 1/8 of a mile (200 meters) of the GTFS shapes.txt data, or stops.txt locations if the GTFS feed doesn't include shapes.txt.",
+            "- vehicle should be within area");
+
+    public static final ValidationRule E029 = new ValidationRule("E029", "ERROR", "Vehicle position far from trip shape",
+            "The vehicle position should be within a certain distance of the GTFS shapes.txt data for the current trip unless there is a Service Alert with the Effect of DETOUR for this trip_id.",
+            "- vehicle should be near trip shape or on DETOUR");
 }

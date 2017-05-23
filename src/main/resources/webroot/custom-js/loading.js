@@ -150,8 +150,8 @@ function monitorGtfsRtFeeds(gtfsrtUrlList, gtfsFeedId) {
 //Download the provided GTFS feed
 function downloadGTFSFeed() {
     var paramVal = getUrlParameter("gtfs");
+    localStorage.setItem("gtfsFileName", paramVal);
     paramVal = decodeURIComponent(paramVal);
-    localStorage.setItem("gtfsFileName", paramVal.split('/').pop().split('.')[0]);
 
     var progressID = "#gtfs-progress";
 

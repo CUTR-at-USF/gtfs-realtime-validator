@@ -17,13 +17,20 @@
 
 package edu.usf.cutr.gtfsrtvalidator.background;
 
+import org.locationtech.spatial4j.context.jts.JtsSpatialContext;
+import org.locationtech.spatial4j.distance.DistanceUtils;
+import org.locationtech.spatial4j.shape.Rectangle;
+import org.locationtech.spatial4j.shape.Shape;
+import org.locationtech.spatial4j.shape.ShapeFactory;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.onebusaway.gtfs.model.*;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils.logDuration;
+import static org.hibernate.internal.util.StringHelper.isEmpty;
 
 /**
  * This is a container class for metadata about a GTFS feed that's used in rule validation
@@ -31,6 +38,11 @@ import static edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils.logDuration;
 public class GtfsMetadata {
 
     private static final org.slf4j.Logger _log = LoggerFactory.getLogger(GtfsMetadata.class);
+
+    // Spatial operation buffer values
+    public static final double REGION_BUFFER_METERS = 1609; // Roughly 1 mile
+    public static final double TRIP_BUFFER_METERS = 200; // Roughly 1/8 of a mile
+    public static final double TRIP_BUFFER_DEGREES = DistanceUtils.KM_TO_DEG * (TRIP_BUFFER_METERS / 1000.0d);
 
     String mFeedUrl;
     TimeZone mTimeZone;
@@ -44,6 +56,24 @@ public class GtfsMetadata {
     private Set<String> mExactTimesZeroTripIds = new HashSet<>();
     // Maps trip_id to a list of Frequency objects
     private Map<String, List<Frequency>> mExactTimesOneTrips = new HashMap<>();
+    // Maps shape_id to a list of ShapePoints
+    private Map<String, List<ShapePoint>> mShapePoints = new HashMap<>();
+    // Map trip_id to a polyline of the trip shape from shapes.txt
+    private Map<String, Shape> mTripShapes = new HashMap<>();
+    // Map trip_id to a buffered polyline of the trip shape from shapes.txt
+    private Map<String, Shape> mTripShapesBuffered = new ConcurrentHashMap<>();
+
+    // A geographic bounding box that includes all the stops from GTFS stops.txt
+    private Rectangle mStopBoundingBox;
+
+    // A geographic bounding box that that includes all stops from GTFS stops.txt PLUS a buffer
+    private Rectangle mStopBoundingBoxWithBuffer;
+
+    // A geographic bounding box that includes all the points from GTFS shapes.txt, if the GTFS feed includes shapes.txt
+    private Rectangle mShapeBoundingBox = null;
+
+    // A geographic bounding box that includes all the points from GTFS shapes.txt, if the GTFS feed includes shapes.txt, PLUS a buffer
+    private Rectangle mShapeBoundingBoxWithBuffer = null;
 
     /**
      * key is stops.txt stop_id, value is stops.txt location_type
@@ -62,6 +92,7 @@ public class GtfsMetadata {
      */
     public GtfsMetadata(String feedUrl, TimeZone timeZone, GtfsDaoImpl gtfsData) {
         long startTime = System.nanoTime();
+        _log.info("Building GtfsMetadata for " + feedUrl + "...");
 
         mFeedUrl = feedUrl;
         mTimeZone = timeZone;
@@ -70,6 +101,39 @@ public class GtfsMetadata {
         Collection<Route> gtfsRouteList = gtfsData.getAllRoutes();
         for (Route r : gtfsRouteList) {
             mRouteIds.add(r.getId().getId());
+        }
+
+        /**
+         * Process GTFS shapes.txt
+         */
+        double regionBufferDegrees = DistanceUtils.KM_TO_DEG * (REGION_BUFFER_METERS / 1000.0d);
+
+        ShapeFactory sf = JtsSpatialContext.GEO.getShapeFactory();
+        ShapeFactory.MultiPointBuilder shapeBuilder = sf.multiPoint();
+        Collection<ShapePoint> shapePoints = gtfsData.getAllShapePoints();
+        if (shapePoints != null && shapePoints.size() > 3) {
+            for (ShapePoint p : shapePoints) {
+                String shapeId = p.getShapeId().getId();
+                // If there isn't already a list for this shape_id, create one
+                List<ShapePoint> shapePointList = mShapePoints.computeIfAbsent(shapeId, k -> new ArrayList<>());
+                shapePointList.add(p);
+                // Create GTFS shapes.txt bounding box
+                shapeBuilder.pointXY(p.getLon(), p.getLat());
+            }
+            _log.debug("Loaded shapes.txt points for " + feedUrl);
+
+            Shape shapePointShape = shapeBuilder.build();
+            mShapeBoundingBox = shapePointShape.getBoundingBox();
+            mShapeBoundingBoxWithBuffer = mShapeBoundingBox.getBuffered(regionBufferDegrees, mShapeBoundingBox.getContext()).getBoundingBox();
+            _log.debug("Generated shapes.txt bounding boxes for " + feedUrl);
+
+            // Order shape points by GTFS shapes.txt shape_pt_sequence
+            _log.debug("Sorting shape points for " + feedUrl + "...");
+            Collection<List<ShapePoint>> shapePointLists = mShapePoints.values();
+            for (List<ShapePoint> shapePointList : shapePointLists) {
+                shapePointList.sort(Comparator.comparing(shapePoint -> (shapePoint.getSequence())));
+            }
+            _log.debug("Shape points for " + feedUrl + " are sorted.");
         }
 
         // Get all StopTimes and map them to trip_ids
@@ -81,7 +145,11 @@ public class GtfsMetadata {
             stopTimes.add(stopTime);
         }
 
-        // Get all trip_ids from the GTFS feed
+        /**
+         * Process GTFS trips.txt - this is a long-running operation for feeds with huge shapes.txt, so log to INFO
+         */
+        _log.info("Processing trips and building trip shapes for " + feedUrl + "...");
+        long tripStartTime = System.nanoTime();
         Collection<Trip> gtfsTripList = gtfsData.getAllTrips();
         for (Trip trip : gtfsTripList) {
             String tripId = trip.getId().getId();
@@ -92,21 +160,49 @@ public class GtfsMetadata {
                 // Make sure StopTimes are sorted by stop_sequence for this trip (stop_times.txt isn't necessary sorted)
                 stopTimes.sort(Comparator.comparing(stopTime -> (stopTime.getStopSequence())));
             }
-        }
 
-        // Create a set of stop_ids from the GTFS feeds stops.txt, and store their location_type in a map
+            // Create a polyline for each trip if the GTFS shapes.txt data exists
+            AgencyAndId shapeAgencyAndId = trip.getShapeId();
+            if (shapeAgencyAndId != null && !isEmpty(shapeAgencyAndId.getId())) {
+                List<ShapePoint> tripShape = mShapePoints.get(shapeAgencyAndId.getId());
+                if (tripShape != null) {
+                    ShapeFactory.LineStringBuilder lineBuilder = sf.lineString();
+                    for (ShapePoint p : tripShape) {
+                        lineBuilder.pointXY(p.getLon(), p.getLat());
+                    }
+                    mTripShapes.put(tripId, lineBuilder.build());
+                }
+            }
+        }
+        logDuration(_log, "Trips polylines processed for " + feedUrl + " in ", tripStartTime);
+
+        /**
+         * Process GTFS stops.txt
+         */
+        ShapeFactory.MultiPointBuilder stopBuilder = sf.multiPoint();
         Collection<Stop> stops = gtfsData.getAllStops();
         for (Stop stop : stops) {
+            // Create a set of stop_ids from the GTFS feeds stops.txt, and store their location_type in a map
             mStopIds.add(stop.getId().getId());
             mStopToLocationTypeMap.put(stop.getId().getId(), stop.getLocationType());
+            // Create GTFS stops.txt bounding box
+            stopBuilder.pointXY(stop.getLon(), stop.getLat());
         }
 
-        // Create a set of all exact_times=0 trips
+        Shape stopShape = stopBuilder.build();
+        mStopBoundingBox = stopShape.getBoundingBox();
+        mStopBoundingBoxWithBuffer = mStopBoundingBox.getBuffered(regionBufferDegrees, mStopBoundingBox.getContext()).getBoundingBox();
+
+        /**
+         * Process GTFS frequencies.txt
+         */
         Collection<Frequency> frequencies = gtfsData.getAllFrequencies();
         for (Frequency f : frequencies) {
             if (f.getExactTimes() == 0) {
+                // All exact_times=0 trips
                 mExactTimesZeroTripIds.add(f.getTrip().getId().getId());
             } else if (f.getExactTimes() == 1) {
+                // All exact_times=1 trips
                 List<Frequency> frequencyList = mExactTimesOneTrips.get(f.getTrip().getId().getId());
                 if (frequencyList == null) {
                     frequencyList = new ArrayList<>();
@@ -174,5 +270,82 @@ public class GtfsMetadata {
      */
     public TimeZone getTimeZone() {
         return mTimeZone;
+    }
+
+    /**
+     * Returns a geographic bounding box for the stop locations from GTFS stops.txt
+     *
+     * @return a geographic bounding box for the stop locations from GTFS stops.txt
+     */
+    public Rectangle getStopBoundingBox() {
+        return mStopBoundingBox;
+    }
+
+    /**
+     * Returns a geographic bounding box for the stop locations from GTFS stops.txt with an added buffer REGION_BUFFER_METERS
+     *
+     * @return a geographic bounding box for the stop locations from GTFS stops.txt with an added buffer REGION_BUFFER_METERS
+     */
+    public Rectangle getStopBoundingBoxWithBuffer() {
+        return mStopBoundingBoxWithBuffer;
+    }
+
+    /**
+     * Returns a geographic bounding box for the shape locations from GTFS shapes.txt, if the GTFS feed includes shapes.txt, or null if it does not
+     *
+     * @return a geographic bounding box for the shape locations from GTFS shapes.txt, if the GTFS feed includes shapes.txt, or null if it does not
+     */
+    public Rectangle getShapeBoundingBox() {
+        return mShapeBoundingBox;
+    }
+
+    /**
+     * Returns a geographic bounding box for the shape locations from GTFS shapes.txt, if the GTFS feed includes shapes.txt, with an added buffer REGION_BUFFER_METERS, or null if it does not
+     *
+     * @return a geographic bounding box for the shape locations from GTFS shapes.txt, if the GTFS feed includes shapes.txt, with an added buffer REGION_BUFFER_METERS, or null if it does not
+     */
+    public Rectangle getShapeBoundingBoxWithBuffer() {
+        return mShapeBoundingBoxWithBuffer;
+    }
+
+    /**
+     * Returns a map of GTFS shape_id to a list of ShapePoints from GTFS shapes.txt
+     *
+     * @return a map of GTFS shape_id to a list of ShapePoints from GTFS shapes.txt
+     */
+    public Map<String, List<ShapePoint>> getShapePoints() {
+        return mShapePoints;
+    }
+
+    /**
+     * Returns a map of GTFS trip_ids to a polyline of that trip's shape from shapes.txt
+     *
+     * @return a map of GTFS trip_ids to a polyline of that trip's shape from shapes.txt
+     */
+    public Map<String, Shape> getTripShapes() {
+        return mTripShapes;
+    }
+
+    /**
+     * Returns a buffered representation (TRIP_BUFFER_METERS) of a GTFS trip shape from shapes.txt for the given tripId,
+     * or null if a shape doesn't exist for the given tripId.
+     * <p>
+     *
+     * @param tripId the GTFS trip_id to retrieve a buffered trip shape for
+     * @return a buffered representation (TRIP_BUFFER_METERS) of a GTFS trip shape from shapes.txt for the given tripId,
+     * or null if a shape doesn't exist for the given trip.
+     */
+    public Shape getBufferedTripShape(String tripId) {
+        if (mTripShapes == null) {
+            // No shapes at all
+            return null;
+        }
+        Shape s = mTripShapes.get(tripId);
+        if (s == null) {
+            // No shape for this trip_id
+            return null;
+        }
+        // Create the buffered version of the trip shape if it doesn't yet exist
+        return mTripShapesBuffered.computeIfAbsent(tripId, k -> s.getBuffered(TRIP_BUFFER_DEGREES, s.getContext()));
     }
 }

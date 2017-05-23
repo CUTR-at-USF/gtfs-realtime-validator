@@ -25,13 +25,18 @@ import edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils;
 import edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
 import org.junit.Test;
+import org.locationtech.spatial4j.shape.Shape;
+import org.locationtech.spatial4j.shape.ShapeFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
 
 import static edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils.MIN_POSIX_TIME;
+import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
+import static org.locationtech.spatial4j.context.SpatialContext.GEO;
 
 /**
  * Test utility methods
@@ -318,6 +323,31 @@ public class UtilTest {
         positionBuilder.setBearing(361);
 
         assertEquals(false, GtfsUtils.isBearingValid(positionBuilder.build()));
+    }
+
+    @Test
+    public void testPositionWithinShape() {
+        // Create USF Bull Runner bounding box
+        ShapeFactory sf = GEO.getShapeFactory();
+        ShapeFactory.MultiPointBuilder shapeBuilder = sf.multiPoint();
+        shapeBuilder.pointXY(-82.438456, 28.041606);
+        shapeBuilder.pointXY(-82.438456, 28.082202);
+        shapeBuilder.pointXY(-82.399531, 28.082202);
+        shapeBuilder.pointXY(-82.399531, 28.041606);
+        Shape boundingBox = shapeBuilder.build().getBoundingBox();
+
+        // Test utility method - USF campus location
+        GtfsRealtime.Position.Builder positionBuilder = GtfsRealtime.Position.newBuilder();
+        positionBuilder.setLatitude(28.0587f);
+        positionBuilder.setLongitude(-82.4139f);
+        boolean result = GtfsUtils.isPositionWithinShape(positionBuilder.build(), boundingBox);
+        assertTrue(result);
+
+        // Test utility method -  Downtown Tampa, FL
+        positionBuilder.setLatitude(27.9482837f);
+        positionBuilder.setLongitude(-82.4655826f);
+        result = GtfsUtils.isPositionWithinShape(positionBuilder.build(), boundingBox);
+        assertFalse(result);
     }
 
     @Test(expected = IllegalArgumentException.class)
