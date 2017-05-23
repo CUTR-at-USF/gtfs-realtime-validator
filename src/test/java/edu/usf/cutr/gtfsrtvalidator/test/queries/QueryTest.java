@@ -143,7 +143,7 @@ public class QueryTest extends TestCase {
 
         // We need to retrieve maximum of 3 records from database
         rowsPerPage = 3;
-        mergeMonitorData = (MergeMonitorData) gtfsRtFeed.getMonitorData(gtfsRtId, currentPage, rowsPerPage, "", currentPage, rowsPerPage).getEntity();
+        mergeMonitorData = (MergeMonitorData) gtfsRtFeed.getMonitorData(gtfsRtId, currentPage, rowsPerPage, "", currentPage, rowsPerPage, 0, 0).getEntity();
 
         assertEquals(staticResult, mergeMonitorData.getViewErrorSummaryModelList());
     }
@@ -247,7 +247,7 @@ public class QueryTest extends TestCase {
 
         // We need to retrieve maximum of 3 records from database
         rowsPerPage = 6;
-        mergeMonitorData = (MergeMonitorData) gtfsRtFeed.getMonitorData(gtfsRtId, currentPage, rowsPerPage, "", currentPage, rowsPerPage)
+        mergeMonitorData = (MergeMonitorData) gtfsRtFeed.getMonitorData(gtfsRtId, currentPage, rowsPerPage, "", currentPage, rowsPerPage, 0, 0)
                 .getEntity();
 
         assertEquals(staticResult, mergeMonitorData.getViewErrorLogModelList());

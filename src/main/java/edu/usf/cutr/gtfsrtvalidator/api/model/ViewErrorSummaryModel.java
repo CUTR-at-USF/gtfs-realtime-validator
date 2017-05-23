@@ -53,7 +53,7 @@ import java.io.Serializable;
                                 "FROM GtfsRtFeedIteration " +
                                 "WHERE rtFeedID = ?) GtfsRtFeedIDIteration " +
                             "ON MessageLog.iterationID = GtfsRtFeedIDIteration.IterationID " +
-                                "AND IterationTimestamp > ? " +
+                                "AND IterationTimestamp >= ? AND IterationTimestamp <= ? " +
                             ") errorLog " +
                             "ORDER BY iterationId " +
                         ") " +

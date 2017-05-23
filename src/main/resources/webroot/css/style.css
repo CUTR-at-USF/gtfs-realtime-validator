@@ -2,6 +2,10 @@
     background-color: #ffffff;
 }
 
+.navbar-fixed-top {
+    min-height: 70px;
+}
+
 .content-well {
     padding-top: 0;
 }
@@ -72,7 +76,7 @@
 }
 
 .feed-padding {
-    padding-top: 70px;
+    padding-top: 80px;
 }
 
 #copy-clipboard {

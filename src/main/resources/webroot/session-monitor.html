@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GTFS-RT Validator</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap-toggle.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/jquery.bs_pagination.min.css">
+    <link rel="stylesheet" href="css/style.css"/>
+    <!--[if lt IE 9]>
+    <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+</head>
+<body>
+<div class="container main-container">
+    <div class="row" style="padding-top: 30px">
+        <div class="monitor-placeholder"></div>
+    </div>
+</div>
+
+<!-- script references -->
+<script src="js/jquery-2.1.4.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/bootstrap-toggle.min.js"></script>
+<script src="js/jquery.flot.js"></script>
+<script src="js/handlebars.js"></script>
+<script src="js/clipboard.min.js"></script>
+<script src="js/jquery.bs_pagination.min.js"></script>
+<script src="js/en.min.js"></script>
+
+<script id="feed-monitor-template" type="text/x-handlebars-template">
+    <div class="col-md-12">
+        <div class="well content-well">
+            <h3>Feed - {{gtfsRtUrl}}</h3>
+            <hr/>
+            <div class="well">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h3>Summary</h3>
+                    </div>
+                    <div class="col-md-4 pull-right">
+                        Http requests:
+                        <span class="info-text" id="requests">0</span>
+                    </div>
+                    <div class="col-md-4 pull-right">
+                        Unique responses:
+                        <span class="info-text" id="responses">0</span>
+                    </div>
+                </div>
+                <hr/>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Severity</th>
+                        <th>Last iteration</th>
+                        <th>Last time</th>
+                        <th>Count</th>
+                        <th>Show in log</th>
+                    </tr>
+                    </thead>
+
+                    <!-- placeholder for rows of records from the database -->
+                    <tbody id="monitor-table-summary">
+
+                    </tbody>
+                </table>
+
+                <div id="summary-pagination"></div>
+
+            </div>
+
+            <div class="well">
+                <h3>Log</h3>
+                <hr/>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Iteration</th>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Severity</th>
+                        <th data-toggle="tooltip" data-placement="top" title="GTFS-rt header timestamp">Timestamp <span class="glyphicon glyphicon-question-sign"></span>
+                        </th>
+                    </tr>
+                    </thead>
+
+                    <!-- placeholder for rows of records from the database -->
+                    <tbody id="monitor-table-log">
+
+                    </tbody>
+                </table>
+
+                <div id="log-pagination"></div>
+
+            </div>
+        </div>
+    </div>
+</script>
+
+<script id="feed-monitor-summary-row-template" type="text/x-handlebars-template">
+    {{#each this}}
+    <tr>
+        <td> <a href="https://github.com/CUTR-at-USF/gtfs-realtime-validator/blob/master/RULES.md#{{id}}" target="_blank">{{id}}</a> </td>
+        <td>{{title}}</td>
+
+        <td>{{severity}}</td>
+        <td>{{lastRowId}}</td>
+        <td title="Time zone: {{timeZone}}">{{formattedTimestamp}} ({{lastFeedTime}})</td>
+
+        <td>{{count}}</td>
+        <td><span class="toggleHolder" id="toggleId{{id}}"></span></td>
+    </tr>
+    {{/each}}
+</script>
+
+<script id="feed-monitor-log-row-template" type="text/x-handlebars-template">
+    {{#each this}}
+    <tr>
+        <td><a href="iteration.html?iteration={{iterationId}}&sessionIteration={{rowId}}" target="_blank">{{rowId}}</a></td>
+        <td>{{id}}</td>
+        <td>{{title}}</td>
+
+        <td>{{severity}}</td>
+        <td title="Time zone: {{timeZone}}">{{formattedTimestamp}} ({{occurrence}})</td>
+    </tr>
+    {{/each}}
+</script>
+
+<script src="custom-js/session-monitor.js"></script>
+
+</body>
+</html>
