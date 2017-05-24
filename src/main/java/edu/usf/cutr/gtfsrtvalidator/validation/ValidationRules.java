@@ -166,4 +166,20 @@ public class ValidationRules {
     public static final ValidationRule E029 = new ValidationRule("E029", "ERROR", "Vehicle position far from trip shape",
             "The vehicle position should be within a certain distance of the GTFS shapes.txt data for the current trip unless there is a Service Alert with the Effect of DETOUR for this trip_id.",
             "- vehicle should be near trip shape or on DETOUR");
+
+    public static final ValidationRule E030 = new ValidationRule("E030", "ERROR", "GTFS-rt alert trip_id does not belong to GTFS-rt alert route_id in GTFS trips.txt",
+            "The alert.informed_entity.trip.trip_id should belong to the specified alert.informed_entity.route_id in GTFS trips.txt",
+            "- informed_entity.route_id must match GTFS data");
+
+    public static final ValidationRule E031 = new ValidationRule("E031", "ERROR", "Alert informed_entity.route_id does not match informed_entity.trip.route_id",
+            "The alert.informed_entity.trip.route_id should be the same as the specified alert-informed_entity.route_id.",
+            "- routes_ids must be the same");
+
+    public static final ValidationRule E032 = new ValidationRule("E032", "ERROR", "Alert does not have an informed_entity",
+            "All alerts must have at least one informed_entity.",
+            "- alerts must have at least one informed_entity");
+
+    public static final ValidationRule E033 = new ValidationRule("E033", "ERROR", "Alert informed_entity does not have any specifiers",
+            "Alert informed_entity should have at least one specified value (route_id, trip_id, stop_id, etc) to which the alert applies.",
+            "- alert informed_entity should have at least one specified value");
 }

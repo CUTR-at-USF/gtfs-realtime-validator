@@ -470,4 +470,270 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
 
         clearAndInitRequiredFeedFields();
     }
+
+    /**
+     * E030 - GTFS-rt alert trip_id does not belong to GTFS-rt alert route_id in GTFS trips.txt
+     */
+    @Test
+    public void testE030() {
+        TripDescriptorValidator tripDescriptorValidator = new TripDescriptorValidator();
+
+        // In bullrunner-gtfs.zip trips.txt, trip_id=1 belongs to route_id=A
+        GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+        GtfsRealtime.EntitySelector.Builder entitySelectorBuilder = GtfsRealtime.EntitySelector.newBuilder();
+
+        // Don't set route_id or trip_id (but set stop_id - we need at least one specifier) - no errors
+        entitySelectorBuilder.setStopId("1234");
+        entitySelectorBuilder.setTrip(tripDescriptorBuilder.build());
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E030, results, 0);
+
+        // Set trip_id but not route_id - no errors
+        tripDescriptorBuilder.setTripId("1");
+        entitySelectorBuilder.setTrip(tripDescriptorBuilder.build());
+        alertBuilder.clearInformedEntity();
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E030, results, 0);
+
+        // Set route_id but not trip_id - no errors
+        tripDescriptorBuilder.clear();
+        entitySelectorBuilder.setRouteId("A");
+        entitySelectorBuilder.setTrip(tripDescriptorBuilder.build());
+        alertBuilder.clearInformedEntity();
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E030, results, 0);
+
+        // Set route_id and trip_id to correct values according to GTFS trips.txt - no errors
+        tripDescriptorBuilder.setTripId("1");
+        entitySelectorBuilder.setRouteId("A");
+        entitySelectorBuilder.setTrip(tripDescriptorBuilder.build());
+        alertBuilder.clearInformedEntity();
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E030, results, 0);
+
+        // Set route_id to something other than the correct value ("A") - 1 error
+        tripDescriptorBuilder.setTripId("1");
+        entitySelectorBuilder.setRouteId("B");
+        entitySelectorBuilder.setTrip(tripDescriptorBuilder.build());
+        alertBuilder.clearInformedEntity();
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E030, results, 1);
+
+        clearAndInitRequiredFeedFields();
+    }
+
+    /**
+     * E031 - Alert informed_entity.route_id does not match informed_entity.trip.route_id
+     */
+    @Test
+    public void testE031() {
+        TripDescriptorValidator tripDescriptorValidator = new TripDescriptorValidator();
+
+        // In bullrunner-gtfs.zip routes.txt, route_id=A is a valid route
+        GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+        GtfsRealtime.EntitySelector.Builder entitySelectorBuilder = GtfsRealtime.EntitySelector.newBuilder();
+
+        // Don't set either route_id (but set stop_id - we need at least one specifier) - no errors
+        entitySelectorBuilder.setStopId("1234");
+        entitySelectorBuilder.setTrip(tripDescriptorBuilder.build());
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E031, results, 0);
+
+        // Set informed_entity.route_id but not informed_entity.trip.route_id - no errors
+        entitySelectorBuilder.setRouteId("A");
+        entitySelectorBuilder.setTrip(tripDescriptorBuilder.build());
+        alertBuilder.clearInformedEntity();
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E031, results, 0);
+
+        // Set informed_entity.trip.route_id but not informed_entity.route_id - no errors
+        tripDescriptorBuilder.setRouteId("A");
+        entitySelectorBuilder.clear();
+        entitySelectorBuilder.setTrip(tripDescriptorBuilder.build());
+        alertBuilder.clearInformedEntity();
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E031, results, 0);
+
+        // Set informed_entity.trip.route_id and informed_entity.route_id to the same values - no errors
+        tripDescriptorBuilder.setRouteId("A");
+        entitySelectorBuilder.setRouteId("A");
+        entitySelectorBuilder.setTrip(tripDescriptorBuilder.build());
+        alertBuilder.clearInformedEntity();
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E031, results, 0);
+
+        // Set informed_entity.trip.route_id and informed_entity.route_id to they don't match - 1 error
+        tripDescriptorBuilder.setRouteId("A");
+        entitySelectorBuilder.setRouteId("B");
+        entitySelectorBuilder.setTrip(tripDescriptorBuilder.build());
+        alertBuilder.clearInformedEntity();
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E031, results, 1);
+
+        clearAndInitRequiredFeedFields();
+    }
+
+    /**
+     * E032 - Alert does not have an informed_entity
+     */
+    @Test
+    public void testE032() {
+        TripDescriptorValidator tripDescriptorValidator = new TripDescriptorValidator();
+
+        GtfsRealtime.EntitySelector.Builder entitySelectorBuilder = GtfsRealtime.EntitySelector.newBuilder();
+
+        // Don't set an informed_entity - 1 error
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E032, results, 1);
+
+        // Add an informed_entity with at least one specifier - no errors
+        entitySelectorBuilder.setRouteId("A");
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E032, results, 0);
+
+        clearAndInitRequiredFeedFields();
+    }
+
+    /**
+     * E033 - Alert informed_entity does not have any specifiers
+     */
+    @Test
+    public void testE033() {
+        TripDescriptorValidator tripDescriptorValidator = new TripDescriptorValidator();
+
+        GtfsRealtime.EntitySelector.Builder entitySelectorBuilder = GtfsRealtime.EntitySelector.newBuilder();
+
+        // Add an informed_entity without any specifiers - 1 error
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E033, results, 1);
+
+        // Set stop_id as specifier - 0 errors
+        entitySelectorBuilder.clear();
+        entitySelectorBuilder.setStopId("1234");
+        alertBuilder.clearInformedEntity();
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E033, results, 0);
+
+        // Set informed_entity.route_id as specifier - 0 errors
+        entitySelectorBuilder.clear();
+        entitySelectorBuilder.setRouteId("A");
+        alertBuilder.clearInformedEntity();
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E033, results, 0);
+
+        // Set agency_id as specifier - 0 errors
+        entitySelectorBuilder.clear();
+        entitySelectorBuilder.setAgencyId("1");
+        alertBuilder.clearInformedEntity();
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E033, results, 0);
+
+        // Set route_type as specifier - 0 errors
+        entitySelectorBuilder.clear();
+        entitySelectorBuilder.setRouteType(0);
+        alertBuilder.clearInformedEntity();
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E033, results, 0);
+
+        // Set trip_id as specifier - 0 errors
+        entitySelectorBuilder.clear();
+        entitySelectorBuilder.setTrip(GtfsRealtime.TripDescriptor.newBuilder().setTripId("1").build());
+        alertBuilder.clearInformedEntity();
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E033, results, 0);
+
+        // Set informed_entity.trip.route_id as specifier - 0 errors
+        entitySelectorBuilder.clear();
+        entitySelectorBuilder.setTrip(GtfsRealtime.TripDescriptor.newBuilder().setRouteId("A").build());
+        alertBuilder.clearInformedEntity();
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E033, results, 0);
+
+        // Clear all entity selectors again and don't set any - 1 error
+        entitySelectorBuilder.clear();
+        alertBuilder.clearInformedEntity();
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E033, results, 1);
+
+        clearAndInitRequiredFeedFields();
+    }
 }

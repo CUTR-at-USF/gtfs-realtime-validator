@@ -30,6 +30,10 @@ Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-U
 | [E027](#E027) | Invalid vehicle `bearing`
 | [E028](#E028) | Vehicle `position` outside agency coverage area
 | [E029](#E029) | Vehicle `position` far from trip shape
+| [E030](#E030) | GTFS-rt alert `trip_id` does not belong to GTFS-rt alert `route_id` in GTFS `trips.txt`
+| [E031](#E031) | Alert `informed_entity.route_id` does not match `informed_entity.trip.route_id`
+| [E032](#E032) | Alert does not have an `informed_entity`
+| [E033](#E033) | Alert `informed_entity` does not have any specifiers
 
 ### Table of Warnings
 
@@ -254,6 +258,44 @@ Buffer is defined by `GtfsMetadata.TRIP_BUFFER_METERS`, and is currently 200 met
 * [GTFS shapes.txt](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#shapestxt)
 * [vehicle.position](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-position)
 * [alert.effect.DETOUR](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#enum-effect)
+
+<a name="E030"/>
+
+### E030 - GTFS-rt alert `trip_id` does not belong to GTFS-rt alert `route_id` in GTFS `trips.txt`
+
+The GTFS-rt `alert.informed_entity.trip.trip_id` should belong to the specified GTFS-rt `alert.informed_entity.route_id` in GTFS `trips.txt`.
+
+#### References:
+* [alert.informed_entity](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-entityselector)
+* [GTFS trips.txt](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#tripstxt)
+
+<a name="E031"/>
+
+### E031 - Alert `informed_entity.route_id` does not match `informed_entity.trip.route_id`
+
+The `alert.informed_entity.trip.route_id` should be the same as the specified `alert.informed_entity.route_id`.
+
+#### References:
+* [alert.informed_entity](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-entityselector)
+* [alert.informed_entity.trip](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
+
+<a name="E032"/>
+
+### E032 - Alert does not have an `informed_entity`
+
+All alerts must have at least one `informed_entity`.
+
+#### References:
+* [alert.informed_entity](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-entityselector)
+
+<a name="E033"/>
+
+### E033 - Alert `informed_entity` does not have any specifiers
+
+Alert `informed_entity` should have at least one specified value (`route_id`, `trip_id`, `stop_id`, etc) to which the alert applies.
+
+#### References:
+* [alert.informed_entity](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-entityselector)
 
 # Warnings
 
