@@ -28,7 +28,7 @@ import javax.ws.rs.core.Response;
  */
 public class GtfsFeedTest extends TestCase {
 
-    private final String validGtfsFeedURL = "http://gohart.org/google/google_transit.zip";
+    private final String validGtfsFeedURL = "https://github.com/CUTR-at-USF/gtfs-realtime-validator/raw/master/src/test/resources/bullrunner-gtfs.zip";
     private final String invalidGtfsFeedURL = "DUMMY";
     private final String downloadFailURL = "http://gohart.org/google/file_not_exist.zip";
     private final String badGTFS = "https://github.com/CUTR-at-USF/gtfs-realtime-validator/raw/master/src/test/resources/badgtfs.zip";
