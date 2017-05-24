@@ -43,7 +43,7 @@ public class StopTimeSequenceValidator implements FeedEntityValidator {
     @Override
     public List<ErrorListHelperModel> validate(long currentTimeMillis, GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage) {
         List<GtfsRealtime.FeedEntity> entityList = feedMessage.getEntityList();
-        List<OccurrenceModel> errorOccurrenceList = new ArrayList<>();
+        List<OccurrenceModel> e002List = new ArrayList<>();
 
         for (GtfsRealtime.FeedEntity entity : entityList) {
             if (entity.hasTripUpdate()) {
@@ -64,7 +64,7 @@ public class StopTimeSequenceValidator implements FeedEntityValidator {
                     }
 
                     OccurrenceModel om = new OccurrenceModel((tripId != null ? "trip_id " + tripId + " " : "") + "stop_sequence " + stopSequenceList.toString());
-                    errorOccurrenceList.add(om);
+                    e002List.add(om);
                     _log.debug(om.getPrefix() + " " + E002.getOccurrenceSuffix());
                 }
 
@@ -73,8 +73,8 @@ public class StopTimeSequenceValidator implements FeedEntityValidator {
         }
 
         List<ErrorListHelperModel> errors = new ArrayList<>();
-        if (!errorOccurrenceList.isEmpty()) {
-            errors.add(new ErrorListHelperModel(new MessageLogModel(E002), errorOccurrenceList));
+        if (!e002List.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E002), e002List));
         }
         return errors;
     }
