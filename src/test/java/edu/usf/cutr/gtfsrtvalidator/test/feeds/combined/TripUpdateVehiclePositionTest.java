@@ -21,8 +21,8 @@ import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.test.FeedMessageTest;
 import edu.usf.cutr.gtfsrtvalidator.test.util.TestUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
+import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.CrossFeedDescriptorValidator;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.TripDescriptorValidator;
-import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.VehicleTripDescriptorValidator;
 import org.junit.Test;
 
 import static edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils.MIN_POSIX_TIME;
@@ -40,7 +40,7 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
     
     @Test
     public void testTripAndVehicleDescriptorValidation() {
-        VehicleTripDescriptorValidator vehicleAndTripDescriptorValidator = new VehicleTripDescriptorValidator();
+        CrossFeedDescriptorValidator vehicleAndTripDescriptorValidator = new CrossFeedDescriptorValidator();
 
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
         GtfsRealtime.VehicleDescriptor.Builder vehicleDescriptorBuilder = GtfsRealtime.VehicleDescriptor.newBuilder();

@@ -66,7 +66,7 @@ public class BackgroundTask implements Runnable {
         // Initialize validation rules
         synchronized (mValidationRules) {
             if (mValidationRules.isEmpty()) {
-                mValidationRules.add(new VehicleTripDescriptorValidator());
+                mValidationRules.add(new CrossFeedDescriptorValidator());
                 mValidationRules.add(new VehicleValidator());
                 mValidationRules.add(new TimestampValidator());
                 mValidationRules.add(new StopTimeSequenceValidator());

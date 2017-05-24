@@ -27,15 +27,15 @@ import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.W003;
 
-public class VehicleTripDescriptorValidator implements FeedEntityValidator {
+public class CrossFeedDescriptorValidator implements FeedEntityValidator {
 
-    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(VehicleTripDescriptorValidator.class);
+    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(CrossFeedDescriptorValidator.class);
 
     /**
      * ID: W003
@@ -103,6 +103,6 @@ public class VehicleTripDescriptorValidator implements FeedEntityValidator {
                 }
             }
         }
-        return Arrays.asList(new ErrorListHelperModel(new MessageLogModel(W003), occurrences));
+        return Collections.singletonList(new ErrorListHelperModel(new MessageLogModel(W003), occurrences));
     }
 }
