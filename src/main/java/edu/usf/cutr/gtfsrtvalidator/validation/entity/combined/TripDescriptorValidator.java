@@ -59,6 +59,8 @@ import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
  *
  * E033 - Alert informed_entity does not have any specifiers
  *
+ * E034 - GTFS-rt agency_id does not exist in GTFS data
+ *
  * W006 - trip_update missing trip_id
  */
 public class TripDescriptorValidator implements FeedEntityValidator {
@@ -78,6 +80,7 @@ public class TripDescriptorValidator implements FeedEntityValidator {
         List<OccurrenceModel> errorListE031 = new ArrayList<>();
         List<OccurrenceModel> errorListE032 = new ArrayList<>();
         List<OccurrenceModel> errorListE033 = new ArrayList<>();
+        List<OccurrenceModel> errorListE034 = new ArrayList<>();
         List<OccurrenceModel> errorListW006 = new ArrayList<>();
 
         // Check the route_id values against the values from the GTFS feed
@@ -162,6 +165,7 @@ public class TripDescriptorValidator implements FeedEntityValidator {
                 if (entitySelectors != null && entitySelectors.size() > 0) {
                     for (GtfsRealtime.EntitySelector entitySelector : entitySelectors) {
                         checkE033(entity, entitySelector, errorListE033);
+                        checkE034(entity, entitySelector, gtfsMetadata, errorListE034);
                         if (entitySelector.hasRouteId() && entitySelector.hasTrip()) {
                             checkE030(entity, entitySelector, gtfsMetadata, errorListE030);
                             checkE031(entity, entitySelector, errorListE031);
@@ -208,6 +212,9 @@ public class TripDescriptorValidator implements FeedEntityValidator {
         }
         if (!errorListE033.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(E033), errorListE033));
+        }
+        if (!errorListE034.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E034), errorListE034));
         }
         if (!errorListW006.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(W006), errorListW006));
@@ -384,6 +391,26 @@ public class TripDescriptorValidator implements FeedEntityValidator {
                 OccurrenceModel om = new OccurrenceModel("alert ID " + entity.getId() + " informed_entity and informed_entity.trip do not not reference any agency, route, trip, or stop");
                 errors.add(om);
                 _log.debug(om.getPrefix() + " " + E033.getOccurrenceSuffix());
+            }
+        }
+    }
+
+
+    /**
+     * Checks rule E034 - "GTFS-rt agency_id does not exist in GTFS data", and adds any errors that are found to the provided error list
+     *
+     * @param entity         feed entity to examine that contains an alert
+     * @param entitySelector EntitySelector to examine for agency_id specifier
+     * @param gtfsMetadata   information about the GTFS dataset
+     * @param errors         list to add any errors for E034 to
+     */
+    private void checkE034(GtfsRealtime.FeedEntity entity, GtfsRealtime.EntitySelector entitySelector, GtfsMetadata gtfsMetadata, List<OccurrenceModel> errors) {
+        if (entitySelector.hasAgencyId()) {
+            if (!gtfsMetadata.getAgencyIds().contains(entitySelector.getAgencyId())) {
+                // E033 - GTFS-rt agency_id does not exist in GTFS data
+                OccurrenceModel om = new OccurrenceModel("alert ID " + entity.getId() + " agency_id " + entitySelector.getAgencyId());
+                errors.add(om);
+                _log.debug(om.getPrefix() + " " + E034.getOccurrenceSuffix());
             }
         }
     }

@@ -182,4 +182,8 @@ public class ValidationRules {
     public static final ValidationRule E033 = new ValidationRule("E033", "ERROR", "Alert informed_entity does not have any specifiers",
             "Alert informed_entity should have at least one specified value (route_id, trip_id, stop_id, etc) to which the alert applies.",
             "- alert informed_entity should have at least one specified value");
+
+    public static final ValidationRule E034 = new ValidationRule("E034", "ERROR", "GTFS-rt agency_id does not exist in GTFS data",
+            "All agency_ids provided in the GTFS-rt alert.informed_entity.agency_id should also exist in GTFS agency.txt",
+            "does not exist in the GTFS data agency.txt");
 }

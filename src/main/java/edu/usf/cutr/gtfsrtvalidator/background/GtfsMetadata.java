@@ -47,6 +47,7 @@ public class GtfsMetadata {
     String mFeedUrl;
     TimeZone mTimeZone;
 
+    private Set<String> mAgencyIds = new HashSet<>();
     private Set<String> mRouteIds = new HashSet<>();
     // Maps trip_ids to the GTFS trip
     private Map<String, Trip> mTrips = new HashMap<>();
@@ -96,6 +97,12 @@ public class GtfsMetadata {
 
         mFeedUrl = feedUrl;
         mTimeZone = timeZone;
+
+        // Get all agency_ids from the GTFS feed
+        Collection<Agency> agencyAndIds = gtfsData.getAllAgencies();
+        for (Agency a : agencyAndIds) {
+            mAgencyIds.add(a.getId());
+        }
 
         // Get all route_ids from the GTFS feed
         Collection<Route> gtfsRouteList = gtfsData.getAllRoutes();
@@ -347,5 +354,14 @@ public class GtfsMetadata {
         }
         // Create the buffered version of the trip shape if it doesn't yet exist
         return mTripShapesBuffered.computeIfAbsent(tripId, k -> s.getBuffered(TRIP_BUFFER_DEGREES, s.getContext()));
+    }
+
+    /**
+     * Returns a set of agency_ids from GTFS agency.txt
+     *
+     * @return a set of agency_ids from GTFS agency.txt
+     */
+    public Set<String> getAgencyIds() {
+        return mAgencyIds;
     }
 }

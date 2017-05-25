@@ -34,6 +34,7 @@ Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-U
 | [E031](#E031) | Alert `informed_entity.route_id` does not match `informed_entity.trip.route_id`
 | [E032](#E032) | Alert does not have an `informed_entity`
 | [E033](#E033) | Alert `informed_entity` does not have any specifiers
+| [E034](#E034) | GTFS-rt `agency_id` does not exist in GTFS data
 
 ### Table of Warnings
 
@@ -293,6 +294,15 @@ All alerts must have at least one `informed_entity`.
 ### E033 - Alert `informed_entity` does not have any specifiers
 
 Alert `informed_entity` should have at least one specified value (`route_id`, `trip_id`, `stop_id`, etc) to which the alert applies.
+
+#### References:
+* [alert.informed_entity](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-entityselector)
+
+<a name="E034"/>
+
+### E034 - GTFS-rt `agency_id` does not exist in GTFS data
+
+All `agency_ids` provided in the GTFS-rt `alert.informed_entity.agency_id` should also exist in GTFS `agency.txt`.
 
 #### References:
 * [alert.informed_entity](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-entityselector)

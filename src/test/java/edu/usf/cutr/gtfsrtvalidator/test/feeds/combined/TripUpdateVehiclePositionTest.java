@@ -682,13 +682,13 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
 
         // Set agency_id as specifier - 0 errors
         entitySelectorBuilder.clear();
-        entitySelectorBuilder.setAgencyId("1");
+        entitySelectorBuilder.setAgencyId("agency");
         alertBuilder.clearInformedEntity();
         alertBuilder.addInformedEntity(entitySelectorBuilder.build());
         feedEntityBuilder.setAlert(alertBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(ValidationRules.E033, results, 0);
 
         // Set route_type as specifier - 0 errors
@@ -733,6 +733,39 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
 
         results = tripDescriptorValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(ValidationRules.E033, results, 1);
+
+        clearAndInitRequiredFeedFields();
+    }
+
+    /**
+     * E034 - GTFS-rt agency_id does not exist in GTFS data
+     */
+    @Test
+    public void testE034() {
+        // testagency.zip has agency_id=agency
+        TripDescriptorValidator tripDescriptorValidator = new TripDescriptorValidator();
+
+        GtfsRealtime.EntitySelector.Builder entitySelectorBuilder = GtfsRealtime.EntitySelector.newBuilder();
+
+        // Add an informed_entity with an agency_id that exists in GTFS - 0 errors
+        entitySelectorBuilder.setAgencyId("agency");
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E034, results, 0);
+
+        // Change to agency_id that is NOT in GTFS - 1 error
+        entitySelectorBuilder.clear();
+        entitySelectorBuilder.setAgencyId("bad");
+        alertBuilder.clear();
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E034, results, 1);
 
         clearAndInitRequiredFeedFields();
     }
