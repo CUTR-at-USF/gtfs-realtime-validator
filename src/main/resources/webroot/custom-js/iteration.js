@@ -25,6 +25,8 @@ var MAX_ERRORS_TO_DISPLAY = 3;
 var showLessErrorList = {};
 
 var server = window.location.protocol + "//" + window.location.host;
+$(".feed-page-loader").show();
+$(".issues-page-loader").show();
 
 $.get(server + "/api/gtfs-rt-feed/" + iterationId + "/iterationDetails").done(function (data) {
     var timestamp = data["feedTimestamp"];
@@ -38,6 +40,11 @@ $.get(server + "/api/gtfs-rt-feed/" + iterationId + "/iterationDetails").done(fu
 $.get(server + "/api/gtfs-rt-feed/" + iterationId + "/feedMessage").done(function (data) {
     var jsonFeed = JSON.stringify(data, undefined, 2);
     document.getElementById("feedMessage").innerHTML = jsonFeed;
+
+    // Hide spinning after 'jsonFeed' is loaded into 'feedMessage' element.
+    $(".feed-page-loader").hide();
+    // Set 'feed-display' position to 'static' after hiding 'showSpin' element. This make sure 'copy-clipboard' is in fixed position relative to parent.
+    document.getElementById('feed-display').style.position = "static";
 });
 
 var clipboard = new Clipboard("#clipboard");
@@ -108,6 +115,8 @@ $.get(server + "/api/gtfs-rt-feed/" + iterationId + "/iterationErrors").done(fun
         $("#error-card-body-" + errorListIndex).html(bodyCompiledHtml);
     }
 
+    $(".issues-page-loader").hide();
+
     $("#error-count").text(errorCount);
     $("#warning-count").text(warningCount);
 });
@@ -157,8 +166,3 @@ function getUrlParameter(param) {
         }
     }
 }
-
-// Fade out page-loader image after page is fully loaded.
-$(window).load(function() {
-    $(".loader").fadeOut("slow");
-})
