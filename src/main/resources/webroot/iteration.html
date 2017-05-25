@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <title>Iteration details</title>
     <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div class="loader"></div>
     <div class="navbar navbar-default navbar-fixed-top">
         <div class="container">
             <div class="navbar-header">
@@ -22,6 +22,9 @@
             <div class="col-md-5 feed-padding">
                 <div id="feed-display">
                     <pre id="feedMessage"></pre>
+                    <div class="feed-page-loader">
+                        <i class="fa fa-spinner fa-spin"></i>
+                    </div>
                     <div class="pull-left" id="copy-clipboard">
                         <span class="glyphicon glyphicon-copy" data-placement="top" data-trigger="click" id="clipboard" data-clipboard-target="#feedMessage">
                         </span>
@@ -39,6 +42,9 @@
                 </div>
 
                 <div class="well content-well iteration-issues">
+                    <div class="issues-page-loader">
+                        <i class="fa fa-spinner fa-spin"></i>
+                    </div>
                     <div id="error-cards">
                     </div>
                 </div>
