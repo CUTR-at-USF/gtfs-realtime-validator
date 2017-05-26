@@ -61,6 +61,8 @@ import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
  *
  * E034 - GTFS-rt agency_id does not exist in GTFS data
  *
+ * E035 - GTFS-rt trip.trip_id does not belong to GTFS-rt trip.route_id in GTFS trips.txt
+ *
  * W006 - trip_update missing trip_id
  */
 public class TripDescriptorValidator implements FeedEntityValidator {
@@ -81,6 +83,7 @@ public class TripDescriptorValidator implements FeedEntityValidator {
         List<OccurrenceModel> errorListE032 = new ArrayList<>();
         List<OccurrenceModel> errorListE033 = new ArrayList<>();
         List<OccurrenceModel> errorListE034 = new ArrayList<>();
+        List<OccurrenceModel> errorListE035 = new ArrayList<>();
         List<OccurrenceModel> errorListW006 = new ArrayList<>();
 
         // Check the route_id values against the values from the GTFS feed
@@ -120,6 +123,7 @@ public class TripDescriptorValidator implements FeedEntityValidator {
                 checkE021(tripUpdate, tripUpdate.getTrip(), errorListE021);
                 checkE004(tripUpdate, tripUpdate.getTrip(), gtfsMetadata, errorListE004);
                 checkE024(tripUpdate, tripUpdate.getTrip(), gtfsMetadata, errorListE024);
+                checkE035(entity, tripUpdate.getTrip(), gtfsMetadata, errorListE035);
             }
             if (entity.hasVehicle() && entity.getVehicle().hasTrip()) {
                 GtfsRealtime.TripDescriptor trip = entity.getVehicle().getTrip();
@@ -158,6 +162,7 @@ public class TripDescriptorValidator implements FeedEntityValidator {
                 checkE004(entity.getVehicle(), trip, gtfsMetadata, errorListE004);
                 checkE021(entity.getVehicle(), trip, errorListE021);
                 checkE024(entity.getVehicle(), trip, gtfsMetadata, errorListE024);
+                checkE035(entity, trip, gtfsMetadata, errorListE035);
             }
             if (entity.hasAlert()) {
                 GtfsRealtime.Alert alert = entity.getAlert();
@@ -166,6 +171,7 @@ public class TripDescriptorValidator implements FeedEntityValidator {
                     for (GtfsRealtime.EntitySelector entitySelector : entitySelectors) {
                         checkE033(entity, entitySelector, errorListE033);
                         checkE034(entity, entitySelector, gtfsMetadata, errorListE034);
+                        checkE035(entity, entitySelector.getTrip(), gtfsMetadata, errorListE035);
                         if (entitySelector.hasRouteId() && entitySelector.hasTrip()) {
                             checkE030(entity, entitySelector, gtfsMetadata, errorListE030);
                             checkE031(entity, entitySelector, errorListE031);
@@ -215,6 +221,9 @@ public class TripDescriptorValidator implements FeedEntityValidator {
         }
         if (!errorListE034.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(E034), errorListE034));
+        }
+        if (!errorListE035.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E035), errorListE035));
         }
         if (!errorListW006.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(W006), errorListW006));
@@ -411,6 +420,31 @@ public class TripDescriptorValidator implements FeedEntityValidator {
                 OccurrenceModel om = new OccurrenceModel("alert ID " + entity.getId() + " agency_id " + entitySelector.getAgencyId());
                 errors.add(om);
                 _log.debug(om.getPrefix() + " " + E034.getOccurrenceSuffix());
+            }
+        }
+    }
+
+    /**
+     * Checks rule E035 - "GTFS-rt trip.trip_id does not belong to GTFS-rt trip.route_id in GTFS trips.txt", and adds any errors that are found to the provided error list
+     *
+     * @param entity       entity which contains the specified trip
+     * @param trip         trip to examine to see if the trip_id belongs to the route_id
+     * @param gtfsMetadata information about the GTFS dataset
+     * @param errors       list to add any errors for E034 to
+     */
+    private void checkE035(GtfsRealtime.FeedEntity entity, GtfsRealtime.TripDescriptor trip, GtfsMetadata gtfsMetadata, List<OccurrenceModel> errors) {
+        if (trip.hasTripId() && trip.hasRouteId()) {
+            Trip gtfsTrip = gtfsMetadata.getTrips().get(trip.getTripId());
+            if (gtfsTrip == null) {
+                // trip_id isn't in GTFS data (which will be caught by E004) - return;
+                return;
+            }
+            String gtfsRouteId = gtfsTrip.getRoute().getId().getId();
+            if (!gtfsRouteId.equals(trip.getRouteId())) {
+                // E035 - GTFS-rt trip.trip_id does not belong to GTFS-rt trip.route_id in GTFS trips.txt
+                OccurrenceModel om = new OccurrenceModel("GTFS-rt entity ID " + entity.getId() + " trip_id " + trip.getTripId() + " has route_id " + trip.getRouteId() + " but belongs to GTFS route_id " + gtfsRouteId);
+                errors.add(om);
+                _log.debug(om.getPrefix() + " " + E035.getOccurrenceSuffix());
             }
         }
     }

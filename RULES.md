@@ -35,6 +35,7 @@ Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-U
 | [E032](#E032) | Alert does not have an `informed_entity`
 | [E033](#E033) | Alert `informed_entity` does not have any specifiers
 | [E034](#E034) | GTFS-rt `agency_id` does not exist in GTFS data
+| [E035](#E035) | GTFS-rt `trip.trip_id` does not belong to GTFS-rt `trip.route_id` in GTFS `trips.txt`
 
 ### Table of Warnings
 
@@ -306,6 +307,15 @@ All `agency_ids` provided in the GTFS-rt `alert.informed_entity.agency_id` shoul
 
 #### References:
 * [alert.informed_entity](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-entityselector)
+
+<a name="E035"/>
+
+### E035 - GTFS-rt `trip.trip_id` does not belong to GTFS-rt `trip.route_id` in GTFS trips.txt
+
+The GTFS-rt `trip.trip_id` should belong to the specified `trip.route_id` in GTFS `trips.txt`.
+
+#### References:
+* [trip.trip_id](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
 
 # Warnings
 

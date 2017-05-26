@@ -136,7 +136,16 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         results = tripIdValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(ValidationRules.E004, results, 2);
+        for (ErrorListHelperModel error : results) {
+            if (error.getErrorMessage().getValidationRule().getErrorId().equals(ValidationRules.E004.getErrorId())) {
+                assertEquals(2, error.getOccurrenceList().size());
+            } else if (error.getErrorMessage().getValidationRule().getErrorId().equals(ValidationRules.E035.getErrorId())) {
+                // An invalid route_id also doesn't match the trip_id, so we'll get 2 errors for E035
+                assertEquals(2, error.getOccurrenceList().size());
+            } else {
+                assertEquals(0, error.getOccurrenceList().size());
+            }
+        }
 
         // Reset to valid route ID
         tripDescriptorBuilder.setRouteId("1");
@@ -766,6 +775,92 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
 
         results = tripDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(ValidationRules.E034, results, 1);
+
+        clearAndInitRequiredFeedFields();
+    }
+
+    /**
+     * E035 - GTFS-rt trip.trip_id does not belong to GTFS-rt trip.route_id in GTFS trips.txt
+     */
+    @Test
+    public void testE035() {
+        TripDescriptorValidator tripDescriptorValidator = new TripDescriptorValidator();
+
+        // In bullrunner-gtfs.zip trips.txt, trip_id=1 belongs to route_id=A
+        GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+        GtfsRealtime.EntitySelector.Builder entitySelectorBuilder = GtfsRealtime.EntitySelector.newBuilder();
+
+        // Don't set either trip_id or route_id - no errors
+        entitySelectorBuilder.setStopId("1234");  // We need at least one specifier
+        entitySelectorBuilder.setTrip(tripDescriptorBuilder.build());
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E035, results, 0);
+
+        // Set route_id but not trip_id - no errors
+        tripDescriptorBuilder.setRouteId("A");
+        entitySelectorBuilder.setTrip(tripDescriptorBuilder.build());
+        alertBuilder.clearInformedEntity();
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E035, results, 0);
+
+        // Set trip_id but not route_id - no errors
+        tripDescriptorBuilder.clear();
+        tripDescriptorBuilder.setTripId("1");
+        entitySelectorBuilder.clear();
+        entitySelectorBuilder.setTrip(tripDescriptorBuilder.build());
+        alertBuilder.clearInformedEntity();
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E035, results, 0);
+
+        // Set trip_id to the correct route - no errors
+        tripDescriptorBuilder.clear();
+        tripDescriptorBuilder.setTripId("1");
+        tripDescriptorBuilder.setRouteId("A");
+        entitySelectorBuilder.clear();
+        entitySelectorBuilder.setTrip(tripDescriptorBuilder.build());
+        alertBuilder.clearInformedEntity();
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E035, results, 0);
+
+        // Set trip_id to the wrong route - 1 error
+        tripDescriptorBuilder.clear();
+        tripDescriptorBuilder.setTripId("1");
+        tripDescriptorBuilder.setRouteId("B");
+        entitySelectorBuilder.clear();
+        entitySelectorBuilder.setTrip(tripDescriptorBuilder.build());
+        alertBuilder.clearInformedEntity();
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E035, results, 1);
 
         clearAndInitRequiredFeedFields();
     }

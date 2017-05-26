@@ -186,4 +186,8 @@ public class ValidationRules {
     public static final ValidationRule E034 = new ValidationRule("E034", "ERROR", "GTFS-rt agency_id does not exist in GTFS data",
             "All agency_ids provided in the GTFS-rt alert.informed_entity.agency_id should also exist in GTFS agency.txt",
             "does not exist in the GTFS data agency.txt");
+
+    public static final ValidationRule E035 = new ValidationRule("E035", "ERROR", "GTFS-rt trip.trip_id does not belong to GTFS-rt trip.route_id in GTFS trips.txt",
+            "The GTFS-rt trip.trip_id should belong to the specified trip.route_id in GTFS trips.txt",
+            "in GTFS trips.txt");
 }
