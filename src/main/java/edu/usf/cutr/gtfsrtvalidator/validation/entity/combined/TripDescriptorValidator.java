@@ -434,9 +434,13 @@ public class TripDescriptorValidator implements FeedEntityValidator {
      */
     private void checkE035(GtfsRealtime.FeedEntity entity, GtfsRealtime.TripDescriptor trip, GtfsMetadata gtfsMetadata, List<OccurrenceModel> errors) {
         if (trip.hasTripId() && trip.hasRouteId()) {
+            if (!gtfsMetadata.getRouteIds().contains(trip.getRouteId())) {
+                // route_id isn't in GTFS data (which will be caught by E004) - return;
+                return;
+            }
             Trip gtfsTrip = gtfsMetadata.getTrips().get(trip.getTripId());
             if (gtfsTrip == null) {
-                // trip_id isn't in GTFS data (which will be caught by E004) - return;
+                // trip_id isn't in GTFS data (which will be caught by E003) - return;
                 return;
             }
             String gtfsRouteId = gtfsTrip.getRoute().getId().getId();

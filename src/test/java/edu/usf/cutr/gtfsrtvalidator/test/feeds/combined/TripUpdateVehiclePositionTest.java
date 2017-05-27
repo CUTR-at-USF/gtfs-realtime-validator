@@ -136,16 +136,7 @@ public class TripUpdateVehiclePositionTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         results = tripIdValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
-        for (ErrorListHelperModel error : results) {
-            if (error.getErrorMessage().getValidationRule().getErrorId().equals(ValidationRules.E004.getErrorId())) {
-                assertEquals(2, error.getOccurrenceList().size());
-            } else if (error.getErrorMessage().getValidationRule().getErrorId().equals(ValidationRules.E035.getErrorId())) {
-                // An invalid route_id also doesn't match the trip_id, so we'll get 2 errors for E035
-                assertEquals(2, error.getOccurrenceList().size());
-            } else {
-                assertEquals(0, error.getOccurrenceList().size());
-            }
-        }
+        TestUtils.assertResults(ValidationRules.E004, results, 2);
 
         // Reset to valid route ID
         tripDescriptorBuilder.setRouteId("1");
