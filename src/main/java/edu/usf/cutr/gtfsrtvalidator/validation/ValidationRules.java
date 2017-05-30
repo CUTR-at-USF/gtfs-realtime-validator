@@ -190,4 +190,12 @@ public class ValidationRules {
     public static final ValidationRule E035 = new ValidationRule("E035", "ERROR", "GTFS-rt trip.trip_id does not belong to GTFS-rt trip.route_id in GTFS trips.txt",
             "The GTFS-rt trip.trip_id should belong to the specified trip.route_id in GTFS trips.txt",
             "in GTFS trips.txt");
+
+    public static final ValidationRule E036 = new ValidationRule("E036", "ERROR", "Sequential stop_time_updates have the same stop_sequence",
+            "Sequential GTFS-rt trip stop_time_updates should never have the same stop_sequence",
+            "- stop_sequence must increase for each stop_time_update");
+
+    public static final ValidationRule E037 = new ValidationRule("E037", "ERROR", "Sequential stop_time_updates have the same stop_id",
+            "Sequential GTFS-rt trip stop_time_updates shouldn't have the same stop_id",
+            "- sequential stop_ids should be different");
 }

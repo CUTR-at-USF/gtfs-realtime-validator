@@ -350,6 +350,27 @@ public class UtilTest {
         assertFalse(result);
     }
 
+    @Test
+    public void testGetTripIdText() {
+        GtfsRealtime.FeedEntity.Builder feedEntityBuilder = GtfsRealtime.FeedEntity.newBuilder();
+        feedEntityBuilder.setId("1");
+        GtfsRealtime.TripUpdate.Builder tripUpdateBuilder = GtfsRealtime.TripUpdate.newBuilder();
+        GtfsRealtime.TripDescriptor.Builder tripBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+
+        // No trip_id - should get entity ID description back
+        tripUpdateBuilder.setTrip(tripBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        String id = GtfsUtils.getTripId(feedEntityBuilder.build(), tripUpdateBuilder.build());
+        assertEquals("entity ID 1", id);
+
+        // Add trip_id - should get trip ID description back
+        tripBuilder.setTripId("20");
+        tripUpdateBuilder.setTrip(tripBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        id = GtfsUtils.getTripId(feedEntityBuilder.build(), tripUpdateBuilder.build());
+        assertEquals("trip_id 20", id);
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void testAssertVehicleAndTripIdThrowException() {
         // Make sure we throw an exception if the method is provided objects other than TripUpdate or VehiclePosition

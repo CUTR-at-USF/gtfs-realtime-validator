@@ -162,4 +162,19 @@ public class GtfsUtils {
         org.locationtech.spatial4j.shape.Point p = sf.pointXY(vehiclePosition.getLongitude(), vehiclePosition.getLatitude());
         return bounds.relate(p).equals(SpatialRelation.CONTAINS);
     }
+
+    /**
+     * Returns the trip_id for the given TripUpdate if one exists, if not the entity ID is returned in the format
+     * "trip_id 1234" or "entity ID 4321".
+     *
+     * @param entity     the entity that the TripUpdate belongs to
+     * @param tripUpdate the tripUpdate to get the ID for
+     * @return the trip_id for the given TripUpdate if one exists, if not the entity ID is returned in the format "trip_id 1234" or "entity ID 4321".
+     */
+    public static String getTripId(GtfsRealtime.FeedEntity entity, GtfsRealtime.TripUpdate tripUpdate) {
+        if (!tripUpdate.hasTrip()) {
+            return "entity ID " + entity.getId();
+        }
+        return tripUpdate.getTrip().hasTripId() ? "trip_id " + tripUpdate.getTrip().getTripId() : "entity ID " + entity.getId();
+    }
 }

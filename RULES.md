@@ -36,6 +36,8 @@ Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-U
 | [E033](#E033) | Alert `informed_entity` does not have any specifiers
 | [E034](#E034) | GTFS-rt `agency_id` does not exist in GTFS data
 | [E035](#E035) | GTFS-rt `trip.trip_id` does not belong to GTFS-rt `trip.route_id` in GTFS `trips.txt`
+| [E036](#E036) | Sequential `stop_time_updates` have the same `stop_sequence`
+| [E037](#E037) | Sequential `stop_time_updates` have the same `stop_id`
 
 ### Table of Warnings
 
@@ -316,6 +318,24 @@ The GTFS-rt `trip.trip_id` should belong to the specified `trip.route_id` in GTF
 
 #### References:
 * [trip.trip_id](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
+
+<a name="E036"/>
+
+### E036 - Sequential `stop_time_updates` have the same `stop_sequence`
+
+Sequential GTFS-rt trip `stop_time_updates` should never have the same `stop_sequence` - `stop_sequence` must increase for each `stop_time_update`.
+
+#### References:
+* [`trip.stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#stop-time-updates)
+
+<a name="E036"/>
+
+### E037 - Sequential `stop_time_updates` have the same `stop_id`
+
+Sequential GTFS-rt trip `stop_time_updates` shouldn't have the same `stop_id` - sequential `stop_ids` should be different.  If a `stop_id` is visited more than once in a trip (i.e., a loop), and if no `stop_time_updates` in the loop are provided in the feed, and if the `stop_sequence` field of the stop where the loop starts/stops is provided in the GTFS-rt feed for the given `stop_id`, then this may not be an error.  
+
+#### References:
+* [`trip.stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#stop-time-updates)
 
 # Warnings
 
