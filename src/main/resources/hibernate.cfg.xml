@@ -18,6 +18,7 @@
     <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.GtfsRtFeedModel"/>
     <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel"/>
     <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel"/>
+    <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.SessionModel"/>
     <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.ValidationRule"/>
     <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.ViewErrorSummaryModel"/>
     <mapping class="edu.usf.cutr.gtfsrtvalidator.api.model.ViewErrorLogModel"/>

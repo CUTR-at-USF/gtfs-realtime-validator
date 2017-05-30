@@ -131,12 +131,52 @@
             </div>
         </form>
     </div>
+
+    <div class="well content-well">
+        <h3>Past Sessions</h3>
+        <hr/>
+        <table class="table table-striped" style="table-layout: fixed">
+            <thead>
+            <tr>
+                <th class="col-md-1">ID</th>
+                <th class="col-md-4">GTFS-rt-Feed URL</th>
+                <th class="col-md-2">Start time</th>
+                <th class="col-md-2">End time</th>
+                <th class="col-md-1">Total time</th>
+                <th class="col-md-1">Errors</th>
+                <th class="col-md-1">Warnings</th>
+            </tr>
+            </thead>
+
+            <tbody id="past-session-data"></tbody>
+
+        </table>
+    </div>
+
 </div>
 <!-- /.container -->
 
 <!-- script references -->
 <script src="js/jquery-2.1.4.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
+<script src="js/handlebars.js"></script>
+
+<script id="past-session-data-template" type="text/x-handlebars-template">
+    {{#each this}}
+    <tr>
+        <td> <a href="session-monitor.html?gtfsRtId={{gtfsRtFeedModel.gtfsRtId}}&gtfsRtUrl={{gtfsRtFeedModel.gtfsUrl}}&sessionStartTime={{sessionStartTime}}&sessionEndTime={{sessionEndTime}}" target="_blank">{{rowId}}</a> </td>
+        <td style="word-wrap: break-word">{{gtfsRtFeedModel.gtfsUrl}}</td>
+
+        <td>{{startTimeFormat}}</td>
+        <td>{{endTimeFormat}}</td>
+        <td>{{totalTime}}</td>
+
+        <td>{{errorCount}}</td>
+        <td>{{warningCount}}</td>
+    </tr>
+    {{/each}}
+</script>
+
 <script src="custom-js/index.js"></script>
 </body>
 </html>

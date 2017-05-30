@@ -38,7 +38,7 @@ import javax.xml.bind.annotation.XmlRootElement;
                 "FROM GtfsRtFeedIteration " +
                 "WHERE rtFeedID = ?) GtfsRtFeedIDIteration " +
                 "ON MessageLog.iterationID = GtfsRtFeedIDIteration.IterationID " +
-                    "AND IterationTimestamp > ? " +
+                    "AND IterationTimestamp >= ? AND IterationTimestamp <= ? " +
                 "GROUP BY errorID) errorCount " +
                 "ON Error.errorID = errorCount.errorID ",
         resultClass = ViewGtfsRtFeedErrorCountModel.class)

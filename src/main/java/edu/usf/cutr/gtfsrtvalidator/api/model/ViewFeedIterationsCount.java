@@ -29,7 +29,7 @@ import javax.xml.bind.annotation.XmlRootElement;
         query = "SELECT count(IterationID) AS iterationCount " +
                 "FROM GtfsRtFeedIteration " +
                 "WHERE rtFeedID = ? " +
-                    "AND IterationTimestamp > ? ",
+                    "AND IterationTimestamp >= ? AND IterationTimestamp <= ? ",
         resultClass = ViewFeedIterationsCount.class)
 public class ViewFeedIterationsCount {
 

@@ -17,6 +17,10 @@
 
 var counter = 1;
 var limit = 5;
+var clientId;
+
+var server = window.location.protocol + "//" + window.location.host;
+
 function addInput(){
     if (counter == limit)  {
         alert("You have reached the limit of adding " + counter + " inputs");
@@ -96,3 +100,46 @@ $('input[type="submit"]').click(function () {
       this.value=$(this).val().trim();
     })
 });
+
+clientId = readCookie();
+// Get past session data for the user.
+$.get(server + "/api/gtfs-rt-feed/pastSessions?clientId=" + clientId).done(function (data) {
+    if (clientId == "") {
+        createCookie(data["clientId"], 1000);
+    } else {
+        displayPastSessionData(data);
+    }
+    sessionStorage.setItem("clientId", readCookie());
+});
+
+function displayPastSessionData(data) {
+    var sessionTemplateScript = $("#past-session-data-template").html();
+    var sessionTemplate = Handlebars.compile(sessionTemplateScript);
+    var compiledHtml = sessionTemplate(data);
+    $("#past-session-data").html(compiledHtml);
+}
+
+function createCookie(value, days) {
+    var expires = "";
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = "; expires = " + date.toUTCString();
+    }
+    document.cookie = "clientId = " + value + expires + "; path =/";
+}
+
+function readCookie() {
+    var nameEQ = "clientId=";
+    var ca = document.cookie.split(';');
+    for (var i=0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1, c.length);
+        }
+        if (c.indexOf(nameEQ) == 0) {
+            return c.substring(nameEQ.length, c.length);
+        }
+    }
+    return "";
+}

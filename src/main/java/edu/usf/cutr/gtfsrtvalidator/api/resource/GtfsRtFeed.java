@@ -17,6 +17,7 @@
 
 package edu.usf.cutr.gtfsrtvalidator.api.resource;
 
+import com.google.gson.JsonObject;
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.api.model.*;
 import edu.usf.cutr.gtfsrtvalidator.api.model.combined.CombinedIterationMessageModel;
@@ -25,6 +26,7 @@ import edu.usf.cutr.gtfsrtvalidator.background.BackgroundTask;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.helper.IterationErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.MergeMonitorData;
+import edu.usf.cutr.gtfsrtvalidator.helper.QueryHelper;
 import org.hibernate.Session;
 import org.slf4j.LoggerFactory;
 
@@ -40,10 +42,7 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -132,56 +131,77 @@ public class GtfsRtFeed {
     private static HashMap<String, ScheduledExecutorService> runningTasks = new HashMap<>();
 
     @PUT
-    @Path("/{id}/{updateInterval}/monitor")
-    public Response getID(@PathParam("id") int id, @PathParam("updateInterval") int updateInterval) {
+    @Path("/monitor/{id}")
+    public Response startMonitor(
+            @PathParam("id") int id,
+            @QueryParam("clientId") String clientId,
+            @DefaultValue("10") @QueryParam("updateInterval") int updateInterval) {
         // Store the timestamp when we start monitoring feeds that can be used to query database
         currentTimestamp = System.currentTimeMillis();
         //Get RtFeedModel from id
         Session session = GTFSDB.initSessionBeginTrans();
         GtfsRtFeedModel gtfsRtFeed = (GtfsRtFeedModel) session.createQuery(" FROM GtfsRtFeedModel "
                 + "WHERE rtFeedID = "+id).uniqueResult();
+
+        // Save the session data of a client monitoring feeds.
+        SessionModel sessionModel = new SessionModel();
+        sessionModel.setClientId(clientId);
+        sessionModel.setSessionStartTime(currentTimestamp);
+        sessionModel.setGtfsRtFeedModel(gtfsRtFeed);
+
+        session.save(sessionModel);
         GTFSDB.commitAndCloseSession(session);
 
         //Extract the Url and gtfsId to start the background process
         startBackgroundTask(gtfsRtFeed, updateInterval);
 
-        return Response.ok(gtfsRtFeed, MediaType.APPLICATION_JSON).build();
+        return Response.ok(sessionModel, MediaType.APPLICATION_JSON).build();
     }
 
     // Get Monitor data for requested gtfsRtId
     @GET
-    @Path("/{id : \\d+}/summary/pagination/{summaryCurPage: \\d+}/{summaryRowsPerPage: \\d+}" +
-            "/log/{toggledData: .*}/pagination/{logCurPage: \\d+}/{logRowsPerPage: \\d+}")
+    @Path("/monitor-data/{id : \\d+}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getMonitorData(
             @PathParam("id") int gtfsRtId,
-            @PathParam("summaryCurPage") int summaryCurPage,
-            @PathParam("summaryRowsPerPage") int summaryRowsPerPage,
-            @PathParam("toggledData") String hideErrors,
-            @PathParam("logCurPage") int logCurPage,
-            @PathParam("logRowsPerPage") int logRowsPerPage) {
+            @QueryParam("summaryCurPage") int summaryCurPage,
+            @QueryParam("summaryRowsPerPage") int summaryRowsPerPage,
+            @QueryParam("toggledData") String hideErrors,
+            @QueryParam("logCurPage") int logCurPage,
+            @QueryParam("logRowsPerPage") int logRowsPerPage,
+            @DefaultValue("0") @QueryParam("startTime") long sessionStartTime,
+            @DefaultValue("0") @QueryParam("endTime") long sessionEndTime) {
 
         MergeMonitorData mergeMonitorData = new MergeMonitorData();
+        if(sessionStartTime <= 0) {
+            sessionStartTime = currentTimestamp;
+        }
+        if(sessionEndTime <= 0) {
+            sessionEndTime = System.currentTimeMillis();
+        }
         Session session = GTFSDB.initSessionBeginTrans();
 
         ViewFeedIterationsCount iterationsCount;
         iterationsCount = (ViewFeedIterationsCount) session.createNamedQuery("feedIterationsCount", ViewFeedIterationsCount.class)
                 .setParameter(0, gtfsRtId)
-                .setParameter(1, currentTimestamp)
+                .setParameter(1, sessionStartTime)
+                .setParameter(2, sessionEndTime)
                 .uniqueResult();
         mergeMonitorData.setIterationCount(iterationsCount.getIterationCount());
 
         ViewFeedUniqueResponseCount uniqueResponseCount;
         uniqueResponseCount = (ViewFeedUniqueResponseCount) session.createNamedQuery("feedUniqueResponseCount", ViewFeedUniqueResponseCount.class)
                 .setParameter(0, gtfsRtId)
-                .setParameter(1, currentTimestamp)
+                .setParameter(1, sessionStartTime)
+                .setParameter(2, sessionEndTime)
                 .uniqueResult();
         mergeMonitorData.setUniqueFeedCount(uniqueResponseCount.getUniqueFeedCount());
 
         List<ViewGtfsRtFeedErrorCountModel> viewGtfsRtFeedErrorCountModel;
         viewGtfsRtFeedErrorCountModel = session.createNamedQuery("feedErrorCount", ViewGtfsRtFeedErrorCountModel.class)
                 .setParameter(0, gtfsRtId)
-                .setParameter(1, currentTimestamp)
+                .setParameter(1, sessionStartTime)
+                .setParameter(2, sessionEndTime)
                 .list();
         mergeMonitorData.setViewGtfsRtFeedErrorCountModelList(viewGtfsRtFeedErrorCountModel);
 
@@ -190,7 +210,8 @@ public class GtfsRtFeed {
         feedSummary = session.createNamedQuery("ErrorSummaryByrtfeedID", ViewErrorSummaryModel.class)
                 .setParameter(0, gtfsRtId)
                 .setParameter(1, gtfsRtId)
-                .setParameter(2, currentTimestamp)
+                .setParameter(2, sessionStartTime)
+                .setParameter(3, sessionEndTime)
                 .setFirstResult(fromRow)
                 .setMaxResults(summaryRowsPerPage)
                 .list();
@@ -212,7 +233,8 @@ public class GtfsRtFeed {
         feedLog = session.createNamedQuery("ErrorLogByrtfeedID", ViewErrorLogModel.class)
                 .setParameter(0, gtfsRtId)
                 .setParameter(1, gtfsRtId)
-                .setParameter(2, currentTimestamp)
+                .setParameter(2, sessionStartTime)
+                .setParameter(3, sessionEndTime)
                 .setParameterList("errorIds", removeIds)
                 .setFirstResult(fromRow)
                 .setMaxResults(logRowsPerPage)
@@ -330,6 +352,84 @@ public class GtfsRtFeed {
         return Response.ok(gtfsRtFeedIterationModel).build();
     }
 
+    // Returns past session details for a particular clientId.
+    @GET
+    @Path("/pastSessions")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getSessionData(
+            @QueryParam("clientId") String clientId) {
+
+        if (clientId.isEmpty()) {
+            String uuid = UUID.randomUUID().toString();
+            JsonObject json = new JsonObject();
+            json.addProperty("clientId", uuid);
+            return Response.ok(json.toString()).build();
+        }
+
+        List<SessionModel> sessionModelList;
+        Session session = GTFSDB.initSessionBeginTrans();
+        long timeDiff;
+        int rowId = 1;
+
+        sessionModelList = session.createQuery(" FROM SessionModel" +
+                " WHERE clientId = '" + clientId + "'").list();
+
+        Iterator iterator = sessionModelList.listIterator();
+        SessionModel eachSessionModel;
+        DateFormat timeFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+        while(iterator.hasNext()) {
+            eachSessionModel = (SessionModel) iterator.next();
+
+            eachSessionModel.setRowId(rowId);
+            rowId++;
+
+            eachSessionModel.setStartTimeFormat(timeFormat.format(eachSessionModel.getSessionStartTime()));
+            eachSessionModel.setEndTimeFormat(timeFormat.format(eachSessionModel.getSessionEndTime()));
+
+            timeDiff = eachSessionModel.getSessionEndTime() - eachSessionModel.getSessionStartTime();
+            timeFormat.format(timeDiff);
+            eachSessionModel.setTotalTime(getTotalTimeFormat(timeDiff));
+        }
+
+        GenericEntity<List<SessionModel>> pastSessionsList = new GenericEntity<List<SessionModel>>(sessionModelList) {
+        };
+        return Response.ok(pastSessionsList).build();
+    }
+
+    // Update sessionEndTime, errorCount and warningCount of a session.
+    @PUT
+    @Path("/{sessionId}/closeSession")
+    public void updateSessionData(
+            @PathParam("sessionId") int sessionId) {
+
+        long currentTime = System.currentTimeMillis();
+        Session session = GTFSDB.initSessionBeginTrans();
+
+        SessionModel sessionModel = (SessionModel) session.createQuery(" FROM SessionModel WHERE sessionId = " + sessionId).uniqueResult();
+        sessionModel.setSessionEndTime(currentTime);
+
+        List<String> errorAndWarningList = session.createQuery(QueryHelper.sessionErrorsAndWarnings)
+                .setParameter("gtfsRtId", sessionModel.getGtfsRtFeedModel().getGtfsRtId())
+                .setParameter("startTime", sessionModel.getSessionStartTime())
+                .setParameter("endTime", currentTime)
+                .list();
+
+        int warningCount = 0;
+        int errorCount = 0;
+        for (String errorOrWarning: errorAndWarningList) {
+            if (errorOrWarning.startsWith("W")) {
+                warningCount++;
+            } else {
+                errorCount++;
+            }
+        }
+        sessionModel.setErrorCount(errorCount);
+        sessionModel.setWarningCount(warningCount);
+
+        session.saveOrUpdate(sessionModel);
+        GTFSDB.commitAndCloseSession(session);
+    }
+
     @GET
     @Path("/{id}/{iteration}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -429,5 +529,17 @@ public class GtfsRtFeed {
             formattedTime = todaytimeFormat.format(feedTimestamp);
         }
         return formattedTime;
+    }
+
+    // Returns elapsed time in Xh Xm Xs format.
+    public String getTotalTimeFormat(long totalTime) {
+
+        long hours = TimeUnit.MILLISECONDS.toHours(totalTime);
+        totalTime -= TimeUnit.HOURS.toMillis(hours);
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(totalTime);
+        totalTime -= TimeUnit.MINUTES.toMillis(minutes);
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(totalTime);
+
+        return String.format("%dh %dm %ds", hours, minutes, seconds);
     }
 }
