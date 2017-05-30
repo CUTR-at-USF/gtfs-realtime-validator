@@ -61,7 +61,7 @@ public class ValidationRules {
             "does not exist in the GTFS data and does not have schedule_relationship of ADDED");
     public static final ValidationRule E004 = new ValidationRule("E004", "ERROR", "GTFS-rt route_id does not exist in GTFS data",
             "All route_ids provided in the GTFS-rt feed must exist in the GTFS data",
-            "does not exist in the GTFS data");
+            "does not exist in the GTFS data routes.txt");
 
     // TODO - implement - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/155
     public static final ValidationRule E005 = new ValidationRule("E005", "ERROR", "stop_time_update contains only delay (no times) and GTFS stop_times.txt does not contain corresponding arrival and/or departure_time for that stop",
