@@ -135,7 +135,7 @@ public class ValidationRules {
             "start_date must be in the YYYYMMDD format",
             "which is not the valid format of YYYYMMDD");
 
-    public static final ValidationRule E022 = new ValidationRule("E022", "ERROR", "Sequential stop stop_time_update times are not increasing",
+    public static final ValidationRule E022 = new ValidationRule("E022", "ERROR", "Sequential stop_time_update times are not increasing",
             "stop_time_update arrival/departure times between sequential stops should always increase - they should never be the same or decrease.",
             "- times must increase between two sequential stops");
 

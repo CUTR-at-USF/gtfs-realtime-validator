@@ -22,7 +22,7 @@ Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-U
 | [E019](#E019) | GTFS-rt frequency type 1 trip `start_time` must be a multiple of GTFS `headway_secs` later than GTFS `start_time`
 | [E020](#E020) | Invalid `start_time` format
 | [E021](#E021) | Invalid `start_date` format
-| [E022](#E022) | Sequential stop `stop_time_update` times are not increasing
+| [E022](#E022) | Sequential `stop_time_update` times are not increasing
 | [E023](#E023) | trip `start_time` does not match first GTFS `arrival_time`
 | [E024](#E024) | trip `direction_id` does not match GTFS data
 | [E025](#E025) | `stop_time_update` departure time is before arrival time
@@ -195,7 +195,7 @@ For frequency-based trips defined in `frequencies.txt` with `exact_times` = 1, t
 
 <a name="E022"/>
 
-### E022 - Sequential stop `stop_time_update` times are not increasing
+### E022 - Sequential `stop_time_update` times are not increasing
 
 `stop_time_update` arrival/departure times between sequential stops should always increase - they should never be the same or decrease.
 
