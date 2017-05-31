@@ -73,12 +73,8 @@ public class StopTimeSequenceValidator implements FeedEntityValidator {
 
                 boolean sorted = Ordering.natural().isOrdered(stopSequenceList);
                 if (!sorted) {
-                    String tripId = null;
-                    if (tripUpdate.hasTrip() && tripUpdate.getTrip().hasTripId()) {
-                        tripId = tripUpdate.getTrip().getTripId();
-                    }
-
-                    OccurrenceModel om = new OccurrenceModel((tripId != null ? "trip_id " + tripId + " " : "") + "stop_sequence " + stopSequenceList.toString());
+                    String id = GtfsUtils.getTripId(entity, tripUpdate);
+                    OccurrenceModel om = new OccurrenceModel(id + " stop_sequence " + stopSequenceList.toString());
                     e002List.add(om);
                     _log.debug(om.getPrefix() + " " + E002.getOccurrenceSuffix());
                 }
