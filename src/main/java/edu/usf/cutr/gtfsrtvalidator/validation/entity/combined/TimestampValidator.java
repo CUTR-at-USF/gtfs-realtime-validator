@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+import static edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils.getTripId;
 import static edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils.getAge;
 import static edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils.isPosix;
 import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
@@ -120,18 +121,19 @@ public class TimestampValidator implements FeedEntityValidator {
                 /**
                  * Validate TripUpdate timestamps - W001, E001, E012
                  */
+                String id = getTripId(entity, tripUpdate);
                 if (tripUpdateTimestamp == 0) {
-                    OccurrenceModel errorW001 = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId());
+                    OccurrenceModel errorW001 = new OccurrenceModel(id);
                     w001List.add(errorW001);
                     _log.debug(errorW001.getPrefix() + " " + W001.getOccurrenceSuffix());
                 } else {
                     if (headerTimestamp != 0 && tripUpdateTimestamp > headerTimestamp) {
-                        OccurrenceModel errorE012 = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() + " timestamp " + tripUpdateTimestamp);
+                        OccurrenceModel errorE012 = new OccurrenceModel(id + " timestamp " + tripUpdateTimestamp);
                         e012List.add(errorE012);
                         _log.debug(errorE012.getPrefix() + " " + E012.getOccurrenceSuffix());
                     }
                     if (!isPosix(tripUpdateTimestamp)) {
-                        OccurrenceModel errorE001 = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() + " timestamp " + tripUpdateTimestamp);
+                        OccurrenceModel errorE001 = new OccurrenceModel(id + " timestamp " + tripUpdateTimestamp);
                         e001List.add(errorE001);
                         _log.debug(errorE001.getPrefix() + " " + E001.getOccurrenceSuffix());
                     }
@@ -160,36 +162,32 @@ public class TimestampValidator implements FeedEntityValidator {
 
                                 if (!isPosix(arrivalTime)) {
                                     // E001
-                                    OccurrenceModel errorE001 = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() +
-                                            stopDescription + " arrival_time " + arrivalTime);
+                                    OccurrenceModel errorE001 = new OccurrenceModel(id + stopDescription + " arrival_time " + arrivalTime);
                                     e001List.add(errorE001);
                                     _log.debug(errorE001.getPrefix() + " " + E001.getOccurrenceSuffix());
                                 }
                                 if (previousArrivalTime != null && arrivalTime < previousArrivalTime) {
                                     // E022 - this stop arrival time is < previous stop arrival time
-                                    OccurrenceModel om = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() +
-                                            stopDescription + " arrival_time " + arrivalTimeText + " (" + arrivalTime + ") is less than previous stop arrival_time " + previousArrivalTimeText + " (" + previousArrivalTime + ")");
+                                    OccurrenceModel om = new OccurrenceModel(id + stopDescription +
+                                            " arrival_time " + arrivalTimeText + " (" + arrivalTime + ") is less than previous stop arrival_time " + previousArrivalTimeText + " (" + previousArrivalTime + ")");
                                     e022List.add(om);
                                     _log.debug(om.getPrefix() + " " + E022.getOccurrenceSuffix());
                                 }
                                 if (previousArrivalTime != null && Objects.equals(arrivalTime, previousArrivalTime)) {
                                     // E022 - this stop arrival time is == previous stop arrival time
-                                    OccurrenceModel om = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() +
-                                            stopDescription + " arrival_time " + arrivalTimeText + " (" + arrivalTime + ") is equal to previous stop arrival_time " + previousArrivalTimeText + " (" + previousArrivalTime + ")");
+                                    OccurrenceModel om = new OccurrenceModel(id + stopDescription + " arrival_time " + arrivalTimeText + " (" + arrivalTime + ") is equal to previous stop arrival_time " + previousArrivalTimeText + " (" + previousArrivalTime + ")");
                                     e022List.add(om);
                                     _log.debug(om.getPrefix() + " " + E022.getOccurrenceSuffix());
                                 }
                                 if (previousDepartureTime != null && arrivalTime < previousDepartureTime) {
                                     // E022 - this stop arrival time is < previous stop departure time
-                                    OccurrenceModel om = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() +
-                                            stopDescription + " arrival_time " + arrivalTimeText + " (" + arrivalTime + ") is less than previous stop departure_time " + previousDepartureTimeText + " (" + previousDepartureTime + ")");
+                                    OccurrenceModel om = new OccurrenceModel(id + stopDescription + " arrival_time " + arrivalTimeText + " (" + arrivalTime + ") is less than previous stop departure_time " + previousDepartureTimeText + " (" + previousDepartureTime + ")");
                                     e022List.add(om);
                                     _log.debug(om.getPrefix() + " " + E022.getOccurrenceSuffix());
                                 }
                                 if (previousDepartureTime != null && Objects.equals(arrivalTime, previousDepartureTime)) {
                                     // E022 - this stop arrival time is == previous stop departure time
-                                    OccurrenceModel om = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() +
-                                            stopDescription + " arrival_time " + arrivalTimeText + " (" + arrivalTime + ") is equal to previous stop departure_time " + previousDepartureTimeText + " (" + previousDepartureTime + ")");
+                                    OccurrenceModel om = new OccurrenceModel(id + stopDescription + " arrival_time " + arrivalTimeText + " (" + arrivalTime + ") is equal to previous stop departure_time " + previousDepartureTimeText + " (" + previousDepartureTime + ")");
                                     e022List.add(om);
                                     _log.debug(om.getPrefix() + " " + E022.getOccurrenceSuffix());
                                 }
@@ -203,42 +201,37 @@ public class TimestampValidator implements FeedEntityValidator {
 
                                 if (!isPosix(departureTime)) {
                                     // E001
-                                    OccurrenceModel errorE001 = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() +
-                                            stopDescription + " departure_time " + departureTime);
+                                    OccurrenceModel errorE001 = new OccurrenceModel(id + stopDescription + " departure_time " + departureTime);
                                     e001List.add(errorE001);
                                     _log.debug(errorE001.getPrefix() + " " + E001.getOccurrenceSuffix());
                                 }
                                 if (previousDepartureTime != null && departureTime < previousDepartureTime) {
                                     // E022 - this stop departure time is < previous stop departure time
-                                    OccurrenceModel om = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() +
-                                            stopDescription + " departure_time " + departureTimeText + " (" + departureTime + ") is less than previous stop departure_time " + previousDepartureTimeText + " (" + previousDepartureTime + ")");
+                                    OccurrenceModel om = new OccurrenceModel(id + stopDescription + " departure_time " + departureTimeText + " (" + departureTime + ") is less than previous stop departure_time " + previousDepartureTimeText + " (" + previousDepartureTime + ")");
                                     e022List.add(om);
                                     _log.debug(om.getPrefix() + " " + E022.getOccurrenceSuffix());
                                 }
                                 if (previousDepartureTime != null && Objects.equals(departureTime, previousDepartureTime)) {
                                     // E022 - this stop departure time is == previous stop departure time
-                                    OccurrenceModel om = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() +
-                                            stopDescription + " departure_time " + departureTimeText + " (" + departureTime + ") is equal to previous stop departure_time " + previousDepartureTimeText + " (" + previousDepartureTime + ")");
+                                    OccurrenceModel om = new OccurrenceModel(id + stopDescription + " departure_time " + departureTimeText + " (" + departureTime + ") is equal to previous stop departure_time " + previousDepartureTimeText + " (" + previousDepartureTime + ")");
                                     e022List.add(om);
                                     _log.debug(om.getPrefix() + " " + E022.getOccurrenceSuffix());
                                 }
                                 if (previousArrivalTime != null && departureTime < previousArrivalTime) {
                                     // E022 - this stop departure time is < previous stop arrival time
-                                    OccurrenceModel om = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() +
-                                            stopDescription + " departure_time " + departureTimeText + " (" + departureTime + ") is less than previous stop arrival_time " + previousArrivalTimeText + " (" + previousArrivalTime + ")");
+                                    OccurrenceModel om = new OccurrenceModel(id + stopDescription + " departure_time " + departureTimeText + " (" + departureTime + ") is less than previous stop arrival_time " + previousArrivalTimeText + " (" + previousArrivalTime + ")");
                                     e022List.add(om);
                                     _log.debug(om.getPrefix() + " " + E022.getOccurrenceSuffix());
                                 }
                                 if (previousArrivalTime != null && Objects.equals(departureTime, previousArrivalTime)) {
                                     // E022 - this stop departure time is == previous stop arrival time
-                                    OccurrenceModel om = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() +
-                                            stopDescription + " departure_time " + departureTimeText + " (" + departureTime + ") is equal to previous stop arrival_time " + previousArrivalTimeText + " (" + previousArrivalTime + ")");
+                                    OccurrenceModel om = new OccurrenceModel(id + stopDescription + " departure_time " + departureTimeText + " (" + departureTime + ") is equal to previous stop arrival_time " + previousArrivalTimeText + " (" + previousArrivalTime + ")");
                                     e022List.add(om);
                                     _log.debug(om.getPrefix() + " " + E022.getOccurrenceSuffix());
                                 }
                                 if (stopTimeUpdate.getArrival().hasTime() && departureTime < stopTimeUpdate.getArrival().getTime()) {
                                     // E025 - stop_time_update departure time is before arrival time
-                                    OccurrenceModel om = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() +
+                                    OccurrenceModel om = new OccurrenceModel(id +
                                             stopDescription + " departure_time " + departureTimeText
                                             + " (" + departureTime + ") is less than the same stop arrival_time " +
                                             TimestampUtils.posixToClock(stopTimeUpdate.getArrival().getTime(), gtfsMetadata.getTimeZone())
