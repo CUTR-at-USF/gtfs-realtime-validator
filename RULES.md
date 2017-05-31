@@ -328,7 +328,7 @@ Sequential GTFS-rt trip `stop_time_updates` should never have the same `stop_seq
 #### References:
 * [`trip.stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#stop-time-updates)
 
-<a name="E036"/>
+<a name="E037"/>
 
 ### E037 - Sequential `stop_time_updates` have the same `stop_id`
 
