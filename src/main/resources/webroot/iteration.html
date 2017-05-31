@@ -35,10 +35,20 @@
 
             <div class="col-md-7 feed-padding">
                 <div class="well content-well ">
-                    <span class="info-text" id="error-count">0</span>
-                    &nbsperror(s),
-                    <span class="info-text" id="warning-count">0</span>
-                    &nbspwarning(s)
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="col-md-9">
+                                <span class="info-text" id="error-count">0</span>
+                                &nbsperror(s),
+                                <span class="info-text" id="warning-count">0</span>
+                                &nbspwarning(s)
+                            </div>
+                            <div class="col-md-3">
+                                <span><b>Download all&nbsp</b></span>
+                                <span class="glyphicon glyphicon-download-alt download-button" id="download-all-button"></span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="well content-well iteration-issues">
@@ -57,6 +67,8 @@
     <script src="js/bootstrap.min.js"></script>
     <script src="js/clipboard.min.js"></script>
     <script src="js/handlebars.js"></script>
+    <script src="js/filesaver.min.js"></script>
+    <script src="js/tableexport.js"></script>
 
     <script id="error-each-card-template" type="text/x-handlebars-template">
         {{#each this}}
@@ -68,15 +80,21 @@
     <script id="error-card-table-template" type="text/x-handlebars-template">
         {{#each this}}
         <div class="well each-card">
-            <h4>
-                <span><a href="https://github.com/CUTR-at-USF/gtfs-realtime-validator/blob/master/RULES.md#{{errorId}}" target="_blank">{{errorId}}</a></span>
-                <span> - {{title}}</span>
-            </h4>
+            <div class="col-md-12">
+                <h4 class="col-md-11">
+                    <span><a href="https://github.com/CUTR-at-USF/gtfs-realtime-validator/blob/master/RULES.md#{{errorId}}" target="_blank">{{errorId}}</a></span>
+                    <span> - {{title}}</span>
+                </h4>
+                <div class="col-md-1 download-button" id="download-button-{{@index}}">
+                    <span class="glyphicon glyphicon-download-alt"></span>
+                </div>
+            </div>
             <hr/>
-            <table class="table">
+            <table class="table" id="export-table-{{@index}}">
                 <thead class="iterations-thead">
                 <tr>
                     <th>OccurrenceId</th>
+                    <th style="display:none;" data-tableexport-display="always">Rule ID</th>
                     <th>Summary</th>
                 </tr>
                 </thead>
@@ -97,6 +115,7 @@
         {{#each this}}
         <tr>
             <td class="iterations-td">{{rowId}}</td>
+            <td style="display:none;" data-tableexport-display="always">{{errorId}}</td>
             <td class="iterations-td">{{occurrencePrefix}} {{occurrenceSuffix}}</td>
         </tr>
         {{/each}}

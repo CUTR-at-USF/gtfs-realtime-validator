@@ -124,6 +124,15 @@
     left: 50%;
 }
 
+.download-button {
+    cursor: pointer;
+    font-size: 1.2em;
+}
+
+.download-button:hover {
+    color: #0027ff;
+}
+
 ::-ms-clear {
   display: none;
 }

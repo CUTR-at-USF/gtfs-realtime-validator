@@ -24,6 +24,9 @@ var showMoreErrorList;
 var MAX_ERRORS_TO_DISPLAY = 3;
 var showLessErrorList = {};
 
+var exportDataHeader;
+var allTablesData = '';
+
 var server = window.location.protocol + "//" + window.location.host;
 $(".feed-page-loader").show();
 $(".issues-page-loader").show();
@@ -111,6 +114,14 @@ $.get(server + "/api/gtfs-rt-feed/" + iterationId + "/iterationErrors").done(fun
                 showLessErrorList[errorListIndex][numErrorsIndex] = data[errorListIndex]["viewIterationErrorsModelList"][numErrorsIndex];
             }
         }
+
+        /*
+         * 'setupExportData' method sets all the rows of each table to be exported as csv file.
+         * Creates a click event for each download button.
+         */
+        setupExportData(errorListIndex, cardBodyTemplate);
+
+        // Show less number of rows in each table.
         var bodyCompiledHtml = cardBodyTemplate(showLessErrorList[errorListIndex]);
         $("#error-card-body-" + errorListIndex).html(bodyCompiledHtml);
     }
@@ -119,6 +130,14 @@ $.get(server + "/api/gtfs-rt-feed/" + iterationId + "/iterationErrors").done(fun
 
     $("#error-count").text(errorCount);
     $("#warning-count").text(warningCount);
+
+    // Add a click event listener for downloading all the tables data saved in 'allTablesData'
+    allTablesData = exportDataHeader + allTablesData;
+    var instance = new TableExport($('<div>')); // Instantiate TableExport
+    $('#download-all-button').on('click', function(e) {
+                             // File data,   mimeType,  filename,                   fileExtension
+        instance.export2file(allTablesData, 'text/csv', 'iteration_' + iterationId, '.csv');
+    });
 });
 
 // On clicking '...and xx more' text, this method will show all the occurrences of that error/warning
@@ -143,6 +162,37 @@ function showLessErrors(errorIndex) {
 
     $(".show-less-" + errorIndex).hide();
     $(".show-more-" + errorIndex).show();
+}
+
+function setupExportData(index, cardBodyTemplate) {
+
+    // Get all the rows into the table
+    var dataCompiledHtml = cardBodyTemplate(showMoreErrorList[index]["viewIterationErrorsModelList"]);
+    $("#error-card-body-" + index).html(dataCompiledHtml);
+
+    // Setting up export data properties and handling click events for each download button
+    (function (){
+        var exportTable = document.getElementById('export-table-' + index);
+        var instance = new TableExport(exportTable, {
+            formats: ['csv'], // The format we want to export
+            exportButtons: false, // Such that we can create customized download button
+            filename: 'iteration_' + iterationId + '_' + showMoreErrorList[index]["errorId"]
+        });
+
+        var exportData = instance.getExportData()['export-table-' + index]['csv'];
+
+        // Form the table header i.e., 'exportDataHeader' and 'allTablesData' so that we can download all tables data at once
+        if (!exportDataHeader) {
+            exportDataHeader = exportData.data.substring(0, exportData.data.indexOf("\n"));
+        }
+        allTablesData = allTablesData.concat(exportData.data.substring(exportData.data.indexOf("\n")));
+
+        var downloadButton = document.getElementById('download-button-' + index);
+
+        $(downloadButton).on('click', function(e) {
+            instance.export2file(exportData.data, exportData.mimeType, exportData.filename, exportData.fileExtension);
+        });
+    }());
 }
 
 function setTooltip(btn,message) {
