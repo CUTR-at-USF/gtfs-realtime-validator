@@ -198,4 +198,8 @@ public class ValidationRules {
     public static final ValidationRule E037 = new ValidationRule("E037", "ERROR", "Sequential stop_time_updates have the same stop_id",
             "Sequential GTFS-rt trip stop_time_updates shouldn't have the same stop_id",
             "- sequential stop_ids should be different");
+
+    public static final ValidationRule E038 = new ValidationRule("E038", "ERROR", "Invalid header.gtfs_realtime_version",
+            "header.gtfs_realtime_version should be a valid value",
+            "is invalid");
 }
