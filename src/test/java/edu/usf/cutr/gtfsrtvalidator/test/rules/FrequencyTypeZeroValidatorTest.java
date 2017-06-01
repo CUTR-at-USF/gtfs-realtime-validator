@@ -1,4 +1,4 @@
-package edu.usf.cutr.gtfsrtvalidator.test.feeds.combined;
+package edu.usf.cutr.gtfsrtvalidator.test.rules;
 
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.test.FeedMessageTest;

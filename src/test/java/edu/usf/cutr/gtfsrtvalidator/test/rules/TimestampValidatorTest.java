@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.usf.cutr.gtfsrtvalidator.test.headerandentity;
+package edu.usf.cutr.gtfsrtvalidator.test.rules;
 
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.test.FeedMessageTest;
@@ -30,7 +30,7 @@ import static edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils.MIN_POSIX_TIME;
 import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
 
 /*
- * Tests all the warnings and rules that validate timestamps:
+ * Tests all the warnings and rules that validate timestamps in TimestampValidator:
  *  * W001 - Timestamps should be populated for all elements
  *  * W007 - Refresh interval more than 35 seconds
  *  * W008 - Header timestamp is older than 65 seconds
@@ -942,7 +942,6 @@ public class TimestampValidatorTest extends FeedMessageTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testDuplicateFeedMessagesThrowException() {
-
         TimestampValidator timestampValidator = new TimestampValidator();
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
 

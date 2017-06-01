@@ -14,16 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.usf.cutr.gtfsrtvalidator.test.feeds.combined;
+package edu.usf.cutr.gtfsrtvalidator.test.rules;
 
 import com.google.transit.realtime.GtfsRealtime;
-import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.test.FeedMessageTest;
 import edu.usf.cutr.gtfsrtvalidator.test.util.TestUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
-import edu.usf.cutr.gtfsrtvalidator.validation.entity.StopTimeSequenceValidator;
 import edu.usf.cutr.gtfsrtvalidator.validation.entity.VehicleValidator;
-import edu.usf.cutr.gtfsrtvalidator.validation.gtfs.StopLocationTypeValidator;
 import org.junit.Test;
 import org.locationtech.spatial4j.context.jts.JtsSpatialContext;
 import org.locationtech.spatial4j.io.ShapeIO;
@@ -38,58 +35,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.locationtech.spatial4j.context.SpatialContext.GEO;
 
-/* 
- * Tests all the warnings and rules that validate TripUpdate feed.
- * Tests: W002 - "vehicle_id should be populated in trip_update"
- *        E002 - "stop_time_updates for a given trip_id must be sorted by increasing stop_sequence"
- *        E010 - "If location_type is used in stops.txt, all stops referenced in stop_times.txt must have location_type of 0"
-*/
-public class TripUpdateFeedTest extends FeedMessageTest {
-    
-    public TripUpdateFeedTest() throws Exception {}
+/**
+ * Tests for rules implemented in VehicleValidator
+ */
+public class VehicleValidatorTest extends FeedMessageTest {
 
-    /**
-     * E002 - stop_time_updates for a given trip_id must be sorted by increasing stop_sequence
-     */
-    @Test
-    public void testStopSequenceValidation() {
-        StopTimeSequenceValidator stopSequenceValidator = new StopTimeSequenceValidator();
-
-        GtfsRealtime.TripUpdate.StopTimeUpdate.Builder stopTimeUpdateBuilder = GtfsRealtime.TripUpdate.StopTimeUpdate.newBuilder();
-        GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
-
-        // tripDescriptor is a required field in tripUpdate
-        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
-        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
-        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-
-        // ordered stop sequence 1, 5
-        stopTimeUpdateBuilder.setStopSequence(1);
-        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
-        stopTimeUpdateBuilder.setStopSequence(5);
-        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
-        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
-        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        // StopTimeUpdate count should be 2
-        assertEquals(2, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
-
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(ValidationRules.E002, results, 0);
-        
-        /* Adding stop sequence 3. So, the stop sequence now is 1, 5, 3 which is unordered.
-           So, the validation fails and the assertion test passes
-        */
-        stopTimeUpdateBuilder.setStopSequence(3);
-        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
-        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
-        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        // StopTimeUpdate count should be 3
-        assertEquals(3, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
-
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(ValidationRules.E002, results, 1);
-
-        clearAndInitRequiredFeedFields();
+    public VehicleValidatorTest() throws Exception {
     }
 
     /**
@@ -335,26 +286,6 @@ public class TripUpdateFeedTest extends FeedMessageTest {
 
         results = vehicleValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(ValidationRules.E027, results, 1);
-
-        clearAndInitRequiredFeedFields();
-    }
-
-    /**
-     * E010 - If location_type is used in stops.txt, all stops referenced in stop_times.txt must have location_type of 0
-     */
-    @Test
-    public void testLocationTypeValidation() {
-        StopLocationTypeValidator stopLocationValidator = new StopLocationTypeValidator();
-
-        // gtfsData does not contain location_type = 1 for stop_id. Therefore returns 0 results
-        results = stopLocationValidator.validate(gtfsData);
-        for (ErrorListHelperModel error : results) {
-            assertEquals(0, error.getOccurrenceList().size());
-        }
-
-        // gtfsData2 contains location_type = 1 for stop_ids. Therefore returns errorcount = (number of location_type = 1 for stop_ids)
-        results = stopLocationValidator.validate(gtfsData2);
-        TestUtils.assertResults(ValidationRules.E010, results, 1);
 
         clearAndInitRequiredFeedFields();
     }
@@ -710,179 +641,5 @@ public class TripUpdateFeedTest extends FeedMessageTest {
 
         results = vehicleValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(ValidationRules.E029, results, 1);
-    }
-
-    /**
-     * E036 - Sequential stop_time_updates have the same stop_sequence
-     */
-    @Test
-    public void testRepeatingStopSequence() {
-        StopTimeSequenceValidator stopSequenceValidator = new StopTimeSequenceValidator();
-
-        GtfsRealtime.TripUpdate.StopTimeUpdate.Builder stopTimeUpdateBuilder = GtfsRealtime.TripUpdate.StopTimeUpdate.newBuilder();
-        GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
-        tripDescriptorBuilder.setTripId("1234");
-
-        // tripDescriptor is a required field in tripUpdate
-        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
-
-        // stop_sequences 1, 5 - no errors
-        stopTimeUpdateBuilder.setStopSequence(1);
-        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
-        stopTimeUpdateBuilder.setStopSequence(5);
-        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
-        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
-        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        // StopTimeUpdate count should be 2
-        assertEquals(2, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
-
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(ValidationRules.E036, results, 0);
-
-        // Add stop_ids - no errors
-        stopTimeUpdateBuilder.clear();
-        stopTimeUpdateBuilder.setStopSequence(1);
-        stopTimeUpdateBuilder.setStopId("1000");
-        tripUpdateBuilder.clearStopTimeUpdate();
-        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
-        stopTimeUpdateBuilder.setStopSequence(5);
-        stopTimeUpdateBuilder.setStopId("2000");
-        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
-        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
-        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        // StopTimeUpdate count should be 2
-        assertEquals(2, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
-
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(ValidationRules.E036, results, 0);
-
-        // Add stop sequence 5 twice (and to make sure we support it, no stopId). So, the stop sequence now is 1, 5, 5 - one error
-        stopTimeUpdateBuilder.clear();
-        stopTimeUpdateBuilder.setStopSequence(1);
-        stopTimeUpdateBuilder.setStopId("1000");
-        tripUpdateBuilder.clearStopTimeUpdate();
-        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
-        stopTimeUpdateBuilder.setStopSequence(5);
-        stopTimeUpdateBuilder.setStopId("2000");
-        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
-        stopTimeUpdateBuilder.clear();
-        stopTimeUpdateBuilder.setStopSequence(5);
-        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
-        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
-        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        // StopTimeUpdate count should be 3
-        assertEquals(3, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
-
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(ValidationRules.E036, results, 1);
-
-        // stop_sequence 5 twice again, but include stop_id for last stop_time_update - one error
-        stopTimeUpdateBuilder.clear();
-        stopTimeUpdateBuilder.setStopSequence(1);
-        stopTimeUpdateBuilder.setStopId("1000");
-        tripUpdateBuilder.clearStopTimeUpdate();
-        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
-        stopTimeUpdateBuilder.setStopSequence(5);
-        stopTimeUpdateBuilder.setStopId("2000");
-        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
-        stopTimeUpdateBuilder.setStopSequence(5);
-        stopTimeUpdateBuilder.setStopId("3000");
-        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
-        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
-        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        // StopTimeUpdate count should be 3
-        assertEquals(3, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
-
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(ValidationRules.E036, results, 1);
-
-        clearAndInitRequiredFeedFields();
-    }
-
-    /**
-     * E037 - Sequential stop_time_updates have the same stop_id
-     */
-    @Test
-    public void testRepeatingStopId() {
-        StopTimeSequenceValidator stopSequenceValidator = new StopTimeSequenceValidator();
-
-        GtfsRealtime.TripUpdate.StopTimeUpdate.Builder stopTimeUpdateBuilder = GtfsRealtime.TripUpdate.StopTimeUpdate.newBuilder();
-        GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
-        tripDescriptorBuilder.setTripId("1234");
-
-        // tripDescriptor is a required field in tripUpdate
-        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
-
-        // stop_ids 1000, 2000 - no errors
-        stopTimeUpdateBuilder.setStopId("1000");
-        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
-        stopTimeUpdateBuilder.setStopId("2000");
-        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
-        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
-        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        // StopTimeUpdate count should be 2
-        assertEquals(2, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
-
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(ValidationRules.E037, results, 0);
-
-        // Add stop_sequence - no errors
-        stopTimeUpdateBuilder.clear();
-        stopTimeUpdateBuilder.setStopSequence(1);
-        stopTimeUpdateBuilder.setStopId("1000");
-        tripUpdateBuilder.clearStopTimeUpdate();
-        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
-        stopTimeUpdateBuilder.setStopSequence(5);
-        stopTimeUpdateBuilder.setStopId("2000");
-        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
-        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
-        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        // StopTimeUpdate count should be 2
-        assertEquals(2, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
-
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(ValidationRules.E037, results, 0);
-
-        // Add stop_id 2000 twice (and to make sure we support it, no stop_sequence). So, repeating stop_ids 3000 - one error
-        stopTimeUpdateBuilder.clear();
-        stopTimeUpdateBuilder.setStopSequence(1);
-        stopTimeUpdateBuilder.setStopId("1000");
-        tripUpdateBuilder.clearStopTimeUpdate();
-        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
-        stopTimeUpdateBuilder.setStopSequence(5);
-        stopTimeUpdateBuilder.setStopId("2000");
-        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
-        stopTimeUpdateBuilder.clear();
-        stopTimeUpdateBuilder.setStopId("2000");
-        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
-        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
-        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        // StopTimeUpdate count should be 3
-        assertEquals(3, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
-
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(ValidationRules.E037, results, 1);
-
-        // stop_id 2000 twice again, but include stop_sequence for last stop_time_update - one error
-        stopTimeUpdateBuilder.clear();
-        stopTimeUpdateBuilder.setStopSequence(1);
-        stopTimeUpdateBuilder.setStopId("1000");
-        tripUpdateBuilder.clearStopTimeUpdate();
-        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
-        stopTimeUpdateBuilder.setStopSequence(5);
-        stopTimeUpdateBuilder.setStopId("2000");
-        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
-        stopTimeUpdateBuilder.setStopSequence(10);
-        stopTimeUpdateBuilder.setStopId("2000");
-        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
-        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
-        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        // StopTimeUpdate count should be 3
-        assertEquals(3, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
-
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(ValidationRules.E037, results, 1);
-
-        clearAndInitRequiredFeedFields();
     }
 }

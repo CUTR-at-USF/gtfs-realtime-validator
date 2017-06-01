@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.usf.cutr.gtfsrtvalidator.test.feeds.combined;
+package edu.usf.cutr.gtfsrtvalidator.test.rules;
 
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.test.FeedMessageTest;
@@ -25,22 +25,19 @@ import org.junit.Test;
 
 import static edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils.MIN_POSIX_TIME;
 
-/*
- * Tests all the warnings and rules that validate TripUpdate, VehiclePosition and Alerts feed.
- * Tests:
- *   E011 - All stop_ids referenced in GTFS-rt feed must appear in the GTFS feed
- *   E015 - All stop_ids referenced in GTFS-rt feeds must have the location_type = 0
-*/
-public class TripUpdateVehiclePostionAlertTest extends FeedMessageTest {
-    
-    public TripUpdateVehiclePostionAlertTest() throws Exception {}
+/**
+ * Tests for rules implemented in StopValidator
+ */
+public class StopValidatorTest extends FeedMessageTest {
+
+    public StopValidatorTest() throws Exception {
+    }
 
     /**
      * E011 - All stop_ids referenced in GTFS-rt feed must appear in the GTFS feed
      */
     @Test
     public void testStopIdValidation() {
-
         StopValidator locationValidator = new StopValidator();
         
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
@@ -110,7 +107,6 @@ public class TripUpdateVehiclePostionAlertTest extends FeedMessageTest {
      */
     @Test
     public void testStopLocationTypeValidation() {
-
         StopValidator locationValidator = new StopValidator();
 
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
