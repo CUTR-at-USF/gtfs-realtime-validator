@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package edu.usf.cutr.gtfsrtvalidator.validation.entity;
+package edu.usf.cutr.gtfsrtvalidator.validation.rules;
 
 import com.google.common.collect.Ordering;
 import com.google.transit.realtime.GtfsRealtime;

@@ -19,7 +19,7 @@ package edu.usf.cutr.gtfsrtvalidator.test.rules;
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.test.FeedMessageTest;
-import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.CrossFeedDescriptorValidator;
+import edu.usf.cutr.gtfsrtvalidator.validation.rules.CrossFeedDescriptorValidator;
 import org.junit.Test;
 
 import static edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils.MIN_POSIX_TIME;

@@ -19,7 +19,7 @@ package edu.usf.cutr.gtfsrtvalidator.test.rules;
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.test.FeedMessageTest;
 import edu.usf.cutr.gtfsrtvalidator.test.util.TestUtils;
-import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.TimestampValidator;
+import edu.usf.cutr.gtfsrtvalidator.validation.rules.TimestampValidator;
 import org.junit.Test;
 
 import java.io.IOException;

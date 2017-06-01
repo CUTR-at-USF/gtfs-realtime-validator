@@ -19,7 +19,7 @@ package edu.usf.cutr.gtfsrtvalidator.test.rules;
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.test.FeedMessageTest;
 import edu.usf.cutr.gtfsrtvalidator.test.util.TestUtils;
-import edu.usf.cutr.gtfsrtvalidator.validation.entity.combined.FrequencyTypeOneValidator;
+import edu.usf.cutr.gtfsrtvalidator.validation.rules.FrequencyTypeOneValidator;
 import org.junit.Test;
 
 import java.io.IOException;
