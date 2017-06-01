@@ -71,6 +71,7 @@ public class BackgroundTask implements Runnable {
                 mValidationRules.add(new StopValidator());
                 mValidationRules.add(new FrequencyTypeZeroValidator());
                 mValidationRules.add(new FrequencyTypeOneValidator());
+                mValidationRules.add(new HeaderValidator());
             }
         }
     }
