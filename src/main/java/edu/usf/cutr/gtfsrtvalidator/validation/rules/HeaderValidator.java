@@ -29,9 +29,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.E038;
+import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.E039;
 
 /**
  * E038 - Invalid header.gtfs_realtime_version
+ * E039 - FULL_DATASET feeds should not include entity.is_deleted
  */
 public class HeaderValidator implements FeedEntityValidator {
 
@@ -40,6 +42,7 @@ public class HeaderValidator implements FeedEntityValidator {
     @Override
     public List<ErrorListHelperModel> validate(long currentTimeMillis, GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage) {
         List<OccurrenceModel> errorListE038 = new ArrayList<>();
+        List<OccurrenceModel> errorListE039 = new ArrayList<>();
 
         String version = feedMessage.getHeader().getGtfsRealtimeVersion();
         if (!version.equals("1.0")) {
@@ -49,9 +52,23 @@ public class HeaderValidator implements FeedEntityValidator {
             _log.debug(om.getPrefix() + " " + E038.getOccurrenceSuffix());
         }
 
+        if (feedMessage.getHeader().getIncrementality().equals(GtfsRealtime.FeedHeader.Incrementality.FULL_DATASET)) {
+            for (GtfsRealtime.FeedEntity entity : feedMessage.getEntityList()) {
+                if (entity.hasIsDeleted()) {
+                    // E039 - FULL_DATASET feeds should not include entity.is_deleted
+                    OccurrenceModel om = new OccurrenceModel("entity ID " + entity.getId() + " has is_deleted=" + entity.getIsDeleted());
+                    errorListE039.add(om);
+                    _log.debug(om.getPrefix() + " " + E039.getOccurrenceSuffix());
+                }
+            }
+        }
+
         List<ErrorListHelperModel> errors = new ArrayList<>();
         if (!errorListE038.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(E038), errorListE038));
+        }
+        if (!errorListE039.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E039), errorListE039));
         }
         return errors;
     }

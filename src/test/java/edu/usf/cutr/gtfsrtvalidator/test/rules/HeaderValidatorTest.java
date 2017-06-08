@@ -72,4 +72,62 @@ public class HeaderValidatorTest extends FeedMessageTest {
 
         clearAndInitRequiredFeedFields();
     }
+
+    /**
+     * E039 - FULL_DATASET feeds should not include entity.is_deleted
+     */
+    @Test
+    public void testIncrementalIsDeleted() {
+        HeaderValidator headerValidator = new HeaderValidator();
+
+        GtfsRealtime.FeedHeader.Builder headerBuilder = GtfsRealtime.FeedHeader.newBuilder();
+        headerBuilder.setGtfsRealtimeVersion("1.0");
+
+        // FULL_DATASET feed without any entities - no errors
+        headerBuilder.setIncrementality(GtfsRealtime.FeedHeader.Incrementality.FULL_DATASET);
+        feedMessageBuilder.setHeader(headerBuilder.build());
+
+        results = headerValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E039, results, 0);
+
+        // DIFFERENTIAL feed without any entities - no errors
+        headerBuilder.setIncrementality(GtfsRealtime.FeedHeader.Incrementality.DIFFERENTIAL);
+        feedMessageBuilder.setHeader(headerBuilder.build());
+
+        results = headerValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E039, results, 0);
+
+        // FULL_DATASET feed without is_deleted field in any entities - no errors
+        headerBuilder.setIncrementality(GtfsRealtime.FeedHeader.Incrementality.FULL_DATASET);
+        feedMessageBuilder.setHeader(headerBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+        results = headerValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E039, results, 0);
+
+        // DIFFERENTIAL feed without is_deleted field in any entities - no errors
+        headerBuilder.setIncrementality(GtfsRealtime.FeedHeader.Incrementality.DIFFERENTIAL);
+        feedMessageBuilder.setHeader(headerBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+        results = headerValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E039, results, 0);
+
+        // FULL_DATASET feed with is_deleted field in an entity - 1 error
+        headerBuilder.setIncrementality(GtfsRealtime.FeedHeader.Incrementality.FULL_DATASET);
+        feedMessageBuilder.setHeader(headerBuilder.build());
+        feedEntityBuilder.setIsDeleted(true);
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+        results = headerValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E039, results, 1);
+
+        // DIFFERENTIAL feed with is_deleted field in an entity - 0 errors
+        feedMessageBuilder.clearEntity();
+        headerBuilder.setIncrementality(GtfsRealtime.FeedHeader.Incrementality.DIFFERENTIAL);
+        feedMessageBuilder.setHeader(headerBuilder.build());
+        feedEntityBuilder.setIsDeleted(true);
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+        results = headerValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.E039, results, 0);
+
+        clearAndInitRequiredFeedFields();
+    }
 }

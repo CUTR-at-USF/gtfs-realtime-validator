@@ -202,4 +202,8 @@ public class ValidationRules {
     public static final ValidationRule E038 = new ValidationRule("E038", "ERROR", "Invalid header.gtfs_realtime_version",
             "header.gtfs_realtime_version should be a valid value",
             "is invalid");
+
+    public static final ValidationRule E039 = new ValidationRule("E039", "ERROR", "FULL_DATASET feeds should not include entity.is_deleted",
+            "The entity.is_deleted field should only be included in GTFS-rt feeds with header.incrementality of DIFFERENTIAL",
+            "- FULL_DATASET feeds should not include is_deleted field");
 }
