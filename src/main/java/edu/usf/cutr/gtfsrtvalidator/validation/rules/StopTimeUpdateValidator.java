@@ -24,6 +24,7 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.background.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils;
+import edu.usf.cutr.gtfsrtvalidator.util.RuleUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.slf4j.LoggerFactory;
@@ -31,16 +32,19 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+import static edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils.getStopTimeUpdateId;
+import static edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils.getTripId;
 import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
 
 /**
  * E002 - stop_time_updates for a given trip_id must be sorted by increasing stop_sequence
  * E036 - Sequential stop_time_updates have the same stop_sequence
  * E037 - Sequential stop_time_updates have the same stop_id
+ * W009 - schedule_relationship not populated (for StopTimeUpdate)
  */
-public class StopTimeSequenceValidator implements FeedEntityValidator {
+public class StopTimeUpdateValidator implements FeedEntityValidator {
 
-    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(StopTimeSequenceValidator.class);
+    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(StopTimeUpdateValidator.class);
 
     @Override
     public List<ErrorListHelperModel> validate(long currentTimeMillis, GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage) {
@@ -48,6 +52,7 @@ public class StopTimeSequenceValidator implements FeedEntityValidator {
         List<OccurrenceModel> e002List = new ArrayList<>();
         List<OccurrenceModel> e036List = new ArrayList<>();
         List<OccurrenceModel> e037List = new ArrayList<>();
+        List<OccurrenceModel> w009List = new ArrayList<>();
 
         for (GtfsRealtime.FeedEntity entity : entityList) {
             if (entity.hasTripUpdate()) {
@@ -69,6 +74,7 @@ public class StopTimeSequenceValidator implements FeedEntityValidator {
                     if (stopTimeUpdate.hasStopSequence()) {
                         stopSequenceList.add(stopTimeUpdate.getStopSequence());
                     }
+                    checkW009(entity, stopTimeUpdate, w009List);
                 }
 
                 boolean sorted = Ordering.natural().isOrdered(stopSequenceList);
@@ -92,6 +98,9 @@ public class StopTimeSequenceValidator implements FeedEntityValidator {
         }
         if (!e037List.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(E037), e037List));
+        }
+        if (!w009List.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(W009), w009List));
         }
         return errors;
     }
@@ -139,6 +148,20 @@ public class StopTimeSequenceValidator implements FeedEntityValidator {
             OccurrenceModel om = new OccurrenceModel(prefix.toString());
             errors.add(om);
             _log.debug(om.getPrefix() + " " + E036.getOccurrenceSuffix());
+        }
+    }
+
+    /**
+     * Checks rule W009 - "schedule_relationship not populated", and adds any warnings that are found to the provided warning list
+     *
+     * @param entity         entity which contains the specified trip.stop_time_update
+     * @param stopTimeUpdate stop_time_update to examine to see if it has a schedule_relationship
+     * @param warnings       list to add any warnings for W009 to
+     */
+    private void checkW009(GtfsRealtime.FeedEntity entity, GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate, List<OccurrenceModel> warnings) {
+        if (stopTimeUpdate != null && !stopTimeUpdate.hasScheduleRelationship()) {
+            // W009 - schedule_relationship not populated
+            RuleUtils.addW009Occurrence(getTripId(entity, entity.getTripUpdate().getTrip()) + " " + getStopTimeUpdateId(stopTimeUpdate), warnings);
         }
     }
 }

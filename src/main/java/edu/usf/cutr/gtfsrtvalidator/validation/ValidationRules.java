@@ -46,6 +46,9 @@ public class ValidationRules {
     public static final ValidationRule W008 = new ValidationRule("W008", "WARNING", "Header timestamp is older than 65 seconds",
             "The data in a GTFS-realtime feed should always be less than one minute old",
             "old which is greater than the recommended age of 65 seconds");
+    public static final ValidationRule W009 = new ValidationRule("W009", "WARNING", "schedule_relationship not populated",
+            "trip.schedule_relationship and stop_time_update.schedule_relationship should be populated",
+            "does not have a schedule_relationship");
 
     /**
      * Errors

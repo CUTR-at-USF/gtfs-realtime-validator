@@ -175,6 +175,33 @@ public class GtfsUtils {
         if (!tripUpdate.hasTrip()) {
             return "entity ID " + entity.getId();
         }
-        return tripUpdate.getTrip().hasTripId() ? "trip_id " + tripUpdate.getTrip().getTripId() : "entity ID " + entity.getId();
+        return getTripId(entity, tripUpdate.getTrip());
+    }
+
+    /**
+     * Returns the trip_id for the given TripDescriptor if one exists, if not the entity ID is returned in the format
+     * "trip_id 1234" or "entity ID 4321".
+     *
+     * @param entity     the entity that the TripUpdate belongs to
+     * @param tripDescriptor the tripDescriptor to get the ID for
+     * @return the trip_id for the given TripUpdate if one exists, if not the entity ID is returned in the format "trip_id 1234" or "entity ID 4321".
+     */
+    public static String getTripId(GtfsRealtime.FeedEntity entity, GtfsRealtime.TripDescriptor tripDescriptor) {
+        return tripDescriptor.hasTripId() ? "trip_id " + tripDescriptor.getTripId() : "entity ID " + entity.getId();
+    }
+
+    /**
+     * Returns the stop_sequence for the given StopTimeUpdate if one exists, if not the stop_id is returned in the format
+     * "stop_sequence 1234" or "stop_id 9876".
+     *
+     * @param stopTimeUpdate the stop_time_update to generate the stop_sequence or stop_id text from
+     * @return the stop_sequence for the given StopTimeUpdate if one exists, if not the stop_id is returned in the format"stop_sequence 1234" or "stop_id 9876".
+     */
+    public static String getStopTimeUpdateId(GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate) {
+        if (stopTimeUpdate.hasStopSequence()) {
+            return "stop_sequence " + stopTimeUpdate.getStopSequence();
+        } else {
+            return "stop_id " + stopTimeUpdate.getStopId();
+        }
     }
 }

@@ -21,6 +21,7 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.background.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
+import edu.usf.cutr.gtfsrtvalidator.util.RuleUtils;
 import edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.hsqldb.lib.StringUtil;
@@ -63,6 +64,8 @@ import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
  * E035 - GTFS-rt trip.trip_id does not belong to GTFS-rt trip.route_id in GTFS trips.txt
  *
  * W006 - trip_update missing trip_id
+ *
+ * W009 - schedule_relationship not populated (for TripDescriptor)
  */
 public class TripDescriptorValidator implements FeedEntityValidator {
 
@@ -84,6 +87,7 @@ public class TripDescriptorValidator implements FeedEntityValidator {
         List<OccurrenceModel> errorListE034 = new ArrayList<>();
         List<OccurrenceModel> errorListE035 = new ArrayList<>();
         List<OccurrenceModel> errorListW006 = new ArrayList<>();
+        List<OccurrenceModel> errorListW009 = new ArrayList<>();
 
         // Check the route_id values against the values from the GTFS feed
         for (GtfsRealtime.FeedEntity entity : feedMessage.getEntityList()) {
@@ -123,6 +127,9 @@ public class TripDescriptorValidator implements FeedEntityValidator {
                 checkE004(tripUpdate, tripUpdate.getTrip(), gtfsMetadata, errorListE004);
                 checkE024(tripUpdate, tripUpdate.getTrip(), gtfsMetadata, errorListE024);
                 checkE035(entity, tripUpdate.getTrip(), gtfsMetadata, errorListE035);
+                if (tripUpdate.hasTrip()) {
+                    checkW009(entity, tripUpdate.getTrip(), errorListW009);
+                }
             }
             if (entity.hasVehicle() && entity.getVehicle().hasTrip()) {
                 GtfsRealtime.TripDescriptor trip = entity.getVehicle().getTrip();
@@ -162,6 +169,7 @@ public class TripDescriptorValidator implements FeedEntityValidator {
                 checkE021(entity.getVehicle(), trip, errorListE021);
                 checkE024(entity.getVehicle(), trip, gtfsMetadata, errorListE024);
                 checkE035(entity, trip, gtfsMetadata, errorListE035);
+                checkW009(entity, trip, errorListW009);
             }
             if (entity.hasAlert()) {
                 GtfsRealtime.Alert alert = entity.getAlert();
@@ -174,6 +182,9 @@ public class TripDescriptorValidator implements FeedEntityValidator {
                         if (entitySelector.hasRouteId() && entitySelector.hasTrip()) {
                             checkE030(entity, entitySelector, gtfsMetadata, errorListE030);
                             checkE031(entity, entitySelector, errorListE031);
+                        }
+                        if (entitySelector.hasTrip()) {
+                            checkW009(entity, entitySelector.getTrip(), errorListW009);
                         }
                     }
                 } else {
@@ -226,6 +237,9 @@ public class TripDescriptorValidator implements FeedEntityValidator {
         }
         if (!errorListW006.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(W006), errorListW006));
+        }
+        if (!errorListW009.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(W009), errorListW009));
         }
         return errors;
     }
@@ -449,6 +463,20 @@ public class TripDescriptorValidator implements FeedEntityValidator {
                 errors.add(om);
                 _log.debug(om.getPrefix() + " " + E035.getOccurrenceSuffix());
             }
+        }
+    }
+
+    /**
+     * Checks rule W009 - "schedule_relationship not populated", and adds any warnings that are found to the provided warning list
+     *
+     * @param entity         entity which contains the specified trip
+     * @param tripDescriptor trip to examine to see if it has a schedule_relationship
+     * @param warnings       list to add any warnings for W009 to
+     */
+    private void checkW009(GtfsRealtime.FeedEntity entity, GtfsRealtime.TripDescriptor tripDescriptor, List<OccurrenceModel> warnings) {
+        if (tripDescriptor != null && !tripDescriptor.hasScheduleRelationship()) {
+            // W009 - schedule_relationship not populated
+            RuleUtils.addW009Occurrence(getTripId(entity, tripDescriptor), warnings);
         }
     }
 }

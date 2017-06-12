@@ -66,7 +66,7 @@ public class BackgroundTask implements Runnable {
                 mValidationRules.add(new CrossFeedDescriptorValidator());
                 mValidationRules.add(new VehicleValidator());
                 mValidationRules.add(new TimestampValidator());
-                mValidationRules.add(new StopTimeSequenceValidator());
+                mValidationRules.add(new StopTimeUpdateValidator());
                 mValidationRules.add(new TripDescriptorValidator());
                 mValidationRules.add(new StopValidator());
                 mValidationRules.add(new FrequencyTypeZeroValidator());

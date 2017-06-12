@@ -53,6 +53,7 @@ Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-U
 | [W006](#W006) | `trip_update` missing `trip_id`
 | [W007](#W007) | Refresh interval is more than 35 seconds
 | [W008](#W008) | Header `timestamp` is older than 65 seconds
+| [W009](#W009) | `schedule_relationship` not populated
 
 # Errors
 
@@ -442,3 +443,13 @@ GTFS-realtime feeds should be refreshed at least every 30 seconds.
 ### W008 - Header `timestamp` is older than 65 seconds
 
 The data in a GTFS-realtime feed should always be less than one minute old.
+
+<a name="W009"/>
+
+### W009 - `schedule_relationship` not populated
+
+`trip.schedule_relationship` and `stop_time_update.schedule_relationship` should be populated.
+
+#### References:
+* [`trip.schedule_relationship`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#enum-schedulerelationship-1)
+* [`stop_time_update.schedule_relationship`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#enum-schedulerelationship)

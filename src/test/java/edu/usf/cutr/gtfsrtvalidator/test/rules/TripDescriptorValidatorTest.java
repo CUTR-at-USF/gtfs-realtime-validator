@@ -43,6 +43,7 @@ public class TripDescriptorValidatorTest extends FeedMessageTest {
         TripDescriptorValidator tripIdValidator = new TripDescriptorValidator();
 
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+        tripDescriptorBuilder.setScheduleRelationship(GtfsRealtime.TripDescriptor.ScheduleRelationship.SCHEDULED);
 
         // Don't set a trip_id - 2 warnings
         tripDescriptorBuilder.setRouteId("1");
@@ -115,6 +116,7 @@ public class TripDescriptorValidatorTest extends FeedMessageTest {
         TripDescriptorValidator tripIdValidator = new TripDescriptorValidator();
 
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+        tripDescriptorBuilder.setScheduleRelationship(GtfsRealtime.TripDescriptor.ScheduleRelationship.SCHEDULED);
 
         // Set trip_id = 1.1 that's in the GTFS data
         tripDescriptorBuilder.setTripId("1.1");
@@ -163,6 +165,7 @@ public class TripDescriptorValidatorTest extends FeedMessageTest {
         TripDescriptorValidator tripIdValidator = new TripDescriptorValidator();
 
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+        tripDescriptorBuilder.setScheduleRelationship(GtfsRealtime.TripDescriptor.ScheduleRelationship.SCHEDULED);
 
         // Set valid trip_id = 1.1 that's in the Bull Runner GTFS data
         tripDescriptorBuilder.setTripId("1");
@@ -209,6 +212,7 @@ public class TripDescriptorValidatorTest extends FeedMessageTest {
         TripDescriptorValidator tripIdValidator = new TripDescriptorValidator();
 
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+        tripDescriptorBuilder.setScheduleRelationship(GtfsRealtime.TripDescriptor.ScheduleRelationship.SCHEDULED);
 
         // Set valid trip_id = 1.1 that's in the GTFS data
         tripDescriptorBuilder.setTripId("1.1");
@@ -265,6 +269,7 @@ public class TripDescriptorValidatorTest extends FeedMessageTest {
 
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
         tripDescriptorBuilder.setTripId("1.2");
+        tripDescriptorBuilder.setScheduleRelationship(GtfsRealtime.TripDescriptor.ScheduleRelationship.SCHEDULED);
 
         tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
         vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
@@ -323,6 +328,7 @@ public class TripDescriptorValidatorTest extends FeedMessageTest {
 
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
         tripDescriptorBuilder.setTripId("1.1");
+        tripDescriptorBuilder.setScheduleRelationship(GtfsRealtime.TripDescriptor.ScheduleRelationship.SCHEDULED);
 
         tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
         vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
@@ -421,6 +427,7 @@ public class TripDescriptorValidatorTest extends FeedMessageTest {
 
         // In bullrunner-gtfs.zip trips.txt, trip_id=1 belongs to route_id=A
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+        tripDescriptorBuilder.setScheduleRelationship(GtfsRealtime.TripDescriptor.ScheduleRelationship.SCHEDULED);
         GtfsRealtime.EntitySelector.Builder entitySelectorBuilder = GtfsRealtime.EntitySelector.newBuilder();
 
         // Don't set route_id or trip_id (but set stop_id - we need at least one specifier) - no errors
@@ -447,6 +454,7 @@ public class TripDescriptorValidatorTest extends FeedMessageTest {
         // Set route_id but not trip_id - no errors
         tripDescriptorBuilder.clear();
         entitySelectorBuilder.setRouteId("A");
+        tripDescriptorBuilder.setScheduleRelationship(GtfsRealtime.TripDescriptor.ScheduleRelationship.SCHEDULED);
         entitySelectorBuilder.setTrip(tripDescriptorBuilder.build());
         alertBuilder.clearInformedEntity();
         alertBuilder.addInformedEntity(entitySelectorBuilder.build());
@@ -492,6 +500,7 @@ public class TripDescriptorValidatorTest extends FeedMessageTest {
 
         // In bullrunner-gtfs.zip routes.txt, route_id=A is a valid route
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+        tripDescriptorBuilder.setScheduleRelationship(GtfsRealtime.TripDescriptor.ScheduleRelationship.SCHEDULED);
         GtfsRealtime.EntitySelector.Builder entitySelectorBuilder = GtfsRealtime.EntitySelector.newBuilder();
 
         // Don't set either route_id (but set stop_id - we need at least one specifier) - no errors
@@ -645,7 +654,7 @@ public class TripDescriptorValidatorTest extends FeedMessageTest {
 
         // Set trip_id as specifier - 0 errors
         entitySelectorBuilder.clear();
-        entitySelectorBuilder.setTrip(GtfsRealtime.TripDescriptor.newBuilder().setTripId("1").build());
+        entitySelectorBuilder.setTrip(GtfsRealtime.TripDescriptor.newBuilder().setTripId("1").setScheduleRelationship(GtfsRealtime.TripDescriptor.ScheduleRelationship.SCHEDULED).build());
         alertBuilder.clearInformedEntity();
         alertBuilder.addInformedEntity(entitySelectorBuilder.build());
         feedEntityBuilder.setAlert(alertBuilder.build());
@@ -656,7 +665,7 @@ public class TripDescriptorValidatorTest extends FeedMessageTest {
 
         // Set informed_entity.trip.route_id as specifier - 0 errors
         entitySelectorBuilder.clear();
-        entitySelectorBuilder.setTrip(GtfsRealtime.TripDescriptor.newBuilder().setRouteId("A").build());
+        entitySelectorBuilder.setTrip(GtfsRealtime.TripDescriptor.newBuilder().setRouteId("A").setScheduleRelationship(GtfsRealtime.TripDescriptor.ScheduleRelationship.SCHEDULED).build());
         alertBuilder.clearInformedEntity();
         alertBuilder.addInformedEntity(entitySelectorBuilder.build());
         feedEntityBuilder.setAlert(alertBuilder.build());
@@ -720,6 +729,7 @@ public class TripDescriptorValidatorTest extends FeedMessageTest {
 
         // In bullrunner-gtfs.zip trips.txt, trip_id=1 belongs to route_id=A
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+        tripDescriptorBuilder.setScheduleRelationship(GtfsRealtime.TripDescriptor.ScheduleRelationship.SCHEDULED);
         GtfsRealtime.EntitySelector.Builder entitySelectorBuilder = GtfsRealtime.EntitySelector.newBuilder();
 
         // Don't set either trip_id or route_id - no errors
@@ -750,6 +760,7 @@ public class TripDescriptorValidatorTest extends FeedMessageTest {
         // Set trip_id but not route_id - no errors
         tripDescriptorBuilder.clear();
         tripDescriptorBuilder.setTripId("1");
+        tripDescriptorBuilder.setScheduleRelationship(GtfsRealtime.TripDescriptor.ScheduleRelationship.SCHEDULED);
         entitySelectorBuilder.clear();
         entitySelectorBuilder.setTrip(tripDescriptorBuilder.build());
         alertBuilder.clearInformedEntity();
@@ -766,6 +777,7 @@ public class TripDescriptorValidatorTest extends FeedMessageTest {
         tripDescriptorBuilder.clear();
         tripDescriptorBuilder.setTripId("1");
         tripDescriptorBuilder.setRouteId("A");
+        tripDescriptorBuilder.setScheduleRelationship(GtfsRealtime.TripDescriptor.ScheduleRelationship.SCHEDULED);
         entitySelectorBuilder.clear();
         entitySelectorBuilder.setTrip(tripDescriptorBuilder.build());
         alertBuilder.clearInformedEntity();
@@ -782,6 +794,7 @@ public class TripDescriptorValidatorTest extends FeedMessageTest {
         tripDescriptorBuilder.clear();
         tripDescriptorBuilder.setTripId("1");
         tripDescriptorBuilder.setRouteId("B");
+        tripDescriptorBuilder.setScheduleRelationship(GtfsRealtime.TripDescriptor.ScheduleRelationship.SCHEDULED);
         entitySelectorBuilder.clear();
         entitySelectorBuilder.setTrip(tripDescriptorBuilder.build());
         alertBuilder.clearInformedEntity();
@@ -793,6 +806,49 @@ public class TripDescriptorValidatorTest extends FeedMessageTest {
 
         results = tripDescriptorValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
         TestUtils.assertResults(ValidationRules.E035, results, 1);
+
+        clearAndInitRequiredFeedFields();
+    }
+
+    /**
+     * W009 - schedule_relationship not populated (for TripDescriptor)
+     */
+    @Test
+    public void testW009() {
+        TripDescriptorValidator tripDescriptorValidator = new TripDescriptorValidator();
+
+        // In bullrunner-gtfs.zip trips.txt, trip_id=1 exists
+        GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+        GtfsRealtime.EntitySelector.Builder entitySelectorBuilder = GtfsRealtime.EntitySelector.newBuilder();
+
+        // No schedule_relationship - 3 warnings
+        tripDescriptorBuilder.setTripId("1");
+        entitySelectorBuilder.setTrip(tripDescriptorBuilder.build());
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.W009, results, 3);
+
+        // Add schedule_relationship of SCHEDULED - 0 warnings
+        tripDescriptorBuilder.setTripId("1");
+        tripDescriptorBuilder.setScheduleRelationship(GtfsRealtime.TripDescriptor.ScheduleRelationship.SCHEDULED);
+        entitySelectorBuilder.setTrip(tripDescriptorBuilder.build());
+        alertBuilder.clearInformedEntity();
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        TestUtils.assertResults(ValidationRules.W009, results, 0);
 
         clearAndInitRequiredFeedFields();
     }
