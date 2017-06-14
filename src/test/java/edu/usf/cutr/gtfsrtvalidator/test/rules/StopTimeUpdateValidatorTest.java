@@ -321,13 +321,31 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         expected.put(W009, 1);
         TestUtils.assertResults(expected, results);
 
+        // Missing another schedule_relationship - however, we only flag one occurrence warning per trip, so still 1 warning
+        stopTimeUpdateBuilder.setStopId("2000");
+        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+        assertEquals(2, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
+
+        results = stopTimeUpdateValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        expected.put(W009, 1);
+        TestUtils.assertResults(expected, results);
+
         // Add schedule_relationship of SCHEDULED - no warnings
         tripUpdateBuilder.clearStopTimeUpdate();
+        stopTimeUpdateBuilder.clear();
+        stopTimeUpdateBuilder.setStopSequence(4);
+        stopTimeUpdateBuilder.setStopId("1000");
+        stopTimeUpdateBuilder.setScheduleRelationship(GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SCHEDULED);
+        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
+        stopTimeUpdateBuilder.setStopSequence(5);
+        stopTimeUpdateBuilder.setStopId("2000");
         stopTimeUpdateBuilder.setScheduleRelationship(GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SCHEDULED);
         tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        assertEquals(1, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
+        assertEquals(2, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
         results = stopTimeUpdateValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         expected.clear();

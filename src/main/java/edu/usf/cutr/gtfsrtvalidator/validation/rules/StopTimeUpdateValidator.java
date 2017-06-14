@@ -62,6 +62,7 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
                 List<Integer> stopSequenceList = new ArrayList<>();
                 Integer previousStopSequence = null;
                 String previousStopId = null;
+                boolean foundW009 = false;
                 for (GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate : stopTimeUpdateList) {
                     if (previousStopSequence != null) {
                         checkE036(entity, previousStopSequence, stopTimeUpdate, e036List);
@@ -74,7 +75,13 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
                     if (stopTimeUpdate.hasStopSequence()) {
                         stopSequenceList.add(stopTimeUpdate.getStopSequence());
                     }
-                    checkW009(entity, stopTimeUpdate, w009List);
+                    // Only flag one occurrence of W009 for stop_time_update per trip to avoid flooding the database
+                    if (!foundW009) {
+                        checkW009(entity, stopTimeUpdate, w009List);
+                        if (!w009List.isEmpty()) {
+                            foundW009 = true;
+                        }
+                    }
                 }
 
                 boolean sorted = Ordering.natural().isOrdered(stopSequenceList);
@@ -161,7 +168,7 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
     private void checkW009(GtfsRealtime.FeedEntity entity, GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate, List<OccurrenceModel> warnings) {
         if (stopTimeUpdate != null && !stopTimeUpdate.hasScheduleRelationship()) {
             // W009 - schedule_relationship not populated
-            RuleUtils.addW009Occurrence(getTripId(entity, entity.getTripUpdate().getTrip()) + " " + getStopTimeUpdateId(stopTimeUpdate), warnings);
+            RuleUtils.addW009Occurrence(getTripId(entity, entity.getTripUpdate().getTrip()) + " " + getStopTimeUpdateId(stopTimeUpdate) + " (and potentially more for this trip)", warnings);
         }
     }
 }
