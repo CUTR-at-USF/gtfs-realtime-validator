@@ -430,6 +430,20 @@ public class UtilTest {
         assertEquals("trip_id 20", id);
     }
 
+    @Test
+    public void testGetStopTimeUpdateId() {
+        String id;
+        GtfsRealtime.TripUpdate.StopTimeUpdate.Builder stopTimeUpdateBuilder = GtfsRealtime.TripUpdate.StopTimeUpdate.newBuilder();
+
+        stopTimeUpdateBuilder.setStopId("1000");
+        id = GtfsUtils.getStopTimeUpdateId(stopTimeUpdateBuilder.build());
+        assertEquals("stop_id 1000", id);
+
+        stopTimeUpdateBuilder.setStopSequence(5);
+        id = GtfsUtils.getStopTimeUpdateId(stopTimeUpdateBuilder.build());
+        assertEquals("stop_sequence 5", id);
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void testAssertVehicleAndTripIdThrowException() {
         // Make sure we throw an exception if the method is provided objects other than TripUpdate or VehiclePosition
