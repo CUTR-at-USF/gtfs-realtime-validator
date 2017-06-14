@@ -65,7 +65,7 @@ import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
  *
  * W006 - trip_update missing trip_id
  *
- * W009 - schedule_relationship not populated (for TripDescriptor)
+ * W009 - schedule_relationship not populated
  */
 public class TripDescriptorValidator implements FeedEntityValidator {
 
@@ -124,6 +124,18 @@ public class TripDescriptorValidator implements FeedEntityValidator {
                 checkE004(tripUpdate, tripUpdate.getTrip(), gtfsMetadata, errorListE004);
                 checkE024(tripUpdate, tripUpdate.getTrip(), gtfsMetadata, errorListE024);
                 checkE035(entity, tripUpdate.getTrip(), gtfsMetadata, errorListE035);
+
+                boolean foundW009 = false;
+                List<GtfsRealtime.TripUpdate.StopTimeUpdate> stopTimeUpdateList = tripUpdate.getStopTimeUpdateList();
+                for (GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate : stopTimeUpdateList) {
+                    // Only flag one occurrence of W009 for stop_time_update per trip to avoid flooding the database
+                    if (!foundW009) {
+                        checkW009(entity, stopTimeUpdate, errorListW009);
+                        if (!errorListW009.isEmpty()) {
+                            foundW009 = true;
+                        }
+                    }
+                }
                 if (tripUpdate.hasTrip()) {
                     checkW009(entity, tripUpdate.getTrip(), errorListW009);
                 }
@@ -488,6 +500,20 @@ public class TripDescriptorValidator implements FeedEntityValidator {
         if (tripDescriptor != null && !tripDescriptor.hasScheduleRelationship()) {
             // W009 - schedule_relationship not populated
             RuleUtils.addW009Occurrence(getTripId(entity, tripDescriptor), warnings);
+        }
+    }
+
+    /**
+     * Checks rule W009 - "schedule_relationship not populated", and adds any warnings that are found to the provided warning list
+     *
+     * @param entity         entity which contains the specified trip.stop_time_update
+     * @param stopTimeUpdate stop_time_update to examine to see if it has a schedule_relationship
+     * @param warnings       list to add any warnings for W009 to
+     */
+    private void checkW009(GtfsRealtime.FeedEntity entity, GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate, List<OccurrenceModel> warnings) {
+        if (stopTimeUpdate != null && !stopTimeUpdate.hasScheduleRelationship()) {
+            // W009 - schedule_relationship not populated
+            RuleUtils.addW009Occurrence(getTripId(entity, entity.getTripUpdate().getTrip()) + " " + getStopTimeUpdateId(stopTimeUpdate) + " (and potentially more for this trip)", warnings);
         }
     }
 }

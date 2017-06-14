@@ -28,6 +28,7 @@ import java.util.Map;
 
 import static edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils.MIN_POSIX_TIME;
 import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests related to rules implemented in TripDescriptorValidator
@@ -888,7 +889,7 @@ public class TripDescriptorValidatorTest extends FeedMessageTest {
      * W009 - schedule_relationship not populated (for TripDescriptor)
      */
     @Test
-    public void testW009() {
+    public void testW009TripDescriptor() {
         TripDescriptorValidator tripDescriptorValidator = new TripDescriptorValidator();
         Map<ValidationRule, Integer> expected = new HashMap<>();
 
@@ -896,7 +897,7 @@ public class TripDescriptorValidatorTest extends FeedMessageTest {
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
         GtfsRealtime.EntitySelector.Builder entitySelectorBuilder = GtfsRealtime.EntitySelector.newBuilder();
 
-        // No schedule_relationship - 3 warnings
+        // No schedule_relationship for trip - 3 warnings
         tripDescriptorBuilder.setTripId("1");
         entitySelectorBuilder.setTrip(tripDescriptorBuilder.build());
         alertBuilder.addInformedEntity(entitySelectorBuilder.build());
@@ -911,7 +912,7 @@ public class TripDescriptorValidatorTest extends FeedMessageTest {
         expected.put(W009, 3);
         TestUtils.assertResults(expected, results);
 
-        // Add schedule_relationship of SCHEDULED - 0 warnings
+        // Add schedule_relationship of SCHEDULED for trip - 0 warnings
         tripDescriptorBuilder.setTripId("1");
         tripDescriptorBuilder.setScheduleRelationship(GtfsRealtime.TripDescriptor.ScheduleRelationship.SCHEDULED);
         entitySelectorBuilder.setTrip(tripDescriptorBuilder.build());
@@ -924,6 +925,66 @@ public class TripDescriptorValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
         results = tripDescriptorValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        expected.clear();
+        TestUtils.assertResults(expected, results);
+
+        clearAndInitRequiredFeedFields();
+    }
+
+    /**
+     * W009 - schedule_relationship not populated (for StopTimeUpdate)
+     */
+    @Test
+    public void testW009StopTimeUpdate() {
+        TripDescriptorValidator tripDescriptorValidator = new TripDescriptorValidator();
+        Map<ValidationRule, Integer> expected = new HashMap<>();
+
+        GtfsRealtime.TripUpdate.StopTimeUpdate.Builder stopTimeUpdateBuilder = GtfsRealtime.TripUpdate.StopTimeUpdate.newBuilder();
+        GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+        tripDescriptorBuilder.setTripId("1.1");
+        tripDescriptorBuilder.setScheduleRelationship(GtfsRealtime.TripDescriptor.ScheduleRelationship.SCHEDULED);
+
+        // tripDescriptor is a required field in tripUpdate
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+
+        // Missing schedule_relationship for StopTimeUpdate - 1 warning
+        stopTimeUpdateBuilder.setStopId("1000");
+        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+        assertEquals(1, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
+
+        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        expected.put(W009, 1);
+        TestUtils.assertResults(expected, results);
+
+        // Missing another schedule_relationship for StopTimeUpdate - however, we only flag one occurrence warning per trip, so still 1 warning
+        stopTimeUpdateBuilder.setStopId("2000");
+        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+        assertEquals(2, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
+
+        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        expected.put(W009, 1);
+        TestUtils.assertResults(expected, results);
+
+        // Add schedule_relationship of SCHEDULED for StopTimeUpdates - no warnings
+        tripUpdateBuilder.clearStopTimeUpdate();
+        stopTimeUpdateBuilder.clear();
+        stopTimeUpdateBuilder.setStopSequence(4);
+        stopTimeUpdateBuilder.setStopId("1000");
+        stopTimeUpdateBuilder.setScheduleRelationship(GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SCHEDULED);
+        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
+        stopTimeUpdateBuilder.setStopSequence(5);
+        stopTimeUpdateBuilder.setStopId("2000");
+        stopTimeUpdateBuilder.setScheduleRelationship(GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SCHEDULED);
+        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+        assertEquals(2, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
+
+        results = tripDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
