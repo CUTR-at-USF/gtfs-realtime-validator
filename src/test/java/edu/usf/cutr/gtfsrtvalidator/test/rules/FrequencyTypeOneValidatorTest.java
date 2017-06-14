@@ -17,12 +17,15 @@
 package edu.usf.cutr.gtfsrtvalidator.test.rules;
 
 import com.google.transit.realtime.GtfsRealtime;
+import edu.usf.cutr.gtfsrtvalidator.api.model.ValidationRule;
 import edu.usf.cutr.gtfsrtvalidator.test.FeedMessageTest;
 import edu.usf.cutr.gtfsrtvalidator.test.util.TestUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.rules.FrequencyTypeOneValidator;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils.MIN_POSIX_TIME;
 import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.E019;
@@ -47,6 +50,7 @@ public class FrequencyTypeOneValidatorTest extends FeedMessageTest {
      */
     @Test
     public void testTypeOneStartDateAndTimeDontMatchGtfsE019() {
+        Map<ValidationRule, Integer> expected = new HashMap<>();
 
         /**
          * Set start_time to match GTFS start_time exactly - 6am - no errors
@@ -70,10 +74,11 @@ public class FrequencyTypeOneValidatorTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         results = frequencyTypeOneValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(E019, results, 0);
+        expected.clear();
+        TestUtils.assertResults(expected, results);
 
         /**
-         * Set start_time to NOT be a multiple of headway_secs - 2.5 hr later at 7:30am - 2 errors
+         * Set start_time to be a multiple of headway_secs - 1 hr later at 7:00am - 0 errors
          */
 
         tripDescriptorBuilder.setTripId("15.1");
@@ -93,7 +98,8 @@ public class FrequencyTypeOneValidatorTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         results = frequencyTypeOneValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(E019, results, 0);
+        expected.clear();
+        TestUtils.assertResults(expected, results);
 
         /**
          * Set start_time to NOT be a multiple of headway_secs - 2.5 hr later at 7:30am - 2 errors
@@ -116,7 +122,8 @@ public class FrequencyTypeOneValidatorTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         results = frequencyTypeOneValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(E019, results, 2);
+        expected.put(E019, 2);
+        TestUtils.assertResults(expected, results);
 
         clearAndInitRequiredFeedFields();
     }

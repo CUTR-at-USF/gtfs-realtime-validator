@@ -17,13 +17,17 @@
 package edu.usf.cutr.gtfsrtvalidator.test.rules;
 
 import com.google.transit.realtime.GtfsRealtime;
+import edu.usf.cutr.gtfsrtvalidator.api.model.ValidationRule;
 import edu.usf.cutr.gtfsrtvalidator.test.FeedMessageTest;
 import edu.usf.cutr.gtfsrtvalidator.test.util.TestUtils;
-import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
 import edu.usf.cutr.gtfsrtvalidator.validation.rules.StopTimeUpdateValidator;
 import org.junit.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils.MIN_POSIX_TIME;
+import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -40,6 +44,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
     @Test
     public void testStopSequenceValidation() {
         StopTimeUpdateValidator stopSequenceValidator = new StopTimeUpdateValidator();
+        Map<ValidationRule, Integer> expected = new HashMap<>();
 
         GtfsRealtime.TripUpdate.StopTimeUpdate.Builder stopTimeUpdateBuilder = GtfsRealtime.TripUpdate.StopTimeUpdate.newBuilder();
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
@@ -63,7 +68,8 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         assertEquals(2, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
         results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(ValidationRules.E002, results, 0);
+        expected.clear();
+        TestUtils.assertResults(expected, results);
 
         /* Adding stop sequence 3. So, the stop sequence now is 1, 5, 3 which is unordered.
            So, the validation fails and the assertion test passes
@@ -77,7 +83,8 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         assertEquals(3, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
         results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(ValidationRules.E002, results, 1);
+        expected.put(E002, 1);
+        TestUtils.assertResults(expected, results);
 
         clearAndInitRequiredFeedFields();
     }
@@ -88,6 +95,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
     @Test
     public void testRepeatingStopSequence() {
         StopTimeUpdateValidator stopSequenceValidator = new StopTimeUpdateValidator();
+        Map<ValidationRule, Integer> expected = new HashMap<>();
 
         GtfsRealtime.TripUpdate.StopTimeUpdate.Builder stopTimeUpdateBuilder = GtfsRealtime.TripUpdate.StopTimeUpdate.newBuilder();
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
@@ -110,7 +118,8 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         assertEquals(2, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
         results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(ValidationRules.E036, results, 0);
+        expected.clear();
+        TestUtils.assertResults(expected, results);
 
         // Add stop_ids - no errors
         stopTimeUpdateBuilder.clear();
@@ -129,7 +138,8 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         assertEquals(2, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
         results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(ValidationRules.E036, results, 0);
+        expected.clear();
+        TestUtils.assertResults(expected, results);
 
         // Add stop sequence 5 twice (and to make sure we support it, no stopId). So, the stop sequence now is 1, 5, 5 - one error
         stopTimeUpdateBuilder.clear();
@@ -152,7 +162,8 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         assertEquals(3, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
         results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(ValidationRules.E036, results, 1);
+        expected.put(E036, 1);
+        TestUtils.assertResults(expected, results);
 
         // stop_sequence 5 twice again, but include stop_id for last stop_time_update - one error
         stopTimeUpdateBuilder.clear();
@@ -175,7 +186,8 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         assertEquals(3, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
         results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(ValidationRules.E036, results, 1);
+        expected.put(E036, 1);
+        TestUtils.assertResults(expected, results);
 
         clearAndInitRequiredFeedFields();
     }
@@ -186,6 +198,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
     @Test
     public void testRepeatingStopId() {
         StopTimeUpdateValidator stopSequenceValidator = new StopTimeUpdateValidator();
+        Map<ValidationRule, Integer> expected = new HashMap<>();
 
         GtfsRealtime.TripUpdate.StopTimeUpdate.Builder stopTimeUpdateBuilder = GtfsRealtime.TripUpdate.StopTimeUpdate.newBuilder();
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
@@ -208,7 +221,8 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         assertEquals(2, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
         results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(ValidationRules.E037, results, 0);
+        expected.clear();
+        TestUtils.assertResults(expected, results);
 
         // Add stop_sequence - no errors
         stopTimeUpdateBuilder.clear();
@@ -227,7 +241,8 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         assertEquals(2, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
         results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(ValidationRules.E037, results, 0);
+        expected.clear();
+        TestUtils.assertResults(expected, results);
 
         // Add stop_id 2000 twice (and to make sure we support it, no stop_sequence). So, repeating stop_ids 3000 - one error
         stopTimeUpdateBuilder.clear();
@@ -250,7 +265,8 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         assertEquals(3, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
         results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(ValidationRules.E037, results, 1);
+        expected.put(E037, 1);
+        TestUtils.assertResults(expected, results);
 
         // stop_id 2000 twice again, but include stop_sequence for last stop_time_update - one error
         stopTimeUpdateBuilder.clear();
@@ -273,7 +289,8 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         assertEquals(3, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
         results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(ValidationRules.E037, results, 1);
+        expected.put(E037, 1);
+        TestUtils.assertResults(expected, results);
 
         clearAndInitRequiredFeedFields();
     }
@@ -284,6 +301,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
     @Test
     public void testW009() {
         StopTimeUpdateValidator stopTimeUpdateValidator = new StopTimeUpdateValidator();
+        Map<ValidationRule, Integer> expected = new HashMap<>();
 
         GtfsRealtime.TripUpdate.StopTimeUpdate.Builder stopTimeUpdateBuilder = GtfsRealtime.TripUpdate.StopTimeUpdate.newBuilder();
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
@@ -300,7 +318,8 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         assertEquals(1, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
         results = stopTimeUpdateValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(ValidationRules.W009, results, 1);
+        expected.put(W009, 1);
+        TestUtils.assertResults(expected, results);
 
         // Add schedule_relationship of SCHEDULED - no warnings
         tripUpdateBuilder.clearStopTimeUpdate();
@@ -311,7 +330,8 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         assertEquals(1, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
         results = stopTimeUpdateValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(ValidationRules.W009, results, 0);
+        expected.clear();
+        TestUtils.assertResults(expected, results);
 
         clearAndInitRequiredFeedFields();
     }

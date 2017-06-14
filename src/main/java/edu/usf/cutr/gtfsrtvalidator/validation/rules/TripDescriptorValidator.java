@@ -94,10 +94,7 @@ public class TripDescriptorValidator implements FeedEntityValidator {
             if (entity.hasTripUpdate()) {
                 GtfsRealtime.TripUpdate tripUpdate = entity.getTripUpdate();
                 if (!tripUpdate.getTrip().hasTripId()) {
-                    // W006 - No trip_id
-                    OccurrenceModel om = new OccurrenceModel("entity ID " + entity.getId());
-                    errorListW006.add(om);
-                    _log.debug(om.getPrefix() + " " + W006.getOccurrenceSuffix());
+                    checkW006(entity, tripUpdate.getTrip(), errorListW006);
                 } else {
                     String tripId = tripUpdate.getTrip().getTripId();
                     Trip trip = gtfsMetadata.getTrips().get(tripId);
@@ -134,10 +131,7 @@ public class TripDescriptorValidator implements FeedEntityValidator {
             if (entity.hasVehicle() && entity.getVehicle().hasTrip()) {
                 GtfsRealtime.TripDescriptor trip = entity.getVehicle().getTrip();
                 if (!trip.hasTripId()) {
-                    // W006 - No trip_id
-                    OccurrenceModel om = new OccurrenceModel("entity ID " + entity.getId());
-                    errorListW006.add(om);
-                    _log.debug(om.getPrefix() + " " + W006.getOccurrenceSuffix());
+                    checkW006(entity, trip, errorListW006);
                 } else {
                     String tripId = trip.getTripId();
                     if (!StringUtil.isEmpty(tripId)) {
@@ -184,6 +178,7 @@ public class TripDescriptorValidator implements FeedEntityValidator {
                             checkE031(entity, entitySelector, errorListE031);
                         }
                         if (entitySelector.hasTrip()) {
+                            checkW006(entity, entitySelector.getTrip(), errorListW006);
                             checkW009(entity, entitySelector.getTrip(), errorListW009);
                         }
                     }
@@ -463,6 +458,22 @@ public class TripDescriptorValidator implements FeedEntityValidator {
                 errors.add(om);
                 _log.debug(om.getPrefix() + " " + E035.getOccurrenceSuffix());
             }
+        }
+    }
+
+    /**
+     * Checks rule W006 - "trip missing trip_id", and adds any warnings that are found to the provided warning list
+     *
+     * @param entity         entity which contains the specified trip
+     * @param tripDescriptor trip to examine to see if it has trip_id
+     * @param warnings       list to add any warnings for W009 to
+     */
+    private void checkW006(GtfsRealtime.FeedEntity entity, GtfsRealtime.TripDescriptor tripDescriptor, List<OccurrenceModel> warnings) {
+        if (tripDescriptor != null && !tripDescriptor.hasTripId()) {
+            // W006 - trip missing trip_id
+            OccurrenceModel om = new OccurrenceModel("entity ID " + entity.getId());
+            warnings.add(om);
+            _log.debug(om.getPrefix() + " " + W006.getOccurrenceSuffix());
         }
     }
 

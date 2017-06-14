@@ -416,9 +416,9 @@ Frequency-based exact_times = 0 trip_updates should contain `vehicle_id`.  This 
 
 <a name="W006"/>
 
-### W006 - `trip_update` missing `trip_id`
+### W006 - `trip` missing `trip_id`
 
-`trip_updates` should include a `trip_id`.  A missing `trip_id` is usually an error in the feed (especially for frequency-based `exact_times` = 0 trips - see [E006](https://github.com/CUTR-at-USF/gtfs-realtime-validator/blob/master/RULES.md#E006), although the section on "Alternative trip matching" includes one exception:
+`trips` should include a `trip_id`.  A missing `trip_id` is usually an error in the feed (especially for frequency-based `exact_times` = 0 trips - see [E006](https://github.com/CUTR-at-USF/gtfs-realtime-validator/blob/master/RULES.md#E006), although the section on "Alternative trip matching" includes one exception:
 
 >Trips which are not frequency based may also be uniquely identified by a TripDescriptor including the combination of:
 >

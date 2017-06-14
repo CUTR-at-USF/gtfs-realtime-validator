@@ -37,9 +37,9 @@ public class ValidationRules {
     public static final ValidationRule W005 = new ValidationRule("W005", "WARNING", "Missing vehicle_id for frequency-based exact_times = 0",
             "Frequency-based exact_times = 0 trip_updates and vehicle positions should contain vehicle_id",
             "is missing vehicle_id, which is suggested for frequency-based exact_times=0 trips");
-    public static final ValidationRule W006 = new ValidationRule("W006", "WARNING", "trip_update missing trip_id",
-            "trip_updates should include a trip_id",
-            "trip_update does not contain a trip_id");
+    public static final ValidationRule W006 = new ValidationRule("W006", "WARNING", "trip missing trip_id",
+            "trip should include a trip_id",
+            "does not contain a trip_id");
     public static final ValidationRule W007 = new ValidationRule("W007", "WARNING", "Refresh interval is more than 35 seconds",
             "GTFS-realtime feeds should be refreshed at least every 30 seconds",
             "which is less than the recommended interval of 35 seconds");

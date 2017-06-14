@@ -1,12 +1,15 @@
 package edu.usf.cutr.gtfsrtvalidator.test.rules;
 
 import com.google.transit.realtime.GtfsRealtime;
+import edu.usf.cutr.gtfsrtvalidator.api.model.ValidationRule;
 import edu.usf.cutr.gtfsrtvalidator.test.FeedMessageTest;
 import edu.usf.cutr.gtfsrtvalidator.test.util.TestUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.rules.FrequencyTypeZeroValidator;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils.MIN_POSIX_TIME;
 import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
@@ -30,6 +33,8 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
     @Test
     public void testMissingStartDateAndTimeE006() {
         FrequencyTypeZeroValidator frequencyTypeZeroValidator = new FrequencyTypeZeroValidator();
+        Map<ValidationRule, Integer> expectedErrorsWarnings = new HashMap<>();
+
         // Set valid trip_id
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
         tripDescriptorBuilder.setTripId("1");
@@ -55,7 +60,8 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
 
         // Start with no start date or time - 4 errors
         results = frequencyTypeZeroValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(E006, results, 4);
+        expectedErrorsWarnings.put(E006, 4);
+        TestUtils.assertResults(expectedErrorsWarnings, results);
 
         // Set start date - 2 errors
         tripDescriptorBuilder.setStartDate("4-24-2016");
@@ -69,7 +75,8 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         results = frequencyTypeZeroValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(E006, results, 2);
+        expectedErrorsWarnings.put(E006, 2);
+        TestUtils.assertResults(expectedErrorsWarnings, results);
 
         // Set start time - 0 error
         tripDescriptorBuilder.setStartTime("08:00:00AM");
@@ -84,7 +91,8 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
 
         // No errors
         results = frequencyTypeZeroValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(E006, results, 0);
+        expectedErrorsWarnings.clear();
+        TestUtils.assertResults(expectedErrorsWarnings, results);
 
         clearAndInitRequiredFeedFields();
     }
@@ -92,6 +100,8 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
     @Test
     public void testScheduleRelationshipE013() {
         FrequencyTypeZeroValidator frequencyTypeZeroValidator = new FrequencyTypeZeroValidator();
+        Map<ValidationRule, Integer> expected = new HashMap<>();
+
         // Set valid trip_id, start_date, and start_time so no errors/warnings for these attributes
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
         tripDescriptorBuilder.setTripId("1");
@@ -135,7 +145,8 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         results = frequencyTypeZeroValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(E013, results, 0);
+        expected.clear();
+        TestUtils.assertResults(expected, results);
 
         // Change to ADDED schedule relationship - not allowed for exact_times=0 trips - 2 errors
         tripDescriptorBuilder.setScheduleRelationship(GtfsRealtime.TripDescriptor.ScheduleRelationship.ADDED);
@@ -149,7 +160,8 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         results = frequencyTypeZeroValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(E013, results, 2);
+        expected.put(E013, 2);
+        TestUtils.assertResults(expected, results);
 
         // Change to CANCELED schedule relationship - not allowed for exact_times=0 trips - 2 errors
         tripDescriptorBuilder.setScheduleRelationship(GtfsRealtime.TripDescriptor.ScheduleRelationship.CANCELED);
@@ -163,7 +175,8 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         results = frequencyTypeZeroValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(E013, results, 2);
+        expected.put(E013, 2);
+        TestUtils.assertResults(expected, results);
 
         // Change to SCHEDULED schedule relationship - not allowed for exact_times=0 trips - 2 errors
         tripDescriptorBuilder.setScheduleRelationship(GtfsRealtime.TripDescriptor.ScheduleRelationship.SCHEDULED);
@@ -177,7 +190,8 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         results = frequencyTypeZeroValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(E013, results, 2);
+        expected.put(E013, 2);
+        TestUtils.assertResults(expected, results);
 
         clearAndInitRequiredFeedFields();
     }
@@ -185,6 +199,8 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
     @Test
     public void testMissingVehicleIdW005() {
         FrequencyTypeZeroValidator frequencyTypeZeroValidator = new FrequencyTypeZeroValidator();
+        Map<ValidationRule, Integer> expected = new HashMap<>();
+
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
         // Set valid trip_id, start_date, and start_time so no errors/warnings for these attributes
         tripDescriptorBuilder.setTripId("1");
@@ -209,7 +225,8 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
 
         // No vehicle Id in trip update or vehicle position - 2 warnings
         results = frequencyTypeZeroValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(W005, results, 2);
+        expected.put(W005, 2);
+        TestUtils.assertResults(expected, results);
 
         // Add vehicle_id to vehicle position - 1 warning
         vehicleDescriptorBuilder.setId("1");
@@ -220,7 +237,8 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
 
         // No vehicle Id in trip update - 1 warning
         results = frequencyTypeZeroValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(W005, results, 1);
+        expected.put(W005, 1);
+        TestUtils.assertResults(expected, results);
 
         // Add vehicle_id to trip update - no warnings
         vehicleDescriptorBuilder.setId("1");
@@ -231,7 +249,8 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
 
         // Both have vehicle_id - no warnings
         results = frequencyTypeZeroValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
-        TestUtils.assertResults(W005, results, 0);
+        expected.clear();
+        TestUtils.assertResults(expected, results);
 
         clearAndInitRequiredFeedFields();
     }

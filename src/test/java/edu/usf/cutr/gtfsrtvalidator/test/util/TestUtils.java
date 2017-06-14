@@ -19,9 +19,13 @@ package edu.usf.cutr.gtfsrtvalidator.test.util;
 import edu.usf.cutr.gtfsrtvalidator.api.model.ValidationRule;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 
+import javax.validation.constraints.NotNull;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Utilities to help with test execution and assertions
@@ -29,25 +33,61 @@ import static org.junit.Assert.assertEquals;
 public class TestUtils {
 
     /**
-     * Asserts that for a given rule and error/warning results (results), there should be a certain number of
-     * results (totalExpectedErrorsWarnings).  There should be 0 results for all other rules.
+     * Asserts that for a given map of rules to expected number of warnings/errors (expected) and
+     * error/warning results (results), there should be a certain number of errors warnings for each rule.  There should
+     * be 0 errors/warnings for all other rules not included in the map.  In expected, the key is the
+     * ValidationRule, and the value is the number of expected warnings/errors for that rule.
      *
-     * @param rule                        the rule to assert number of results for
-     * @param results                     list of errors or warnings output from validation
-     * @param totalExpectedErrorsWarnings total number of expected results for the given rule and results
+     * @param expected      A map of the ValidationRules to the number of expected warnings/errors for each rule.  If a ValidationRule isn't included in this map, it is expected that there are 0 errors/warnings for that rule.
+     * @param results       list of errors or warnings output from validation
      */
-    public static void assertResults(ValidationRule rule, List<ErrorListHelperModel> results, int totalExpectedErrorsWarnings) {
+    public static void assertResults(@NotNull Map<ValidationRule, Integer> expected, @NotNull List<ErrorListHelperModel> results) {
+        if (expected == null) {
+            throw new IllegalArgumentException("expected cannot be null - it must be a list of expected errors or warnings");
+        }
         if (results == null) {
-            throw new IllegalArgumentException("results cannot be null - it must be a list of errors or warnings");
+            throw new IllegalArgumentException("results cannot be null - it must be a list of actual errors or warnings");
         }
-        if (results.isEmpty() && totalExpectedErrorsWarnings > 0) {
-            throw new IllegalArgumentException("If at least one error or warning is expected (totalExpectedErrorsWarnings), the results list cannot be empty");
-        }
+
+        // We need to create a map of actual results to actual count, so we can loop through
+        Map<ValidationRule, Integer> actual = new HashMap<>();
+
+        /**
+         * First, confirm that all actual count for all rules in results match the expected count
+         */
         for (ErrorListHelperModel error : results) {
-            if (error.getErrorMessage().getValidationRule().getErrorId().equals(rule.getErrorId())) {
-                assertEquals(totalExpectedErrorsWarnings, error.getOccurrenceList().size());
+            // Save the actual count to a map for quick access in the next FOR loop
+            ValidationRule rule = error.getErrorMessage().getValidationRule();
+            Integer actualCount = error.getOccurrenceList().size();
+            actual.put(rule, actualCount);
+
+            // Get the expected count for this rule
+            Integer expectedCount = expected.get(rule);
+            if (expectedCount != null) {
+                // Make sure we have expected number of errors/warnings
+                assertEquals(expectedCount, actualCount);
             } else {
-                assertEquals(0, error.getOccurrenceList().size());
+                // Make sure there aren't any errors/warnings for this rule, as it wasn't in the expected HashMap
+                assertEquals(0, actualCount.intValue());
+            }
+        }
+
+        /**
+         * Second, make sure that all expected counts for all rules in expected match the actual count.  We need this loop
+         * to make sure that there isn't an expected rule in expected that's not included in results.
+         */
+        for (Map.Entry<ValidationRule, Integer> entry : expected.entrySet()) {
+            ValidationRule rule = entry.getKey();
+            Integer expectedCount = entry.getValue();
+
+            // Get the actual count for this rule
+            Integer actualCount = actual.get(rule);
+            if (actualCount != null) {
+                // Make sure we have expected number of errors/warnings for this rule
+                assertEquals(actualCount, expectedCount);
+            } else {
+                // We're expecting errors/warnings for a rule that wasn't included in the actual results
+                fail("Expected " + expectedCount + " occurrences for " + rule.getErrorId() + " but found 0 occurrences in actual results");
             }
         }
     }
