@@ -142,3 +142,22 @@
   pointer-events: auto;
   cursor: pointer;
 }
+
+.brand {
+    font-size: 16px;
+    font-weight: 800;
+}
+.brand img {
+	vertical-align: middle;
+	margin-left: 1em;
+	height: 50px; 
+    width: auto;
+}
+
+.brand h1 {
+	font: 600 3em/1em 'Helvetica Neue', sans-serif;
+	color: #222;
+	text-shadow: 0 1px 0 #fff;
+	margin: 0;
+	padding: 0;
+}
