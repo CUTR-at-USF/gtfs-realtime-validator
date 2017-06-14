@@ -418,11 +418,15 @@ public class UtilTest {
         String id = GtfsUtils.getTripId(feedEntityBuilder.build(), tripUpdateBuilder.build());
         assertEquals("entity ID 1", id);
 
-        // Add trip_id - should get trip ID description back
+        // Add trip_id and test with trip_update - should get trip ID description back
         tripBuilder.setTripId("20");
         tripUpdateBuilder.setTrip(tripBuilder.build());
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         id = GtfsUtils.getTripId(feedEntityBuilder.build(), tripUpdateBuilder.build());
+        assertEquals("trip_id 20", id);
+
+        // Test with trip directly
+        id = GtfsUtils.getTripId(feedEntityBuilder.build(), tripBuilder.build());
         assertEquals("trip_id 20", id);
     }
 
