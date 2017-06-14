@@ -40,6 +40,7 @@ Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-U
 | [E037](#E037) | Sequential `stop_time_updates` have the same `stop_id`
 | [E038](#E038) | Invalid `header.gtfs_realtime_version`
 | [E039](#E039) | `FULL_DATASET` feeds should not include `entity.is_deleted`
+| [E040](#E040) | `stop_time_update` doesn't contain `stop_id` or `stop_sequence`
 
 ### Table of Warnings
 
@@ -358,6 +359,15 @@ The `entity.is_deleted` field should only be included in GTFS-rt feeds with `hea
 #### References:
 * [`header.incrementality`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-feedheader)
 * [`entity.is_deleted`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-feedentity)
+
+<a name="E040"/>
+
+### E040 - `stop_time_update` doesn't contain `stop_id` or `stop_sequence`
+
+All `stop_time_updates` must contain `stop_id` or `stop_sequence` - both fields cannot be left blank.
+
+#### References:
+* [`trip.stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
 
 # Warnings
 

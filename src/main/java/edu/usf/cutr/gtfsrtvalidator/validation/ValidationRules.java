@@ -209,4 +209,8 @@ public class ValidationRules {
     public static final ValidationRule E039 = new ValidationRule("E039", "ERROR", "FULL_DATASET feeds should not include entity.is_deleted",
             "The entity.is_deleted field should only be included in GTFS-rt feeds with header.incrementality of DIFFERENTIAL",
             "- FULL_DATASET feeds should not include is_deleted field");
+
+    public static final ValidationRule E040 = new ValidationRule("E040", "ERROR", "stop_time_update doesn't contain stop_id or stop_sequence",
+            "All stop_time_updates must contain stop_id or stop_sequence - both fields cannot be left blank",
+            "doesn't contain stop_id or stop_sequence");
 }

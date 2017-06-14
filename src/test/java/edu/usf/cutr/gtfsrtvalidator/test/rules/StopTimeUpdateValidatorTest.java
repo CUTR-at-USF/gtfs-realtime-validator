@@ -295,5 +295,83 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         clearAndInitRequiredFeedFields();
     }
 
+    /**
+     * E040 - stop_time_update doesn't contain stop_id or stop_sequence
+     */
+    @Test
+    public void testE40() {
+        StopTimeUpdateValidator stopSequenceValidator = new StopTimeUpdateValidator();
+        Map<ValidationRule, Integer> expected = new HashMap<>();
 
+        GtfsRealtime.TripUpdate.StopTimeUpdate.Builder stopTimeUpdateBuilder = GtfsRealtime.TripUpdate.StopTimeUpdate.newBuilder();
+        GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+        tripDescriptorBuilder.setTripId("1234");
+        tripDescriptorBuilder.setScheduleRelationship(GtfsRealtime.TripDescriptor.ScheduleRelationship.SCHEDULED);
+
+        // tripDescriptor is a required field in tripUpdate
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+
+        // No stop_id or stop_sequence - 1 error
+        stopTimeUpdateBuilder.setScheduleRelationship(GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SCHEDULED);
+        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+        // StopTimeUpdate count should be 1
+        assertEquals(1, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
+
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        expected.put(E040, 1);
+        TestUtils.assertResults(expected, results);
+
+        // Add stop_id but no stop_sequence - no errors
+        stopTimeUpdateBuilder.clear();
+        stopTimeUpdateBuilder.setScheduleRelationship(GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SCHEDULED);
+        stopTimeUpdateBuilder.setStopId("1.1");
+        tripUpdateBuilder.clear();
+        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+        // StopTimeUpdate count should be 1
+        assertEquals(1, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
+
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        expected.clear();
+        TestUtils.assertResults(expected, results);
+
+        // Add stop_sequence but no stop_id - no errors
+        stopTimeUpdateBuilder.clear();
+        stopTimeUpdateBuilder.setScheduleRelationship(GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SCHEDULED);
+        stopTimeUpdateBuilder.setStopSequence(1);
+        tripUpdateBuilder.clear();
+        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+        // StopTimeUpdate count should be 1
+        assertEquals(1, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
+
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        expected.clear();
+        TestUtils.assertResults(expected, results);
+
+        // Add stop_sequence and stop_id - no errors
+        stopTimeUpdateBuilder.clear();
+        stopTimeUpdateBuilder.setScheduleRelationship(GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SCHEDULED);
+        stopTimeUpdateBuilder.setStopSequence(1);
+        stopTimeUpdateBuilder.setStopId("1.1");
+        tripUpdateBuilder.clear();
+        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+        // StopTimeUpdate count should be 1
+        assertEquals(1, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
+
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        expected.clear();
+        TestUtils.assertResults(expected, results);
+
+        clearAndInitRequiredFeedFields();
+    }
 }

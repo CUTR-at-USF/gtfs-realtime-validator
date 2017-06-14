@@ -48,6 +48,7 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
         List<OccurrenceModel> e002List = new ArrayList<>();
         List<OccurrenceModel> e036List = new ArrayList<>();
         List<OccurrenceModel> e037List = new ArrayList<>();
+        List<OccurrenceModel> e040List = new ArrayList<>();
 
         for (GtfsRealtime.FeedEntity entity : entityList) {
             if (entity.hasTripUpdate()) {
@@ -69,6 +70,7 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
                     if (stopTimeUpdate.hasStopSequence()) {
                         stopSequenceList.add(stopTimeUpdate.getStopSequence());
                     }
+                    checkE040(entity, tripUpdate, stopTimeUpdate, e040List);
                 }
 
                 boolean sorted = Ordering.natural().isOrdered(stopSequenceList);
@@ -92,6 +94,9 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
         }
         if (!e037List.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(E037), e037List));
+        }
+        if (!e040List.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E040), e040List));
         }
         return errors;
     }
@@ -139,6 +144,22 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
             OccurrenceModel om = new OccurrenceModel(prefix.toString());
             errors.add(om);
             _log.debug(om.getPrefix() + " " + E036.getOccurrenceSuffix());
+        }
+    }
+
+    /**
+     * Checks E040 "stop_time_update doesn't contain stop_id or stop_sequence", and adds any errors to the provided error list.
+     *
+     * @param entity         entity that the stopTimeUpdate is from
+     * @param tripUpdate     the trip_update for the StopTimeUpdate
+     * @param stopTimeUpdate the stop_time_update to check for E040
+     * @param errors         the list to add the errors to
+     */
+    private void checkE040(GtfsRealtime.FeedEntity entity, GtfsRealtime.TripUpdate tripUpdate, GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate, List<OccurrenceModel> errors) {
+        if (!stopTimeUpdate.hasStopSequence() && !stopTimeUpdate.hasStopId()) {
+            OccurrenceModel om = new OccurrenceModel(GtfsUtils.getTripId(entity, tripUpdate));
+            errors.add(om);
+            _log.debug(om.getPrefix() + " " + E040.getOccurrenceSuffix());
         }
     }
 }
