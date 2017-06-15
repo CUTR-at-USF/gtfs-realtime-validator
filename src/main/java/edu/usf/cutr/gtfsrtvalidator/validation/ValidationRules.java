@@ -213,4 +213,8 @@ public class ValidationRules {
     public static final ValidationRule E040 = new ValidationRule("E040", "ERROR", "stop_time_update doesn't contain stop_id or stop_sequence",
             "All stop_time_updates must contain stop_id or stop_sequence - both fields cannot be left blank",
             "doesn't contain stop_id or stop_sequence");
+
+    public static final ValidationRule E041 = new ValidationRule("E041", "ERROR", "trip doesn't have any stop_time_updates",
+            "Unless a trip's schedule_relationship is CANCELED, a trip must have at least one stop_time_update",
+            "doesn't have any stop_time_updates and isn't CANCELED");
 }

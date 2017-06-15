@@ -41,6 +41,7 @@ Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-U
 | [E038](#E038) | Invalid `header.gtfs_realtime_version`
 | [E039](#E039) | `FULL_DATASET` feeds should not include `entity.is_deleted`
 | [E040](#E040) | `stop_time_update` doesn't contain `stop_id` or `stop_sequence`
+| [E041](#E041) | `trip` doesn't have any `stop_time_updates`
 
 ### Table of Warnings
 
@@ -368,6 +369,17 @@ All `stop_time_updates` must contain `stop_id` or `stop_sequence` - both fields 
 
 #### References:
 * [`trip.stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
+
+<a name="E041"/>
+
+### E041 - `trip` doesn't have any `stop_time_updates`
+
+Unless a `trip's` `schedule_relationship` is `CANCELED`, a `trip` must have at least one `stop_time_update`
+
+#### References:
+* [`trip_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripupdate)
+* [`trip_update.stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
+* [`trip_update.trip.schedule_relationship`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#enum-schedulerelationship-1)
 
 # Warnings
 
