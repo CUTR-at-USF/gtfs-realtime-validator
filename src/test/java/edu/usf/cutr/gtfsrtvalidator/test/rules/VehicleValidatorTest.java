@@ -50,7 +50,7 @@ public class VehicleValidatorTest extends FeedMessageTest {
      * W002 - vehicle_id should be populated in TripUpdate and VehiclePosition feeds
      */
     @Test
-    public void testVehicleIdValidation() {
+    public void testW002() {
         VehicleValidator vehicleValidator = new VehicleValidator();
         Map<ValidationRule, Integer> expected = new HashMap<>();
         
@@ -96,7 +96,7 @@ public class VehicleValidatorTest extends FeedMessageTest {
      * W004 - VehiclePosition has unrealistic speed
      */
     @Test
-    public void testVehicleSpeedValidation() {
+    public void testW004() {
         VehicleValidator vehicleValidator = new VehicleValidator();
         Map<ValidationRule, Integer> expected = new HashMap<>();
 
@@ -170,7 +170,7 @@ public class VehicleValidatorTest extends FeedMessageTest {
      * E026 - Invalid vehicle position
      */
     @Test
-    public void testInvalidVehiclePosition() {
+    public void testE026() {
         VehicleValidator vehicleValidator = new VehicleValidator();
         Map<ValidationRule, Integer> expected = new HashMap<>();
 
@@ -237,7 +237,7 @@ public class VehicleValidatorTest extends FeedMessageTest {
      * E027 - Invalid vehicle bearing
      */
     @Test
-    public void testInvalidVehicleBearing() {
+    public void testE027() {
         VehicleValidator vehicleValidator = new VehicleValidator();
         Map<ValidationRule, Integer> expected = new HashMap<>();
 
@@ -416,7 +416,7 @@ public class VehicleValidatorTest extends FeedMessageTest {
      * E028 - Vehicle position outside agency coverage area
      */
     @Test
-    public void testE028VehiclePositionOutsideAgencyBounds() {
+    public void testE028() {
         VehicleValidator vehicleValidator = new VehicleValidator();
         Map<ValidationRule, Integer> expected = new HashMap<>();
 
@@ -502,7 +502,7 @@ public class VehicleValidatorTest extends FeedMessageTest {
      * E029 - Vehicle position outside trip shape buffer
      */
     @Test
-    public void testE029VehiclePositionOutsideTripBounds() {
+    public void testE029() {
         VehicleValidator vehicleValidator = new VehicleValidator();
         Map<ValidationRule, Integer> expected = new HashMap<>();
 

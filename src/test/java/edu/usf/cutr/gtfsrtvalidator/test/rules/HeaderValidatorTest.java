@@ -42,7 +42,7 @@ public class HeaderValidatorTest extends FeedMessageTest {
      * E038 - Invalid header.gtfs_realtime_version
      */
     @Test
-    public void testGtfsRealtimeVersion() {
+    public void testE038() {
         HeaderValidator headerValidator = new HeaderValidator();
         Map<ValidationRule, Integer> expected = new HashMap<>();
 
@@ -87,7 +87,7 @@ public class HeaderValidatorTest extends FeedMessageTest {
      * E039 - FULL_DATASET feeds should not include entity.is_deleted
      */
     @Test
-    public void testIncrementalIsDeleted() {
+    public void testE039() {
         HeaderValidator headerValidator = new HeaderValidator();
         Map<ValidationRule, Integer> expected = new HashMap<>();
 

@@ -46,7 +46,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
     }
 
     @Test
-    public void testTimestampValidationW001() {
+    public void testW001() {
         TimestampValidator timestampValidator = new TimestampValidator();
         Map<ValidationRule, Integer> expected = new HashMap<>();
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
@@ -97,7 +97,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
      * W007 - Refresh interval is more than 35 seconds
      */
     @Test
-    public void testTimestampValidationW007() {
+    public void testW007() {
         TimestampValidator timestampValidator = new TimestampValidator();
         Map<ValidationRule, Integer> expected = new HashMap<>();
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
@@ -169,7 +169,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
      * W008 - Header timestamp is older than 65 seconds
      */
     @Test
-    public void testTimestampValidationW008() {
+    public void testW008() {
         TimestampValidator timestampValidator = new TimestampValidator();
         Map<ValidationRule, Integer> expected = new HashMap<>();
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
@@ -221,7 +221,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
     }
 
     @Test
-    public void testTimestampValidationE001() {
+    public void testE001() {
         TimestampValidator timestampValidator = new TimestampValidator();
         Map<ValidationRule, Integer> expected = new HashMap<>();
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
@@ -378,7 +378,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
 
 
     @Test
-    public void testTimestampValidationE012() {
+    public void testE012() {
         TimestampValidator timestampValidator = new TimestampValidator();
         Map<ValidationRule, Integer> expected = new HashMap<>();
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
@@ -475,7 +475,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
     }
 
     @Test
-    public void testTimestampValidationE017() {
+    public void testE017() {
         TimestampValidator timestampValidator = new TimestampValidator();
         Map<ValidationRule, Integer> expected = new HashMap<>();
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
@@ -550,7 +550,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
     }
 
     @Test
-    public void testTimestampValidationE018() {
+    public void testE018() {
         TimestampValidator timestampValidator = new TimestampValidator();
         Map<ValidationRule, Integer> expected = new HashMap<>();
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
@@ -622,7 +622,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
      * E022 - trip stop_time_update times are not increasing
      */
     @Test
-    public void testTimestampValidationE022() {
+    public void testE022() {
         TimestampValidator timestampValidator = new TimestampValidator();
         Map<ValidationRule, Integer> expected = new HashMap<>();
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
@@ -904,7 +904,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
      * E025 - stop_time_update departure time is before arrival time
      */
     @Test
-    public void testTimestampValidationE025() {
+    public void testE025() {
         TimestampValidator timestampValidator = new TimestampValidator();
         Map<ValidationRule, Integer> expected = new HashMap<>();
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();

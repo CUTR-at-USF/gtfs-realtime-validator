@@ -44,7 +44,7 @@ public class TripDescriptorValidatorTest extends FeedMessageTest {
      * W006 - trip_update missing trip_id
      */
     @Test
-    public void testTripIdAndRouteIdValidation() {
+    public void testE003E004W006() {
         TripDescriptorValidator tripIdValidator = new TripDescriptorValidator();
         Map<ValidationRule, Integer> expected = new HashMap<>();
 

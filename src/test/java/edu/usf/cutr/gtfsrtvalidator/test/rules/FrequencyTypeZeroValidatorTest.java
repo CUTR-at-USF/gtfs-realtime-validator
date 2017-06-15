@@ -30,8 +30,11 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
     public FrequencyTypeZeroValidatorTest() throws IOException {
     }
 
+    /**
+     * E006 - Missing required trip field for frequency-based exact_times = 0
+     */
     @Test
-    public void testMissingStartDateAndTimeE006() {
+    public void testE006() {
         FrequencyTypeZeroValidator frequencyTypeZeroValidator = new FrequencyTypeZeroValidator();
         Map<ValidationRule, Integer> expectedErrorsWarnings = new HashMap<>();
 
@@ -97,8 +100,11 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
         clearAndInitRequiredFeedFields();
     }
 
+    /**
+     * E013 - Frequency type 0 trip schedule_relationship should be UNSCHEDULED or empty
+     */
     @Test
-    public void testScheduleRelationshipE013() {
+    public void testE013() {
         FrequencyTypeZeroValidator frequencyTypeZeroValidator = new FrequencyTypeZeroValidator();
         Map<ValidationRule, Integer> expected = new HashMap<>();
 
@@ -196,8 +202,11 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
         clearAndInitRequiredFeedFields();
     }
 
+    /**
+     * W005 - Missing vehicle_id for frequency-based exact_times = 0
+     */
     @Test
-    public void testMissingVehicleIdW005() {
+    public void testW005() {
         FrequencyTypeZeroValidator frequencyTypeZeroValidator = new FrequencyTypeZeroValidator();
         Map<ValidationRule, Integer> expected = new HashMap<>();
 

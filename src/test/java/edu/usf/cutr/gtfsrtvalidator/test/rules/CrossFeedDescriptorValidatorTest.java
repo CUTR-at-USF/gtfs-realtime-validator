@@ -37,7 +37,7 @@ public class CrossFeedDescriptorValidatorTest extends FeedMessageTest {
      * W003 - If both vehicle positions and trip updates are provided, VehicleDescriptor or TripDescriptor values should match between the two feeds
      */
     @Test
-    public void testTripAndVehicleDescriptorValidation() {
+    public void testW003() {
         CrossFeedDescriptorValidator vehicleAndTripDescriptorValidator = new CrossFeedDescriptorValidator();
 
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();

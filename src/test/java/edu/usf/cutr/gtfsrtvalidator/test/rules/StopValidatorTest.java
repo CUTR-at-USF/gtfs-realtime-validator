@@ -42,7 +42,7 @@ public class StopValidatorTest extends FeedMessageTest {
      * E011 - All stop_ids referenced in GTFS-rt feed must appear in the GTFS feed
      */
     @Test
-    public void testStopIdValidation() {
+    public void testE011() {
         StopValidator locationValidator = new StopValidator();
         Map<ValidationRule, Integer> expected = new HashMap<>();
         
@@ -116,7 +116,7 @@ public class StopValidatorTest extends FeedMessageTest {
      * stop_id B with location_type = 1
      */
     @Test
-    public void testStopLocationTypeValidation() {
+    public void testE015() {
         StopValidator locationValidator = new StopValidator();
         Map<ValidationRule, Integer> expected = new HashMap<>();
 

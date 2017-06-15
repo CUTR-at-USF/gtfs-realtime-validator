@@ -49,7 +49,7 @@ public class FrequencyTypeOneValidatorTest extends FeedMessageTest {
      * testagency.zip (gtfsData) has exact_times = 1 trips for 15.1 with a 1 hr (3600 sec) headway
      */
     @Test
-    public void testTypeOneStartDateAndTimeDontMatchGtfsE019() {
+    public void testE019() {
         Map<ValidationRule, Integer> expected = new HashMap<>();
 
         /**

@@ -30,8 +30,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.TimeZone;
 
+/**
+ * Base class extended by each individual rule test
+ */
 public abstract class FeedMessageTest {
-
 
     public GtfsDaoImpl gtfsData;
     public GtfsMetadata gtfsDataMetadata;
@@ -47,17 +49,17 @@ public abstract class FeedMessageTest {
     public final File bullRunnerGtfsFile = new File("src/test/resources/bullrunner-gtfs.zip");
     public final File bullRunnerNoShapesGtfsFile = new File("src/test/resources/bullrunner-gtfs-no-shapes.zip");
     public final static String ENTITY_ID = "TEST_ENTITY";
-    
+
     public List<ErrorListHelperModel> results;
-    
+
     public GtfsRealtime.FeedMessage.Builder feedMessageBuilder;
     public GtfsRealtime.FeedEntity.Builder feedEntityBuilder;
     public GtfsRealtime.FeedHeader.Builder feedHeaderBuilder;
-    
+
     public GtfsRealtime.TripUpdate.Builder tripUpdateBuilder;
     public GtfsRealtime.VehiclePosition.Builder vehiclePositionBuilder;
     public GtfsRealtime.Alert.Builder alertBuilder;
-        
+
     public FeedMessageTest() throws IOException {
         results = Arrays.asList(new ErrorListHelperModel());
 
@@ -70,7 +72,7 @@ public abstract class FeedMessageTest {
         alertBuilder = GtfsRealtime.Alert.newBuilder();
 
         String timeZoneText = null;
-        
+
         // Read GTFS data into a GtfsDaoImpl
         gtfsData = new GtfsDaoImpl();
         reader = new GtfsReader();
@@ -83,7 +85,7 @@ public abstract class FeedMessageTest {
             break;
         }
         gtfsDataMetadata = new GtfsMetadata("testagency.zip", TimeZone.getTimeZone(timeZoneText), gtfsData);
-            
+
         gtfsData2 = new GtfsDaoImpl();
         reader = new GtfsReader();
         reader.setInputLocation(staticGtfs2File);
@@ -119,24 +121,24 @@ public abstract class FeedMessageTest {
             break;
         }
         bullRunnerGtfsNoShapesMetadata = new GtfsMetadata("bullrunner-gtfs.zip", TimeZone.getTimeZone(timeZoneText), bullRunnerGtfsNoShapes);
-        
+
         clearAndInitRequiredFeedFields();
     }
-    
+
     // Initialization of some required fields in FeedMessage
     public final void clearAndInitRequiredFeedFields() {
         // clear the fields first
         feedEntityBuilder.clear();
         feedMessageBuilder.clear();
         feedHeaderBuilder.clear();
-        
+
         tripUpdateBuilder.clear();
         vehiclePositionBuilder.clear();
         alertBuilder.clear();
-        
+
         feedHeaderBuilder.setGtfsRealtimeVersion("1.0");
         feedMessageBuilder.setHeader(feedHeaderBuilder);
-        
+
         feedEntityBuilder.setId(ENTITY_ID);
         feedMessageBuilder.addEntity(feedEntityBuilder);
     }

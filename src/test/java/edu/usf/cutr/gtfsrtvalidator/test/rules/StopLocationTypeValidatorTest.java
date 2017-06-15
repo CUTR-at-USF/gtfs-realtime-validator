@@ -42,7 +42,7 @@ public class StopLocationTypeValidatorTest extends FeedMessageTest {
      * E010 - If location_type is used in stops.txt, all stops referenced in stop_times.txt must have location_type of 0
      */
     @Test
-    public void testLocationTypeValidation() {
+    public void testE010() {
         StopLocationTypeValidator stopLocationValidator = new StopLocationTypeValidator();
         Map<ValidationRule, Integer> expected = new HashMap<>();
 
