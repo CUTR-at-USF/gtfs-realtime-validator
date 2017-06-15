@@ -40,11 +40,14 @@ import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
 /**
  * Implement validation rules related to feed entity timestamps:
  *  W001 - Timestamp not populated
+ *  W007 - Refresh interval is more than 35 seconds
+ *  W008 - Header timestamp is older than 65 seconds
  *  E001 - Not in POSIX time
  *  E012 - Header timestamp should be greater than or equal to all other timestamps
  *  E017 - GTFS-rt content changed but has the same timestamp
  *  E018 - GTFS-rt header timestamp decreased between two sequential iterations
  *  E022 - trip stop_time_update times are not increasing
+ *  E025 - stop_time_update departure time is before arrival time
  */
 public class TimestampValidator implements FeedEntityValidator {
 
