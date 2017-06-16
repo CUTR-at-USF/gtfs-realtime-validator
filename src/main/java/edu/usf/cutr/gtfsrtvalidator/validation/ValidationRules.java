@@ -225,4 +225,8 @@ public class ValidationRules {
     public static final ValidationRule E043 = new ValidationRule("E043", "ERROR", "stop_time_update doesn't have arrival or departure",
             "If a stop_time_update doesn't have a schedule_relationship of SKIPPED or NO_DATA, then either arrival or departure must be provided",
             "doesn't have arrival or departure");
+
+    public static final ValidationRule E044 = new ValidationRule("E044", "ERROR", "stop_time_update arrival/departure doesn't have delay or time",
+            "stop_time_update.arrival and stop_time_update.departure must have either delay or time - both fields cannot be missing",
+            "doesn't have delay or time");
 }

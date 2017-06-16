@@ -44,6 +44,7 @@ Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-U
 | [E041](#E041) | `trip` doesn't have any `stop_time_updates`
 | [E042](#E042) | `arrival` or `departure` provided for `NO_DATA` `stop_time_update`
 | [E043](#E043) | `stop_time_update` doesn't have `arrival` or `departure`
+| [E044](#E044) | `stop_time_update` `arrival/departure` doesn't have `delay` or `time`
 
 ### Table of Warnings
 
@@ -400,6 +401,14 @@ If a `stop_time_update` doesn't have a `schedule_relationship` of `SKIPPED` or `
 #### References:
 * [`stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
 * [`stop_time_update.schedule_relationship`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#enum-schedulerelationship)
+
+### E044 - `stop_time_update` `arrival/departure` doesn't have `delay` or `time`
+
+`stop_time_update.arrival` and `stop_time_update.departure` must have either `delay` or `time` - both fields cannot be missing
+
+#### References:
+* [`stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
+* [`stop_time_update.arrival and stop_time_update.departure (StopTimeEvent)`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeevent)
 
 # Warnings
 

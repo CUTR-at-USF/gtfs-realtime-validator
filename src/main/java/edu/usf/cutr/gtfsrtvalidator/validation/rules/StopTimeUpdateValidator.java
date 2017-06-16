@@ -44,6 +44,7 @@ import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
  * E041 - trip doesn't have any stop_time_updates
  * E042 - arrival or departure provided for NO_DATA stop_time_update
  * E043 - stop_time_update doesn't have arrival or departure
+ * E044 - stop_time_update arrival/departure doesn't have delay or time
  */
 public class StopTimeUpdateValidator implements FeedEntityValidator {
 
@@ -59,6 +60,7 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
         List<OccurrenceModel> e041List = new ArrayList<>();
         List<OccurrenceModel> e042List = new ArrayList<>();
         List<OccurrenceModel> e043List = new ArrayList<>();
+        List<OccurrenceModel> e044List = new ArrayList<>();
 
         for (GtfsRealtime.FeedEntity entity : entityList) {
             if (entity.hasTripUpdate()) {
@@ -84,6 +86,7 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
                     checkE040(entity, tripUpdate, stopTimeUpdate, e040List);
                     checkE042(entity, tripUpdate, stopTimeUpdate, e042List);
                     checkE043(entity, tripUpdate, stopTimeUpdate, e043List);
+                    checkE044(entity, tripUpdate, stopTimeUpdate, e044List);
                 }
 
                 boolean sorted = Ordering.natural().isOrdered(stopSequenceList);
@@ -119,6 +122,9 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
         }
         if (!e043List.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(E043), e043List));
+        }
+        if (!e044List.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E044), e044List));
         }
         return errors;
     }
@@ -254,6 +260,39 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
             OccurrenceModel om = new OccurrenceModel(id);
             errors.add(om);
             _log.debug(om.getPrefix() + " " + E043.getOccurrenceSuffix());
+        }
+    }
+
+    /**
+     * Checks E044 "stop_time_update arrival/departure doesn't have delay or time", and adds any errors to the provided error list.
+     *
+     * @param entity         entity that the trip_update is from
+     * @param tripUpdate     the trip_update to examine
+     * @param stopTimeUpdate the stop_time_update to examine
+     * @param errors         the list to add the errors to
+     */
+    private void checkE044(GtfsRealtime.FeedEntity entity, GtfsRealtime.TripUpdate tripUpdate, GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate, List<OccurrenceModel> errors) {
+        String id = getTripId(entity, tripUpdate) + " " + getStopTimeUpdateId(stopTimeUpdate);
+        if (stopTimeUpdate.hasArrival()) {
+            checkE044StopTimeEvent(stopTimeUpdate.getArrival(), id + " arrival", errors);
+        }
+        if (stopTimeUpdate.hasDeparture()) {
+            checkE044StopTimeEvent(stopTimeUpdate.getDeparture(), id + " departure", errors);
+        }
+    }
+
+    /**
+     * Checks StopTimeEvent for rule E044 - "stop_time_update arrival/departure doesn't have delay or time" and adds any errors to the provided errors list
+     *
+     * @param stopTimeEvent    the arrival or departure to examine
+     * @param occurrencePrefix prefix to use for the OccurrenceModel constructor
+     * @param errors           list to add occurrence for E044 to
+     */
+    private void checkE044StopTimeEvent(GtfsRealtime.TripUpdate.StopTimeEvent stopTimeEvent, String occurrencePrefix, List<OccurrenceModel> errors) {
+        if (!stopTimeEvent.hasDelay() && !stopTimeEvent.hasTime()) {
+            OccurrenceModel om = new OccurrenceModel(occurrencePrefix);
+            errors.add(om);
+            _log.debug(om.getPrefix() + " " + E044.getOccurrenceSuffix());
         }
     }
 }
