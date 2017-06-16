@@ -30,6 +30,8 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.NO_DATA;
+import static edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils.getStopTimeUpdateId;
 import static edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils.getTripId;
 import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
 
@@ -39,6 +41,7 @@ import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
  * E037 - Sequential stop_time_updates have the same stop_id
  * E040 - stop_time_update doesn't contain stop_id or stop_sequence
  * E041 - trip doesn't have any stop_time_updates
+ * E042 - arrival or departure provided for NO_DATA stop_time_update
  */
 public class StopTimeUpdateValidator implements FeedEntityValidator {
 
@@ -52,6 +55,7 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
         List<OccurrenceModel> e037List = new ArrayList<>();
         List<OccurrenceModel> e040List = new ArrayList<>();
         List<OccurrenceModel> e041List = new ArrayList<>();
+        List<OccurrenceModel> e042List = new ArrayList<>();
 
         for (GtfsRealtime.FeedEntity entity : entityList) {
             if (entity.hasTripUpdate()) {
@@ -75,6 +79,7 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
                         stopSequenceList.add(stopTimeUpdate.getStopSequence());
                     }
                     checkE040(entity, tripUpdate, stopTimeUpdate, e040List);
+                    checkE042(entity, tripUpdate, stopTimeUpdate, e042List);
                 }
 
                 boolean sorted = Ordering.natural().isOrdered(stopSequenceList);
@@ -104,6 +109,9 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
         }
         if (!e041List.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(E041), e041List));
+        }
+        if (!e042List.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E042), e042List));
         }
         return errors;
     }
@@ -189,6 +197,32 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
             OccurrenceModel om = new OccurrenceModel(getTripId(entity, tripUpdate));
             errors.add(om);
             _log.debug(om.getPrefix() + " " + E041.getOccurrenceSuffix());
+        }
+    }
+
+    /**
+     * Checks E042 "arrival or departure provided for NO_DATA stop_time_update", and adds any errors to the provided error list.
+     *
+     * @param entity         entity that the trip_update is from
+     * @param tripUpdate     the trip_update to examine
+     * @param stopTimeUpdate the stop_time_update to examine
+     * @param errors         the list to add the errors to
+     */
+    private void checkE042(GtfsRealtime.FeedEntity entity, GtfsRealtime.TripUpdate tripUpdate, GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate, List<OccurrenceModel> errors) {
+        if (stopTimeUpdate.hasScheduleRelationship() &&
+                stopTimeUpdate.getScheduleRelationship().equals(NO_DATA)) {
+            String id = getTripId(entity, tripUpdate) + getStopTimeUpdateId(stopTimeUpdate);
+
+            if (stopTimeUpdate.hasArrival()) {
+                OccurrenceModel om = new OccurrenceModel(id + " has arrival");
+                errors.add(om);
+                _log.debug(om.getPrefix() + " " + E042.getOccurrenceSuffix());
+            }
+            if (stopTimeUpdate.hasDeparture()) {
+                OccurrenceModel om = new OccurrenceModel(id + " has departure");
+                errors.add(om);
+                _log.debug(om.getPrefix() + " " + E042.getOccurrenceSuffix());
+            }
         }
     }
 }

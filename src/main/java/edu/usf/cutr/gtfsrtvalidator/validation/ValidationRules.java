@@ -217,4 +217,8 @@ public class ValidationRules {
     public static final ValidationRule E041 = new ValidationRule("E041", "ERROR", "trip doesn't have any stop_time_updates",
             "Unless a trip's schedule_relationship is CANCELED, a trip must have at least one stop_time_update",
             "doesn't have any stop_time_updates and isn't CANCELED");
+
+    public static final ValidationRule E042 = new ValidationRule("E042", "ERROR", "arrival or departure provided for NO_DATA stop_time_update",
+            "If a stop_time_update has a schedule_relationship of NO_DATA, then neither arrival nor departure should be provided",
+            "and schedule_relationship of NO_DATA");
 }
