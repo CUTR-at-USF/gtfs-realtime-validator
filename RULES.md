@@ -43,6 +43,7 @@ Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-U
 | [E040](#E040) | `stop_time_update` doesn't contain `stop_id` or `stop_sequence`
 | [E041](#E041) | `trip` doesn't have any `stop_time_updates`
 | [E042](#E042) | `arrival` or `departure` provided for `NO_DATA` `stop_time_update`
+| [E043](#E043) | `stop_time_update` doesn't have `arrival` or `departure`
 
 ### Table of Warnings
 
@@ -387,6 +388,14 @@ Unless a `trip's` `schedule_relationship` is `CANCELED`, a `trip` must have at l
 ### E042 - `arrival` or `departure` provided for `NO_DATA` `stop_time_update`
 
 If a `stop_time_update` has a `schedule_relationship` of `NO_DATA`, then neither `arrival` nor `departure` should be provided
+
+#### References:
+* [`stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
+* [`stop_time_update.schedule_relationship`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#enum-schedulerelationship)
+
+### E043 - `stop_time_update` doesn't have `arrival` or `departure`
+
+If a `stop_time_update` doesn't have a `schedule_relationship` of `SKIPPED` or `NO_DATA`, then either `arrival` or `departure` must be provided
 
 #### References:
 * [`stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)

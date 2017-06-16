@@ -221,4 +221,8 @@ public class ValidationRules {
     public static final ValidationRule E042 = new ValidationRule("E042", "ERROR", "arrival or departure provided for NO_DATA stop_time_update",
             "If a stop_time_update has a schedule_relationship of NO_DATA, then neither arrival nor departure should be provided",
             "and schedule_relationship of NO_DATA");
+
+    public static final ValidationRule E043 = new ValidationRule("E043", "ERROR", "stop_time_update doesn't have arrival or departure",
+            "If a stop_time_update doesn't have a schedule_relationship of SKIPPED or NO_DATA, then either arrival or departure must be provided",
+            "doesn't have arrival or departure");
 }
