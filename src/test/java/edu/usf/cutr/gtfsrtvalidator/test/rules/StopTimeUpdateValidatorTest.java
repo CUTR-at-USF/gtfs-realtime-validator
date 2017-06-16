@@ -42,7 +42,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
      * E002 - stop_time_updates for a given trip_id must be sorted by increasing stop_sequence
      */
     @Test
-    public void testStopSequenceValidation() {
+    public void testE002() {
         StopTimeUpdateValidator stopSequenceValidator = new StopTimeUpdateValidator();
         Map<ValidationRule, Integer> expected = new HashMap<>();
 
@@ -93,7 +93,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
      * E036 - Sequential stop_time_updates have the same stop_sequence
      */
     @Test
-    public void testRepeatingStopSequence() {
+    public void testE036() {
         StopTimeUpdateValidator stopSequenceValidator = new StopTimeUpdateValidator();
         Map<ValidationRule, Integer> expected = new HashMap<>();
 
@@ -196,7 +196,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
      * E037 - Sequential stop_time_updates have the same stop_id
      */
     @Test
-    public void testRepeatingStopId() {
+    public void testE037() {
         StopTimeUpdateValidator stopSequenceValidator = new StopTimeUpdateValidator();
         Map<ValidationRule, Integer> expected = new HashMap<>();
 
