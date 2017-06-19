@@ -394,6 +394,8 @@ If a `stop_time_update` has a `schedule_relationship` of `NO_DATA`, then neither
 * [`stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
 * [`stop_time_update.schedule_relationship`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#enum-schedulerelationship)
 
+<a name="E043"/>
+
 ### E043 - `stop_time_update` doesn't have `arrival` or `departure`
 
 If a `stop_time_update` doesn't have a `schedule_relationship` of `SKIPPED` or `NO_DATA`, then either `arrival` or `departure` must be provided
@@ -401,6 +403,8 @@ If a `stop_time_update` doesn't have a `schedule_relationship` of `SKIPPED` or `
 #### References:
 * [`stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
 * [`stop_time_update.schedule_relationship`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#enum-schedulerelationship)
+
+<a name="E044"/>
 
 ### E044 - `stop_time_update` `arrival/departure` doesn't have `delay` or `time`
 
