@@ -143,7 +143,24 @@ public class GtfsRtFeed {
         GtfsRtFeedModel gtfsRtFeed = (GtfsRtFeedModel) session.createQuery(" FROM GtfsRtFeedModel "
                 + "WHERE rtFeedID = "+id).uniqueResult();
 
+        // check if there is a current session for this GTFS RT Feed
+        // the idea would be the get the latest session for this feed
+        SessionModel feedSession = null;
+        try {
+            List<SessionModel> list = (List<SessionModel>) session.createQuery(
+                    " select sm FROM SessionModel sm inner join sm.gtfsRtFeedModel as gm "
+                            + " WHERE gm.gtfsRtId = " + id + " AND sm.sessionStartTime > " + (currentTimestamp - (15 * 60 * 1000))
+                            + " ORDER BY sm.sessionStartTime DESC").list();
+            if(list != null && list.size() > 0)
+            {
+                feedSession = list.get(0);
+            }
+        } catch (Exception ex){
+
+        }
+
         // Save the session data of a client monitoring feeds.
+
         SessionModel sessionModel = new SessionModel();
         sessionModel.setClientId(clientId);
         sessionModel.setSessionStartTime(currentTimestamp);
@@ -152,8 +169,13 @@ public class GtfsRtFeed {
         session.save(sessionModel);
         GTFSDB.commitAndCloseSession(session);
 
-        //Extract the Url and gtfsId to start the background process
-        startBackgroundTask(gtfsRtFeed, updateInterval);
+        if(feedSession == null) {
+            //Extract the Url and gtfsId to start the background process
+            _log.info("No feed session, starting new one!");
+            startBackgroundTask(gtfsRtFeed, updateInterval);
+        } else{
+            _log.info("Feed session found!");
+        }
 
         return Response.ok(sessionModel, MediaType.APPLICATION_JSON).build();
     }
