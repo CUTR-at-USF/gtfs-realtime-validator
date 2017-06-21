@@ -143,7 +143,7 @@ public class GtfsRtFeed {
         GtfsRtFeedModel gtfsRtFeed = (GtfsRtFeedModel) session.createQuery(" FROM GtfsRtFeedModel "
                 + "WHERE rtFeedID = "+id).uniqueResult();
 
-        // we check if there is a current session for this GTFS RT Feed crated within 15 min
+        // we check if there is a current session for this GTFS RT Feed created within 15 min
         SessionModel feedSession = null;
         List<SessionModel> sessionModelList = (List<SessionModel>) session.createQuery(
                 " select sm FROM SessionModel sm inner join sm.gtfsRtFeedModel as gm "
