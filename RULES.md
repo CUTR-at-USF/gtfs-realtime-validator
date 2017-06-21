@@ -45,6 +45,7 @@ Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-U
 | [E042](#E042) | `arrival` or `departure` provided for `NO_DATA` `stop_time_update`
 | [E043](#E043) | `stop_time_update` doesn't have `arrival` or `departure`
 | [E044](#E044) | `stop_time_update` `arrival/departure` doesn't have `delay` or `time`
+| [E045](#E045) | GTFS-rt `stop_time_update` `stop_sequence` and `stop_id` do not match GTFS
 
 ### Table of Warnings
 
@@ -413,6 +414,15 @@ If a `stop_time_update` doesn't have a `schedule_relationship` of `SKIPPED` or `
 #### References:
 * [`stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
 * [`stop_time_update.arrival and stop_time_update.departure (StopTimeEvent)`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeevent)
+
+<a name="E045"/>
+
+### E045 - GTFS-rt `stop_time_update` `stop_sequence` and `stop_id` do not match GTFS
+
+If GTFS-rt stop_time_update contains both stop_sequence and stop_id, the values must match the GTFS data in stop_times.txt
+
+#### References:
+* [`stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
 
 # Warnings
 
