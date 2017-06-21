@@ -163,7 +163,7 @@ public class GtfsRtFeed {
         GTFSDB.commitAndCloseSession(session);
 
         if(feedSession == null) {
-            // No session for this feed. We can create a new one and start the process
+            // No recent monitoring session for this feed. We can create a new one and start the process
             _log.info("No feed session, starting new one!");
             startBackgroundTask(gtfsRtFeed, updateInterval);
         } else{
