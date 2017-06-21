@@ -76,7 +76,7 @@ function loadGtfsErrorCount(gtfsFeedId) {
     });
 }
 
-function refresh(id, sessionStartTime) {
+function refresh(id) {
 
     $.get(server + "/api/gtfs-rt-feed/monitor-data/" + id +
             "?summaryCurPage=" + paginationSummary[id]["currentPage"] +
