@@ -217,4 +217,20 @@ public class ValidationRules {
     public static final ValidationRule E041 = new ValidationRule("E041", "ERROR", "trip doesn't have any stop_time_updates",
             "Unless a trip's schedule_relationship is CANCELED, a trip must have at least one stop_time_update",
             "doesn't have any stop_time_updates and isn't CANCELED");
+
+    public static final ValidationRule E042 = new ValidationRule("E042", "ERROR", "arrival or departure provided for NO_DATA stop_time_update",
+            "If a stop_time_update has a schedule_relationship of NO_DATA, then neither arrival nor departure should be provided",
+            "and schedule_relationship of NO_DATA");
+
+    public static final ValidationRule E043 = new ValidationRule("E043", "ERROR", "stop_time_update doesn't have arrival or departure",
+            "If a stop_time_update doesn't have a schedule_relationship of SKIPPED or NO_DATA, then either arrival or departure must be provided",
+            "doesn't have arrival or departure");
+
+    public static final ValidationRule E044 = new ValidationRule("E044", "ERROR", "stop_time_update arrival/departure doesn't have delay or time",
+            "stop_time_update.arrival and stop_time_update.departure must have either delay or time - both fields cannot be missing",
+            "doesn't have delay or time");
+
+    public static final ValidationRule E045 = new ValidationRule("E045", "ERROR", "GTFS-rt stop_time_update stop_sequence and stop_id do not match GTFS",
+            "If GTFS-rt stop_time_update contains both stop_sequence and stop_id, the values must match the GTFS data in stop_times.txt",
+            "- stop_ids should be the same");
 }
