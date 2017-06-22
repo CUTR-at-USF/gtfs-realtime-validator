@@ -72,8 +72,9 @@ public class GtfsUtils {
         long durationNanos = System.nanoTime() - startTimeNanos;
         long durationMillis = TimeUnit.NANOSECONDS.toMillis(durationNanos);
         long durationSeconds = TimeUnit.NANOSECONDS.toSeconds(durationNanos);
-
-        log.info(prefix + durationSeconds + "." + durationMillis + " seconds");
+        double elapsedTime = (double)durationSeconds+(double)durationMillis/1000.0;
+        elapsedTime = Math.round(elapsedTime*1000.0)/1000.0;
+        log.info(prefix + elapsedTime + " seconds");
     }
 
     /**
