@@ -1323,6 +1323,113 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         expected.put(E045, 2);
         TestUtils.assertResults(expected, results);
 
+        // start at stop_sequence 2 - no stop_ids - no errors
+        tripUpdateBuilder.clearStopTimeUpdate();
+        stopTimeUpdateBuilder.clearStopId();
+
+        stopTimeUpdateBuilder.setStopSequence(2);
+        stopTimeUpdateBuilder.setScheduleRelationship(GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SCHEDULED);
+        stopTimeUpdateBuilder.setArrival(GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder().setDelay(60).build());
+        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
+
+        stopTimeUpdateBuilder.setStopSequence(3);
+        stopTimeUpdateBuilder.setScheduleRelationship(GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SCHEDULED);
+        stopTimeUpdateBuilder.setArrival(GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder().setDelay(60).build());
+        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
+
+        stopTimeUpdateBuilder.setStopSequence(4);
+        stopTimeUpdateBuilder.setScheduleRelationship(GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SCHEDULED);
+        stopTimeUpdateBuilder.setArrival(GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder().setDelay(60).build());
+        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
+
+        stopTimeUpdateBuilder.setStopSequence(5);
+        stopTimeUpdateBuilder.setScheduleRelationship(GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SCHEDULED);
+        stopTimeUpdateBuilder.setArrival(GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder().setDelay(60).build());
+        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
+
+        stopTimeUpdateBuilder.setStopSequence(6);
+        stopTimeUpdateBuilder.setScheduleRelationship(GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SCHEDULED);
+        stopTimeUpdateBuilder.setArrival(GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder().setDelay(60).build());
+        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
+
+        stopTimeUpdateBuilder.setStopSequence(10);
+        stopTimeUpdateBuilder.setScheduleRelationship(GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SCHEDULED);
+        stopTimeUpdateBuilder.setArrival(GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder().setDelay(60).build());
+        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
+
+        stopTimeUpdateBuilder.setStopSequence(12);
+        stopTimeUpdateBuilder.setScheduleRelationship(GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SCHEDULED);
+        stopTimeUpdateBuilder.setArrival(GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder().setDelay(60).build());
+        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
+
+        stopTimeUpdateBuilder.setStopSequence(25);
+        stopTimeUpdateBuilder.setScheduleRelationship(GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SCHEDULED);
+        stopTimeUpdateBuilder.setArrival(GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder().setDelay(60).build());
+        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
+
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        expected.clear();
+        TestUtils.assertResults(expected, results);
+
+        // no stop_sequences - no errors
+        tripUpdateBuilder.clearStopTimeUpdate();
+        stopTimeUpdateBuilder.clearStopSequence();
+
+        stopTimeUpdateBuilder.setStopId("222");
+        stopTimeUpdateBuilder.setScheduleRelationship(GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SCHEDULED);
+        stopTimeUpdateBuilder.setArrival(GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder().setDelay(60).build());
+        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
+
+        stopTimeUpdateBuilder.setStopId("230");
+        stopTimeUpdateBuilder.setScheduleRelationship(GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SCHEDULED);
+        stopTimeUpdateBuilder.setArrival(GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder().setDelay(60).build());
+        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
+
+        stopTimeUpdateBuilder.setStopId("214");
+        stopTimeUpdateBuilder.setScheduleRelationship(GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SCHEDULED);
+        stopTimeUpdateBuilder.setArrival(GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder().setDelay(60).build());
+        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
+
+        stopTimeUpdateBuilder.setStopId("204");
+        stopTimeUpdateBuilder.setScheduleRelationship(GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SCHEDULED);
+        stopTimeUpdateBuilder.setArrival(GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder().setDelay(60).build());
+        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
+
+        stopTimeUpdateBuilder.setStopId("102");
+        stopTimeUpdateBuilder.setScheduleRelationship(GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SCHEDULED);
+        stopTimeUpdateBuilder.setArrival(GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder().setDelay(60).build());
+        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
+
+        stopTimeUpdateBuilder.setStopId("101");
+        stopTimeUpdateBuilder.setScheduleRelationship(GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SCHEDULED);
+        stopTimeUpdateBuilder.setArrival(GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder().setDelay(60).build());
+        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
+
+        stopTimeUpdateBuilder.setStopId("162");
+        stopTimeUpdateBuilder.setScheduleRelationship(GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SCHEDULED);
+        stopTimeUpdateBuilder.setArrival(GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder().setDelay(60).build());
+        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
+
+        stopTimeUpdateBuilder.setStopId("154");
+        stopTimeUpdateBuilder.setScheduleRelationship(GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SCHEDULED);
+        stopTimeUpdateBuilder.setArrival(GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder().setDelay(60).build());
+        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
+
+        stopTimeUpdateBuilder.setStopId("222");
+        stopTimeUpdateBuilder.setScheduleRelationship(GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SCHEDULED);
+        stopTimeUpdateBuilder.setArrival(GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder().setDelay(60).build());
+        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
+
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        expected.clear();
+        TestUtils.assertResults(expected, results);
+
         clearAndInitRequiredFeedFields();
     }
 }
