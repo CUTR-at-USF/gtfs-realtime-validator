@@ -46,6 +46,7 @@ Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-U
 | [E043](#E043) | `stop_time_update` doesn't have `arrival` or `departure`
 | [E044](#E044) | `stop_time_update` `arrival/departure` doesn't have `delay` or `time`
 | [E045](#E045) | GTFS-rt `stop_time_update` `stop_sequence` and `stop_id` do not match GTFS
+| [E046](#E046) | GTFS-rt `stop_time_update` without `time` doesn't have arrival/departure time in GTFS
 
 ### Table of Warnings
 
@@ -423,6 +424,21 @@ If GTFS-rt stop_time_update contains both stop_sequence and stop_id, the values 
 
 #### References:
 * [`stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
+
+<a name="E046"/>
+
+### E046 - GTFS-rt `stop_time_update` without `time` doesn't have arrival/departure_time in GTFS
+
+If only `delay` is provided in a `stop_time_update` `arrival` or `departure` (and not a `time`), then the GTFS `stop_times.txt` must contain arrival_times and/or departure_times for these corresponding stops.  A `delay` value in the real-time feed is meaningless unless you have a clock time to add it to in the GTFS `stop_times.txt` file.
+
+*Common mistakes* - Providing a `arrival/departure.delay` value, but not providing a `arrival/departure.time` value for non-timepoint stops that do not have an `arrival_time` or `departure_time` in GTFS `stop_times.txt`.  
+
+*Possible solution* - Add a `time` value to the GTFS-rt feed for the `arrival` and `departure`, or add an `arrival_time` and `departure_time` in `GTFS stop_times.txt`.
+
+#### References:
+* [`stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
+* [`stop_time_update.arrival and stop_time_update.departure (StopTimeEvent)`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeevent)
+* [GTFS stop_times.txt](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#stop_timestxt)
 
 # Warnings
 
