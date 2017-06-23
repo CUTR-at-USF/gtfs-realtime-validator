@@ -233,4 +233,8 @@ public class ValidationRules {
     public static final ValidationRule E045 = new ValidationRule("E045", "ERROR", "GTFS-rt stop_time_update stop_sequence and stop_id do not match GTFS",
             "If GTFS-rt stop_time_update contains both stop_sequence and stop_id, the values must match the GTFS data in stop_times.txt",
             "- stop_ids should be the same");
+
+    public static final ValidationRule E046 = new ValidationRule("E046", "ERROR", "GTFS-rt stop_time_update without time doesn't have arrival/departure_time in GTFS",
+            "If only delay is provided in a stop_time_update arrival or departure (and not a time), then the GTFS stop_times.txt must contain arrival_times and/or departure_times for these corresponding stops.",
+            "isn't set and GTFS doesn't have arrival/departure_time in stop_times.txt");
 }
