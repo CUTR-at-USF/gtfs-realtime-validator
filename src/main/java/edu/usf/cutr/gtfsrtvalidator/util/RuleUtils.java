@@ -17,28 +17,26 @@
 package edu.usf.cutr.gtfsrtvalidator.util;
 
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
-import org.slf4j.LoggerFactory;
+import edu.usf.cutr.gtfsrtvalidator.api.model.ValidationRule;
 
 import java.util.List;
 
-import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.W009;
-
 /**
- * Utilities related to particular rules
+ * Utilities related to rules
  */
 public class RuleUtils {
 
-    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(RuleUtils.class);
-
     /**
-     * Adds occurrence for rule W009 - "schedule_relationship not populated" to the provided warnings list
+     * Adds occurrence for rule
      *
-     * @param occurrencePrefix prefix to use for the OccurrenceModel constructor
-     * @param warnings         list to add occurence for W009 to
+     * @param rule               rule to add occurrence for
+     * @param occurrencePrefix   prefix to use for the OccurrenceModel constructor
+     * @param list               list to add occurrence for the rule to
+     * @param log                logger to use to output occurrence info
      */
-    public static void addW009Occurrence(String occurrencePrefix, List<OccurrenceModel> warnings) {
+    public static void addOccurrence(ValidationRule rule, String occurrencePrefix, List<OccurrenceModel> list, org.slf4j.Logger log) {
         OccurrenceModel om = new OccurrenceModel(occurrencePrefix);
-        warnings.add(om);
-        _log.debug(om.getPrefix() + " " + W009.getOccurrenceSuffix());
+        list.add(om);
+        log.debug(om.getPrefix() + " " + rule.getOccurrenceSuffix());
     }
 }

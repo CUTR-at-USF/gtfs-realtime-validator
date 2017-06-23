@@ -22,6 +22,7 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.background.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
+import edu.usf.cutr.gtfsrtvalidator.util.RuleUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.slf4j.LoggerFactory;
@@ -56,18 +57,16 @@ public class StopValidator implements FeedEntityValidator {
                 List<GtfsRealtime.TripUpdate.StopTimeUpdate> stopTimeUpdateList = tripUpdate.getStopTimeUpdateList();
                 for (GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate : stopTimeUpdateList) {
                     if (stopTimeUpdate.hasStopId()) {
+                        String prefix = "trip_id " + tripUpdate.getTrip().getTripId() + " stop_id " + stopTimeUpdate.getStopId();
                         if (!gtfsMetadata.getStopIds().contains(stopTimeUpdate.getStopId())) {
-                            OccurrenceModel om = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() + " stop_id " + stopTimeUpdate.getStopId());
-                            e011List.add(om);
-                            _log.debug(om.getPrefix() + " " + E011.getOccurrenceSuffix());
+                            // E011 - All stop_ids referenced in GTFS-rt feed must appear in the GTFS feed
+                            RuleUtils.addOccurrence(E011, prefix, e011List, _log);
                         }
                         Integer locationType = gtfsMetadata.getStopToLocationTypeMap().get(stopTimeUpdate.getStopId());
                         if (locationType != null && locationType != 0) {
-                            OccurrenceModel om = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() + " stop_id " + stopTimeUpdate.getStopId());
-                            e015List.add(om);
-                            _log.debug(om.getPrefix() + " " + E015.getOccurrenceSuffix());
+                            // E015 - All stop_ids referenced in GTFS-rt feeds must have the location_type = 0
+                            RuleUtils.addOccurrence(E015, prefix, e015List, _log);
                         }
-
                     }
                 }
             }
@@ -75,14 +74,15 @@ public class StopValidator implements FeedEntityValidator {
                 GtfsRealtime.VehiclePosition v = entity.getVehicle();
                 if (v.hasStopId()) {
                     if (!gtfsMetadata.getStopIds().contains(v.getStopId())) {
-                        OccurrenceModel om = new OccurrenceModel((v.hasVehicle() && v.getVehicle().hasId() ? "vehicle_id " + v.getVehicle().getId() + " " : "") + "stop_id " + v.getStopId());
-                        e011List.add(om);
+                        // E011 - All stop_ids referenced in GTFS-rt feed must appear in the GTFS feed
+                        String prefix = (v.hasVehicle() && v.getVehicle().hasId() ? "vehicle_id " + v.getVehicle().getId() + " " : "") + "stop_id " + v.getStopId();
+                        RuleUtils.addOccurrence(E011, prefix, e011List, _log);
                     }
                     Integer locationType = gtfsMetadata.getStopToLocationTypeMap().get(v.getStopId());
                     if (locationType != null && locationType != 0) {
-                        OccurrenceModel om = new OccurrenceModel((v.hasVehicle() && v.getVehicle().hasId() ? "vehicle_id " + v.getVehicle().getId() + " " : "") + "stop_id " + v.getStopId());
-                        e015List.add(om);
-                        _log.debug(om.getPrefix() + " " + E015.getOccurrenceSuffix());
+                        // E015 - All stop_ids referenced in GTFS-rt feeds must have the location_type = 0
+                        String prefix = (v.hasVehicle() && v.getVehicle().hasId() ? "vehicle_id " + v.getVehicle().getId() + " " : "") + "stop_id " + v.getStopId();
+                        RuleUtils.addOccurrence(E015, prefix, e015List, _log);
                     }
                 }
             }
@@ -90,15 +90,15 @@ public class StopValidator implements FeedEntityValidator {
                 List<GtfsRealtime.EntitySelector> informedEntityList = entity.getAlert().getInformedEntityList();
                 for (GtfsRealtime.EntitySelector entitySelector : informedEntityList) {
                     if (entitySelector.hasStopId()) {
+                        String prefix = "alert entity ID " + entityId + " stop_id " + entitySelector.getStopId();
                         if (!gtfsMetadata.getStopIds().contains(entitySelector.getStopId())) {
-                            OccurrenceModel errorOccurrence = new OccurrenceModel("alert entity ID " + entityId + " stop_id " + entitySelector.getStopId());
-                            e011List.add(errorOccurrence);
+                            // E011 - All stop_ids referenced in GTFS-rt feed must appear in the GTFS feed
+                            RuleUtils.addOccurrence(E011, prefix, e011List, _log);
                         }
                         Integer locationType = gtfsMetadata.getStopToLocationTypeMap().get(entitySelector.getStopId());
                         if (locationType != null && locationType != 0) {
-                            OccurrenceModel om = new OccurrenceModel("alert entity ID " + entityId + " stop_id " + entitySelector.getStopId());
-                            e015List.add(om);
-                            _log.debug(om.getPrefix() + " " + E015.getOccurrenceSuffix());
+                            // E015 - All stop_ids referenced in GTFS-rt feeds must have the location_type = 0
+                            RuleUtils.addOccurrence(E015, prefix, e015List, _log);
                         }
                     }
                 }

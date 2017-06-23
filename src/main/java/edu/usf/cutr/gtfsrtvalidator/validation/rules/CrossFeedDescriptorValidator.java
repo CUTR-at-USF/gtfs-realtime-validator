@@ -22,6 +22,7 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.background.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
+import edu.usf.cutr.gtfsrtvalidator.util.RuleUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.slf4j.LoggerFactory;
@@ -33,16 +34,17 @@ import java.util.Objects;
 
 import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.W003;
 
+/**
+ * W003 - If both vehicle positions and trip updates are provided, VehicleDescriptor or TripDescriptor values should match between the two feeds.
+ */
 public class CrossFeedDescriptorValidator implements FeedEntityValidator {
 
     private static final org.slf4j.Logger _log = LoggerFactory.getLogger(CrossFeedDescriptorValidator.class);
 
-    /**
-     * ID: W003
-     * Description: If both vehicle positions and trip updates are provided, VehicleDescriptor or TripDescriptor values should match between the two feeds.
-     */
     @Override
     public List<ErrorListHelperModel> validate(long currentTimeMillis, GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage) {
+        List<OccurrenceModel> warningListW003 = new ArrayList<>();
+
         List<GtfsRealtime.TripUpdate> tripUpdates = new ArrayList<>();
         List<GtfsRealtime.VehiclePosition> vehiclePositions = new ArrayList<>();
         List<GtfsRealtime.Alert> alerts = new ArrayList<>();
@@ -59,12 +61,9 @@ public class CrossFeedDescriptorValidator implements FeedEntityValidator {
             }
         }
 
-        List<OccurrenceModel> occurrences = new ArrayList<>();
-
         // FIXME - Should be optimized since this would be costly with a higher number of feeds
         if (!tripUpdates.isEmpty() && !vehiclePositions.isEmpty()) {
-
-            //Checks if all TripUpdate object has a matching tripId in any of the VehicleUpdate objects
+            // Checks if all TripUpdate object has a matching tripId in any of the VehicleUpdate objects
             for (GtfsRealtime.TripUpdate trip : tripUpdates) {
                 boolean matchingTrips = false;
                 for (GtfsRealtime.VehiclePosition vehiclePosition : vehiclePositions) {
@@ -78,13 +77,12 @@ public class CrossFeedDescriptorValidator implements FeedEntityValidator {
                     }
                 }
                 if (!matchingTrips) {
-                    OccurrenceModel om = new OccurrenceModel("trip_id " + trip.getTrip().getTripId());
-                    occurrences.add(om);
-                    _log.debug(om.getPrefix() + " " + W003.getOccurrenceSuffix());
+                    // W003 - If both vehicle positions and trip updates are provided, VehicleDescriptor or TripDescriptor values should match between the two feeds.
+                    RuleUtils.addOccurrence(W003, "trip_id " + trip.getTrip().getTripId(), warningListW003, _log);
                 }
             }
 
-            //Checks if all VehicleUpdate object has a matching tripId in any of the TripUpdate objects
+            // Checks if all VehicleUpdate object has a matching tripId in any of the TripUpdate objects
             for (GtfsRealtime.VehiclePosition vehiclePosition : vehiclePositions) {
                 boolean matchingTrips = false;
                 for (GtfsRealtime.TripUpdate trip : tripUpdates) {
@@ -97,12 +95,11 @@ public class CrossFeedDescriptorValidator implements FeedEntityValidator {
                     }
                 }
                 if (!matchingTrips) {
-                    OccurrenceModel om = new OccurrenceModel("trip_id " + vehiclePosition.getTrip().getTripId());
-                    occurrences.add(om);
-                    _log.debug(om.getPrefix() + " " + W003.getOccurrenceSuffix());
+                    // W003 - If both vehicle positions and trip updates are provided, VehicleDescriptor or TripDescriptor values should match between the two feeds.
+                    RuleUtils.addOccurrence(W003, "trip_id " + vehiclePosition.getTrip().getTripId(), warningListW003, _log);
                 }
             }
         }
-        return Collections.singletonList(new ErrorListHelperModel(new MessageLogModel(W003), occurrences));
+        return Collections.singletonList(new ErrorListHelperModel(new MessageLogModel(W003), warningListW003));
     }
 }

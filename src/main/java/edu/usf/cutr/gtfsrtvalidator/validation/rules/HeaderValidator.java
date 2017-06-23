@@ -21,6 +21,7 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.background.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
+import edu.usf.cutr.gtfsrtvalidator.util.RuleUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.slf4j.LoggerFactory;
@@ -47,18 +48,14 @@ public class HeaderValidator implements FeedEntityValidator {
         String version = feedMessage.getHeader().getGtfsRealtimeVersion();
         if (!version.equals("1.0")) {
             // E038 - Invalid header.gtfs_realtime_version
-            OccurrenceModel om = new OccurrenceModel("header.gtfs_realtime_version of " + version);
-            errorListE038.add(om);
-            _log.debug(om.getPrefix() + " " + E038.getOccurrenceSuffix());
+            RuleUtils.addOccurrence(E038, "header.gtfs_realtime_version of " + version, errorListE038, _log);
         }
 
         if (feedMessage.getHeader().getIncrementality().equals(GtfsRealtime.FeedHeader.Incrementality.FULL_DATASET)) {
             for (GtfsRealtime.FeedEntity entity : feedMessage.getEntityList()) {
                 if (entity.hasIsDeleted()) {
                     // E039 - FULL_DATASET feeds should not include entity.is_deleted
-                    OccurrenceModel om = new OccurrenceModel("entity ID " + entity.getId() + " has is_deleted=" + entity.getIsDeleted());
-                    errorListE039.add(om);
-                    _log.debug(om.getPrefix() + " " + E039.getOccurrenceSuffix());
+                    RuleUtils.addOccurrence(E039, "entity ID " + entity.getId() + " has is_deleted=" + entity.getIsDeleted(), errorListE039, _log);
                 }
             }
         }

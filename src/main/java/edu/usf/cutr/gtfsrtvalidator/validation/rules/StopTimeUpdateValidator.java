@@ -23,6 +23,7 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.background.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
+import edu.usf.cutr.gtfsrtvalidator.util.RuleUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.onebusaway.gtfs.model.Stop;
@@ -142,10 +143,9 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
 
                 boolean sorted = Ordering.natural().isOrdered(rtStopSequenceList);
                 if (!sorted) {
+                    // E002 - stop_time_updates for a given trip_id must be sorted by increasing stop_sequence
                     String id = getTripId(entity, tripUpdate);
-                    OccurrenceModel om = new OccurrenceModel(id + " stop_sequence " + rtStopSequenceList.toString());
-                    e002List.add(om);
-                    _log.debug(om.getPrefix() + " " + E002.getOccurrenceSuffix());
+                    RuleUtils.addOccurrence(E002, id + " stop_sequence " + rtStopSequenceList.toString(), e002List, _log);
                 }
 
                 // TODO - detect out-of-order stops when stop_sequence isn't provided - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/159
@@ -199,9 +199,7 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
         if (stopTimeUpdate.hasStopSequence() &&
                 previousStopSequence == stopTimeUpdate.getStopSequence()) {
             String id = getTripId(entity, entity.getTripUpdate());
-            OccurrenceModel om = new OccurrenceModel(id + " has repeating stop_sequence " + previousStopSequence);
-            errors.add(om);
-            _log.debug(om.getPrefix() + " " + E036.getOccurrenceSuffix());
+            RuleUtils.addOccurrence(E036, id + " has repeating stop_sequence " + previousStopSequence, errors, _log);
         }
     }
 
@@ -226,9 +224,7 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
                 prefix.append(" at stop_sequence ");
                 prefix.append(stopTimeUpdate.getStopSequence());
             }
-            OccurrenceModel om = new OccurrenceModel(prefix.toString());
-            errors.add(om);
-            _log.debug(om.getPrefix() + " " + E036.getOccurrenceSuffix());
+            RuleUtils.addOccurrence(E037, prefix.toString(), errors, _log);
         }
     }
 
@@ -242,9 +238,7 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
      */
     private void checkE040(GtfsRealtime.FeedEntity entity, GtfsRealtime.TripUpdate tripUpdate, GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate, List<OccurrenceModel> errors) {
         if (!stopTimeUpdate.hasStopSequence() && !stopTimeUpdate.hasStopId()) {
-            OccurrenceModel om = new OccurrenceModel(getTripId(entity, tripUpdate));
-            errors.add(om);
-            _log.debug(om.getPrefix() + " " + E040.getOccurrenceSuffix());
+            RuleUtils.addOccurrence(E040, getTripId(entity, tripUpdate), errors, _log);
         }
     }
 
@@ -263,10 +257,7 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
                 // No errors - the trip was canceled, so it doesn't need any stop_time_updates - return
                 return;
             }
-
-            OccurrenceModel om = new OccurrenceModel(getTripId(entity, tripUpdate));
-            errors.add(om);
-            _log.debug(om.getPrefix() + " " + E041.getOccurrenceSuffix());
+            RuleUtils.addOccurrence(E041, getTripId(entity, tripUpdate), errors, _log);
         }
     }
 
@@ -284,14 +275,10 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
             String id = getTripId(entity, tripUpdate) + " " + getStopTimeUpdateId(stopTimeUpdate);
 
             if (stopTimeUpdate.hasArrival()) {
-                OccurrenceModel om = new OccurrenceModel(id + " has arrival");
-                errors.add(om);
-                _log.debug(om.getPrefix() + " " + E042.getOccurrenceSuffix());
+                RuleUtils.addOccurrence(E042, id + " has arrival", errors, _log);
             }
             if (stopTimeUpdate.hasDeparture()) {
-                OccurrenceModel om = new OccurrenceModel(id + " has departure");
-                errors.add(om);
-                _log.debug(om.getPrefix() + " " + E042.getOccurrenceSuffix());
+                RuleUtils.addOccurrence(E042, id + " has departure", errors, _log);
             }
         }
     }
@@ -312,11 +299,8 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
                 // stop_time_updates with SKIPPED or NO_DATA aren't required to have arrival or departures - return
                 return;
             }
-
             String id = getTripId(entity, tripUpdate) + " " + getStopTimeUpdateId(stopTimeUpdate);
-            OccurrenceModel om = new OccurrenceModel(id);
-            errors.add(om);
-            _log.debug(om.getPrefix() + " " + E043.getOccurrenceSuffix());
+            RuleUtils.addOccurrence(E043, id, errors, _log);
         }
     }
 
@@ -347,9 +331,7 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
      */
     private void checkE044StopTimeEvent(GtfsRealtime.TripUpdate.StopTimeEvent stopTimeEvent, String occurrencePrefix, List<OccurrenceModel> errors) {
         if (!stopTimeEvent.hasDelay() && !stopTimeEvent.hasTime()) {
-            OccurrenceModel om = new OccurrenceModel(occurrencePrefix);
-            errors.add(om);
-            _log.debug(om.getPrefix() + " " + E044.getOccurrenceSuffix());
+            RuleUtils.addOccurrence(E044, occurrencePrefix, errors, _log);
         }
     }
 
@@ -369,9 +351,7 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
             String stopSequence = "stop_sequence " + stopTimeUpdate.getStopSequence();
             String stopId = "stop_id " + stopTimeUpdate.getStopId();
             String gtfsSummary = " but GTFS stop_sequence " + gtfsStopSequence + " has stop_id " + stop.getId().getId();
-            OccurrenceModel om = new OccurrenceModel(tripId + stopSequence + " has " + stopId + gtfsSummary);
-            errors.add(om);
-            _log.debug(om.getPrefix() + " " + E045.getOccurrenceSuffix());
+            RuleUtils.addOccurrence(E045, tripId + stopSequence + " has " + stopId + gtfsSummary, errors, _log);
         }
     }
 
@@ -391,26 +371,14 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
         if (stopTimeUpdate.hasArrival()) {
             if (!stopTimeUpdate.getArrival().hasTime() && !gtfsStopTime.isArrivalTimeSet()) {
                 String prefix = prefixBuilder.toString() + "arrival.time";
-                addE046Occurrence(prefix, errors);
+                RuleUtils.addOccurrence(E046, prefix, errors, _log);
             }
         }
         if (stopTimeUpdate.hasDeparture()) {
             if (!stopTimeUpdate.getDeparture().hasTime() && !gtfsStopTime.isDepartureTimeSet()) {
                 String prefix = prefixBuilder.toString() + "departure.time";
-                addE046Occurrence(prefix, errors);
+                RuleUtils.addOccurrence(E046, prefix, errors, _log);
             }
         }
-    }
-
-    /**
-     * Adds occurrence for rule E046 - "GTFS-rt stop_time_update without time doesn't have arrival/departure_time in GTFS" to the provided errors list
-     *
-     * @param occurrencePrefix prefix to use for the OccurrenceModel constructor
-     * @param errors           list to add occurrence for E046 to
-     */
-    public static void addE046Occurrence(String occurrencePrefix, List<OccurrenceModel> errors) {
-        OccurrenceModel om = new OccurrenceModel(occurrencePrefix);
-        errors.add(om);
-        _log.debug(om.getPrefix() + " " + E046.getOccurrenceSuffix());
     }
 }

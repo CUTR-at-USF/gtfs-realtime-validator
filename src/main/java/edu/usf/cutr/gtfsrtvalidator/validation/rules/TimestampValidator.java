@@ -22,6 +22,7 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.background.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
+import edu.usf.cutr.gtfsrtvalidator.util.RuleUtils;
 import edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
@@ -39,6 +40,7 @@ import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
 
 /**
  * Implement validation rules related to feed entity timestamps:
+ *
  *  W001 - Timestamp not populated
  *  W007 - Refresh interval is more than 35 seconds
  *  W008 - Header timestamp is older than 65 seconds
@@ -71,29 +73,24 @@ public class TimestampValidator implements FeedEntityValidator {
         List<OccurrenceModel> e022List = new ArrayList<>();
         List<OccurrenceModel> e025List = new ArrayList<>();
 
-
         /**
-         * Validate FeedHeader timestamp - W001 and E001
+         * Validate FeedHeader timestamp
          */
         long headerTimestamp = feedMessage.getHeader().getTimestamp();
         if (headerTimestamp == 0) {
-            OccurrenceModel errorW001 = new OccurrenceModel("header");
-            w001List.add(errorW001);
-            _log.debug(errorW001.getPrefix() + " " + W001.getOccurrenceSuffix());
+            // W001 - Timestamp not populated
+            RuleUtils.addOccurrence(W001, "header", w001List, _log);
         } else {
             if (!isPosix(headerTimestamp)) {
-                OccurrenceModel errorE001 = new OccurrenceModel("header.timestamp");
-                e001List.add(errorE001);
-                _log.debug(errorE001.getPrefix() + " " + E001.getOccurrenceSuffix());
+                // E001 - Not in POSIX time
+                RuleUtils.addOccurrence(E001, "header.timestamp", e001List, _log);
             } else {
                 long age = getAge(currentTimeMillis, headerTimestamp);
                 if (age > TimeUnit.SECONDS.toMillis(MAX_AGE_SECONDS)) {
-                    // W008
+                    // W008 - Header timestamp is older than 65 seconds
                     long ageMinutes = TimeUnit.MILLISECONDS.toMinutes(age);
                     long ageSeconds = TimeUnit.MILLISECONDS.toSeconds(age);
-                    OccurrenceModel om = new OccurrenceModel(String.format("header.timestamp is " + ageMinutes + " min " + ageSeconds % 60 + " sec"));
-                    w008List.add(om);
-                    _log.debug(om.getPrefix() + " " + W008.getOccurrenceSuffix());
+                    RuleUtils.addOccurrence(W008, "header.timestamp is " + ageMinutes + " min " + ageSeconds % 60 + " sec", w008List, _log);
                 }
             }
 
@@ -101,17 +98,15 @@ public class TimestampValidator implements FeedEntityValidator {
                 long previousTimestamp = previousFeedMessage.getHeader().getTimestamp();
                 long interval = headerTimestamp - previousTimestamp;
                 if (headerTimestamp == previousTimestamp) {
-                    OccurrenceModel om = new OccurrenceModel("header.timestamp of " + headerTimestamp);
-                    e017List.add(om);
-                    _log.debug(om.getPrefix() + " " + E017.getOccurrenceSuffix());
+                    // E017 - GTFS-rt content changed but has the same timestamp
+                    RuleUtils.addOccurrence(E017, "header.timestamp of " + headerTimestamp, e017List, _log);
                 } else if (headerTimestamp < previousTimestamp) {
-                    OccurrenceModel om = new OccurrenceModel("header.timestamp of " + headerTimestamp + " is less than the header.timestamp of " + previousFeedMessage.getHeader().getTimestamp());
-                    e018List.add(om);
-                    _log.debug(om.getPrefix() + " " + E018.getOccurrenceSuffix());
+                    // E018 - GTFS-rt header timestamp decreased between two sequential iterations
+                    String prefix = "header.timestamp of " + headerTimestamp + " is less than the header.timestamp of " + previousFeedMessage.getHeader().getTimestamp();
+                    RuleUtils.addOccurrence(E018, prefix, e018List, _log);
                 } else if (interval > MINIMUM_REFRESH_INTERVAL_SECONDS) {
-                    OccurrenceModel om = new OccurrenceModel(interval + " second interval between consecutive header.timestamps");
-                    w007List.add(om);
-                    _log.debug(om.getPrefix() + " " + W007.getOccurrenceSuffix());
+                    // W007 - Refresh interval is more than 35 seconds
+                    RuleUtils.addOccurrence(W007, interval + " second interval between consecutive header.timestamps", w007List, _log);
                 }
             }
         }
@@ -122,23 +117,20 @@ public class TimestampValidator implements FeedEntityValidator {
                 long tripUpdateTimestamp = tripUpdate.getTimestamp();
 
                 /**
-                 * Validate TripUpdate timestamps - W001, E001, E012
+                 * Validate TripUpdate timestamps
                  */
                 String id = getTripId(entity, tripUpdate);
                 if (tripUpdateTimestamp == 0) {
-                    OccurrenceModel errorW001 = new OccurrenceModel(id);
-                    w001List.add(errorW001);
-                    _log.debug(errorW001.getPrefix() + " " + W001.getOccurrenceSuffix());
+                    // W001 - Timestamp not populated
+                    RuleUtils.addOccurrence(W001, id, w001List, _log);
                 } else {
                     if (headerTimestamp != 0 && tripUpdateTimestamp > headerTimestamp) {
-                        OccurrenceModel errorE012 = new OccurrenceModel(id + " timestamp " + tripUpdateTimestamp);
-                        e012List.add(errorE012);
-                        _log.debug(errorE012.getPrefix() + " " + E012.getOccurrenceSuffix());
+                        // E012 - Header timestamp should be greater than or equal to all other timestamps
+                        RuleUtils.addOccurrence(E012, id + " timestamp " + tripUpdateTimestamp, e012List, _log);
                     }
                     if (!isPosix(tripUpdateTimestamp)) {
-                        OccurrenceModel errorE001 = new OccurrenceModel(id + " timestamp " + tripUpdateTimestamp);
-                        e001List.add(errorE001);
-                        _log.debug(errorE001.getPrefix() + " " + E001.getOccurrenceSuffix());
+                        // E001 - Not in POSIX time
+                        RuleUtils.addOccurrence(E001, id + " timestamp " + tripUpdateTimestamp, e001List, _log);
                     }
                 }
 
@@ -164,35 +156,29 @@ public class TimestampValidator implements FeedEntityValidator {
                                 arrivalTimeText = TimestampUtils.posixToClock(arrivalTime, gtfsMetadata.getTimeZone());
 
                                 if (!isPosix(arrivalTime)) {
-                                    // E001
-                                    OccurrenceModel errorE001 = new OccurrenceModel(id + stopDescription + " arrival_time " + arrivalTime);
-                                    e001List.add(errorE001);
-                                    _log.debug(errorE001.getPrefix() + " " + E001.getOccurrenceSuffix());
+                                    // E001 - Not in POSIX time
+                                    RuleUtils.addOccurrence(E001, id + stopDescription + " arrival_time " + arrivalTime, e001List, _log);
                                 }
                                 if (previousArrivalTime != null && arrivalTime < previousArrivalTime) {
                                     // E022 - this stop arrival time is < previous stop arrival time
-                                    OccurrenceModel om = new OccurrenceModel(id + stopDescription +
-                                            " arrival_time " + arrivalTimeText + " (" + arrivalTime + ") is less than previous stop arrival_time " + previousArrivalTimeText + " (" + previousArrivalTime + ")");
-                                    e022List.add(om);
-                                    _log.debug(om.getPrefix() + " " + E022.getOccurrenceSuffix());
+                                    String prefix = id + stopDescription +
+                                            " arrival_time " + arrivalTimeText + " (" + arrivalTime + ") is less than previous stop arrival_time " + previousArrivalTimeText + " (" + previousArrivalTime + ")";
+                                    RuleUtils.addOccurrence(E022, prefix, e022List, _log);
                                 }
                                 if (previousArrivalTime != null && Objects.equals(arrivalTime, previousArrivalTime)) {
                                     // E022 - this stop arrival time is == previous stop arrival time
-                                    OccurrenceModel om = new OccurrenceModel(id + stopDescription + " arrival_time " + arrivalTimeText + " (" + arrivalTime + ") is equal to previous stop arrival_time " + previousArrivalTimeText + " (" + previousArrivalTime + ")");
-                                    e022List.add(om);
-                                    _log.debug(om.getPrefix() + " " + E022.getOccurrenceSuffix());
+                                    String prefix = id + stopDescription + " arrival_time " + arrivalTimeText + " (" + arrivalTime + ") is equal to previous stop arrival_time " + previousArrivalTimeText + " (" + previousArrivalTime + ")";
+                                    RuleUtils.addOccurrence(E022, prefix, e022List, _log);
                                 }
                                 if (previousDepartureTime != null && arrivalTime < previousDepartureTime) {
                                     // E022 - this stop arrival time is < previous stop departure time
-                                    OccurrenceModel om = new OccurrenceModel(id + stopDescription + " arrival_time " + arrivalTimeText + " (" + arrivalTime + ") is less than previous stop departure_time " + previousDepartureTimeText + " (" + previousDepartureTime + ")");
-                                    e022List.add(om);
-                                    _log.debug(om.getPrefix() + " " + E022.getOccurrenceSuffix());
+                                    String prefix = id + stopDescription + " arrival_time " + arrivalTimeText + " (" + arrivalTime + ") is less than previous stop departure_time " + previousDepartureTimeText + " (" + previousDepartureTime + ")";
+                                    RuleUtils.addOccurrence(E022, prefix, e022List, _log);
                                 }
                                 if (previousDepartureTime != null && Objects.equals(arrivalTime, previousDepartureTime)) {
                                     // E022 - this stop arrival time is == previous stop departure time
-                                    OccurrenceModel om = new OccurrenceModel(id + stopDescription + " arrival_time " + arrivalTimeText + " (" + arrivalTime + ") is equal to previous stop departure_time " + previousDepartureTimeText + " (" + previousDepartureTime + ")");
-                                    e022List.add(om);
-                                    _log.debug(om.getPrefix() + " " + E022.getOccurrenceSuffix());
+                                    String prefix = id + stopDescription + " arrival_time " + arrivalTimeText + " (" + arrivalTime + ") is equal to previous stop departure_time " + previousDepartureTimeText + " (" + previousDepartureTime + ")";
+                                    RuleUtils.addOccurrence(E022, prefix, e022List, _log);
                                 }
                             }
                         }
@@ -203,44 +189,36 @@ public class TimestampValidator implements FeedEntityValidator {
                                 departureTimeText = TimestampUtils.posixToClock(departureTime, gtfsMetadata.getTimeZone());
 
                                 if (!isPosix(departureTime)) {
-                                    // E001
-                                    OccurrenceModel errorE001 = new OccurrenceModel(id + stopDescription + " departure_time " + departureTime);
-                                    e001List.add(errorE001);
-                                    _log.debug(errorE001.getPrefix() + " " + E001.getOccurrenceSuffix());
+                                    // E001 - Not in POSIX time
+                                    RuleUtils.addOccurrence(E001, id + stopDescription + " departure_time " + departureTime, e001List, _log);
                                 }
                                 if (previousDepartureTime != null && departureTime < previousDepartureTime) {
                                     // E022 - this stop departure time is < previous stop departure time
-                                    OccurrenceModel om = new OccurrenceModel(id + stopDescription + " departure_time " + departureTimeText + " (" + departureTime + ") is less than previous stop departure_time " + previousDepartureTimeText + " (" + previousDepartureTime + ")");
-                                    e022List.add(om);
-                                    _log.debug(om.getPrefix() + " " + E022.getOccurrenceSuffix());
+                                    String prefix = id + stopDescription + " departure_time " + departureTimeText + " (" + departureTime + ") is less than previous stop departure_time " + previousDepartureTimeText + " (" + previousDepartureTime + ")";
+                                    RuleUtils.addOccurrence(E022, prefix, e022List, _log);
                                 }
                                 if (previousDepartureTime != null && Objects.equals(departureTime, previousDepartureTime)) {
                                     // E022 - this stop departure time is == previous stop departure time
-                                    OccurrenceModel om = new OccurrenceModel(id + stopDescription + " departure_time " + departureTimeText + " (" + departureTime + ") is equal to previous stop departure_time " + previousDepartureTimeText + " (" + previousDepartureTime + ")");
-                                    e022List.add(om);
-                                    _log.debug(om.getPrefix() + " " + E022.getOccurrenceSuffix());
+                                    String prefix = id + stopDescription + " departure_time " + departureTimeText + " (" + departureTime + ") is equal to previous stop departure_time " + previousDepartureTimeText + " (" + previousDepartureTime + ")";
+                                    RuleUtils.addOccurrence(E022, prefix, e022List, _log);
                                 }
                                 if (previousArrivalTime != null && departureTime < previousArrivalTime) {
                                     // E022 - this stop departure time is < previous stop arrival time
-                                    OccurrenceModel om = new OccurrenceModel(id + stopDescription + " departure_time " + departureTimeText + " (" + departureTime + ") is less than previous stop arrival_time " + previousArrivalTimeText + " (" + previousArrivalTime + ")");
-                                    e022List.add(om);
-                                    _log.debug(om.getPrefix() + " " + E022.getOccurrenceSuffix());
+                                    String prefix = id + stopDescription + " departure_time " + departureTimeText + " (" + departureTime + ") is less than previous stop arrival_time " + previousArrivalTimeText + " (" + previousArrivalTime + ")";
+                                    RuleUtils.addOccurrence(E022, prefix, e022List, _log);
                                 }
                                 if (previousArrivalTime != null && Objects.equals(departureTime, previousArrivalTime)) {
                                     // E022 - this stop departure time is == previous stop arrival time
-                                    OccurrenceModel om = new OccurrenceModel(id + stopDescription + " departure_time " + departureTimeText + " (" + departureTime + ") is equal to previous stop arrival_time " + previousArrivalTimeText + " (" + previousArrivalTime + ")");
-                                    e022List.add(om);
-                                    _log.debug(om.getPrefix() + " " + E022.getOccurrenceSuffix());
+                                    String prefix = id + stopDescription + " departure_time " + departureTimeText + " (" + departureTime + ") is equal to previous stop arrival_time " + previousArrivalTimeText + " (" + previousArrivalTime + ")";
+                                    RuleUtils.addOccurrence(E022, prefix, e022List, _log);
                                 }
                                 if (stopTimeUpdate.getArrival().hasTime() && departureTime < stopTimeUpdate.getArrival().getTime()) {
                                     // E025 - stop_time_update departure time is before arrival time
-                                    OccurrenceModel om = new OccurrenceModel(id +
-                                            stopDescription + " departure_time " + departureTimeText
+                                    String prefix = id + stopDescription + " departure_time " + departureTimeText
                                             + " (" + departureTime + ") is less than the same stop arrival_time " +
                                             TimestampUtils.posixToClock(stopTimeUpdate.getArrival().getTime(), gtfsMetadata.getTimeZone())
-                                            + " (" + stopTimeUpdate.getArrival().getTime() + ")");
-                                    e025List.add(om);
-                                    _log.debug(om.getPrefix() + " " + E025.getOccurrenceSuffix());
+                                            + " (" + stopTimeUpdate.getArrival().getTime() + ")";
+                                    RuleUtils.addOccurrence(E025, prefix, e025List, _log);
                                 }
                             }
                         }
@@ -256,34 +234,26 @@ public class TimestampValidator implements FeedEntityValidator {
                 }
             }
 
-            /**
-             * Validate VehiclePosition timestamps - W001, E001, E012
-             */
             if (entity.hasVehicle()) {
                 GtfsRealtime.VehiclePosition vehiclePosition = entity.getVehicle();
                 long vehicleTimestamp = vehiclePosition.getTimestamp();
 
                 if (vehicleTimestamp == 0) {
-                    OccurrenceModel errorW001 = new OccurrenceModel("vehicle_id " + vehiclePosition.getVehicle().getId());
-                    w001List.add(errorW001);
-                    _log.debug(errorW001.getPrefix() + " " + W001.getOccurrenceSuffix());
+                    // W001 - Timestamp not populated
+                    RuleUtils.addOccurrence(W001, "vehicle_id " + vehiclePosition.getVehicle().getId(), w001List, _log);
                 } else {
+                    String prefix = "vehicle_id " + vehiclePosition.getVehicle().getId() + " timestamp " + vehicleTimestamp;
                     if (headerTimestamp != 0 && vehicleTimestamp > headerTimestamp) {
-                        OccurrenceModel errorE012 = new OccurrenceModel("vehicle_id " + vehiclePosition.getVehicle().getId() + " timestamp " + vehicleTimestamp);
-                        e012List.add(errorE012);
-                        _log.debug(errorE012.getPrefix() + " " + E012.getOccurrenceSuffix());
+                        // E012 - Header timestamp should be greater than or equal to all other timestamps
+                        RuleUtils.addOccurrence(E012, prefix, e012List, _log);
                     }
                     if (!isPosix(vehicleTimestamp)) {
-                        OccurrenceModel errorE001 = new OccurrenceModel("vehicle_id " + vehiclePosition.getVehicle().getId() + " timestamp " + vehicleTimestamp);
-                        e001List.add(errorE001);
-                        _log.debug(errorE001.getPrefix() + " " + E001.getOccurrenceSuffix());
+                        // E001 - Not in POSIX time
+                        RuleUtils.addOccurrence(E001, prefix, e001List, _log);
                     }
                 }
             }
 
-            /**
-             * Validate Alert time ranges - E001
-             */
             if (entity.hasAlert()) {
                 checkAlertE001(entity, e001List);
             }
@@ -332,16 +302,12 @@ public class TimestampValidator implements FeedEntityValidator {
             for (GtfsRealtime.TimeRange range : activePeriods) {
                 if (range.hasStart()) {
                     if (!isPosix(range.getStart())) {
-                        OccurrenceModel om = new OccurrenceModel("alert in entity " + entity.getId() + " active_period.start " + range.getStart());
-                        errors.add(om);
-                        _log.debug(om.getPrefix() + " " + E001.getOccurrenceSuffix());
+                        RuleUtils.addOccurrence(E001, "alert in entity " + entity.getId() + " active_period.start " + range.getStart(), errors, _log);
                     }
                 }
                 if (range.hasEnd()) {
                     if (!isPosix(range.getEnd())) {
-                        OccurrenceModel om = new OccurrenceModel("alert in entity " + entity.getId() + " active_period.end " + range.getEnd());
-                        errors.add(om);
-                        _log.debug(om.getPrefix() + " " + E001.getOccurrenceSuffix());
+                        RuleUtils.addOccurrence(E001, "alert in entity " + entity.getId() + " active_period.end " + range.getEnd(), errors, _log);
                     }
                 }
             }

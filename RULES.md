@@ -55,7 +55,7 @@ Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-U
 | [W001](#W001) | `timestamps` not populated
 | [W002](#W002) | `vehicle_id` not populated
 | [W003](#W003) | `VehiclePosition` and `TripUpdate` feed mismatch
-| [W004](#W004) | `VehiclePosition` has unrealistic speed
+| [W004](#W004) | vehicle `speed` is unrealistic
 | [W005](#W005) | Missing `vehicle_id` in `trip_update` for frequency-based `exact_times` = 0
 | [W006](#W006) | `trip_update` missing `trip_id`
 | [W007](#W007) | Refresh interval is more than 35 seconds
@@ -466,13 +466,13 @@ Populating `vehicle_ids` in TripUpdates is important so consumers can relate a g
 
 ### W003 - `VehiclePosition` and `TripUpdate` feed mismatch
 
-If separate vehicle positions and trip updates feeds are provided, `VehicleDescriptor` or `TripDescriptor` values should match between the two feeds.  
+If separate Vehicle Positions and Trip Updates feeds are provided, `VehicleDescriptor` or `TripDescriptor` values should match between the two feeds.  
 
 In other words, if the `VehiclePosition` has a `vehicle_id` A that is assigned to `trip_id` 4, then the `TripUpdate` feed should have a prediction for `trip_id` 4 that includes a reference to `vehicle_id` A.
 
 <a name="W004"/>
 
-### W004 - VehiclePosition has unrealistic speed
+### W004 - vehicle `speed` is unrealistic
 
 `vehicle.position.speed` has an unrealistic speed that may be incorrect.  
 
