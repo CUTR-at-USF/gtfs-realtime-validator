@@ -50,6 +50,7 @@ for (var gtfsRtFeed in gtfsRtFeeds) {
             type: 'PUT',
             success: function (data) {
                 initializeInterface(data["gtfsRtFeedModel"]);
+                sessionStorage.setItem("sessionStartTime", data["sessionStartTime"]);
                 refresh(data["gtfsRtFeedModel"]["gtfsRtId"]);
 
                 // SessionId's for each of the GTFS-rt-feed. On 'stop' monitoring feeds, 'Session' table 'sessionEndTime' is updated using these sessionId's.
@@ -78,7 +79,8 @@ function loadGtfsErrorCount(gtfsFeedId) {
 function refresh(id) {
 
     $.get(server + "/api/gtfs-rt-feed/monitor-data/" + id +
-            "?summaryCurPage=" + paginationSummary[id]["currentPage"] +
+            "?startTime=" + sessionStorage.getItem("sessionStartTime") +
+            "&summaryCurPage=" + paginationSummary[id]["currentPage"] +
             "&summaryRowsPerPage=" + paginationSummary[id]["rowsPerPage"] +
             "&toggledData=" + hideErrors[id] +
             "&logCurPage=" + paginationLog[id]["currentPage"] +
