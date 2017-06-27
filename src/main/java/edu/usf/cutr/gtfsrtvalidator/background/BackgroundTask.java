@@ -49,7 +49,6 @@ public class BackgroundTask implements Runnable {
 
     private static final org.slf4j.Logger _log = LoggerFactory.getLogger(BackgroundTask.class);
 
-    private static Map<Integer, Map<Integer, GtfsRealtime.FeedMessage>> mFeedEntityList = new ConcurrentHashMap<>();
     private static Map<Integer, GtfsRealtime.FeedMessage> mGtfsRtFeedMap = new ConcurrentHashMap<>();
     private static Map<Integer, edu.usf.cutr.gtfsrtvalidator.background.GtfsMetadata> mGtfsMetadata = new ConcurrentHashMap<>();
     private final static List<FeedEntityValidator> mValidationRules = new ArrayList<>();
@@ -98,6 +97,7 @@ public class BackgroundTask implements Runnable {
 
             // Read the GTFS-rt feed from the feed URL
             URL gtfsRtFeedUrl;
+            Session session;
             try {
                 gtfsRtFeedUrl = new URL(mCurrentGtfsRtFeed.getGtfsUrl());
             } catch (MalformedURLException e) {
@@ -116,7 +116,7 @@ public class BackgroundTask implements Runnable {
                 byte[] prevFeedDigest = null;
                 byte[] currentFeedDigest = md.digest(gtfsRtProtobuf);
 
-                Session session = GTFSDB.initSessionBeginTrans();
+                session = GTFSDB.initSessionBeginTrans();
                 feedIteration = (GtfsRtFeedIterationModel) session.createQuery("FROM GtfsRtFeedIterationModel"
                         + " WHERE rtFeedId = " + mCurrentGtfsRtFeed.getGtfsRtId()
                             + " ORDER BY IterationId DESC").setMaxResults(1).uniqueResult();
@@ -159,22 +159,34 @@ public class BackgroundTask implements Runnable {
 
             // Read all GTFS-rt entities for the current feed
             mGtfsRtFeedMap.put(feedIteration.getGtfsRtFeedModel().getGtfsRtId(), currentFeedMessage);
-            mFeedEntityList.put(mCurrentGtfsRtFeed.getGtfsFeedModel().getFeedId(), mGtfsRtFeedMap);
 
-            Map<Integer, GtfsRealtime.FeedMessage> feedEntityInstance = mFeedEntityList.get(mCurrentGtfsRtFeed.getGtfsFeedModel().getFeedId());
+            session = GTFSDB.initSessionBeginTrans();
 
             List<GtfsRealtime.FeedEntity> allEntitiesArrayList = new ArrayList<>();
 
+            List<GtfsRtFeedModel> gtfsRtFeedModelList;
+            gtfsRtFeedModelList = session.createQuery("FROM GtfsRtFeedModel"
+                    + " WHERE gtfsFeedID = " + mCurrentGtfsRtFeed.getGtfsFeedModel().getFeedId()).list();
+
+            GTFSDB.closeSession(session);
+
             GtfsRealtime.FeedHeader header = null;
 
-            for (Map.Entry<Integer, GtfsRealtime.FeedMessage> allFeeds : feedEntityInstance.entrySet()) {
-                int key = allFeeds.getKey();
-                GtfsRealtime.FeedMessage message = feedEntityInstance.get(key);
+            // May be not needed to log this error. Because, gtfsRtFeedModelList size should always greater than 1 if database is stored properly.
+            if (gtfsRtFeedModelList.size() < 1) {
+                _log.error("The URL '" + gtfsRtFeedUrl + "' is not stored properly into the database");
+                return;
+            }
+
+            for (GtfsRtFeedModel gtfsRtFeedModel : gtfsRtFeedModelList) {
+                GtfsRealtime.FeedMessage message = mGtfsRtFeedMap.get(gtfsRtFeedModel.getGtfsRtId());
                 if (header == null) {
                     // Save one header to use in our combined feed below
-                    header = feedEntityInstance.get(key).getHeader();
+                    header = message.getHeader();
                 }
-                allEntitiesArrayList.addAll(message.getEntityList());
+                if (message != null) {
+                    allEntitiesArrayList.addAll(message.getEntityList());
+                }
             }
 
             GtfsRealtime.FeedMessage.Builder feedMessageBuilder = GtfsRealtime.FeedMessage.newBuilder();
