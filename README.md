@@ -24,6 +24,8 @@ A tool that validates [General Transit Feed Specification (GTFS)-realtime](https
         * GTFS - http://www.mbta.com/uploadedfiles/MBTA_GTFS.zip
     * ...more at [Transitfeeds.com](http://transitfeeds.com/search?q=gtfsrt) and [Transitland Feed Registry](https://transit.land/feed-registry/)
 
+Please note that if you're using **HTTPS** URLS, you'll need to install the [Java Cryptography Extension (JCE)](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html).  You will need to replace the `US_export_policy.jar` and `local_policy.jar` files in your JVM `/security` directory, such as `C:\Program Files\Java\jdk1.8.0_73\jre\lib\security`, with the JAR files in the JCE Extension download.
+
 ## Rules
 
 * [Implemented rules](RULES.md)
