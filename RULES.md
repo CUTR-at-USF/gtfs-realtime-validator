@@ -253,9 +253,9 @@ Vehicle bearing must be between 0 and 360 degrees (inclusive).  The GTFS-rt spec
 
 ### E028 - Vehicle `position` outside agency coverage area
 
-The vehicle `position` should be inside the agency coverage area.  This is defined as within roughly 1/8 of a mile (200 meters) of the GTFS `shapes.txt` data, or `stops.txt` locations if the GTFS feed doesn't include `shapes.txt`.
+The vehicle `position` should be inside the agency coverage area.  Coverage area is defined by a buffer surrounding the GTFS `shapes.txt` data, or `stops.txt` locations if the GTFS feed doesn't include `shapes.txt`.
 
-Buffer is defined by `GtfsMetadata.REGION_BUFFER_METERS`, and is currently 1609 meters (roughly 1 mile).
+Buffer distance is defined by `GtfsMetadata.REGION_BUFFER_METERS`, and is currently 1609 meters (roughly 1 mile).
 
 #### References:
 * [vehicle.position](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-position)
@@ -264,9 +264,9 @@ Buffer is defined by `GtfsMetadata.REGION_BUFFER_METERS`, and is currently 1609 
 
 ### E029 - Vehicle `position` far from trip shape
 
-The vehicle `position` should be within the buffer of the GTFS `shapes.txt` data for the current trip unless there is an `alert` with the `effect` of `DETOUR` for this `trip_id`.
+The vehicle `position` should be within a buffer surrounding the GTFS `shapes.txt` data for the current trip unless there is an `alert` with the `effect` of `DETOUR` for this `trip_id`.
 
-Buffer is defined by `GtfsMetadata.TRIP_BUFFER_METERS`, and is currently 200 meters (roughly 1/8 of a mile).
+Buffer distance is defined by `GtfsMetadata.TRIP_BUFFER_METERS`, and is currently 200 meters (roughly 1/8 of a mile).
 
 #### References:
 * [GTFS shapes.txt](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#shapestxt)
