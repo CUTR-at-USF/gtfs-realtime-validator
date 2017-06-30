@@ -372,6 +372,10 @@ The `entity.is_deleted` field should only be included in GTFS-rt feeds with `hea
 
 All `stop_time_updates` must contain `stop_id` or `stop_sequence` - both fields cannot be left blank.
 
+From [`trip.stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate):
+
+>The update is linked to a specific stop either through stop_sequence or stop_id, so one of these fields must necessarily be set. 
+
 #### References:
 * [`trip.stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
 
@@ -390,7 +394,11 @@ Unless a `trip's` `schedule_relationship` is `CANCELED`, a `trip` must have at l
 
 ### E042 - `arrival` or `departure` provided for `NO_DATA` `stop_time_update`
 
-If a `stop_time_update` has a `schedule_relationship` of `NO_DATA`, then neither `arrival` nor `departure` should be provided
+If a `stop_time_update` has a `schedule_relationship` of `NO_DATA`, then neither `arrival` nor `departure` should be provided.
+
+From [`stop_time_update.schedule_relationship`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#enum-schedulerelationship):
+
+> `NO_DATA` -> 	No data is given for this stop. It indicates that there is no realtime information available. When set NO_DATA is propagated through subsequent stops so this is the recommended way of specifying from which stop you do not have realtime information. *When NO_DATA is set neither arrival nor departure should be supplied*.
 
 #### References:
 * [`stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
@@ -400,7 +408,11 @@ If a `stop_time_update` has a `schedule_relationship` of `NO_DATA`, then neither
 
 ### E043 - `stop_time_update` doesn't have `arrival` or `departure`
 
-If a `stop_time_update` doesn't have a `schedule_relationship` of `SKIPPED` or `NO_DATA`, then either `arrival` or `departure` must be provided
+If a `stop_time_update` doesn't have a `schedule_relationship` of `SKIPPED` or `NO_DATA`, then either `arrival` or `departure` must be provided.
+
+From [`stop_time_update.schedule_relationship`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#enum-schedulerelationship):
+
+> `SCHEDULED` -> The vehicle is proceeding in accordance with its static schedule of stops, although not necessarily according to the times of the schedule. This is the default behavior. *At least one of arrival and departure must be provided*. If the schedule for this stop contains both arrival and departure times then so must this update.
 
 #### References:
 * [`stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
