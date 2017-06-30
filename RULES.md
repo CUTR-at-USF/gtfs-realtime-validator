@@ -299,6 +299,10 @@ The `alert.informed_entity.trip.route_id` should be the same as the specified `a
 
 All alerts must have at least one `informed_entity`.
 
+From [alert.informed_entity](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-entityselector):
+
+> The values of the fields should correspond to the appropriate fields in the GTFS feed. *At least one specifier must be given.* If several are given, then the matching has to apply to all the given specifiers.
+
 #### References:
 * [alert.informed_entity](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-entityselector)
 
