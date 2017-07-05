@@ -23,6 +23,7 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.background.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils;
+import edu.usf.cutr.gtfsrtvalidator.util.RuleUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.hsqldb.lib.StringUtil;
 import org.locationtech.spatial4j.shape.Shape;
@@ -33,6 +34,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static edu.usf.cutr.gtfsrtvalidator.background.GtfsMetadata.TRIP_BUFFER_METERS;
+import static edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils.getTripId;
+import static edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils.getVehicleId;
 import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
 
 
@@ -41,8 +44,8 @@ import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
  * E027 - Invalid vehicle bearing
  * E028 - Vehicle position outside agency coverage area
  * E029 - Vehicle position outside trip shape buffer
- * W002 - vehicle_id should be populated for TripUpdates and VehiclePositions
- * W004 - VehiclePosition has unrealistic speed
+ * W002 - vehicle_id not populated
+ * W004 - vehicle speed is unrealistic
  */
 
 public class VehicleValidator implements FeedEntityValidator {
@@ -65,47 +68,38 @@ public class VehicleValidator implements FeedEntityValidator {
             if (entity.hasTripUpdate()) {
                 GtfsRealtime.TripUpdate tripUpdate = entity.getTripUpdate();
 
-                // W002: vehicle_id should be populated in trip_update
                 if (StringUtil.isEmpty(tripUpdate.getVehicle().getId())) {
-                    OccurrenceModel om = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId());
-                    w002List.add(om);
-                    _log.debug(om.getPrefix() + " " + W002.getOccurrenceSuffix());
+                    // W002 - vehicle_id not populated
+                    RuleUtils.addOccurrence(W002, getTripId(entity, tripUpdate), w002List, _log);
                 }
             }
             if (entity.hasVehicle()) {
                 GtfsRealtime.VehiclePosition v = entity.getVehicle();
 
-                // W002: vehicle_id should be populated in VehiclePosition
                 if (StringUtil.isEmpty(v.getVehicle().getId())) {
-                    OccurrenceModel om = new OccurrenceModel("entity ID " + entity.getId());
-                    w002List.add(om);
-                    _log.debug(om.getPrefix() + " " + W002.getOccurrenceSuffix());
+                    // W002 - vehicle_id not populated
+                    RuleUtils.addOccurrence(W002, "entity ID " + entity.getId(), w002List, _log);
                 }
 
-                // W004: VehiclePosition has unrealistic speed
                 if (v.hasPosition() && v.getPosition().hasSpeed()) {
                     if (v.getPosition().getSpeed() > MAX_REALISTIC_SPEED_METERS_PER_SECOND ||
                             v.getPosition().getSpeed() < 0f) {
-                        OccurrenceModel om = new OccurrenceModel((v.getVehicle().hasId() ? "vehicle_id " + v.getVehicle().getId() : "entity ID " + entity.getId()) +
-                                " speed of " + v.getPosition().getSpeed() + " m/s (" + String.format("%.2f", GtfsUtils.toMilesPerHour(v.getPosition().getSpeed())) + " mph)");
-                        w004List.add(om);
-                        _log.debug(om.getPrefix() + " " + W004.getOccurrenceSuffix());
+                        // W004 - vehicle speed is unrealistic
+                        String prefix = getVehicleId(entity, v) +
+                                " speed of " + v.getPosition().getSpeed() + " m/s (" + String.format("%.2f", GtfsUtils.toMilesPerHour(v.getPosition().getSpeed())) + " mph)";
+                        RuleUtils.addOccurrence(W004, prefix, w004List, _log);
                     }
                 }
 
                 if (v.hasPosition()) {
                     GtfsRealtime.Position position = v.getPosition();
-                    String id = (v.getVehicle().hasId() ? "vehicle_id " + v.getVehicle().getId() : "entity ID " + entity.getId());
+                    String id = getVehicleId(entity, v);
                     if (!position.hasLatitude() || !position.hasLongitude()) {
-                        // E026: Invalid vehicle position - missing lat/long
-                        OccurrenceModel om = new OccurrenceModel(id + " position is missing lat/long");
-                        e026List.add(om);
-                        _log.debug(om.getPrefix() + " " + E026.getOccurrenceSuffix());
+                        // E026 - Invalid vehicle position - missing lat/long
+                        RuleUtils.addOccurrence(E026, id + " position is missing lat/long", e026List, _log);
                     } else if (!GtfsUtils.isPositionValid(position)) {
-                        // E026: Invalid vehicle position - invalid lat/long
-                        OccurrenceModel om = new OccurrenceModel(id + " has latitude/longitude of (" + position.getLatitude() + "," + position.getLongitude() + ")");
-                        e026List.add(om);
-                        _log.debug(om.getPrefix() + " " + E026.getOccurrenceSuffix());
+                        // E026 - Invalid vehicle position - invalid lat/long
+                        RuleUtils.addOccurrence(E026, id + " has latitude/longitude of (" + position.getLatitude() + "," + position.getLongitude() + ")", e026List, _log);
                     } else {
                         // Position is valid - check E028, if it lies within the agency bounds, using shapes.txt if it exists
                         boolean insideBounds = checkE028(entity, gtfsMetadata, e028List);
@@ -115,10 +109,8 @@ public class VehicleValidator implements FeedEntityValidator {
                         }
                     }
                     if (!GtfsUtils.isBearingValid(position)) {
-                        // E027: Invalid vehicle bearing
-                        OccurrenceModel om = new OccurrenceModel(id + " has bearing of " + position.getBearing());
-                        e027List.add(om);
-                        _log.debug(om.getPrefix() + " " + E027.getOccurrenceSuffix());
+                        // E027 - Invalid vehicle bearing
+                        RuleUtils.addOccurrence(E027, id + " has bearing of " + position.getBearing(), e027List, _log);
                     }
                 }
             }
@@ -157,7 +149,7 @@ public class VehicleValidator implements FeedEntityValidator {
     private boolean checkE028(GtfsRealtime.FeedEntity entity, GtfsMetadata gtfsMetadata, List<OccurrenceModel> errors) {
         GtfsRealtime.VehiclePosition v = entity.getVehicle();
         GtfsRealtime.Position position = v.getPosition();
-        String id = (v.getVehicle().hasId() ? "vehicle_id " + v.getVehicle().getId() : "entity ID " + entity.getId());
+        String id = getVehicleId(entity, v);
 
         // See if position lies within the agency bounds, using shapes.txt if it exists
         Shape boundingBox;
@@ -174,11 +166,10 @@ public class VehicleValidator implements FeedEntityValidator {
 
         boolean insideBounds = GtfsUtils.isPositionWithinShape(position, boundingBox);
         if (!insideBounds) {
-            OccurrenceModel om = new OccurrenceModel(id + " at (" + position.getLatitude() + "," + position.getLongitude() +
+            String prefix = id + " at (" + position.getLatitude() + "," + position.getLongitude() +
                     ") is more than " + GtfsMetadata.REGION_BUFFER_METERS + " meters (" + String.format("%.2f", GtfsUtils.toMiles(GtfsMetadata.REGION_BUFFER_METERS)) + " mile(s)) outside entire GTFS "
-                    + boundingDescription + " coverage area");
-            errors.add(om);
-            _log.debug(om.getPrefix() + " " + E028.getOccurrenceSuffix());
+                    + boundingDescription + " coverage area";
+            RuleUtils.addOccurrence(E028, prefix, errors, _log);
         }
         return insideBounds;
     }
@@ -204,7 +195,7 @@ public class VehicleValidator implements FeedEntityValidator {
             routeId = v.getTrip().getRouteId();
         }
         GtfsRealtime.Position position = v.getPosition();
-        String id = (v.getVehicle().hasId() ? "vehicle_id " + v.getVehicle().getId() : "entity ID " + entity.getId());
+        String id = getVehicleId(entity, v);
 
         Shape bufferedShape = gtfsMetadata.getBufferedTripShape(tripId);
         if (bufferedShape == null) {
@@ -219,10 +210,9 @@ public class VehicleValidator implements FeedEntityValidator {
             }
 
             // E029 - Vehicle position is outside of trip shape buffer and it's not on DETOUR
-            OccurrenceModel om = new OccurrenceModel(id + " trip_id " + tripId + " at (" + position.getLatitude() + "," + position.getLongitude() +
-                    ") is more than " + TRIP_BUFFER_METERS + " meters (" + String.format("%.2f", GtfsUtils.toMiles(TRIP_BUFFER_METERS)) + " mile(s)) from the GTFS trip shape");
-            errors.add(om);
-            _log.debug(om.getPrefix() + " " + E029.getOccurrenceSuffix());
+            String prefix = id + " trip_id " + tripId + " at (" + position.getLatitude() + "," + position.getLongitude() +
+                    ") is more than " + TRIP_BUFFER_METERS + " meters (" + String.format("%.2f", GtfsUtils.toMiles(TRIP_BUFFER_METERS)) + " mile(s)) from the GTFS trip shape";
+            RuleUtils.addOccurrence(E029, prefix, errors, _log);
         }
     }
 

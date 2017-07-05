@@ -192,6 +192,33 @@ public class GtfsUtils {
     }
 
     /**
+     * Returns the vehicle id for the given VehiclePosition if one exists, if not the entity ID is returned in the format
+     * "vehicle.id 1234" or "entity ID 4321".
+     *
+     * @param entity          the entity that the VehiclePosition belongs to
+     * @param vehiclePosition the VehiclePosition to get the ID for
+     * @return the vehicle.id for the given VehiclePosition if one exists, if not the entity ID is returned in the format "vehicle.id 1234" or "entity ID 4321".
+     */
+    public static String getVehicleId(GtfsRealtime.FeedEntity entity, GtfsRealtime.VehiclePosition vehiclePosition) {
+        if (!vehiclePosition.hasVehicle()) {
+            return "entity ID " + entity.getId();
+        }
+        return getVehicleId(entity, vehiclePosition.getVehicle());
+    }
+
+    /**
+     * Returns the vehicle.id for the given VehicleDescriptor if one exists, if not the entity ID is returned in the format
+     * "vehicle.id 1234" or "entity ID 4321".
+     *
+     * @param entity            the entity that the VehiclePosition belongs to
+     * @param vehicleDescriptor the vehicleDescriptor to get the ID for
+     * @return the vehicle.id for the given VehiclePosition if one exists, if not the entity ID is returned in the format "vehicle.id 1234" or "entity ID 4321".
+     */
+    public static String getVehicleId(GtfsRealtime.FeedEntity entity, GtfsRealtime.VehicleDescriptor vehicleDescriptor) {
+        return vehicleDescriptor.hasId() ? "vehicle.id " + vehicleDescriptor.getId() : "entity ID " + entity.getId();
+    }
+
+    /**
      * Returns the stop_sequence for the given StopTimeUpdate if one exists, if not the stop_id is returned in the format
      * "stop_sequence 1234" or "stop_id 9876".
      *

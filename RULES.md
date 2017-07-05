@@ -46,6 +46,7 @@ Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-U
 | [E043](#E043) | `stop_time_update` doesn't have `arrival` or `departure`
 | [E044](#E044) | `stop_time_update` `arrival/departure` doesn't have `delay` or `time`
 | [E045](#E045) | GTFS-rt `stop_time_update` `stop_sequence` and `stop_id` do not match GTFS
+| [E046](#E046) | GTFS-rt `stop_time_update` without `time` doesn't have arrival/departure time in GTFS
 
 ### Table of Warnings
 
@@ -54,7 +55,7 @@ Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-U
 | [W001](#W001) | `timestamps` not populated
 | [W002](#W002) | `vehicle_id` not populated
 | [W003](#W003) | `VehiclePosition` and `TripUpdate` feed mismatch
-| [W004](#W004) | `VehiclePosition` has unrealistic speed
+| [W004](#W004) | vehicle `speed` is unrealistic
 | [W005](#W005) | Missing `vehicle_id` in `trip_update` for frequency-based `exact_times` = 0
 | [W006](#W006) | `trip_update` missing `trip_id`
 | [W007](#W007) | Refresh interval is more than 35 seconds
@@ -252,9 +253,9 @@ Vehicle bearing must be between 0 and 360 degrees (inclusive).  The GTFS-rt spec
 
 ### E028 - Vehicle `position` outside agency coverage area
 
-The vehicle `position` should be inside the agency coverage area.  This is defined as within roughly 1/8 of a mile (200 meters) of the GTFS `shapes.txt` data, or `stops.txt` locations if the GTFS feed doesn't include `shapes.txt`.
+The vehicle `position` should be inside the agency coverage area.  Coverage area is defined by a buffer surrounding the GTFS `shapes.txt` data, or `stops.txt` locations if the GTFS feed doesn't include `shapes.txt`.
 
-Buffer is defined by `GtfsMetadata.REGION_BUFFER_METERS`, and is currently 1609 meters (roughly 1 mile).
+Buffer distance is defined by `GtfsMetadata.REGION_BUFFER_METERS`, and is currently 1609 meters (roughly 1 mile).
 
 #### References:
 * [vehicle.position](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-position)
@@ -263,9 +264,9 @@ Buffer is defined by `GtfsMetadata.REGION_BUFFER_METERS`, and is currently 1609 
 
 ### E029 - Vehicle `position` far from trip shape
 
-The vehicle `position` should be within the buffer of the GTFS `shapes.txt` data for the current trip unless there is an `alert` with the `effect` of `DETOUR` for this `trip_id`.
+The vehicle `position` should be within a buffer surrounding the GTFS `shapes.txt` data for the current trip unless there is an `alert` with the `effect` of `DETOUR` for this `trip_id`.
 
-Buffer is defined by `GtfsMetadata.TRIP_BUFFER_METERS`, and is currently 200 meters (roughly 1/8 of a mile).
+Buffer distance is defined by `GtfsMetadata.TRIP_BUFFER_METERS`, and is currently 200 meters (roughly 1/8 of a mile).
 
 #### References:
 * [GTFS shapes.txt](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#shapestxt)
@@ -297,6 +298,10 @@ The `alert.informed_entity.trip.route_id` should be the same as the specified `a
 ### E032 - Alert does not have an `informed_entity`
 
 All alerts must have at least one `informed_entity`.
+
+From [alert.informed_entity](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-entityselector):
+
+> The values of the fields should correspond to the appropriate fields in the GTFS feed. *At least one specifier must be given.* If several are given, then the matching has to apply to all the given specifiers.
 
 #### References:
 * [alert.informed_entity](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-entityselector)
@@ -371,6 +376,10 @@ The `entity.is_deleted` field should only be included in GTFS-rt feeds with `hea
 
 All `stop_time_updates` must contain `stop_id` or `stop_sequence` - both fields cannot be left blank.
 
+From [`trip.stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate):
+
+>The update is linked to a specific stop either through stop_sequence or stop_id, so one of these fields must necessarily be set. 
+
 #### References:
 * [`trip.stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
 
@@ -389,7 +398,11 @@ Unless a `trip's` `schedule_relationship` is `CANCELED`, a `trip` must have at l
 
 ### E042 - `arrival` or `departure` provided for `NO_DATA` `stop_time_update`
 
-If a `stop_time_update` has a `schedule_relationship` of `NO_DATA`, then neither `arrival` nor `departure` should be provided
+If a `stop_time_update` has a `schedule_relationship` of `NO_DATA`, then neither `arrival` nor `departure` should be provided.
+
+From [`stop_time_update.schedule_relationship`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#enum-schedulerelationship):
+
+> `NO_DATA` -> 	No data is given for this stop. It indicates that there is no realtime information available. When set NO_DATA is propagated through subsequent stops so this is the recommended way of specifying from which stop you do not have realtime information. *When NO_DATA is set neither arrival nor departure should be supplied*.
 
 #### References:
 * [`stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
@@ -399,7 +412,11 @@ If a `stop_time_update` has a `schedule_relationship` of `NO_DATA`, then neither
 
 ### E043 - `stop_time_update` doesn't have `arrival` or `departure`
 
-If a `stop_time_update` doesn't have a `schedule_relationship` of `SKIPPED` or `NO_DATA`, then either `arrival` or `departure` must be provided
+If a `stop_time_update` doesn't have a `schedule_relationship` of `SKIPPED` or `NO_DATA`, then either `arrival` or `departure` must be provided.
+
+From [`stop_time_update.schedule_relationship`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#enum-schedulerelationship):
+
+> `SCHEDULED` -> The vehicle is proceeding in accordance with its static schedule of stops, although not necessarily according to the times of the schedule. This is the default behavior. *At least one of arrival and departure must be provided*. If the schedule for this stop contains both arrival and departure times then so must this update.
 
 #### References:
 * [`stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
@@ -423,6 +440,21 @@ If GTFS-rt stop_time_update contains both stop_sequence and stop_id, the values 
 
 #### References:
 * [`stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
+
+<a name="E046"/>
+
+### E046 - GTFS-rt `stop_time_update` without `time` doesn't have arrival/departure_time in GTFS
+
+If only `delay` is provided in a `stop_time_update` `arrival` or `departure` (and not a `time`), then the GTFS `stop_times.txt` must contain arrival_times and/or departure_times for these corresponding stops.  A `delay` value in the real-time feed is meaningless unless you have a clock time to add it to in the GTFS `stop_times.txt` file.
+
+*Common mistakes* - Providing a `arrival/departure.delay` value, but not providing a `arrival/departure.time` value for non-timepoint stops that do not have an `arrival_time` or `departure_time` in GTFS `stop_times.txt`.  
+
+*Possible solution* - Add a `time` value to the GTFS-rt feed for the `arrival` and `departure`, or add an `arrival_time` and `departure_time` in `GTFS stop_times.txt`.
+
+#### References:
+* [`stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
+* [`stop_time_update.arrival and stop_time_update.departure (StopTimeEvent)`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeevent)
+* [GTFS stop_times.txt](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#stop_timestxt)
 
 # Warnings
 
@@ -450,13 +482,13 @@ Populating `vehicle_ids` in TripUpdates is important so consumers can relate a g
 
 ### W003 - `VehiclePosition` and `TripUpdate` feed mismatch
 
-If separate vehicle positions and trip updates feeds are provided, `VehicleDescriptor` or `TripDescriptor` values should match between the two feeds.  
+If separate Vehicle Positions and Trip Updates feeds are provided, `VehicleDescriptor` or `TripDescriptor` values should match between the two feeds.  
 
 In other words, if the `VehiclePosition` has a `vehicle_id` A that is assigned to `trip_id` 4, then the `TripUpdate` feed should have a prediction for `trip_id` 4 that includes a reference to `vehicle_id` A.
 
 <a name="W004"/>
 
-### W004 - VehiclePosition has unrealistic speed
+### W004 - vehicle `speed` is unrealistic
 
 `vehicle.position.speed` has an unrealistic speed that may be incorrect.  
 

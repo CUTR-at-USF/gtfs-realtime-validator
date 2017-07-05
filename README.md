@@ -13,7 +13,7 @@ A tool that validates [General Transit Feed Specification (GTFS)-realtime](https
 1. Install [Java Development Kit (JDK) 1.8 or higher](http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html)
 2. Download the latest alpha build:
     * [gtfs-rt-validator-1.0.0-SNAPSHOT.jar](https://s3.amazonaws.com/gtfs-rt-validator/travis_builds/gtfs-rt-validator-1.0.0-SNAPSHOT.jar)
-3. From the command line run `java -jar gtfs-rt-validator-1.0.0-SNAPSHOT.jar`
+3. From the command line run `java -Djsse.enableSNIExtension=false -jar gtfs-rt-validator-1.0.0-SNAPSHOT.jar`
 4. When prompted, in your browser go to `http://localhost:8080`
 5. Enter your [General Transit Feed Specification (GTFS)-realtime](https://developers.google.com/transit/gtfs-realtime/) and [GTFS](https://developers.google.com/transit/gtfs/) feed URLs and click "Start".  Example feeds:
     * HART (Tampa, FL)
@@ -23,6 +23,8 @@ A tool that validates [General Transit Feed Specification (GTFS)-realtime](https
         * GTFS-realtime - http://developer.mbta.com/lib/GTRTFS/Alerts/TripUpdates.pb
         * GTFS - http://www.mbta.com/uploadedfiles/MBTA_GTFS.zip
     * ...more at [Transitfeeds.com](http://transitfeeds.com/search?q=gtfsrt) and [Transitland Feed Registry](https://transit.land/feed-registry/)
+
+Please note that if you're using `https` URLS, you'll need to use the `-Djsse.enableSNIExtension=false` command-line parameter or install the [Java Cryptography Extension (JCE)](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html) - see the [Prerequisites](https://github.com/CUTR-at-USF/gtfs-realtime-validator#prerequisites) section for details.
 
 ## Rules
 
@@ -41,7 +43,10 @@ Following are the requirements to get the project up and running:
 
 * [Java Development Kit (JDK) 1.8 or higher](http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html)
 * [Apache Maven](https://maven.apache.org/)
-* [Java Cryptography Extension (JCE)](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html) - If you're downloading GTFS or GTFS-rt from secure HTTPS URLs, you may need to install the JCE Extension.  You will need to replace the `US_export_policy.jar` and `local_policy.jar` files in your JVM `/security` directory, such as `C:\Program Files\Java\jdk1.8.0_73\jre\lib\security`, with the JAR files in the JCE Extension download. 
+
+If you're using `https` URLs for GTFS or GTFS-rt feeds, either:
+* Use the `-Djsse.enableSNIExtension=false` parameter when running the tool
+* Install the [Java Cryptography Extension (JCE)](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html) - You will need to replace the `US_export_policy.jar` and `local_policy.jar` files in your JVM `/security` directory, such as `C:\Program Files\Java\jdk1.8.0_73\jre\lib\security`, with the JAR files in the JCE Extension download.
 
 #### 1. Build the project 
 
@@ -59,7 +64,7 @@ If you're going to be rebuilding the project frequently (e.g., editing source co
 
 From the command-line, run: 
 
-`java -jar target/gtfs-rt-validator-1.0.0-SNAPSHOT.jar`
+`java -Djsse.enableSNIExtension=false -jar target/gtfs-rt-validator-1.0.0-SNAPSHOT.jar`
 
 You should see some output, and a message saying `Go to http://localhost:8080 in your browser`. 
 

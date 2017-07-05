@@ -17,13 +17,17 @@
 package edu.usf.cutr.gtfsrtvalidator.test.rules;
 
 import com.google.transit.realtime.GtfsRealtime;
-import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
+import edu.usf.cutr.gtfsrtvalidator.api.model.ValidationRule;
 import edu.usf.cutr.gtfsrtvalidator.test.FeedMessageTest;
+import edu.usf.cutr.gtfsrtvalidator.test.util.TestUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.rules.CrossFeedDescriptorValidator;
 import org.junit.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils.MIN_POSIX_TIME;
-import static org.junit.Assert.assertEquals;
+import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.W003;
 
 /**
  * Tests for rules implemented in CrossFeedDescriptorValidator
@@ -38,6 +42,8 @@ public class CrossFeedDescriptorValidatorTest extends FeedMessageTest {
      */
     @Test
     public void testW003() {
+        Map<ValidationRule, Integer> expected = new HashMap<>();
+
         CrossFeedDescriptorValidator vehicleAndTripDescriptorValidator = new CrossFeedDescriptorValidator();
 
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
@@ -63,9 +69,8 @@ public class CrossFeedDescriptorValidatorTest extends FeedMessageTest {
 
         // TripUpdate and VehiclePosition feed have same trip id = 1.1 and same vehicle id = 1. So, no results.
         results = vehicleAndTripDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
-        for (ErrorListHelperModel error : results) {
-            assertEquals(0, error.getOccurrenceList().size());
-        }
+        expected.clear();
+        TestUtils.assertResults(expected, results);
 
         /* If trip_id's and vehicle_id's in TripUpdate and VehiclePosition are not equal, validator should return an error.
            That is, it fails the validation and passes the assertion.
@@ -83,9 +88,8 @@ public class CrossFeedDescriptorValidatorTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
         // 2 results. Unmatched trip id's and vechicle id's in TripUpdate and VehiclePosition feeds
         results = vehicleAndTripDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
-        for (ErrorListHelperModel error : results) {
-            assertEquals(2, error.getOccurrenceList().size());
-        }
+        expected.put(W003, 2);
+        TestUtils.assertResults(expected, results);
 
         clearAndInitRequiredFeedFields();
     }

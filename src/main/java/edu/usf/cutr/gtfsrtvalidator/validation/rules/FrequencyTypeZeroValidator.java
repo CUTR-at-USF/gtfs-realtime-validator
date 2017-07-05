@@ -21,6 +21,7 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.background.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
+import edu.usf.cutr.gtfsrtvalidator.util.RuleUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.slf4j.LoggerFactory;
@@ -53,40 +54,26 @@ public class FrequencyTypeZeroValidator implements FeedEntityValidator {
 
                 if (gtfsMetadata.getExactTimesZeroTripIds().contains(tripUpdate.getTrip().getTripId())) {
                     /**
-                     * E006 - Missing required trip_update trip field for frequency-based exact_times = 0
-                     * NOTE - W006 checks for missing trip_ids, because we can't check for that here
+                     * NOTE - W006 checks for missing trip_ids, because we can't check for that here - we need the trip_id to know if it's exact_times=0
                      */
-
-                    // Check for missing start_date
                     if (!tripUpdate.getTrip().hasStartDate()) {
-                        OccurrenceModel om = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() + " is missing start_date");
-                        errorListE006.add(om);
-                        _log.debug(om.getPrefix() + " " + E006.getOccurrenceSuffix());
+                        // E006 - Missing required trip_update trip field for frequency-based exact_times = 0
+                        RuleUtils.addOccurrence(E006, "trip_id " + tripUpdate.getTrip().getTripId() + " is missing start_date", errorListE006, _log);
                     }
 
-                    // Check for missing start_time
                     if (!tripUpdate.getTrip().hasStartTime()) {
-                        OccurrenceModel om = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() + " is missing start_time");
-                        errorListE006.add(om);
-                        _log.debug(om.getPrefix() + " " + E006.getOccurrenceSuffix());
+                        // E006 - Missing required trip_update trip field for frequency-based exact_times = 0
+                        RuleUtils.addOccurrence(E006, "trip_id " + tripUpdate.getTrip().getTripId() + " is missing start_time", errorListE006, _log);
                     }
 
-                    /**
-                     * E013 - Validate schedule_relationship is UNSCHEDULED or empty
-                     */
                     if (!(!tripUpdate.getTrip().hasScheduleRelationship() || tripUpdate.getTrip().getScheduleRelationship().equals(GtfsRealtime.TripDescriptor.ScheduleRelationship.UNSCHEDULED))) {
-                        OccurrenceModel om = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId() + " schedule_relationship " + tripUpdate.getTrip().getScheduleRelationship());
-                        errorListE013.add(om);
-                        _log.debug(om.getPrefix() + " " + E013.getOccurrenceSuffix());
+                        // E013 - Validate schedule_relationship is UNSCHEDULED or empty
+                        RuleUtils.addOccurrence(E013, "trip_id " + tripUpdate.getTrip().getTripId() + " schedule_relationship " + tripUpdate.getTrip().getScheduleRelationship(), errorListE013, _log);
                     }
 
-                    /**
-                     * W005 - Missing vehicle_id in trip_update for frequency-based exact_times = 0
-                     */
                     if (!tripUpdate.hasVehicle() || !tripUpdate.getVehicle().hasId()) {
-                        OccurrenceModel om = new OccurrenceModel("trip_id " + tripUpdate.getTrip().getTripId());
-                        errorListW005.add(om);
-                        _log.debug(om.getPrefix() + " " + W005.getOccurrenceSuffix());
+                        // W005 - Missing vehicle_id in trip_update for frequency-based exact_times = 0
+                        RuleUtils.addOccurrence(W005, "trip_id " + tripUpdate.getTrip().getTripId(), errorListW005, _log);
                     }
                 }
             }
@@ -97,41 +84,27 @@ public class FrequencyTypeZeroValidator implements FeedEntityValidator {
                         gtfsMetadata.getExactTimesZeroTripIds().contains(vehiclePosition.getTrip().getTripId())) {
 
                     /**
-                     * E006 - Missing required vehicle_position trip field for frequency-based exact_times = 0
-                     * NOTE - W006 checks for missing trip_ids, because we can't check for that here
+                     * NOTE - W006 checks for missing trip_ids, because we can't check for that here - we need the trip_id to know if it's exact_times=0
                      */
-
-                    // Check for missing start_date
                     if (!vehiclePosition.getTrip().hasStartDate()) {
-                        OccurrenceModel om = new OccurrenceModel("vehicle_id " + vehiclePosition.getVehicle().getId() + " trip_id " + vehiclePosition.getTrip().getTripId() + " is missing start_date");
-                        errorListE006.add(om);
-                        _log.debug(om.getPrefix() + " " + E006.getOccurrenceSuffix());
+                        // E006 - Missing required vehicle_position trip field for frequency-based exact_times = 0
+                        RuleUtils.addOccurrence(E006, "vehicle_id " + vehiclePosition.getVehicle().getId() + " trip_id " + vehiclePosition.getTrip().getTripId() + " is missing start_date", errorListE006, _log);
                     }
 
-                    // Check for missing start_time
                     if (!vehiclePosition.getTrip().hasStartTime()) {
-                        OccurrenceModel om = new OccurrenceModel("vehicle_id " + vehiclePosition.getVehicle().getId() + " trip_id " + vehiclePosition.getTrip().getTripId() + " is missing start_time");
-                        errorListE006.add(om);
-                        _log.debug(om.getPrefix() + " " + E006.getOccurrenceSuffix());
+                        // E006 - Missing required vehicle_position trip field for frequency-based exact_times = 0
+                        RuleUtils.addOccurrence(E006, "vehicle_id " + vehiclePosition.getVehicle().getId() + " trip_id " + vehiclePosition.getTrip().getTripId() + " is missing start_time", errorListE006, _log);
                     }
 
-                    /**
-                     * E013 - Validate schedule_relationship is UNSCHEDULED or empty
-                     */
                     if (!(!vehiclePosition.getTrip().hasScheduleRelationship() || vehiclePosition.getTrip().getScheduleRelationship().equals(GtfsRealtime.TripDescriptor.ScheduleRelationship.UNSCHEDULED))) {
-                        OccurrenceModel om = new OccurrenceModel("vehicle_id " + vehiclePosition.getVehicle().getId() + " trip_id " + vehiclePosition.getTrip().getTripId() + " schedule_relationship " + vehiclePosition.getTrip().getScheduleRelationship());
-                        errorListE013.add(om);
-                        _log.debug(om.getPrefix() + " " + E013.getOccurrenceSuffix());
+                        // E013 - Validate schedule_relationship is UNSCHEDULED or empty
+                        String prefix = "vehicle_id " + vehiclePosition.getVehicle().getId() + " trip_id " + vehiclePosition.getTrip().getTripId() + " schedule_relationship " + vehiclePosition.getTrip().getScheduleRelationship();
+                        RuleUtils.addOccurrence(E013, prefix, errorListE013, _log);
                     }
 
-
-                    /**
-                     * W005 - Missing vehicle_id for frequency-based exact_times = 0
-                     */
                     if (!vehiclePosition.getVehicle().hasId()) {
-                        OccurrenceModel om = new OccurrenceModel("entity ID" + entity.getId() + "with trip_id " + vehiclePosition.getTrip().getTripId());
-                        errorListW005.add(om);
-                        _log.debug(om.getPrefix() + " " + W005.getOccurrenceSuffix());
+                        // W005 - Missing vehicle_id for frequency-based exact_times = 0
+                        RuleUtils.addOccurrence(W005, "entity ID" + entity.getId() + "with trip_id " + vehiclePosition.getTrip().getTripId(), errorListW005, _log);
                     }
                 }
             }

@@ -37,17 +37,25 @@ public abstract class FeedMessageTest {
 
     public GtfsDaoImpl gtfsData;
     public GtfsMetadata gtfsDataMetadata;
+
     public GtfsDaoImpl gtfsData2; // gtfsData2 contains location_type = 1 for stop_id
     public GtfsMetadata gtfsData2Metadata;
+
     public GtfsDaoImpl bullRunnerGtfs; // For Frequency-based exact_times=0 trips
     public GtfsMetadata bullRunnerGtfsMetadata;
+
     public GtfsDaoImpl bullRunnerGtfsNoShapes; // Missing shapes.txt
     public GtfsMetadata bullRunnerGtfsNoShapesMetadata;
+
+    public GtfsDaoImpl bullRunnerGtfsTimepointsOnlyLegacyExactTimes1; // Only timepoints in stop_times.txt (without timepoint field)
+    public GtfsMetadata bullRunnerGtfsTimepointsOnlyLegacyExactTimes1Metadata;
+
     public GtfsReader reader;
     public final File staticGtfsFile = new File("src/test/resources/testagency.zip");
     public final File staticGtfs2File = new File("src/test/resources/testagency2.zip");
     public final File bullRunnerGtfsFile = new File("src/test/resources/bullrunner-gtfs.zip");
     public final File bullRunnerNoShapesGtfsFile = new File("src/test/resources/bullrunner-gtfs-no-shapes.zip");
+    public final File bullRunnerGtfsTimepointsOnlyLegacyExactTimes1GtfsFile = new File("src/test/resources/bullrunner-gtfs-timepoints-only-legacy-exact-times-1.zip");
     public final static String ENTITY_ID = "TEST_ENTITY";
 
     public List<ErrorListHelperModel> results;
@@ -120,7 +128,19 @@ public abstract class FeedMessageTest {
             timeZoneText = agency.getTimezone();
             break;
         }
-        bullRunnerGtfsNoShapesMetadata = new GtfsMetadata("bullrunner-gtfs.zip", TimeZone.getTimeZone(timeZoneText), bullRunnerGtfsNoShapes);
+        bullRunnerGtfsNoShapesMetadata = new GtfsMetadata("bullrunner-gtfs-no-shapes.zip", TimeZone.getTimeZone(timeZoneText), bullRunnerGtfsNoShapes);
+
+        bullRunnerGtfsTimepointsOnlyLegacyExactTimes1 = new GtfsDaoImpl();
+        reader = new GtfsReader();
+        reader.setInputLocation(bullRunnerGtfsTimepointsOnlyLegacyExactTimes1GtfsFile);
+        reader.setEntityStore(bullRunnerGtfsTimepointsOnlyLegacyExactTimes1);
+        reader.run();
+        agencies = bullRunnerGtfsTimepointsOnlyLegacyExactTimes1.getAllAgencies();
+        for (Agency agency : agencies) {
+            timeZoneText = agency.getTimezone();
+            break;
+        }
+        bullRunnerGtfsTimepointsOnlyLegacyExactTimes1Metadata = new GtfsMetadata("bullrunner-gtfs-timepoints-only-legacy.zip", TimeZone.getTimeZone(timeZoneText), bullRunnerGtfsTimepointsOnlyLegacyExactTimes1);
 
         clearAndInitRequiredFeedFields();
     }

@@ -21,6 +21,7 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.background.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
+import edu.usf.cutr.gtfsrtvalidator.util.RuleUtils;
 import edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
@@ -49,7 +50,6 @@ public class FrequencyTypeOneValidator implements FeedEntityValidator {
             if (entity.hasTripUpdate()) {
                 GtfsRealtime.TripUpdate tripUpdate = entity.getTripUpdate();
 
-                // E019 - GTFS-rt frequency exact_times = 1 trip start_time must match GTFS data
                 List<Frequency> frequenceTypeOneList = gtfsMetadata.getExactTimesOneTrips().get(tripUpdate.getTrip().getTripId());
                 if (frequenceTypeOneList != null) {
                     boolean foundMatch = false;
@@ -78,11 +78,11 @@ public class FrequencyTypeOneValidator implements FeedEntityValidator {
                         }
                     }
                     if (!foundMatch) {
-                        OccurrenceModel om = new OccurrenceModel("GTFS-rt trip_id " + tripUpdate.getTrip().getTripId() +
+                        // E019 - GTFS-rt frequency exact_times = 1 trip start_time must match GTFS data
+                        String prefix = "GTFS-rt trip_id " + tripUpdate.getTrip().getTripId() +
                                 " has start_time of " + tripUpdate.getTrip().getStartTime() +
-                                " and GTFS frequencies.txt start_time is " + gtfsStartTimeString + " with a headway of " + headwaySecs + " seconds ");
-                        errorListE019.add(om);
-                        _log.debug(om.getPrefix() + " " + E019.getOccurrenceSuffix());
+                                " and GTFS frequencies.txt start_time is " + gtfsStartTimeString + " with a headway of " + headwaySecs + " seconds ";
+                        RuleUtils.addOccurrence(E019, prefix, errorListE019, _log);
                     }
                 }
             }
@@ -119,11 +119,11 @@ public class FrequencyTypeOneValidator implements FeedEntityValidator {
                         }
                     }
                     if (!foundMatch) {
-                        OccurrenceModel om = new OccurrenceModel("GTFS-rt trip_id " + vehiclePosition.getTrip().getTripId() +
+                        // E019 - GTFS-rt frequency exact_times = 1 trip start_time must match GTFS data
+                        String prefix = "GTFS-rt trip_id " + vehiclePosition.getTrip().getTripId() +
                                 " has start_time of " + vehiclePosition.getTrip().getStartTime() +
-                                " and GTFS frequencies.txt start_time is " + gtfsStartTimeString + " with a headway of " + headwaySecs + " seconds ");
-                        errorListE019.add(om);
-                        _log.debug(om.getPrefix() + " " + E019.getOccurrenceSuffix());
+                                " and GTFS frequencies.txt start_time is " + gtfsStartTimeString + " with a headway of " + headwaySecs + " seconds ";
+                        RuleUtils.addOccurrence(E019, prefix, errorListE019, _log);
                     }
                 }
             }

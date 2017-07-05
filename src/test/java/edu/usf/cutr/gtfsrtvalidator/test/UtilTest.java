@@ -306,6 +306,70 @@ public class UtilTest {
     }
 
     @Test
+    public void testGetTripIdText() {
+        GtfsRealtime.FeedEntity.Builder feedEntityBuilder = GtfsRealtime.FeedEntity.newBuilder();
+        feedEntityBuilder.setId("1");
+        GtfsRealtime.TripUpdate.Builder tripUpdateBuilder = GtfsRealtime.TripUpdate.newBuilder();
+        GtfsRealtime.TripDescriptor.Builder tripBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+
+        // No trip_id - should get entity ID description back
+        tripUpdateBuilder.setTrip(tripBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        String id = GtfsUtils.getTripId(feedEntityBuilder.build(), tripUpdateBuilder.build());
+        assertEquals("entity ID 1", id);
+
+        // Add trip_id and test with trip_update - should get trip ID description back
+        tripBuilder.setTripId("20");
+        tripUpdateBuilder.setTrip(tripBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        id = GtfsUtils.getTripId(feedEntityBuilder.build(), tripUpdateBuilder.build());
+        assertEquals("trip_id 20", id);
+
+        // Test with trip directly
+        id = GtfsUtils.getTripId(feedEntityBuilder.build(), tripBuilder.build());
+        assertEquals("trip_id 20", id);
+    }
+
+    @Test
+    public void testGetStopTimeUpdateId() {
+        String id;
+        GtfsRealtime.TripUpdate.StopTimeUpdate.Builder stopTimeUpdateBuilder = GtfsRealtime.TripUpdate.StopTimeUpdate.newBuilder();
+
+        stopTimeUpdateBuilder.setStopId("1000");
+        id = GtfsUtils.getStopTimeUpdateId(stopTimeUpdateBuilder.build());
+        assertEquals("stop_id 1000", id);
+
+        stopTimeUpdateBuilder.setStopSequence(5);
+        id = GtfsUtils.getStopTimeUpdateId(stopTimeUpdateBuilder.build());
+        assertEquals("stop_sequence 5", id);
+    }
+
+    @Test
+    public void testGetVehicleId() {
+        GtfsRealtime.FeedEntity.Builder feedEntityBuilder = GtfsRealtime.FeedEntity.newBuilder();
+        feedEntityBuilder.setId("1");
+        GtfsRealtime.VehiclePosition.Builder vehiclePositionBuilder = GtfsRealtime.VehiclePosition.newBuilder();
+        GtfsRealtime.VehicleDescriptor.Builder vehicleDescriptorBuilder = GtfsRealtime.VehicleDescriptor.newBuilder();
+
+        // No vehicle ID - should get entity ID description back
+        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        String id = GtfsUtils.getVehicleId(feedEntityBuilder.build(), vehiclePositionBuilder.build());
+        assertEquals("entity ID 1", id);
+
+        // Add vehicle ID and test with vehicle - should get vehicle ID description back
+        vehicleDescriptorBuilder.setId("20");
+        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        id = GtfsUtils.getVehicleId(feedEntityBuilder.build(), vehiclePositionBuilder.build());
+        assertEquals("vehicle.id 20", id);
+
+        // Test with vehicle directly
+        id = GtfsUtils.getVehicleId(feedEntityBuilder.build(), vehicleDescriptorBuilder.build());
+        assertEquals("vehicle.id 20", id);
+    }
+
+    @Test
     public void testValidPosition() {
         GtfsRealtime.Position.Builder positionBuilder = GtfsRealtime.Position.newBuilder();
 
@@ -403,45 +467,6 @@ public class UtilTest {
         positionBuilder.setLongitude(-82.4655826f);
         result = GtfsUtils.isPositionWithinShape(positionBuilder.build(), boundingBox);
         assertFalse(result);
-    }
-
-    @Test
-    public void testGetTripIdText() {
-        GtfsRealtime.FeedEntity.Builder feedEntityBuilder = GtfsRealtime.FeedEntity.newBuilder();
-        feedEntityBuilder.setId("1");
-        GtfsRealtime.TripUpdate.Builder tripUpdateBuilder = GtfsRealtime.TripUpdate.newBuilder();
-        GtfsRealtime.TripDescriptor.Builder tripBuilder = GtfsRealtime.TripDescriptor.newBuilder();
-
-        // No trip_id - should get entity ID description back
-        tripUpdateBuilder.setTrip(tripBuilder.build());
-        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
-        String id = GtfsUtils.getTripId(feedEntityBuilder.build(), tripUpdateBuilder.build());
-        assertEquals("entity ID 1", id);
-
-        // Add trip_id and test with trip_update - should get trip ID description back
-        tripBuilder.setTripId("20");
-        tripUpdateBuilder.setTrip(tripBuilder.build());
-        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
-        id = GtfsUtils.getTripId(feedEntityBuilder.build(), tripUpdateBuilder.build());
-        assertEquals("trip_id 20", id);
-
-        // Test with trip directly
-        id = GtfsUtils.getTripId(feedEntityBuilder.build(), tripBuilder.build());
-        assertEquals("trip_id 20", id);
-    }
-
-    @Test
-    public void testGetStopTimeUpdateId() {
-        String id;
-        GtfsRealtime.TripUpdate.StopTimeUpdate.Builder stopTimeUpdateBuilder = GtfsRealtime.TripUpdate.StopTimeUpdate.newBuilder();
-
-        stopTimeUpdateBuilder.setStopId("1000");
-        id = GtfsUtils.getStopTimeUpdateId(stopTimeUpdateBuilder.build());
-        assertEquals("stop_id 1000", id);
-
-        stopTimeUpdateBuilder.setStopSequence(5);
-        id = GtfsUtils.getStopTimeUpdateId(stopTimeUpdateBuilder.build());
-        assertEquals("stop_sequence 5", id);
     }
 
     @Test(expected = IllegalArgumentException.class)

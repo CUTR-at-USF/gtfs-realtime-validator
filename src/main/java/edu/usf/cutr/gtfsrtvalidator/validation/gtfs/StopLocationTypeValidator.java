@@ -20,24 +20,29 @@ package edu.usf.cutr.gtfsrtvalidator.validation.gtfs;
 import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
-import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
+import edu.usf.cutr.gtfsrtvalidator.util.RuleUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.GtfsFeedValidator;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.E010;
+
 /**
- * ID: e010
- * Description: If location_type is used in stops.txt, all stops referenced in stop_times.txt must have location_type of 0
+ * E010 - If location_type is used in stops.txt, all stops referenced in stop_times.txt must have location_type of 0
  */
 public class StopLocationTypeValidator implements GtfsFeedValidator {
+
+    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(StopLocationTypeValidator.class);
+
     @Override
     public List<ErrorListHelperModel> validate(GtfsDaoImpl gtfsData) {
-        List<OccurrenceModel> occurrenceList = new ArrayList<>();
-        Collection<StopTime> stopTimes = gtfsData.getAllStopTimes();
+        List<OccurrenceModel> e010List = new ArrayList<>();
 
+        Collection<StopTime> stopTimes = gtfsData.getAllStopTimes();
         Set<Stop> checkedStops = new HashSet<>();
 
         for (StopTime stopTime : stopTimes) {
@@ -45,11 +50,15 @@ public class StopLocationTypeValidator implements GtfsFeedValidator {
                 checkedStops.add(stopTime.getStop());
 
                 if (stopTime.getStop().getLocationType() != 0) {
-                    OccurrenceModel om = new OccurrenceModel("stop_id " + stopTime.getStop().getId());
-                    occurrenceList.add(om);
+                    RuleUtils.addOccurrence(E010, "stop_id " + stopTime.getStop().getId(), e010List, _log);
                 }
             }
         }
-        return Arrays.asList(new ErrorListHelperModel(new MessageLogModel(ValidationRules.E010), occurrenceList));
+
+        List<ErrorListHelperModel> errors = new ArrayList<>();
+        if (!e010List.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E010), e010List));
+        }
+        return errors;
     }
 }

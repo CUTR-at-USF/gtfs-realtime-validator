@@ -22,16 +22,16 @@ public class ValidationRules {
     /**
      * Warnings
      */
-    public static final ValidationRule W001 = new ValidationRule("W001", "WARNING", "Timestamp not populated",
+    public static final ValidationRule W001 = new ValidationRule("W001", "WARNING", "timestamp not populated",
             "Timestamps should be populated for all elements",
             "does not have a timestamp");
-    public static final ValidationRule W002 = new ValidationRule("W002", "WARNING", "Vehicle_id not populated",
+    public static final ValidationRule W002 = new ValidationRule("W002", "WARNING", "vehicle_id not populated",
             "vehicle_id should be populated for TripUpdates and VehiclePositions",
             "does not have a vehicle_id");
     public static final ValidationRule W003 = new ValidationRule("W003", "WARNING", "VehiclePosition and TripUpdate feed mismatch",
-            "If both vehicle positions and trip updates are provided, VehicleDescriptor or TripDescriptor values should match between the two feeds",
+            "If separate Vehicle Positions and Trip Updates are provided, VehicleDescriptor or TripDescriptor values should match between the two feeds",
             "does not exist in both VehiclePositions and TripUpdates feeds");
-    public static final ValidationRule W004 = new ValidationRule("W004", "WARNING", "VehiclePosition has unrealistic speed",
+    public static final ValidationRule W004 = new ValidationRule("W004", "WARNING", "vehicle speed is unrealistic",
             "vehicle.position.speed has an unrealistic speed that may be incorrect",
             "is unrealistic");
     public static final ValidationRule W005 = new ValidationRule("W005", "WARNING", "Missing vehicle_id for frequency-based exact_times = 0",
@@ -233,4 +233,8 @@ public class ValidationRules {
     public static final ValidationRule E045 = new ValidationRule("E045", "ERROR", "GTFS-rt stop_time_update stop_sequence and stop_id do not match GTFS",
             "If GTFS-rt stop_time_update contains both stop_sequence and stop_id, the values must match the GTFS data in stop_times.txt",
             "- stop_ids should be the same");
+
+    public static final ValidationRule E046 = new ValidationRule("E046", "ERROR", "GTFS-rt stop_time_update without time doesn't have arrival/departure_time in GTFS",
+            "If only delay is provided in a stop_time_update arrival or departure (and not a time), then the GTFS stop_times.txt must contain arrival_times and/or departure_times for these corresponding stops.",
+            "isn't set and GTFS doesn't have arrival/departure_time in stop_times.txt");
 }
