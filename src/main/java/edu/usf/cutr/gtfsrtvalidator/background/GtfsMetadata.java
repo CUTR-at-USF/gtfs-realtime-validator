@@ -84,6 +84,9 @@ public class GtfsMetadata {
      */
     private Map<String, Integer> mStopToLocationTypeMap = new HashMap<>();
 
+    // A map of trips that visit a stop more than once, where the key is the trip_id and the value is a list of the stops visited more than once
+    private Map<String, List<String>> mTripsWithMultiStops = new HashMap<>();
+
     /**
      * Builds the metadata for a particular GTFS feed
      *
@@ -182,6 +185,28 @@ public class GtfsMetadata {
             }
         }
         logDuration(_log, "Trips polylines processed for " + feedUrl + " in ", tripStartTime);
+
+        /**
+         * Process GTFS stop_times.txt
+         */
+        long stopTimesStartTime = System.nanoTime();
+        for (Map.Entry<String, List<StopTime>> tripStopTimes : mTripStopTimes.entrySet()) {
+            // Create the map of trip_ids to List of stop_ids for trips that visit a stop more than once
+            String tripId = tripStopTimes.getKey();
+            Set<String> allStopIds = new HashSet<>();
+            List<String> duplicateStopIds = new ArrayList<>();
+
+            for (StopTime stopTime : tripStopTimes.getValue()) {
+                if (allStopIds.contains(stopTime.getStop().getId().getId())) {
+                    // If we've already seen this stop_id for this trip, then add it to the duplicates list
+                    duplicateStopIds.add(stopTime.getStop().getId().getId());
+                }
+                allStopIds.add(stopTime.getStop().getId().getId());
+            }
+
+            mTripsWithMultiStops.put(tripId, duplicateStopIds);
+        }
+        logDuration(_log, "Repeated stop_ids for trips in stop_times.txt processed for " + feedUrl + " in ", stopTimesStartTime);
 
         /**
          * Process GTFS stops.txt
@@ -363,5 +388,14 @@ public class GtfsMetadata {
      */
     public Set<String> getAgencyIds() {
         return mAgencyIds;
+    }
+
+    /**
+     * Returns a map of trips that visit a stop more than once, where the key is the trip_id and the value is a list of the stops visited more than once
+     *
+     * @return a map of trips that visit a stop more than once, where the key is the trip_id and the value is a list of the stops visited more than once
+     */
+    public Map<String, List<String>> getTripsWithMultiStops() {
+        return mTripsWithMultiStops;
     }
 }

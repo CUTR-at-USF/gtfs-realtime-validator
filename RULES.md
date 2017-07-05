@@ -11,6 +11,7 @@ Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-U
 | [E003](#E003) | GTFS-rt `trip_id` does not exist in GTFS data
 | [E004](#E004) | GTFS-rt `route_id` does not exist in GTFS data
 | [E006](#E006) | Missing required trip field for frequency-based `exact_times` = 0
+| [E009](#E009) | GTFS-rt `stop_sequence` isn't provided for `trip` that visits same `stop_id` more than once
 | [E010](#E010) | `location_type` not `0` in `stops.txt` (Note that this is implemented but not executed because it's specific to GTFS - see [issue #126](https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/126))
 | [E011](#E011) | GTFS-rt `stop_id` does not exist in GTFS data
 | [E012](#E012) | Header `timestamp` should be greater than or equal to all other `timestamps`
@@ -117,6 +118,19 @@ Frequency-based `exact_times` = 0 `trip_updates` must contain `trip_id`, `start_
 
 #### References:
 * [`trip_update.trip`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#systems-with-repeated-trip_ids)
+
+<a name="E009"/>
+
+### E009 - GTFS-rt `stop_sequence` isn't provided for `trip` that visits same `stop_id` more than once
+
+If a GTFS `trip` contains multiple references to the same `stop_id` (i.e., the vehicle visits the same `stop_id` more than once in the same trip), then GTFS-rt `stop_time_updates` for this trip must include `stop_sequence`.
+
+From [`stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate):
+
+>If the same stop_id is visited more than once in a trip, then stop_sequence should be provided in all StopTimeUpdates for that stop_id on that trip.
+
+#### References:
+* [`trip_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripupdate)
 
 <a name="E010"/>
 

@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.NO_DATA;
 import static com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SKIPPED;
@@ -41,6 +42,7 @@ import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
 
 /**
  * E002 - stop_time_updates for a given trip_id must be sorted by increasing stop_sequence
+ * E009 - GTFS-rt stop_sequence isn't provided for trip that visits same stop_id more than once
  * E036 - Sequential stop_time_updates have the same stop_sequence
  * E037 - Sequential stop_time_updates have the same stop_id
  * E040 - stop_time_update doesn't contain stop_id or stop_sequence
@@ -59,6 +61,7 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
     public List<ErrorListHelperModel> validate(long currentTimeMillis, GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage) {
         List<GtfsRealtime.FeedEntity> entityList = feedMessage.getEntityList();
         List<OccurrenceModel> e002List = new ArrayList<>();
+        List<OccurrenceModel> e009List = new ArrayList<>();
         List<OccurrenceModel> e036List = new ArrayList<>();
         List<OccurrenceModel> e037List = new ArrayList<>();
         List<OccurrenceModel> e040List = new ArrayList<>();
@@ -75,8 +78,10 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
                 checkE041(entity, tripUpdate, e041List);
                 List<StopTime> gtfsStopTimes = null;
                 int gtfsStopTimeIndex = 0;
+                String tripId = null;
                 if (tripUpdate.hasTrip() && tripUpdate.getTrip().hasTripId()) {
-                    gtfsStopTimes = gtfsMetadata.getTripStopTimes().get(tripUpdate.getTrip().getTripId());
+                    tripId = tripUpdate.getTrip().getTripId();
+                    gtfsStopTimes = gtfsMetadata.getTripStopTimes().get(tripId);
                 }
 
                 List<GtfsRealtime.TripUpdate.StopTimeUpdate> rtStopTimeUpdateList = tripUpdate.getStopTimeUpdateList();
@@ -84,7 +89,15 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
                 List<Integer> rtStopSequenceList = new ArrayList<>();
                 Integer previousRtStopSequence = null;
                 String previousRtStopId = null;
+                boolean foundE009error = false;
+                Map<String, List<String>> tripWithMultiStop = gtfsMetadata.getTripsWithMultiStops();
                 for (GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate : rtStopTimeUpdateList) {
+                    if (!foundE009error && tripId != null && tripWithMultiStop.containsKey(tripId) && !stopTimeUpdate.hasStopSequence()) {
+                        // E009 - GTFS-rt stop_sequence isn't provided for trip that visits same stop_id more than once
+                        List<String> stopIds = tripWithMultiStop.get(tripId);
+                        RuleUtils.addOccurrence(E009, "trip_id " + tripId + " visits stop_id " + stopIds.toString(), e009List, _log);
+                        foundE009error = true;  // Only log error once for this trip
+                    }
                     if (previousRtStopSequence != null) {
                         checkE036(entity, previousRtStopSequence, stopTimeUpdate, e036List);
                     }
@@ -155,6 +168,9 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
         List<ErrorListHelperModel> errors = new ArrayList<>();
         if (!e002List.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(E002), e002List));
+        }
+        if (!e009List.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E009), e009List));
         }
         if (!e036List.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(E036), e036List));

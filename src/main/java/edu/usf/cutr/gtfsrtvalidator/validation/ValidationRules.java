@@ -85,10 +85,9 @@ public class ValidationRules {
             "If a GTFS block contains multiple references to the same stopId (i.e., the bus visits the same stopId more than once in the same block), but in different trips, then in the GTFS-rt data the tripId for each TripUpdate.TripDescriptor must be provided. In this case, the bus wouldn't visit the same stopId more than once in the same trip.",
             "does not have a trip_id but visits the same stop_id more than once in the block");
 
-    // TODO - implement - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/17
     public static final ValidationRule E009 = new ValidationRule("E009", "ERROR", "GTFS-rt stop_sequence isn't provided for trip that visits same stop_id more than once",
-            "If a GTFS trip contains multiple references to the same stopId (i.e., the bus visits the same stop_id more than once in the SAME trip), then in the GTFS-rt data the stop_sequence for each TripUpdate.StopTimeUpdate must be provided.",
-            "does not contain stop_sequence");
+            "If a GTFS trip contains multiple references to the same stop_id (i.e., the vehicle visits the same stop_id more than once in the same trip), then GTFS-rt stop_time_updates for this trip must include stop_sequence",
+            "more than once and GTFS-rt stop_time_update is missing stop_sequence field - stop_sequence must be provided");
 
     public static final ValidationRule E010 = new ValidationRule("E010", "ERROR", "location_type not 0 in stops.txt",
             "If location_type is used in stops.txt, all stops referenced in stop_times.txt must have location_type of 0",
