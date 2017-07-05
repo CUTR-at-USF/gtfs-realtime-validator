@@ -47,6 +47,7 @@ Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-U
 | [E044](#E044) | `stop_time_update` `arrival/departure` doesn't have `delay` or `time`
 | [E045](#E045) | GTFS-rt `stop_time_update` `stop_sequence` and `stop_id` do not match GTFS
 | [E046](#E046) | GTFS-rt `stop_time_update` without `time` doesn't have arrival/departure time in GTFS
+| [E047](#E047) | `VehiclePosition` and `TripUpdate` ID pairing mismatch
 
 ### Table of Warnings
 
@@ -54,7 +55,7 @@ Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-U
 |---------------|---------------------------|
 | [W001](#W001) | `timestamps` not populated
 | [W002](#W002) | `vehicle_id` not populated
-| [W003](#W003) | `VehiclePosition` and `TripUpdate` feed mismatch
+| [W003](#W003) | ID in one feed missing from the other
 | [W004](#W004) | vehicle `speed` is unrealistic
 | [W005](#W005) | Missing `vehicle_id` in `trip_update` for frequency-based `exact_times` = 0
 | [W006](#W006) | `trip_update` missing `trip_id`
@@ -456,6 +457,20 @@ If only `delay` is provided in a `stop_time_update` `arrival` or `departure` (an
 * [`stop_time_update.arrival and stop_time_update.departure (StopTimeEvent)`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeevent)
 * [GTFS stop_times.txt](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#stop_timestxt)
 
+<a name="E047"/>
+
+### E047 - `VehiclePosition` and `TripUpdate` ID pairing mismatch
+
+If separate `VehiclePositions` and `TripUpdates` feeds are provided, `VehicleDescriptor` or `TripDescriptor` ID value pairing should match between the two feeds.  
+
+In other words, if the `VehiclePosition` has a `vehicle_id` A that is assigned to `trip_id` 4, then the `TripUpdate` feed should have a prediction for `trip_id` 4 that includes a reference to `vehicle_id` A.  If the `trip_id` of 4 is paired with a different `vehicle_id` B in one of the two feeds, this is an error.
+
+Note that this is different from W003, which simply checks to see if an ID that is provided in one feed is provided in the other - that is a warning.
+
+#### References:
+* [vehicle.id](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-vehicledescriptor)
+* [trip.trip_id](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
+
 # Warnings
 
 <a name="W001"/>
@@ -480,11 +495,17 @@ Populating `vehicle_ids` in TripUpdates is important so consumers can relate a g
 
 <a name="W003"/>
 
-### W003 - `VehiclePosition` and `TripUpdate` feed mismatch
+### W003 - ID in one feed missing from the other
 
-If separate Vehicle Positions and Trip Updates feeds are provided, `VehicleDescriptor` or `TripDescriptor` values should match between the two feeds.  
+If separate `VehiclePositions` and `TripUpdates` feeds are provided, a `trip_id` that is provided in the `VehiclePositions` feed should be provided in the `TripUpdates` feed, and a vehicle_id that is provided in the `TripUpdates` feed should be provided in the `VehiclePositions` feed.
 
-In other words, if the `VehiclePosition` has a `vehicle_id` A that is assigned to `trip_id` 4, then the `TripUpdate` feed should have a prediction for `trip_id` 4 that includes a reference to `vehicle_id` A.
+In other words, if the `VehiclePosition` has a vehicle that is assigned to `trip_id` 4, then the `TripUpdate` feed should have a prediction for `trip_id` 4.
+
+Note that this is different from E047, which checks for a mismatch of IDs between the feeds - that is an error.
+
+#### References:
+* [vehicle.id](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-vehicledescriptor)
+* [trip.trip_id](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
 
 <a name="W004"/>
 

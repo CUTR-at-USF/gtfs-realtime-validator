@@ -28,9 +28,9 @@ public class ValidationRules {
     public static final ValidationRule W002 = new ValidationRule("W002", "WARNING", "vehicle_id not populated",
             "vehicle_id should be populated for TripUpdates and VehiclePositions",
             "does not have a vehicle_id");
-    public static final ValidationRule W003 = new ValidationRule("W003", "WARNING", "VehiclePosition and TripUpdate feed mismatch",
-            "If separate Vehicle Positions and Trip Updates are provided, VehicleDescriptor or TripDescriptor values should match between the two feeds",
-            "does not exist in both VehiclePositions and TripUpdates feeds");
+    public static final ValidationRule W003 = new ValidationRule("W003", "WARNING", "ID in one feed missing from the other",
+            "a trip_id that is provided in the VehiclePositions feed should be provided in the TripUpdates feed, and a vehicle_id that is provided in the TripUpdates feed should be provided in the VehiclePositions feed",
+            "");
     public static final ValidationRule W004 = new ValidationRule("W004", "WARNING", "vehicle speed is unrealistic",
             "vehicle.position.speed has an unrealistic speed that may be incorrect",
             "is unrealistic");
@@ -237,4 +237,8 @@ public class ValidationRules {
     public static final ValidationRule E046 = new ValidationRule("E046", "ERROR", "GTFS-rt stop_time_update without time doesn't have arrival/departure_time in GTFS",
             "If only delay is provided in a stop_time_update arrival or departure (and not a time), then the GTFS stop_times.txt must contain arrival_times and/or departure_times for these corresponding stops.",
             "isn't set and GTFS doesn't have arrival/departure_time in stop_times.txt");
+
+    public static final ValidationRule E047 = new ValidationRule("E047", "ERROR", "VehiclePosition and TripUpdate ID pairing mismatch",
+            "If separate `VehiclePositions` and `TripUpdates` feeds are provided, `VehicleDescriptor` or `TripDescriptor` ID value pairing should match between the two feeds.",
+            "- ID pairing between feeds should match");
 }
