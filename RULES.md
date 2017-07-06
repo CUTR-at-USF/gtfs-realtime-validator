@@ -441,11 +441,21 @@ From [`stop_time_update.schedule_relationship`](https://github.com/google/transi
 
 ### E044 - `stop_time_update` `arrival/departure` doesn't have `delay` or `time`
 
-`stop_time_update.arrival` and `stop_time_update.departure` must have either `delay` or `time` - both fields cannot be missing
+If the `stop_time_update.schedule_relationship` is not `SKIPPED`, `stop_time_update.arrival` and `stop_time_update.departure` must have either `delay` or `time` - both fields cannot be missing.
+
+[Stop Time Updates description](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#stop-time-updates) says:
+
+>The update can provide a exact timing for arrival and/or departure at a stop in StopTimeUpdates using StopTimeEvent. This should contain either an absolute time or a delay (i.e. an offset from the scheduled time in seconds).
+
+[`stop_time_update.schedule_relationship`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#enum-schedulerelationship) says:
+
+>`SKIPPED` - The stop is skipped, i.e., the vehicle will not stop at this stop. Arrival and departure are optional.
 
 #### References:
-* [`stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
+* [Stop Time Updates description](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#stop-time-updates)
+* [`stop_time_update` reference](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
 * [`stop_time_update.arrival and stop_time_update.departure (StopTimeEvent)`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeevent)
+* [`stop_time_update.schedule_relationship`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#enum-schedulerelationship)
 
 <a name="E045"/>
 

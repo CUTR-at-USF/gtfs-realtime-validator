@@ -329,6 +329,10 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
      * @param errors         the list to add the errors to
      */
     private void checkE044(GtfsRealtime.FeedEntity entity, GtfsRealtime.TripUpdate tripUpdate, GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate, List<OccurrenceModel> errors) {
+        if (stopTimeUpdate.hasScheduleRelationship() && stopTimeUpdate.getScheduleRelationship().equals(SKIPPED)) {
+            // SKIPPED stop_time_updates aren't required to have delay or time (arrival/departure are optional) - see #243
+            return;
+        }
         String id = getTripId(entity, tripUpdate) + " " + getStopTimeUpdateId(stopTimeUpdate);
         if (stopTimeUpdate.hasArrival()) {
             checkE044StopTimeEvent(stopTimeUpdate.getArrival(), id + " arrival", errors);
