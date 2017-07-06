@@ -184,7 +184,7 @@ public class BackgroundTask implements Runnable {
                     // Save one header to use in our combined feed below
                     header = message.getHeader();
                 } else {
-                    if (message.getHeader().getTimestamp() > header.getTimestamp()) {
+                    if (message.getHeader() != null && message.getHeader().getTimestamp() > header.getTimestamp()) {
                         // Use largest header timestamp with multiple feeds - see #239
                         header = message.getHeader();
                     }
