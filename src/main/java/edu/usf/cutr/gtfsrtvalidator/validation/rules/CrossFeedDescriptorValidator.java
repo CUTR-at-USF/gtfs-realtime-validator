@@ -30,9 +30,7 @@ import org.hsqldb.lib.StringUtil;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.E047;
 import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.W003;
@@ -50,67 +48,124 @@ public class CrossFeedDescriptorValidator implements FeedEntityValidator {
         List<OccurrenceModel> w003List = new ArrayList<>();
         List<OccurrenceModel> e047List = new ArrayList<>();
 
-        // key is trip_id from TripUpdates feed, value is vehicle_id or "" if no vehicle_id exists for this trip
+        // key is trip_id from TripUpdates feed, value is vehicle.id
         BiMap<String, String> tripUpdates = HashBiMap.create();
+        // A set of trips (key = trip_id) that don't have any vehicle.ids
+        Set<String> tripsWithoutVehicles = new HashSet<>();
+        int tripUpdateCount = 0;
 
-        // key is vehicle_id from VehiclePositions feed, value is trip_id or "" if no trip_id exists for this vehicle
+        // key is vehicle_id from VehiclePositions feed, value is trip_id
         BiMap<String, String> vehiclePositions = HashBiMap.create();
+        // A set of vehicles (key = vehicle.id) that don't have any trip_ids
+        Set<String> vehiclesWithoutTrips = new HashSet<>();
+        int vehiclePositionCount = 0;
 
         // Build the maps
         for (GtfsRealtime.FeedEntity entity : feedMessage.getEntityList()) {
             if (entity.hasTripUpdate() && hasTripId(entity.getTripUpdate())) {
+                tripUpdateCount++;
+                String tripId = entity.getTripUpdate().getTrip().getTripId();
                 String vehicleId = "";
                 if (entity.getTripUpdate().hasVehicle() && entity.getTripUpdate().getVehicle().hasId()) {
                     vehicleId = entity.getTripUpdate().getVehicle().getId();
                 }
-                tripUpdates.put(entity.getTripUpdate().getTrip().getTripId(), vehicleId);
+                if (StringUtil.isEmpty(vehicleId)) {
+                    // Trip does not have a vehicle.id - add it to the set (it can't exist in HashBiMap)
+                    tripsWithoutVehicles.add(tripId);
+                } else {
+                    // Trip has a vehicle.id - add it to the HashBiMap
+                    try {
+                        tripUpdates.put(tripId, vehicleId);
+                    } catch (IllegalArgumentException e) {
+                        // TODO - We should log this as error under new rule - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/33
+                        _log.error("Error adding trip_id " + tripId + " -> vehicle_id " + vehicleId + " to TripUpdates HashBiMap.  TripUpdate exists twice in feed, or more than one TripUpdate is assigned to the same vehicle. " + e);
+                    }
+                }
+
             }
             if (entity.hasVehicle() && hasVehicleId(entity.getVehicle())) {
+                vehiclePositionCount++;
+                String vehicleId = entity.getVehicle().getVehicle().getId();
                 String tripId = "";
                 if (entity.getVehicle().hasTrip() && entity.getVehicle().getTrip().hasTripId()) {
                     tripId = entity.getVehicle().getTrip().getTripId();
                 }
-                vehiclePositions.put(entity.getVehicle().getVehicle().getId(), tripId);
-            }
-        }
-
-        /**
-         * Create inverse maps, so we can efficiently check if a trip_id in TripUpdates is in VehiclePositions, and if
-         * vehicle_id in VehiclePositions is in TripUpdates
-         *
-         * tripUpdatesInverse - A map of vehicle_ids to trip_ids, from the TripUpdates feed
-         * vehiclePositionsInverse - A map of trip_ids to vehicle_ids, from the VehiclePositions feed
-         */
-        BiMap<String, String> tripUpdatesInverse = tripUpdates.inverse();
-        BiMap<String, String> vehiclePositionsInverse = vehiclePositions.inverse();
-
-        if (!tripUpdates.isEmpty() && !vehiclePositions.isEmpty()) {
-            for (Map.Entry<String, String> trip : tripUpdates.entrySet()) {
-                if (!vehiclePositionsInverse.containsKey(trip.getKey())) {
-                    // W003 - TripUpdates feed has a trip_id that's not in VehiclePositions feed
-                    RuleUtils.addOccurrence(W003, "trip_id " + trip.getKey() + " is in TripUpdates but not in VehiclePositions feed", w003List, _log);
+                if (StringUtil.isEmpty(tripId)) {
+                    // Vehicle does not have a trip_id - add it to the set (it can't exist in HashBiMap)
+                    vehiclesWithoutTrips.add(vehicleId);
+                } else {
+                    // Vehicle has a trip_id - add it to the HashBiMap
+                    try {
+                        vehiclePositions.put(vehicleId, tripId);
+                    } catch (IllegalArgumentException e) {
+                        // TODO - We should log this as error under new rule - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/38
+                        _log.error("Error adding vehicle.id " + vehicleId + " -> trip_id " + tripId + " to VehiclePositions HashBiMap.  Vehicle exists twice in feed, or more than one vehicle is assigned to same trip. " + e);
+                    }
                 }
-                if (!vehiclePositions.containsKey(trip.getValue())) {
-                    // W003 - TripUpdates feed has a vehicle_id that's not in VehiclePositions feed
-                    RuleUtils.addOccurrence(W003, "vehicle_id " + trip.getValue() + " is in TripUpdates but not in VehiclePositions feed", w003List, _log);
-                }
-                checkE047TripUpdates(trip, vehiclePositionsInverse, e047List);
-            }
-
-            for (Map.Entry<String, String> vehiclePosition : vehiclePositions.entrySet()) {
-                if (!tripUpdatesInverse.containsKey(vehiclePosition.getKey())) {
-                    // W003 - VehiclePositions has a vehicle_id that's not in TripUpdates feed
-                    RuleUtils.addOccurrence(W003, "vehicle_id " + vehiclePosition.getKey() + " is in VehiclePositions but not in TripUpdates feed", w003List, _log);
-                }
-                if (!tripUpdates.containsKey(vehiclePosition.getValue())) {
-                    // W003 - VehiclePositions has a trip_id that's not in the TripUpdates feed
-                    RuleUtils.addOccurrence(W003, "trip_id " + vehiclePosition.getValue() + " is in VehiclePositions but not in TripUpdates feed", w003List, _log);
-                }
-                checkE047VehiclePositions(vehiclePosition, tripUpdatesInverse, e047List);
             }
         }
 
         List<ErrorListHelperModel> errors = new ArrayList<>();
+        if (tripUpdateCount == 0 || vehiclePositionCount == 0) {
+            // We are missing a VehiclePositions or TripUpdates feed, so we can't compare across feeds - return empty list;
+            return errors;
+        }
+
+        /**
+         * Create inverse maps, so we can efficiently check if a trip_id in TripUpdates is in VehiclePositions, and if
+         * vehicle_id in VehiclePositions is in TripUpdates.
+         *
+         * tripUpdatesInverse - A map of vehicle_ids to trip_ids, from the TripUpdates feed
+         * vehiclePositionsInverse - A map of trip_ids to vehicle_ids, from the VehiclePositions feed
+         *
+         * Note that we still need to check vehiclesWithoutTrips and tripsWithoutVehicles, as these trips/vehicles can't exist in HashBiMaps.
+         * See https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/241#issuecomment-313194304.
+         */
+        BiMap<String, String> tripUpdatesInverse = tripUpdates.inverse();
+        BiMap<String, String> vehiclePositionsInverse = vehiclePositions.inverse();
+
+        // Check all trips that contained a vehicle
+        for (Map.Entry<String, String> trip : tripUpdates.entrySet()) {
+            if (!vehiclePositionsInverse.containsKey(trip.getKey())) {
+                // W003 - TripUpdates feed has a trip_id that's not in VehiclePositions feed
+                RuleUtils.addOccurrence(W003, "trip_id " + trip.getKey() + " is in TripUpdates but not in VehiclePositions feed", w003List, _log);
+            }
+            if (!vehiclePositions.containsKey(trip.getValue()) && !vehiclesWithoutTrips.contains(trip.getValue())) {
+                // W003 - TripUpdates feed has a vehicle_id that's not in VehiclePositions feed
+                RuleUtils.addOccurrence(W003, "vehicle_id " + trip.getValue() + " is in TripUpdates but not in VehiclePositions feed", w003List, _log);
+            }
+            checkE047TripUpdates(trip, vehiclePositionsInverse, e047List);
+        }
+
+        // Check all vehicles that contained a trip
+        for (Map.Entry<String, String> vehiclePosition : vehiclePositions.entrySet()) {
+            if (!tripUpdatesInverse.containsKey(vehiclePosition.getKey())) {
+                // W003 - VehiclePositions has a vehicle_id that's not in TripUpdates feed
+                RuleUtils.addOccurrence(W003, "vehicle_id " + vehiclePosition.getKey() + " is in VehiclePositions but not in TripUpdates feed", w003List, _log);
+            }
+            if (!tripUpdates.containsKey(vehiclePosition.getValue()) && !tripsWithoutVehicles.contains(vehiclePosition.getValue())) {
+                // W003 - VehiclePositions has a trip_id that's not in the TripUpdates feed
+                RuleUtils.addOccurrence(W003, "trip_id " + vehiclePosition.getValue() + " is in VehiclePositions but not in TripUpdates feed", w003List, _log);
+            }
+            checkE047VehiclePositions(vehiclePosition, tripUpdatesInverse, e047List);
+        }
+
+        // Check all trips that did NOT contain a vehicle
+        for (String trip_id : tripsWithoutVehicles) {
+            if (!vehiclePositionsInverse.containsKey(trip_id)) {
+                // W003 - TripUpdates feed has a trip_id that's not in VehiclePositions feed
+                RuleUtils.addOccurrence(W003, "trip_id " + trip_id + " is in TripUpdates but not in VehiclePositions feed", w003List, _log);
+            }
+        }
+
+        // Check all vehicles that did NOT contain a trip
+        for (String vehicle_id : vehiclesWithoutTrips) {
+            if (!tripUpdatesInverse.containsKey(vehicle_id)) {
+                // W003 - VehiclePositions has a vehicle_id that's not in TripUpdates feed
+                RuleUtils.addOccurrence(W003, "vehicle_id " + vehicle_id + " is in VehiclePositions but not in TripUpdates feed", w003List, _log);
+            }
+        }
+
         if (!w003List.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(W003), w003List));
         }

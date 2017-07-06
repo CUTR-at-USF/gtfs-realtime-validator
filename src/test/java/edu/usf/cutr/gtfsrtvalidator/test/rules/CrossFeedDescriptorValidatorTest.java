@@ -39,7 +39,7 @@ public class CrossFeedDescriptorValidatorTest extends FeedMessageTest {
     }
 
     /**
-     * W003 - If both vehicle positions and trip updates are provided, VehicleDescriptor or TripDescriptor values should match between the two feeds
+     * W003 - ID in one feed missing from the other
      */
     @Test
     public void testW003() {
@@ -81,6 +81,123 @@ public class CrossFeedDescriptorValidatorTest extends FeedMessageTest {
 
         results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
         expected.put(W003, 4);
+        TestUtils.assertResults(expected, results);
+
+        /**
+         * Clear the VehiclePosition trip_id, and clear the TripUpdates vehicle.id, and add two versions of each
+         * (to make sure we detect HashBiMap IllegalArgumentException - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/241#issuecomment-313194304)
+         * - 4 warnings.
+         */
+        vehicleDescriptorBuilder.clearId();
+        tripDescriptorBuilder.setTripId("100");
+        tripUpdateBuilder.setVehicle(vehicleDescriptorBuilder.build());
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+
+        vehicleDescriptorBuilder.setId("44");
+        tripDescriptorBuilder.clearTripId();
+        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        vehicleDescriptorBuilder.clearId();
+        tripDescriptorBuilder.setTripId("101");
+        tripUpdateBuilder.setVehicle(vehicleDescriptorBuilder.build());
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+
+        vehicleDescriptorBuilder.setId("45");
+        tripDescriptorBuilder.clearTripId();
+        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.addEntity(1, feedEntityBuilder.build());
+
+        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        expected.put(W003, 4);
+        TestUtils.assertResults(expected, results);
+
+        /**
+         * Set the VehiclePosition trip_id to empty string, and set the TripUpdates vehicle.id to empty string, and add two versions of each
+         * (to make sure we detect HashBiMap IllegalArgumentException - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/241#issuecomment-313194304)
+         * - 4 warnings.
+         */
+        vehicleDescriptorBuilder.setId("");
+        tripDescriptorBuilder.setTripId("100");
+        tripUpdateBuilder.setVehicle(vehicleDescriptorBuilder.build());
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+
+        vehicleDescriptorBuilder.setId("44");
+        tripDescriptorBuilder.setTripId("");
+        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        vehicleDescriptorBuilder.setId("");
+        tripDescriptorBuilder.setTripId("101");
+        tripUpdateBuilder.setVehicle(vehicleDescriptorBuilder.build());
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+
+        vehicleDescriptorBuilder.setId("45");
+        tripDescriptorBuilder.setTripId("");
+        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(1, feedEntityBuilder.build());
+
+        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        expected.put(W003, 4);
+        TestUtils.assertResults(expected, results);
+
+        /**
+         * Clear the TripUpdates feed but not the VehiclePositions - no warnings should occur if no TripUpdates feed is provided
+         */
+        feedEntityBuilder.clearTripUpdate();
+        feedMessageBuilder.clearEntity();
+        feedMessageBuilder.addEntity(0, feedEntityBuilder.build());
+
+        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        expected.clear();
+        TestUtils.assertResults(expected, results);
+
+        /**
+         * Set the TripUpdates feed and clear the VehiclePositions - no warnings should occur if no VehiclePositions feed is provided
+         */
+        feedEntityBuilder.clearVehicle();
+        feedMessageBuilder.clearEntity();
+
+        vehicleDescriptorBuilder.setId("");
+        tripDescriptorBuilder.setTripId("100");
+        tripUpdateBuilder.setVehicle(vehicleDescriptorBuilder.build());
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+
+        vehicleDescriptorBuilder.setId("44");
+        tripDescriptorBuilder.setTripId("");
+
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedMessageBuilder.addEntity(0, feedEntityBuilder.build());
+
+        vehicleDescriptorBuilder.setId("");
+        tripDescriptorBuilder.setTripId("101");
+        tripUpdateBuilder.setVehicle(vehicleDescriptorBuilder.build());
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+
+        vehicleDescriptorBuilder.setId("45");
+        tripDescriptorBuilder.setTripId("");
+
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedMessageBuilder.addEntity(1, feedEntityBuilder.build());
+
+        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        expected.clear();
         TestUtils.assertResults(expected, results);
 
         clearAndInitRequiredFeedFields();
@@ -169,6 +286,138 @@ public class CrossFeedDescriptorValidatorTest extends FeedMessageTest {
         expected.put(W003, 4);
         TestUtils.assertResults(expected, results);
 
-        clearAndInitRequiredFeedFields();
+        /**
+         * Set the VehiclePosition trip_id to empty string (and create two entities like this, to make sure we detect
+         * HashBiMap IllegalArgumentException - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/241#issuecomment-313194304),
+         * while TripUpdate still has trip_id 1.1 and vehicle_id 1 - 0 mismatch, so 0 errors.
+         * Also, 4 warnings for W003 (2 for TripUpdate, and 1 for each VehiclePosition).
+         */
+        vehicleB.setId("45");
+        tripB.setTripId("");
+        vehiclePositionBuilder.setVehicle(vehicleB.build());
+        vehiclePositionBuilder.setTrip(tripB.build());
+
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        vehicleB.setId("100");
+        tripB.setTripId("");
+        vehiclePositionBuilder.setVehicle(vehicleB.build());
+        vehiclePositionBuilder.setTrip(tripB.build());
+
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedEntityBuilder.clearTripUpdate();
+        feedMessageBuilder.addEntity(1, feedEntityBuilder.build());
+
+        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        expected.clear();
+        expected.put(W003, 4);
+        TestUtils.assertResults(expected, results);
+
+        /**
+         * Clear the VehiclePosition trip_id (and create two entities like this to make sure we detect HashBiMap
+         * IllegalArgumentException - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/241#issuecomment-313194304),
+         * while TripUpdate still has trip_id 1.1 and vehicle_id 1 - 0 mismatch, so 0 errors.
+         * Also, 4 warnings for W003 (2 for TripUpdate, and 1 for each VehiclePosition).
+         */
+        vehicleB.setId("45");
+        tripB.clearTripId();
+        vehiclePositionBuilder.setVehicle(vehicleB.build());
+        vehiclePositionBuilder.setTrip(tripB.build());
+
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        vehicleB.setId("100");
+        tripB.clearTripId();
+        vehiclePositionBuilder.setVehicle(vehicleB.build());
+        vehiclePositionBuilder.setTrip(tripB.build());
+
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(1, feedEntityBuilder.build());
+
+        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        expected.clear();
+        expected.put(W003, 4);
+        TestUtils.assertResults(expected, results);
+
+        /**
+         * Set the TripUpdate vehicle.id to empty string and VehiclePosition trip_id to empty string (and create two entities like this to make sure we detect
+         * HashBiMap IllegalArgumentException - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/241#issuecomment-313194304)
+         * - 0 mismatch, so 0 errors.
+         * Also, 4 warnings for W003 (two for each entity with empty string IDs).
+         */
+        vehicleB.setId("45");
+        tripB.setTripId("");
+        vehiclePositionBuilder.setTrip(tripB);
+        vehiclePositionBuilder.setVehicle(vehicleB);
+
+        tripA.setTripId("1");
+        vehicleA.setId("");
+        tripUpdateBuilder.setTrip(tripA);
+        tripUpdateBuilder.setVehicle(vehicleA);
+
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        vehicleB.setId("46");
+        tripB.setTripId("");
+        vehiclePositionBuilder.setTrip(tripB);
+        vehiclePositionBuilder.setVehicle(vehicleB);
+
+        tripA.setTripId("2");
+        vehicleA.setId("");
+        tripUpdateBuilder.setTrip(tripA);
+        tripUpdateBuilder.setVehicle(vehicleA);
+
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(1, feedEntityBuilder.build());
+
+        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        expected.clear();
+        expected.put(W003, 4);
+        TestUtils.assertResults(expected, results);
+
+        /**
+         * Clear the TripUpdate vehicle.id and VehiclePosition trip_id (and create two entities like this to make sure we detect HashBiMap
+         * IllegalArgumentException - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/241#issuecomment-313194304)
+         * - 0 mismatch, so 0 errors.
+         * Also, 4 warnings for W003 (two for each entity with cleared IDs).
+         */
+        vehicleB.setId("45");
+        tripB.clearTripId();
+        vehiclePositionBuilder.setTrip(tripB);
+        vehiclePositionBuilder.setVehicle(vehicleB);
+
+        tripA.setTripId("1");
+        vehicleA.clearId();
+        tripUpdateBuilder.setTrip(tripA);
+        tripUpdateBuilder.setVehicle(vehicleA);
+
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        vehicleB.setId("46");
+        tripB.clearTripId();
+        vehiclePositionBuilder.setTrip(tripB);
+        vehiclePositionBuilder.setVehicle(vehicleB);
+
+        tripA.setTripId("2");
+        vehicleA.clearId();
+        tripUpdateBuilder.setTrip(tripA);
+        tripUpdateBuilder.setVehicle(vehicleA);
+
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(1, feedEntityBuilder.build());
+
+        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        expected.clear();
+        expected.put(W003, 4);
+        TestUtils.assertResults(expected, results);
     }
 }
