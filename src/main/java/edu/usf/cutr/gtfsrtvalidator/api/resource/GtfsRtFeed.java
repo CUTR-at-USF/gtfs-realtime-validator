@@ -69,8 +69,6 @@ public class GtfsRtFeed {
     @Produces(MediaType.APPLICATION_JSON)
     public Response postGtfsRtFeed(GtfsRtFeedModel feedInfo) {
         //feedInfo.setGtfsId(1);
-        feedInfo.setStartTime(System.currentTimeMillis());
-
         //Validate URL for GTFS feed and the GTFS ID.
         if (feedInfo.getGtfsUrl() == null) {
             return generateError("GTFS-RT URL is required");

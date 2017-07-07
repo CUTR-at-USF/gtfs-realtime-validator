@@ -6,9 +6,9 @@ INSERT INTO GtfsFeed -- Columns (feedId, agency, fileCheckSum, errorCount, fileL
     WHERE NOT EXISTS (SELECT * FROM GtfsFeed WHERE feedId = -1);
 
 -- Insert records into GtfsRtFeed table
-INSERT INTO GtfsRtFeed -- Columns (rtFeedId, rtFeedUrl, startTime, gtfsFeedId)
+INSERT INTO GtfsRtFeed -- Columns (rtFeedId, rtFeedUrl, gtfsFeedId)
     -- We ensures that record is not inserted if already exists, to avoid primary key constraint violation
-    SELECT * FROM (VALUES( -1, 'dummy', 1, -1))
+    SELECT * FROM (VALUES( -1, 'dummy', -1))
     WHERE NOT EXISTS (SELECT * FROM GtfsRtFeed WHERE rtFeedId = -1);
 
 -- Insert records into GtfsRtFeedIteration
