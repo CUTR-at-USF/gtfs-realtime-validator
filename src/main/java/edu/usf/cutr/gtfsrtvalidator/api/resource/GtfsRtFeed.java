@@ -146,12 +146,20 @@ public class GtfsRtFeed {
         sessionModel.setClientId(clientId);
         sessionModel.setSessionStartTime(currentTimestamp);
         sessionModel.setGtfsRtFeedModel(gtfsRtFeed);
-
+        sessionModel.setUpdateInterval(updateInterval);
         session.save(sessionModel);
         GTFSDB.commitAndCloseSession(session);
-
+        session = GTFSDB.initSessionBeginTrans();
+        List<SessionModel> sessionModels = session.createQuery(" FROM SessionModel WHERE sessionEndTime = 0 and rtFeedId = " + sessionModel.getGtfsRtFeedModel().getGtfsRtId()).list();
+        int leastInterval=updateInterval;
+        boolean intervalUpdated=false;
+        for(SessionModel s : sessionModels){
+            if(leastInterval<s.getUpdateInterval()){
+                intervalUpdated=true;
+            }
+        }
         //Extract the Url and gtfsId to start the background process
-        startBackgroundTask(gtfsRtFeed, updateInterval);
+        startBackgroundTask(gtfsRtFeed, leastInterval, intervalUpdated);
 
         return Response.ok(sessionModel, MediaType.APPLICATION_JSON).build();
     }
@@ -426,6 +434,19 @@ public class GtfsRtFeed {
 
         session.saveOrUpdate(sessionModel);
         GTFSDB.commitAndCloseSession(session);
+        session = GTFSDB.initSessionBeginTrans();
+        List<SessionModel> sessionModels = session.createQuery(" FROM SessionModel WHERE sessionEndTime = 0 and rtFeedId = " + sessionModel.getGtfsRtFeedModel().getGtfsRtId()).list();
+        boolean endFeedMonitoring=true;
+        l1:for(SessionModel s : sessionModels){
+            if(s.getSessionEndTime()==0){
+                endFeedMonitoring=false;
+                break l1;
+            }
+        }
+        if(endFeedMonitoring){
+            runningTasks.get(sessionModel.getGtfsRtFeedModel().getGtfsUrl()).shutdown();
+            runningTasks.remove(sessionModel.getGtfsRtFeedModel().getGtfsUrl());
+        }
     }
 
     @GET
@@ -481,13 +502,20 @@ public class GtfsRtFeed {
         return INVALID_FEED;
     }
 
-    public synchronized static ScheduledExecutorService startBackgroundTask(GtfsRtFeedModel gtfsRtFeed, int updateInterval) {
+    public synchronized static ScheduledExecutorService startBackgroundTask(GtfsRtFeedModel gtfsRtFeed, int updateInterval, boolean intervalUpdated) {
         String rtFeedUrl = gtfsRtFeed.getGtfsUrl();
 
         if (!runningTasks.containsKey(rtFeedUrl)) {
             ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
             scheduler.scheduleAtFixedRate(new BackgroundTask(gtfsRtFeed), 0, updateInterval, TimeUnit.SECONDS);
             runningTasks.put(rtFeedUrl, scheduler);
+            return scheduler;
+        } else if(intervalUpdated) {
+            ScheduledExecutorService scheduler = runningTasks.get(rtFeedUrl);
+            scheduler.shutdown();
+            scheduler = Executors.newScheduledThreadPool(1);
+            scheduler.scheduleAtFixedRate(new BackgroundTask(gtfsRtFeed), 0, updateInterval, TimeUnit.SECONDS);
+            runningTasks.replace(rtFeedUrl, scheduler);
             return scheduler;
         } else {
             return runningTasks.get(rtFeedUrl);

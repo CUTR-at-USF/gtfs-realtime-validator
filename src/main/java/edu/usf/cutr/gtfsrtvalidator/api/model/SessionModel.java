@@ -50,6 +50,9 @@ public class SessionModel implements Serializable {
     @Column(name = "warningCount")
     private int warningCount = 0;
 
+    @Column(name = "updateInterval")
+    private Integer updateInterval = 0;
+
     // To retrieve records sequentially starting from 1
     @Transient
     private int rowId;
@@ -145,6 +148,10 @@ public class SessionModel implements Serializable {
     public void setWarningCount(int warningCount) {
         this.warningCount = warningCount;
     }
+
+    public Integer getUpdateInterval() { return updateInterval; }
+
+    public void setUpdateInterval(Integer updateInterval) { this.updateInterval = updateInterval; }
 
     public int getRowId() {
         return rowId;
