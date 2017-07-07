@@ -172,7 +172,6 @@ public class BackgroundTask implements Runnable {
 
             GtfsRealtime.FeedHeader header = null;
 
-            // May be not needed to log this error. Because, gtfsRtFeedModelList size should always greater than 1 if database is stored properly.
             if (gtfsRtFeedModelList.size() < 1) {
                 _log.error("The URL '" + gtfsRtFeedUrl + "' is not stored properly into the database");
                 return;
