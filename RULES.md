@@ -115,8 +115,8 @@ All `trip_ids` provided in the GTFS-rt feed must exist in the GTFS data, unless 
 
 [`schedule_relationship`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#enum-schedulerelationship-1) says:
 
->If a trip is done in accordance with temporary schedule, not reflected in GTFS, then it shouldn't be marked as SCHEDULED, but marked as ADDED.
->...
+>If a trip is done in accordance with temporary schedule, not reflected in GTFS, then it shouldn't be marked as SCHEDULED, but marked as ADDED...
+>
 >`ADDED` - An extra trip that was added in addition to a running schedule, for example, to replace a broken vehicle or to respond to sudden passenger load.
 
 #### References:
