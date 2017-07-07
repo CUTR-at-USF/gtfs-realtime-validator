@@ -35,7 +35,10 @@ import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.net.*;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -66,7 +69,7 @@ public class GtfsRtFeed {
     @Produces(MediaType.APPLICATION_JSON)
     public Response postGtfsRtFeed(GtfsRtFeedModel feedInfo) {
         //feedInfo.setGtfsId(1);
-       //Validate URL for GTFS feed and the GTFS ID.
+        //Validate URL for GTFS feed and the GTFS ID.
         if (feedInfo.getGtfsUrl() == null) {
             return generateError("GTFS-RT URL is required");
         } else if (feedInfo.getGtfsFeedModel().getFeedId() == 0) {
@@ -115,7 +118,7 @@ public class GtfsRtFeed {
             Session session = GTFSDB.initSessionBeginTrans();
             gtfsFeeds = session.createQuery(" FROM GtfsRtFeedModel").list();
             GTFSDB.commitAndCloseSession(session);
-            } catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         GenericEntity<List<GtfsRtFeedModel>> feedList = new GenericEntity<List<GtfsRtFeedModel>>(gtfsFeeds) {
@@ -249,21 +252,21 @@ public class GtfsRtFeed {
     }
 
     // Returns feed message for a requested iteration
-     @GET
-     @Path("/{iterationId : \\d+}/feedMessage")
-     @Produces(MediaType.APPLICATION_JSON)
-     public String getFeedMessage(
-             @PathParam("iterationId") int iterationId) {
+    @GET
+    @Path("/{iterationId : \\d+}/feedMessage")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getFeedMessage(
+            @PathParam("iterationId") int iterationId) {
 
         ViewFeedMessageModel feedMessageModel;
-         Session session = GTFSDB.initSessionBeginTrans();
+        Session session = GTFSDB.initSessionBeginTrans();
         feedMessageModel = session.createNamedQuery("feedMessageByIterationId", ViewFeedMessageModel.class)
                 .setParameter(0, iterationId)
                 .uniqueResult();
         GTFSDB.commitAndCloseSession(session);
         feedMessageModel.setJsonFeedMessage(feedMessageModel.getByteFeedMessage());
         return feedMessageModel.getJsonFeedMessage();
-     }
+    }
 
     // Returns feed errors/warnings for a requested iteration.
     @GET
@@ -285,9 +288,9 @@ public class GtfsRtFeed {
          * ORDER BY errorId helps to have errors/warnings in ascending order i.e., first errors in ascending order then warnings in ascending order
          */
         messageIdList = session.createQuery(" SELECT messageId FROM MessageLogModel" +
-                                                " WHERE iterationId = " + iterationId +
-                                                " ORDER BY errorId")
-                                            .list();
+                " WHERE iterationId = " + iterationId +
+                " ORDER BY errorId")
+                .list();
 
         GTFSDB.closeSession(session);
 
@@ -337,8 +340,8 @@ public class GtfsRtFeed {
         Session session = GTFSDB.initSessionBeginTrans();
 
         gtfsRtFeedIterationModel = (GtfsRtFeedIterationModel) session.createQuery(" FROM GtfsRtFeedIterationModel" +
-                                                                                      " WHERE IterationId = " + iterationId)
-                                                                                      .uniqueResult();
+                " WHERE IterationId = " + iterationId)
+                .uniqueResult();
 
         GTFSDB.closeSession(session);
         gtfsRtFeedIterationModel.setDateFormat(getDateFormat(gtfsRtFeedIterationModel.getFeedTimestamp(), gtfsRtFeedIterationModel.getGtfsRtFeedModel().getGtfsRtId()));
@@ -395,7 +398,7 @@ public class GtfsRtFeed {
     @PUT
     @Path("/{sessionId}/closeSession")
     public void updateSessionData(
-            @PathParam("sessionId") int sessionId) throws MalformedURLException, URISyntaxException{
+            @PathParam("sessionId") int sessionId) {
 
         long currentTime = System.currentTimeMillis();
         Session session = GTFSDB.initSessionBeginTrans();
@@ -420,14 +423,9 @@ public class GtfsRtFeed {
         }
         sessionModel.setErrorCount(errorCount);
         sessionModel.setWarningCount(warningCount);
-        URL url = new URL(sessionModel.getGtfsRtFeedModel().getGtfsUrl());
-        URL redUrl = new URL(url.getProtocol()+"://"+url.getHost());
+
         session.saveOrUpdate(sessionModel);
         GTFSDB.commitAndCloseSession(session);
-        runningTasks.get(sessionModel.getGtfsRtFeedModel().getGtfsUrl()).shutdown();
-        runningTasks.remove(sessionModel.getGtfsRtFeedModel().getGtfsUrl());
-
-        Response.temporaryRedirect(redUrl.toURI());
     }
 
     @GET
@@ -437,7 +435,7 @@ public class GtfsRtFeed {
         CombinedIterationMessageModel messageList = new CombinedIterationMessageModel();
         Session session = GTFSDB.initSessionBeginTrans();
         GtfsRtFeedIterationModel iterationModel = (GtfsRtFeedIterationModel) session.
-                            createQuery("  FROM GtfsRtFeedIterationModel WHERE IterationId = "+iterationId).uniqueResult();
+                createQuery("  FROM GtfsRtFeedIterationModel WHERE IterationId = "+iterationId).uniqueResult();
 
         GtfsRtFeedIterationString iterationString = new GtfsRtFeedIterationString(iterationModel);
 
@@ -447,12 +445,12 @@ public class GtfsRtFeed {
 
         //Get a message list
         List<MessageLogModel> messageLogModels = session.createQuery(
-                            " FROM MessageLogModel WHERE IterationId = "+iterationId).list();
+                " FROM MessageLogModel WHERE IterationId = "+iterationId).list();
 
         //For each message get the occurrences
         for (MessageLogModel messageLog : messageLogModels) {
             List<OccurrenceModel> occurrenceModels = session.createQuery(
-                            "FROM OccurrenceModel WHERE messageId = "+messageLog.getMessageId()).list();
+                    "FROM OccurrenceModel WHERE messageId = "+messageLog.getMessageId()).list();
             //Add both to the returned list
             CombinedMessageOccurrenceModel messageOccurrence = new CombinedMessageOccurrenceModel();
             messageOccurrence.setMessageLogModel(messageLog);
