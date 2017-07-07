@@ -89,14 +89,19 @@ All times and timestamps must be in [POSIX time](https://en.wikipedia.org/wiki/U
 
 `stop_time_updates` for a given `trip_id` must be sorted by increasing stop_sequence.
 
-Note that this currently implemented when `stop_sequence` is provided in the GTFS-rt feed, but not when `stop_sequence` is omitted from the GTFS-rt feed (see [issue #159](https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/159)).
+From [Stop Time Updates description](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#stop-time-updates):
+
+>Updates should be sorted by stop_sequence (or stop_ids in the order they occur in the trip).
+
+Note that this validation rule is currently implemented when `stop_sequence` is provided in the GTFS-rt feed, but not when `stop_sequence` is omitted from the GTFS-rt feed (see [issue #159](https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/159)).
 
 *Common mistakes* - Assuming that the GTFS `stop_times.txt` file will be grouped by `trip_id` and sorted by `stop_sequence` - while sorting the data is a good practice, it's not strictly required by the spec.   
 
 *Possible solution* - Group the GTFS `stop_times.txt` records by `trip_id` and sort by `stop_sequence`.
 
 #### References:
-* [`trip_update.stop_time_updates`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#stop-time-updates)
+* [`Stop Time Updates description`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#stop-time-updates)
+* [`stop_time_update` reference](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
 
 <a name="E003"/>
 
@@ -104,11 +109,32 @@ Note that this currently implemented when `stop_sequence` is provided in the GTF
 
 All `trip_ids` provided in the GTFS-rt feed must exist in the GTFS data, unless their `schedule_relationship` is set to `ADDED`.
 
+[`trip`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor) says:
+
+>`trip_id` - The trip_id from the GTFS feed that this selector refers to.
+
+[`schedule_relationship`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#enum-schedulerelationship-1) says:
+
+>If a trip is done in accordance with temporary schedule, not reflected in GTFS, then it shouldn't be marked as SCHEDULED, but marked as ADDED.
+>...
+>`ADDED` - An extra trip that was added in addition to a running schedule, for example, to replace a broken vehicle or to respond to sudden passenger load.
+
+#### References:
+* [`trip.trip_id`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
+* [`trip.schedule_relationship`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#enum-schedulerelationship-1)
+
 <a name="E004"/>
 
 ### E004 - GTFS-rt `route_id` does not exist in GTFS data
 
-All `route_ids` provided in the GTFS-rt feed must exist in the GTFS data
+All `route_ids` provided in the GTFS-rt feed must exist in the GTFS data.
+
+[`trip`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor) says:
+
+>`route_id` - The route_id from the GTFS that this selector refers to.
+
+#### References:
+* [`trip.route_id`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
 
 <a name="E006"/>
 
@@ -337,7 +363,7 @@ Alert `informed_entity` should have at least one specified value (`route_id`, `t
 All `agency_ids` provided in the GTFS-rt `alert.informed_entity.agency_id` should also exist in GTFS `agency.txt`.
 
 #### References:
-* [alert.informed_entity](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-entityselector)
+* [`alert.informed_entity`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-entityselector)
 
 <a name="E035"/>
 
@@ -345,8 +371,13 @@ All `agency_ids` provided in the GTFS-rt `alert.informed_entity.agency_id` shoul
 
 The GTFS-rt `trip.trip_id` should belong to the specified `trip.route_id` in GTFS `trips.txt`.
 
+[`trip`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor) says:
+
+>If route_id is also set, then it should be same as one that the given trip corresponds to.
+
 #### References:
-* [trip.trip_id](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
+* [`trip.trip_id`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
+* [`trip.route_id`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
 
 <a name="E036"/>
 
