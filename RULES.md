@@ -100,7 +100,7 @@ Note that this validation rule is currently implemented when `stop_sequence` is 
 *Possible solution* - Group the GTFS `stop_times.txt` records by `trip_id` and sort by `stop_sequence`.
 
 #### References:
-* [`Stop Time Updates description`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#stop-time-updates)
+* [`Stop Time Updates` description](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#stop-time-updates)
 * [`stop_time_update` reference](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
 
 <a name="E003"/>
@@ -122,6 +122,7 @@ All `trip_ids` provided in the GTFS-rt feed must exist in the GTFS data, unless 
 #### References:
 * [`trip.trip_id`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
 * [`trip.schedule_relationship`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#enum-schedulerelationship-1)
+* [GTFS `trips.txt`](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#tripstxt)
 
 <a name="E004"/>
 
@@ -135,6 +136,7 @@ All `route_ids` provided in the GTFS-rt feed must exist in the GTFS data.
 
 #### References:
 * [`trip.route_id`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
+* [GTFS `routes.txt`](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#routestxt)
 
 <a name="E006"/>
 
@@ -235,7 +237,7 @@ For frequency-based trips defined in `frequencies.txt` with `exact_times` = 1, t
 `start_time` must be in the format `25:15:35`.  Note that times can exceed 24 hrs if service goes into the next service day.
 
 #### References:
-* [trip.start_time](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
+* [`trip.start_time`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
 
 <a name="E021"/>
 
@@ -244,7 +246,7 @@ For frequency-based trips defined in `frequencies.txt` with `exact_times` = 1, t
 `start_date` must be in the `YYYYMMDD` format.
 
 #### References:
-* [trip.start_date](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
+* [`trip.start_date`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
 
 <a name="E022"/>
 
@@ -277,7 +279,7 @@ Within the same `stop_time_update`, arrival and departures times can be the same
 Vehicle position must be valid WGS84 coordinates - latitude must be between -90 and 90 (inclusive), and vehicle longitude must be between -180  and 180 (inclusive).
 
 #### References:
-* [vehicle.position](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-position)
+* [`vehicle.position`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-position)
 
 <a name="E027"/>
 
@@ -288,7 +290,7 @@ Vehicle bearing must be between 0 and 360 degrees (inclusive).  The GTFS-rt spec
 >...in degrees, clockwise from True North, i.e., 0 is North and 90 is East. This can be the compass bearing, or the direction towards the next stop or intermediate location. This should not be deduced from the sequence of previous positions, which clients can compute from previous data.
 
 #### References:
-* [vehicle.position.bearing](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-position)
+* [`vehicle.position.bearing`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-position)
 
 <a name="E028"/>
 
@@ -299,7 +301,7 @@ The vehicle `position` should be inside the agency coverage area.  Coverage area
 Buffer distance is defined by `GtfsMetadata.REGION_BUFFER_METERS`, and is currently 1609 meters (roughly 1 mile).
 
 #### References:
-* [vehicle.position](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-position)
+* [`vehicle.position`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-position)
 
 <a name="E029"/>
 
@@ -310,9 +312,9 @@ The vehicle `position` should be within a buffer surrounding the GTFS `shapes.tx
 Buffer distance is defined by `GtfsMetadata.TRIP_BUFFER_METERS`, and is currently 200 meters (roughly 1/8 of a mile).
 
 #### References:
-* [GTFS shapes.txt](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#shapestxt)
-* [vehicle.position](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-position)
-* [alert.effect.DETOUR](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#enum-effect)
+* [GTFS `shapes.txt`](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#shapestxt)
+* [`vehicle.position`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-position)
+* [`alert.effect.DETOUR`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#enum-effect)
 
 <a name="E030"/>
 
@@ -321,8 +323,8 @@ Buffer distance is defined by `GtfsMetadata.TRIP_BUFFER_METERS`, and is currentl
 The GTFS-rt `alert.informed_entity.trip.trip_id` should belong to the specified GTFS-rt `alert.informed_entity.route_id` in GTFS `trips.txt`.
 
 #### References:
-* [alert.informed_entity](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-entityselector)
-* [GTFS trips.txt](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#tripstxt)
+* [`alert.informed_entity`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-entityselector)
+* [GTFS `trips.txt`](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#tripstxt)
 
 <a name="E031"/>
 
@@ -331,8 +333,8 @@ The GTFS-rt `alert.informed_entity.trip.trip_id` should belong to the specified 
 The `alert.informed_entity.trip.route_id` should be the same as the specified `alert.informed_entity.route_id`.
 
 #### References:
-* [alert.informed_entity](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-entityselector)
-* [alert.informed_entity.trip](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
+* [`alert.informed_entity`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-entityselector)
+* [`alert.informed_entity.trip`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
 
 <a name="E032"/>
 
@@ -340,12 +342,12 @@ The `alert.informed_entity.trip.route_id` should be the same as the specified `a
 
 All alerts must have at least one `informed_entity`.
 
-From [alert.informed_entity](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-entityselector):
+From [`alert.informed_entity`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-entityselector):
 
 > The values of the fields should correspond to the appropriate fields in the GTFS feed. *At least one specifier must be given.* If several are given, then the matching has to apply to all the given specifiers.
 
 #### References:
-* [alert.informed_entity](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-entityselector)
+* [`alert.informed_entity`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-entityselector)
 
 <a name="E033"/>
 
@@ -354,7 +356,7 @@ From [alert.informed_entity](https://github.com/google/transit/blob/master/gtfs-
 Alert `informed_entity` should have at least one specified value (`route_id`, `trip_id`, `stop_id`, etc) to which the alert applies.
 
 #### References:
-* [alert.informed_entity](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-entityselector)
+* [`alert.informed_entity`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-entityselector)
 
 <a name="E034"/>
 
@@ -510,7 +512,7 @@ If only `delay` is provided in a `stop_time_update` `arrival` or `departure` (an
 #### References:
 * [`stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
 * [`stop_time_update.arrival and stop_time_update.departure (StopTimeEvent)`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeevent)
-* [GTFS stop_times.txt](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#stop_timestxt)
+* [GTFS `stop_times.txt`](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#stop_timestxt)
 
 <a name="E047"/>
 
@@ -523,8 +525,8 @@ In other words, if the `VehiclePosition` has a `vehicle_id` A that is assigned t
 Note that this is different from W003, which simply checks to see if an ID that is provided in one feed is provided in the other - that is a warning.
 
 #### References:
-* [vehicle.id](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-vehicledescriptor)
-* [trip.trip_id](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
+* [`vehicle.id`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-vehicledescriptor)
+* [`trip.trip_id`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
 
 # Warnings
 
@@ -559,8 +561,8 @@ In other words, if the `VehiclePosition` has a vehicle that is assigned to `trip
 Note that this is different from E047, which checks for a mismatch of IDs between the feeds - that is an error.
 
 #### References:
-* [vehicle.id](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-vehicledescriptor)
-* [trip.trip_id](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
+* [`vehicle.id`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-vehicledescriptor)
+* [`trip.trip_id`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
 
 <a name="W004"/>
 
@@ -575,7 +577,7 @@ Speeds are flagged as unrealistic if they are greater than `VehicleValidator.MAX
 *Possible solution* - Check to make sure the speed units are *meters per second*.
 
 #### References:
-* [vehicle.position.speed](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-position)
+* [`vehicle.position.speed`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-position)
 
 <a name="W005"/>
 
