@@ -35,10 +35,7 @@ import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.net.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -69,9 +66,7 @@ public class GtfsRtFeed {
     @Produces(MediaType.APPLICATION_JSON)
     public Response postGtfsRtFeed(GtfsRtFeedModel feedInfo) {
         //feedInfo.setGtfsId(1);
-        feedInfo.setStartTime(System.currentTimeMillis());
-
-        //Validate URL for GTFS feed and the GTFS ID.
+       //Validate URL for GTFS feed and the GTFS ID.
         if (feedInfo.getGtfsUrl() == null) {
             return generateError("GTFS-RT URL is required");
         } else if (feedInfo.getGtfsFeedModel().getFeedId() == 0) {
@@ -400,7 +395,7 @@ public class GtfsRtFeed {
     @PUT
     @Path("/{sessionId}/closeSession")
     public void updateSessionData(
-            @PathParam("sessionId") int sessionId) {
+            @PathParam("sessionId") int sessionId) throws MalformedURLException, URISyntaxException{
 
         long currentTime = System.currentTimeMillis();
         Session session = GTFSDB.initSessionBeginTrans();
@@ -425,9 +420,14 @@ public class GtfsRtFeed {
         }
         sessionModel.setErrorCount(errorCount);
         sessionModel.setWarningCount(warningCount);
-
+        URL url = new URL(sessionModel.getGtfsRtFeedModel().getGtfsUrl());
+        URL redUrl = new URL(url.getProtocol()+"://"+url.getHost());
         session.saveOrUpdate(sessionModel);
         GTFSDB.commitAndCloseSession(session);
+        runningTasks.get(sessionModel.getGtfsRtFeedModel().getGtfsUrl()).shutdown();
+        runningTasks.remove(sessionModel.getGtfsRtFeedModel().getGtfsUrl());
+
+        Response.temporaryRedirect(redUrl.toURI());
     }
 
     @GET
