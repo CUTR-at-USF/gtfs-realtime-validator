@@ -100,7 +100,7 @@ Note that this validation rule is currently implemented when `stop_sequence` is 
 *Possible solution* - Group the GTFS `stop_times.txt` records by `trip_id` and sort by `stop_sequence`.
 
 #### References:
-* [`Stop Time Updates` description](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#stop-time-updates)
+* [Stop Time Updates description](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#stop-time-updates)
 * [`stop_time_update` reference](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
 
 <a name="E003"/>
@@ -172,7 +172,21 @@ If location_type is used in `stops.txt`, all stops referenced in `stop_times.txt
 
 ### E011 - GTFS-rt `stop_id` does not exist in GTFS data
 
-All `stop_ids` referenced in GTFS-rt feeds must exist in the GTFS data in `stops.txt`
+All `stop_ids` referenced in GTFS-rt feeds must exist in the GTFS data in `stops.txt`.
+
+From [`stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)):
+
+>`stop_id` - Must be the same as in stops.txt in the corresponding GTFS feed.
+
+From [`position`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-vehicleposition):
+
+>`stop_id` - Identifies the current stop. The value must be the same as in stops.txt in the corresponding GTFS feed.
+
+#### References:
+* [`stop_time_update.stop_id`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
+* [`position.stop_id`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-vehicleposition)
+* [`informed_entity.stop_id`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-entityselector)
+* [GTFS `stops.txt`](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#stopstxt)
 
 <a name="E012"/>
 
@@ -180,23 +194,67 @@ All `stop_ids` referenced in GTFS-rt feeds must exist in the GTFS data in `stops
 
 No timestamps for individual entities (TripUpdate, VehiclePosition, Alerts) in the feeds should be greater than the header timestamp.
 
+From [`header`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-feedheader):
+
+>`timestamp` - This timestamp identifies the moment when the content of this feed has been created (in server time). In POSIX time (i.e., number of seconds since January 1st 1970 00:00:00 UTC). To avoid time skew between systems producing and consuming realtime information it is strongly advised to derive timestamp from a time server. It is completely acceptable to use Stratum 3 or even lower strata servers since time differences up to a couple of seconds are tolerable.
+
+#### References:
+* [`header`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-feedheader)
+
 <a name="E013"/>
 
 ### E013 - Frequency type 0 trip `schedule_relationship` should be `UNSCHEDULED` or empty
 
 For frequency-based exact_times=0 trips, schedule_relationship should be `UNSCHEDULED` or empty.
 
+From [Trip Updates -> Trip Descriptor description](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#trip-descriptor):
+
+>`UNSCHEDULED` - This trip is running and is never associated with a schedule. For example, if there is no schedule and the buses run on a shuttle service.
+
+From [`trip_update.trip.schedule_relationship`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#enum-schedulerelationship-1):
+
+>`UNSCHEDULED` - A trip that is running with no schedule associated to it, for example, if there is no schedule at all.
+
+#### References:
+* [Trip Updates -> Trip Descriptor description](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#trip-descriptor)
+* [`trip_update.trip.schedule_relationship`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#enum-schedulerelationship-1)
+
 <a name="E015"/>
 
 ### E015 - All `stop_ids` referenced in GTFS-rt feeds must have the `location_type` = 0
 
-All `stop_ids` referenced in GTFS-rt feeds must have the `location_type` = 0 in GTFS `stops.txt`
+All `stop_ids` referenced in GTFS-rt feeds must have the `location_type` = 0 in GTFS `stops.txt`.
+
+From [GTFS `stop_times.txt`](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#stop_timestxt):
+
+>`stop_id` - ...The stop_id is referenced from the stops.txt file. If location_type is used in stops.txt, all stops referenced in stop_times.txt must have location_type of 0.
+
+#### References:
+* [GTFS `stop_times.txt`](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#stop_timestxt)
+* [GTFS `stops.txt`](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#stopstxt)
+* [`stop_time_update.stop_id`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
+* [`position.stop_id`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-vehicleposition)
+* [`informed_entity.stop_id`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-entityselector)
 
 <a name="E016"/>
 
 ### E016 - `trip_ids` with `schedule_relationship` `ADDED` must not be in GTFS data
 
-Trips that have a `schedule_relationship` of `ADDED` must not be included in the GTFS data
+Trips that have a `schedule_relationship` of `ADDED` must **NOT** be included in the GTFS data.
+
+From [`trip.schedule_relationship`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#enum-schedulerelationship-1):
+
+>`ADDED` - An extra trip that was added in addition to a running schedule, for example, to replace a broken vehicle or to respond to sudden passenger load.
+
+From [Trip Updates -> Trip Descriptor description](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#trip-descriptor):
+
+>Added - This trip was not scheduled and has been added. For example, to cope with demand, or replace a broken down vehicle.
+
+#### References:
+* [`trip.schedule_relationship`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#enum-schedulerelationship-1)
+* [Trip Updates -> Trip Descriptor description](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#trip-descriptor)
+* [`trip.trip_id`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
+* [GTFS `trips.txt`](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#tripstxt)
 
 <a name="E017"/>
 
@@ -230,11 +288,23 @@ The GTFS-rt header `timestamp` should be monotonically increasing -  it should a
 
 For frequency-based trips defined in `frequencies.txt` with `exact_times` = 1, the GTFS-rt trip `start_time` must be some multiple (including zero) of `headway_secs` later than the `start_time` in file `frequencies.txt` for the corresponding time period.  Note that this doesn't not apply to frequency-based trips defined in `frequencies.txt` with `exact_times` = 0.
 
+From [`trip.start_time`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor):
+
+>`start_time` - ...If the trip corresponds to exact_times=1 GTFS record, then start_time must be some multiple (including zero) of headway_secs later than frequencies.txt start_time for the corresponding time period.
+
+* [`trip.start_time`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
+* [`trip_update.trip`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#alternative-trip-matching)
+* [GTFS `frequencies.txt` `exact_times` = 1](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#frequenciestxt)
+
 <a name="E020"/>
 
 ### E020 - Invalid `start_time` format
 
 `start_time` must be in the format `25:15:35`.  Note that times can exceed 24 hrs if service goes into the next service day.
+
+From [`trip.start_time`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor):
+
+>`start_time` - ...Format and semantics of the field is same as that of GTFS/frequencies.txt/start_time, e.g., 11:15:35 or 25:15:35.
 
 #### References:
 * [`trip.start_time`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
@@ -245,6 +315,10 @@ For frequency-based trips defined in `frequencies.txt` with `exact_times` = 1, t
 
 `start_date` must be in the `YYYYMMDD` format.
 
+From [`trip.start_date`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor):
+
+>`start_date` - The scheduled start date of this trip instance...In YYYYMMDD format.
+
 #### References:
 * [`trip.start_date`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
 
@@ -253,6 +327,10 @@ For frequency-based trips defined in `frequencies.txt` with `exact_times` = 1, t
 ### E022 - Sequential `stop_time_update` times are not increasing
 
 `stop_time_update` arrival/departure times between sequential stops should always increase - they should never be the same or decrease.
+
+#### References:
+* [Stop Time Updates description](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#stop-time-updates)
+* [`stop_time_update` reference](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
 
 <a name="E023"/>
 
