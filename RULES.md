@@ -292,6 +292,7 @@ From [`trip.start_time`](https://github.com/google/transit/blob/master/gtfs-real
 
 >`start_time` - ...If the trip corresponds to exact_times=1 GTFS record, then start_time must be some multiple (including zero) of headway_secs later than frequencies.txt start_time for the corresponding time period.
 
+#### References:
 * [`trip.start_time`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
 * [`trip_update.trip`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#alternative-trip-matching)
 * [GTFS `frequencies.txt` `exact_times` = 1](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#frequenciestxt)
@@ -338,11 +339,27 @@ From [`trip.start_date`](https://github.com/google/transit/blob/master/gtfs-real
 
 For normal scheduled trips (i.e., not defined in `frequencies.txt`), the GTFS-realtime trip `start_time` must match the first GTFS `arrival_time` in `stop_times.txt` for this trip.
 
+From [`trip.start_time`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor):
+
+>`start_time` - The initially scheduled start time of this trip instance. When the trip_id corresponds to a non-frequency-based trip, this field should either be omitted or be equal to the value in the GTFS feed.
+
+#### References:
+* [`trip.start_time`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
+* [GTFS `stop_times.txt`](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#stop_timestxt)
+
 <a name="E024"/>
 
 ### E024 - trip `direction_id` does not match GTFS data
 
 GTFS-rt trip `direction_id` must match the `direction_id` in GTFS `trips.txt`.
+
+From [`trip.direction_id`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor):
+
+>`direction_id` - The direction_id from the GTFS feed trips.txt file, indicating the direction of travel for trips this selector refers to.
+
+#### References:
+* [`trip.direction_id`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
+* [GTFS `trips.txt`](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#tripstxt)
 
 <a name="E025"/>
 
@@ -350,11 +367,20 @@ GTFS-rt trip `direction_id` must match the `direction_id` in GTFS `trips.txt`.
 
 Within the same `stop_time_update`, arrival and departures times can be the same, or the departure time can be later than the arrival time - the departure time should never come before the arrival time.
 
+#### References:
+* [Stop Time Updates description](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#stop-time-updates)
+* [`stop_time_update` reference](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
+
 <a name="E026"/>
 
 ### E026 - Invalid vehicle `position`
 
 Vehicle position must be valid WGS84 coordinates - latitude must be between -90 and 90 (inclusive), and vehicle longitude must be between -180  and 180 (inclusive).
+
+From [`vehicle.position`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-position):
+
+>* `latitude` - Degrees North, in the WGS-84 coordinate system.
+>* `longitude` - Degrees East, in the WGS-84 coordinate system.
 
 #### References:
 * [`vehicle.position`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-position)
