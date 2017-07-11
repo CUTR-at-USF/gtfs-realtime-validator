@@ -8,7 +8,7 @@ A tool that validates [General Transit Feed Specification (GTFS)-realtime](https
 
 ## Quick start
 
-*Please note that this project is still under active development and is in an early alpha state.  It has a limited number of rules and the user interface to view warnings/errors is still under development.*
+*Please note that this project is still under active development and is in an early alpha state.*
 
 1. Install [Java Development Kit (JDK) 1.8 or higher](http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html)
 2. Download the latest alpha build:
