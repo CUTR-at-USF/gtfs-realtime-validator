@@ -31,8 +31,6 @@ public class GtfsRtFeedModel implements Serializable {
     @ManyToOne
     @JoinColumn(name = "gtfsFeedID")
     private GtfsFeedModel gtfsFeedModel;
-    @Column(name="startTime")
-    private long startTime;
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="rtFeedID")
@@ -56,14 +54,6 @@ public class GtfsRtFeedModel implements Serializable {
         this.gtfsFeedModel = gtfsFeedModel;
     }
 
-    public long getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(long startTime) {
-        this.startTime = startTime;
-    }
-
     public int getGtfsRtId() {
         return gtfsRtId;
     }
@@ -77,7 +67,6 @@ public class GtfsRtFeedModel implements Serializable {
         return "GtfsRtFeedModel{" +
                 "gtfsUrl='" + gtfsUrl + '\'' +
                 ", gtfsId=" + gtfsFeedModel.getFeedId() +
-                ", startTime=" + startTime +
                 ", gtfsRtId=" + gtfsRtId +
                 '}';
     }
