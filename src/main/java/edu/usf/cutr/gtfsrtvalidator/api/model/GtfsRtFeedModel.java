@@ -55,15 +55,15 @@ public class GtfsRtFeedModel implements Serializable {
     public void setGtfsFeedModel(GtfsFeedModel gtfsFeedModel) {
         this.gtfsFeedModel = gtfsFeedModel;
     }
-    
+
     public long getStartTime() {
         return startTime;
     }
-    
+
     public void setStartTime(long startTime) {
         this.startTime = startTime;
     }
-    
+
     public int getGtfsRtId() {
         return gtfsRtId;
     }
