@@ -77,7 +77,7 @@ public class GtfsRtFeedModel implements Serializable {
         return "GtfsRtFeedModel{" +
                 "gtfsUrl='" + gtfsUrl + '\'' +
                 ", gtfsId=" + gtfsFeedModel.getFeedId() +
-                ", startTime=" + startTime +            
+                ", startTime=" + startTime +
                 ", gtfsRtId=" + gtfsRtId +
                 '}';
     }
