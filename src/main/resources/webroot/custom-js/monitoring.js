@@ -260,10 +260,12 @@ function stopMonitor() {
         if (sessionIds.hasOwnProperty(sessionId)) {
             $.ajax({
                 url: server + "/api/gtfs-rt-feed/" + sessionIds[sessionId] + "/closeSession",
+                async: false,
                 type: 'PUT'
             });
         }
     }
+    window.location = server;
 }
 
 function showOrHideError(gtfsRtId, errorId) {
