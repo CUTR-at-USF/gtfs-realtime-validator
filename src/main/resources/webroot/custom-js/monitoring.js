@@ -41,6 +41,7 @@ var sessionIds = [];
 
 var toggleDataOn = '<input type="checkbox" checked data-toggle="toggle" data-onstyle="success"/>';
 var toggleDataOff = '<input type="checkbox" data-toggle="toggle" data-onstyle="success"/>';
+var sessionClosed = 0;
 
 //PUT request to start monitoring of the given gtfsRtFeed ID /api/gtfs-rt-feed/{id}/monitor
 for (var gtfsRtFeed in gtfsRtFeeds) {
@@ -260,10 +261,13 @@ function stopMonitor() {
         if (sessionIds.hasOwnProperty(sessionId)) {
             $.ajax({
                 url: server + "/api/gtfs-rt-feed/" + sessionIds[sessionId] + "/closeSession",
+                async: false,
                 type: 'PUT'
             });
         }
     }
+    sessionClosed = 1;
+    window.location = server;
 }
 
 function showOrHideError(gtfsRtId, errorId) {
@@ -322,5 +326,7 @@ $(document).ready(function(){
 });
 
 window.onbeforeunload = function(){
-  stopMonitor();
+    if (sessionClosed == 0) {
+        stopMonitor();
+    }
 }

@@ -27,6 +27,7 @@ import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.helper.IterationErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.helper.MergeMonitorData;
 import edu.usf.cutr.gtfsrtvalidator.helper.QueryHelper;
+import edu.usf.cutr.gtfsrtvalidator.helper.ServiceScheduler;
 import org.hibernate.Session;
 import org.slf4j.LoggerFactory;
 
@@ -126,7 +127,7 @@ public class GtfsRtFeed {
         return Response.ok(feedList).build();
     }
 
-    private static HashMap<String, ScheduledExecutorService> runningTasks = new HashMap<>();
+    private static HashMap<String, ServiceScheduler> runningTasks = new HashMap<>();
 
     @PUT
     @Path("/monitor/{id}")
@@ -149,9 +150,14 @@ public class GtfsRtFeed {
 
         session.save(sessionModel);
         GTFSDB.commitAndCloseSession(session);
-
+        boolean intervalUpdated = false;
+        int leastInterval = updateInterval;
+        if(runningTasks.containsKey(sessionModel.getGtfsRtFeedModel().getGtfsUrl()) &&
+                leastInterval< runningTasks.get(sessionModel.getGtfsRtFeedModel().getGtfsUrl()).getUpdateInterval()){
+            intervalUpdated=true;
+        }
         //Extract the Url and gtfsId to start the background process
-        startBackgroundTask(gtfsRtFeed, updateInterval);
+        startBackgroundTask(gtfsRtFeed, leastInterval, intervalUpdated);
 
         return Response.ok(sessionModel, MediaType.APPLICATION_JSON).build();
     }
@@ -423,9 +429,15 @@ public class GtfsRtFeed {
         }
         sessionModel.setErrorCount(errorCount);
         sessionModel.setWarningCount(warningCount);
-
         session.saveOrUpdate(sessionModel);
         GTFSDB.commitAndCloseSession(session);
+        if (runningTasks.get(sessionModel.getGtfsRtFeedModel().getGtfsUrl()).getParallelClientCount() == 1) {
+            runningTasks.get(sessionModel.getGtfsRtFeedModel().getGtfsUrl()).getScheduler().shutdown();
+            runningTasks.remove(sessionModel.getGtfsRtFeedModel().getGtfsUrl());
+        } else {
+            runningTasks.get(sessionModel.getGtfsRtFeedModel().getGtfsUrl()).setParallelClientCount(
+                    runningTasks.get(sessionModel.getGtfsRtFeedModel().getGtfsUrl()).getParallelClientCount()-1);
+        }
     }
 
     @GET
@@ -481,16 +493,35 @@ public class GtfsRtFeed {
         return INVALID_FEED;
     }
 
-    public synchronized static ScheduledExecutorService startBackgroundTask(GtfsRtFeedModel gtfsRtFeed, int updateInterval) {
+    public synchronized static ServiceScheduler startBackgroundTask(GtfsRtFeedModel gtfsRtFeed, int updateInterval,
+                                                                            boolean intervalUpdated) {
         String rtFeedUrl = gtfsRtFeed.getGtfsUrl();
 
         if (!runningTasks.containsKey(rtFeedUrl)) {
+            ServiceScheduler serviceScheduler = new ServiceScheduler();
             ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
             scheduler.scheduleAtFixedRate(new BackgroundTask(gtfsRtFeed), 0, updateInterval, TimeUnit.SECONDS);
-            runningTasks.put(rtFeedUrl, scheduler);
-            return scheduler;
+            serviceScheduler.setScheduler(scheduler);
+            serviceScheduler.setUpdateInterval(updateInterval);
+            serviceScheduler.setParallelClientCount(1);
+            runningTasks.put(rtFeedUrl, serviceScheduler);
+            return serviceScheduler;
         } else {
-            return runningTasks.get(rtFeedUrl);
+            if (intervalUpdated) {
+                ServiceScheduler serviceScheduler = runningTasks.get(rtFeedUrl);
+                serviceScheduler.getScheduler().shutdown();
+                ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+                scheduler.scheduleAtFixedRate(new BackgroundTask(gtfsRtFeed), 0, updateInterval, TimeUnit.SECONDS);
+                serviceScheduler.setScheduler(scheduler);
+                serviceScheduler.setUpdateInterval(updateInterval);
+                serviceScheduler.setParallelClientCount(serviceScheduler.getParallelClientCount()+1);
+                runningTasks.replace(rtFeedUrl, serviceScheduler);
+                return serviceScheduler;
+            } else {
+                runningTasks.get(rtFeedUrl).setParallelClientCount(runningTasks.get(rtFeedUrl).getParallelClientCount()+1);
+                runningTasks.get(rtFeedUrl).setUpdateInterval(updateInterval);
+                return runningTasks.get(rtFeedUrl);
+            }
         }
     }
 
