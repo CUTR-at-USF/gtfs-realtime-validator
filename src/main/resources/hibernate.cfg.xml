@@ -4,7 +4,7 @@
   <session-factory>
     <property name="hibernate.dialect">org.hibernate.dialect.HSQLDialect</property>
     <property name="hibernate.connection.driver_class">org.hsqldb.jdbcDriver</property>
-    <property name="hibernate.connection.url">jdbc:hsqldb:file:gtfsrthsql</property>
+    <property name="hibernate.connection.url">jdbc:hsqldb:file:gtfsrthsql;hsqldb.log_data=false</property>
     <property name="hibernate.c3p0.min_size">1</property>
     <property name="hibernate.c3p0.max_size">1</property>
     <property name="hibernate.c3p0.timeout">1800</property>
