@@ -155,6 +155,9 @@ public class UtilTest {
         validDate = "20170427";
         assertEquals(true, TimestampUtils.isValidDateFormat(validDate));
 
+        validDate = "20170706";
+        assertEquals(true, TimestampUtils.isValidDateFormat(validDate));
+
         /**
          * Bad dates
          */
