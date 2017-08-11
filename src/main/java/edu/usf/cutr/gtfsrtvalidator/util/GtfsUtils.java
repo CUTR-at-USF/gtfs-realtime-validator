@@ -21,8 +21,6 @@ import org.locationtech.spatial4j.shape.Shape;
 import org.locationtech.spatial4j.shape.ShapeFactory;
 import org.locationtech.spatial4j.shape.SpatialRelation;
 
-import java.util.concurrent.TimeUnit;
-
 import static org.locationtech.spatial4j.context.SpatialContext.GEO;
 
 /**
@@ -58,23 +56,6 @@ public class GtfsUtils {
      */
     public static double toMiles(double meters) {
         return meters * 0.000621371d;
-    }
-
-
-    /**
-     * Logs the amount of time that a particular activity took, based on the given start time
-     *
-     * @param log            the log to write to
-     * @param prefix         text to write to log before the amount of time that the activity took
-     * @param startTimeNanos the starting time of this iteration, in nanoseconds (e.g., System.nanoTime())
-     */
-    public static void logDuration(org.slf4j.Logger log, String prefix, long startTimeNanos) {
-        long durationNanos = System.nanoTime() - startTimeNanos;
-        long durationMillis = TimeUnit.NANOSECONDS.toMillis(durationNanos);
-        long durationSeconds = TimeUnit.NANOSECONDS.toSeconds(durationNanos);
-        double elapsedTime = (double)durationSeconds+(double)durationMillis/1000.0;
-        elapsedTime = Math.round(elapsedTime*1000.0)/1000.0;
-        log.info(prefix + elapsedTime + " seconds");
     }
 
     /**
@@ -231,20 +212,5 @@ public class GtfsUtils {
         } else {
             return "stop_id " + stopTimeUpdate.getStopId();
         }
-    }
-
-    /**
-     * Returns the elapsed time by taking start-time as input
-     *
-     * @param startTimeNanos the startTime in nanoseconds
-     * @return the elapsedTime as the difference between System.nanoTime() and startTimeNanos".
-     */
-    public static double getElapsedTime(long startTimeNanos){
-        long durationNanos = System.nanoTime() - startTimeNanos;
-        long durationMillis = TimeUnit.NANOSECONDS.toMillis(durationNanos);
-        long durationSeconds = TimeUnit.NANOSECONDS.toSeconds(durationNanos);
-        double elapsedTime = (double)durationSeconds+(double)durationMillis/1000.0;
-        elapsedTime = Math.round(elapsedTime*1000.0)/1000.0;
-        return elapsedTime;
     }
 }

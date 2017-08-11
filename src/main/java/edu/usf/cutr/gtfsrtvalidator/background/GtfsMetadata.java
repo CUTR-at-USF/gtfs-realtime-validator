@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils.logDuration;
+import static edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils.logDuration;
 import static org.hibernate.internal.util.StringHelper.isEmpty;
 
 /**

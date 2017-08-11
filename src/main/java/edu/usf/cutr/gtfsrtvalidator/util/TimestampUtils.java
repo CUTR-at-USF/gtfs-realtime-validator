@@ -17,6 +17,7 @@
 package edu.usf.cutr.gtfsrtvalidator.util;
 
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
@@ -35,6 +36,7 @@ public class TimestampUtils {
     private static DateFormat mDateFormat = new SimpleDateFormat("yyyyMMdd");
     private static DateFormat mTimeFormat = new SimpleDateFormat("HH:mm:ss");
     private static Pattern mTimePattern = Pattern.compile("^[0-2][0-9]:[0-5][0-9]:[0-5][0-9]$"); // Up to 29 hrs
+    private static DecimalFormat mDecimalFormat = new DecimalFormat("0.0##");
 
     /**
      * Returns true if the timestamp is a valid POSIX time, false if it is not
@@ -119,5 +121,42 @@ public class TimestampUtils {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Returns the elapsed time between the provided start and end times
+     *
+     * @param startTimeNanos the starting time in nanoseconds
+     * @param endTimeNanos   the ending time in nanoseconds
+     * @return the elapsed time as the difference between endTimeNanos and startTimeNanos, in seconds as a decimal (0.22)
+     */
+    public static double getElapsedTime(long startTimeNanos, long endTimeNanos) {
+        long durationMillis = TimeUnit.NANOSECONDS.toMillis(endTimeNanos - startTimeNanos);
+        return durationMillis / 1000f;
+    }
+
+    /**
+     * Returns the elapsed time as a human readable string, like "2.5 seconds"
+     *
+     * @param elapsedTimeSeconds elapsed time as decimal seconds (e.g., 2.5)
+     * @return a the elapsed time as a human readable string, like "2.5 seconds"
+     */
+    public static String getElapsedTimeString(double elapsedTimeSeconds) {
+        return mDecimalFormat.format(elapsedTimeSeconds) + " seconds";
+    }
+
+    /**
+     * Logs the amount of time that a particular activity took, based on the given start time, in the format
+     * of:
+     * <p>
+     * prefix + "0.22 seconds"
+     *
+     * @param log            the log to write to
+     * @param prefix         text to write to log before the amount of time that the activity took
+     * @param startTimeNanos the starting time of this iteration, in nanoseconds (e.g., System.nanoTime())
+     */
+    public static void logDuration(org.slf4j.Logger log, String prefix, long startTimeNanos) {
+        double elapsedTime = getElapsedTime(startTimeNanos, System.nanoTime());
+        log.info(prefix + getElapsedTimeString(elapsedTime));
     }
 }

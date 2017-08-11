@@ -24,7 +24,6 @@ import edu.usf.cutr.gtfsrtvalidator.api.resource.GtfsFeed;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.helper.DBHelper;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
-import edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import edu.usf.cutr.gtfsrtvalidator.validation.rules.*;
 import org.apache.commons.io.IOUtils;
@@ -44,7 +43,8 @@ import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-import static edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils.logDuration;
+import static edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils.getElapsedTime;
+import static edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils.getElapsedTimeString;
 
 public class BackgroundTask implements Runnable {
 
@@ -205,7 +205,7 @@ public class BackgroundTask implements Runnable {
             for (FeedEntityValidator rule : mValidationRules) {
                 consoleOutput.append(validateEntity(currentTimeMillis, combinedFeed, previousFeedMessage, gtfsData, gtfsMetadata, feedIteration, rule));
             }
-            consoleOutput.append("\nProcessed " + mCurrentGtfsRtFeed.getGtfsUrl() + " in " + GtfsUtils.getElapsedTime(startTimeNanos) + " seconds");
+            consoleOutput.append("\nProcessed " + mCurrentGtfsRtFeed.getGtfsUrl() + " in " + getElapsedTimeString(getElapsedTime(startTimeNanos, System.nanoTime())));
             _log.info(consoleOutput.toString());
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -218,7 +218,7 @@ public class BackgroundTask implements Runnable {
         StringBuffer consoleLine;
         List<ErrorListHelperModel> errorLists = feedEntityValidator.validate(currentTimeMillis, gtfsData, gtfsMetadata, currentFeedMessage, previousFeedMessage);
         consoleLine = new StringBuffer();
-        consoleLine.append("\nProcessed " + feedEntityValidator.getClass().getSimpleName() + " in " + GtfsUtils.getElapsedTime(startTimeNanos) + " seconds");
+        consoleLine.append("\nProcessed " + feedEntityValidator.getClass().getSimpleName() + " in " + getElapsedTimeString(getElapsedTime(startTimeNanos, System.nanoTime())));
         if (errorLists != null) {
             for (ErrorListHelperModel errorList : errorLists) {
                 if (!errorList.getOccurrenceList().isEmpty()) {

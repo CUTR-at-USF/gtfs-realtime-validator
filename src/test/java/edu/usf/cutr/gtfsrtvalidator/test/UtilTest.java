@@ -30,6 +30,7 @@ import org.locationtech.spatial4j.shape.Shape;
 import org.locationtech.spatial4j.shape.ShapeFactory;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils.MIN_POSIX_TIME;
 import static junit.framework.TestCase.assertFalse;
@@ -271,6 +272,53 @@ public class UtilTest {
         TimeZone timeZone = TimeZone.getTimeZone(timeZoneText);
         String clockTime = TimestampUtils.posixToClock(time, timeZone);
         assertEquals("08:51:26", clockTime);
+    }
+
+    @Test
+    public void testGetElapsedTime() {
+        long startTime = 1502457651566L, endTime, delta;
+        double elapsedTime;
+
+        // 60 seconds
+        delta = TimeUnit.SECONDS.toNanos(60);
+        endTime = startTime + delta;
+
+        elapsedTime = TimestampUtils.getElapsedTime(startTime, endTime);
+        assertEquals(60, elapsedTime, 0.00000001d);
+
+        // 60.5 seconds
+        delta = TimeUnit.MILLISECONDS.toNanos(6500);
+        endTime = startTime + delta;
+
+        elapsedTime = TimestampUtils.getElapsedTime(startTime, endTime);
+        assertEquals(6.5d, elapsedTime, 0.00000001d);
+
+        // 0.5 seconds
+        delta = TimeUnit.MILLISECONDS.toNanos(500);
+        endTime = startTime + delta;
+
+        elapsedTime = TimestampUtils.getElapsedTime(startTime, endTime);
+        assertEquals(0.5d, elapsedTime, 0.00000001d);
+    }
+
+    @Test
+    public void testGetElapsedTimeString() {
+        double elapsedTime;
+
+        elapsedTime = 2.5;
+        assertEquals("2.5 seconds", TimestampUtils.getElapsedTimeString(elapsedTime));
+
+        elapsedTime = 3.0;
+        assertEquals("3.0 seconds", TimestampUtils.getElapsedTimeString(elapsedTime));
+
+        elapsedTime = 3.25;
+        assertEquals("3.25 seconds", TimestampUtils.getElapsedTimeString(elapsedTime));
+
+        elapsedTime = 3.25123412;
+        assertEquals("3.251 seconds", TimestampUtils.getElapsedTimeString(elapsedTime));
+
+        elapsedTime = 3.25163412;
+        assertEquals("3.252 seconds", TimestampUtils.getElapsedTimeString(elapsedTime));
     }
 
     @Test
