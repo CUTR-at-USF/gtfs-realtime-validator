@@ -232,4 +232,19 @@ public class GtfsUtils {
             return "stop_id " + stopTimeUpdate.getStopId();
         }
     }
+
+    /**
+     * Returns the elapsed time by taking start-time as input
+     *
+     * @param startTimeNanos the startTime in nanoseconds
+     * @return the elapsedTime as the difference between System.nanoTime() and startTimeNanos".
+     */
+    public static double getElapsedTime(long startTimeNanos){
+        long durationNanos = System.nanoTime() - startTimeNanos;
+        long durationMillis = TimeUnit.NANOSECONDS.toMillis(durationNanos);
+        long durationSeconds = TimeUnit.NANOSECONDS.toSeconds(durationNanos);
+        double elapsedTime = (double)durationSeconds+(double)durationMillis/1000.0;
+        elapsedTime = Math.round(elapsedTime*1000.0)/1000.0;
+        return elapsedTime;
+    }
 }

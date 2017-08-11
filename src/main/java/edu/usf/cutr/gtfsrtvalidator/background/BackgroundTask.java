@@ -24,6 +24,7 @@ import edu.usf.cutr.gtfsrtvalidator.api.resource.GtfsFeed;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.helper.DBHelper;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
+import edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import edu.usf.cutr.gtfsrtvalidator.validation.rules.*;
 import org.apache.commons.io.IOUtils;
@@ -83,10 +84,9 @@ public class BackgroundTask implements Runnable {
             GtfsRealtime.FeedMessage previousFeedMessage = null;
             GtfsDaoImpl gtfsData;
             GtfsMetadata gtfsMetadata;
-
             // Holds data needed in the database under each iteration
             GtfsRtFeedIterationModel feedIteration;
-
+            StringBuffer consoleOutput;
             // Get the GTFS feed from the GtfsDaoMap using the gtfsFeedId of the current feed.
             gtfsData = GtfsFeed.GtfsDaoMap.get(mCurrentGtfsRtFeed.getGtfsFeedModel().getFeedId());
             // Create the GTFS metadata if it doesn't already exist
@@ -119,7 +119,7 @@ public class BackgroundTask implements Runnable {
                 session = GTFSDB.initSessionBeginTrans();
                 feedIteration = (GtfsRtFeedIterationModel) session.createQuery("FROM GtfsRtFeedIterationModel"
                         + " WHERE rtFeedId = " + mCurrentGtfsRtFeed.getGtfsRtId()
-                            + " ORDER BY IterationId DESC").setMaxResults(1).uniqueResult();
+                        + " ORDER BY IterationId DESC").setMaxResults(1).uniqueResult();
                 if (feedIteration != null) {
                     prevFeedDigest = feedIteration.getFeedHash();
                 }
@@ -198,26 +198,27 @@ public class BackgroundTask implements Runnable {
             feedMessageBuilder.addAllEntity(allEntitiesArrayList);
 
             GtfsRealtime.FeedMessage combinedFeed = feedMessageBuilder.build();
-
             // Use the same current time for all rules for consistency
             long currentTimeMillis = System.currentTimeMillis();
-
+            consoleOutput = new StringBuffer();
             // Run validation rules
             for (FeedEntityValidator rule : mValidationRules) {
-                validateEntity(currentTimeMillis, combinedFeed, previousFeedMessage, gtfsData, gtfsMetadata, feedIteration, rule);
+                consoleOutput.append(validateEntity(currentTimeMillis, combinedFeed, previousFeedMessage, gtfsData, gtfsMetadata, feedIteration, rule));
             }
-
-            logDuration(_log, "Processed " + mCurrentGtfsRtFeed.getGtfsUrl() + " in ", startTimeNanos);
+            consoleOutput.append("\nProcessed " + mCurrentGtfsRtFeed.getGtfsUrl() + " in " + GtfsUtils.getElapsedTime(startTimeNanos) + " seconds");
+            _log.info(consoleOutput.toString());
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
 
-    private void validateEntity(long currentTimeMillis, GtfsRealtime.FeedMessage currentFeedMessage, GtfsRealtime.FeedMessage previousFeedMessage, GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRtFeedIterationModel feedIteration, FeedEntityValidator feedEntityValidator) {
+    private StringBuffer validateEntity(long currentTimeMillis, GtfsRealtime.FeedMessage currentFeedMessage, GtfsRealtime.FeedMessage previousFeedMessage, GtfsDaoImpl gtfsData,
+                                        GtfsMetadata gtfsMetadata, GtfsRtFeedIterationModel feedIteration, FeedEntityValidator feedEntityValidator) {
         long startTimeNanos = System.nanoTime();
+        StringBuffer consoleLine;
         List<ErrorListHelperModel> errorLists = feedEntityValidator.validate(currentTimeMillis, gtfsData, gtfsMetadata, currentFeedMessage, previousFeedMessage);
-        logDuration(_log, "Processed " + feedEntityValidator.getClass().getSimpleName() + " in ", startTimeNanos);
-
+        consoleLine = new StringBuffer();
+        consoleLine.append("\nProcessed " + feedEntityValidator.getClass().getSimpleName() + " in " + GtfsUtils.getElapsedTime(startTimeNanos) + " seconds");
         if (errorLists != null) {
             for (ErrorListHelperModel errorList : errorLists) {
                 if (!errorList.getOccurrenceList().isEmpty()) {
@@ -228,5 +229,6 @@ public class BackgroundTask implements Runnable {
                 }
             }
         }
+        return consoleLine;
     }
 }
