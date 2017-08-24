@@ -68,7 +68,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 2
         assertEquals(2, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -83,7 +83,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 3
         assertEquals(3, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E002, 1);
         TestUtils.assertResults(expected, results);
 
@@ -194,7 +194,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = stopTimeUpdateValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = stopTimeUpdateValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -249,7 +249,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = stopTimeUpdateValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = stopTimeUpdateValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E009, 1);
         TestUtils.assertResults(expected, results);
 
@@ -284,7 +284,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 3
         assertEquals(3, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopTimeUpdateValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopTimeUpdateValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -307,7 +307,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 3
         assertEquals(3, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopTimeUpdateValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopTimeUpdateValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -330,7 +330,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 3
         assertEquals(3, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopTimeUpdateValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopTimeUpdateValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -367,7 +367,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 2
         assertEquals(2, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -389,7 +389,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 2
         assertEquals(2, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -416,7 +416,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 3
         assertEquals(3, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E036, 1);
         TestUtils.assertResults(expected, results);
 
@@ -443,7 +443,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 3
         assertEquals(3, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E036, 1);
         TestUtils.assertResults(expected, results);
 
@@ -480,7 +480,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 2
         assertEquals(2, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -502,7 +502,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 2
         assertEquals(2, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -529,7 +529,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 3
         assertEquals(3, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E037, 1);
         TestUtils.assertResults(expected, results);
 
@@ -556,7 +556,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 3
         assertEquals(3, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E037, 1);
         TestUtils.assertResults(expected, results);
 
@@ -588,7 +588,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 1
         assertEquals(1, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E040, 1);
         TestUtils.assertResults(expected, results);
 
@@ -605,7 +605,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 1
         assertEquals(1, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -622,7 +622,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 1
         assertEquals(1, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -640,7 +640,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 1
         assertEquals(1, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -671,7 +671,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 0
         assertEquals(0, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E041, 1);
         TestUtils.assertResults(expected, results);
 
@@ -687,7 +687,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 1
         assertEquals(1, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -701,7 +701,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 0
         assertEquals(0, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -735,7 +735,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 1
         assertEquals(1, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -753,7 +753,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 1
         assertEquals(1, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -771,7 +771,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 1
         assertEquals(1, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E042, 1);
         TestUtils.assertResults(expected, results);
 
@@ -789,7 +789,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 1
         assertEquals(1, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E042, 1);
         TestUtils.assertResults(expected, results);
 
@@ -822,7 +822,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 1
         assertEquals(1, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E043, 1);
         TestUtils.assertResults(expected, results);
 
@@ -839,7 +839,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 1
         assertEquals(1, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -856,7 +856,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 1
         assertEquals(1, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -874,7 +874,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 1
         assertEquals(1, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -892,7 +892,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 1
         assertEquals(1, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -930,7 +930,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 1
         assertEquals(1, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -949,7 +949,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 1
         assertEquals(1, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -968,7 +968,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 1
         assertEquals(1, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -987,7 +987,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 1
         assertEquals(1, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -1006,7 +1006,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 1
         assertEquals(1, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E044, 1);
         TestUtils.assertResults(expected, results);
 
@@ -1025,7 +1025,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 1
         assertEquals(1, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E044, 1);
         TestUtils.assertResults(expected, results);
 
@@ -1044,7 +1044,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 1
         assertEquals(1, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -1063,7 +1063,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         // StopTimeUpdate count should be 1
         assertEquals(1, feedMessageBuilder.getEntity(0).getTripUpdate().getStopTimeUpdateCount());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -1174,7 +1174,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -1238,7 +1238,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E045, 1);
         TestUtils.assertResults(expected, results);
 
@@ -1302,7 +1302,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E045, 2);
         TestUtils.assertResults(expected, results);
 
@@ -1366,7 +1366,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E045, 2);
         TestUtils.assertResults(expected, results);
 
@@ -1430,7 +1430,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E045, 2);
         TestUtils.assertResults(expected, results);
 
@@ -1488,7 +1488,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -1546,7 +1546,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E045, 1);
         TestUtils.assertResults(expected, results);
 
@@ -1604,7 +1604,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E045, 2);
         TestUtils.assertResults(expected, results);
 
@@ -1655,7 +1655,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -1711,7 +1711,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         expected.put(E009, 1);
         TestUtils.assertResults(expected, results);
@@ -1832,7 +1832,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfsTimepointsOnlyLegacyExactTimes1, bullRunnerGtfsTimepointsOnlyLegacyExactTimes1Metadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfsTimepointsOnlyLegacyExactTimes1, bullRunnerGtfsTimepointsOnlyLegacyExactTimes1Metadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -1905,7 +1905,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfsTimepointsOnlyLegacyExactTimes1, bullRunnerGtfsTimepointsOnlyLegacyExactTimes1Metadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfsTimepointsOnlyLegacyExactTimes1, bullRunnerGtfsTimepointsOnlyLegacyExactTimes1Metadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -1943,7 +1943,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfsTimepointsOnlyLegacyExactTimes1, bullRunnerGtfsTimepointsOnlyLegacyExactTimes1Metadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfsTimepointsOnlyLegacyExactTimes1, bullRunnerGtfsTimepointsOnlyLegacyExactTimes1Metadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -1995,7 +1995,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfsTimepointsOnlyLegacyExactTimes1, bullRunnerGtfsTimepointsOnlyLegacyExactTimes1Metadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfsTimepointsOnlyLegacyExactTimes1, bullRunnerGtfsTimepointsOnlyLegacyExactTimes1Metadata, feedMessageBuilder.build(), null, null);
         expected.put(E046, 4);
         TestUtils.assertResults(expected, results);
 
@@ -2042,7 +2042,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfsTimepointsOnlyLegacyExactTimes1, bullRunnerGtfsTimepointsOnlyLegacyExactTimes1Metadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfsTimepointsOnlyLegacyExactTimes1, bullRunnerGtfsTimepointsOnlyLegacyExactTimes1Metadata, feedMessageBuilder.build(), null, null);
         expected.put(E046, 4);
         expected.put(E009, 1);
         TestUtils.assertResults(expected, results);
@@ -2090,7 +2090,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfsTimepointsOnlyLegacyExactTimes1, bullRunnerGtfsTimepointsOnlyLegacyExactTimes1Metadata, feedMessageBuilder.build(), null);
+        results = stopSequenceValidator.validate(MIN_POSIX_TIME, bullRunnerGtfsTimepointsOnlyLegacyExactTimes1, bullRunnerGtfsTimepointsOnlyLegacyExactTimes1Metadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         expected.put(E046, 4);
         TestUtils.assertResults(expected, results);

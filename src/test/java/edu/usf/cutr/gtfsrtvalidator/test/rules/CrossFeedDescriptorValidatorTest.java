@@ -63,7 +63,7 @@ public class CrossFeedDescriptorValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, null, null, feedMessageBuilder.build());
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -79,7 +79,7 @@ public class CrossFeedDescriptorValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, null, null, feedMessageBuilder.build());
         expected.put(W003, 4);
         TestUtils.assertResults(expected, results);
 
@@ -116,7 +116,7 @@ public class CrossFeedDescriptorValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         feedMessageBuilder.addEntity(1, feedEntityBuilder.build());
 
-        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, null, null, feedMessageBuilder.build());
         expected.put(W003, 4);
         TestUtils.assertResults(expected, results);
 
@@ -153,7 +153,7 @@ public class CrossFeedDescriptorValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         feedMessageBuilder.setEntity(1, feedEntityBuilder.build());
 
-        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, null, null, feedMessageBuilder.build());
         expected.put(W003, 4);
         TestUtils.assertResults(expected, results);
 
@@ -164,7 +164,7 @@ public class CrossFeedDescriptorValidatorTest extends FeedMessageTest {
         feedMessageBuilder.clearEntity();
         feedMessageBuilder.addEntity(0, feedEntityBuilder.build());
 
-        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, null, null, feedMessageBuilder.build());
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -196,7 +196,7 @@ public class CrossFeedDescriptorValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.addEntity(1, feedEntityBuilder.build());
 
-        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, null, null, feedMessageBuilder.build());
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -229,7 +229,7 @@ public class CrossFeedDescriptorValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, null, null, feedMessageBuilder.build());
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -247,7 +247,7 @@ public class CrossFeedDescriptorValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, null, null, feedMessageBuilder.build());
         expected.put(W003, 2);
         expected.put(E047, 1);
         TestUtils.assertResults(expected, results);
@@ -264,7 +264,7 @@ public class CrossFeedDescriptorValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, null, null, feedMessageBuilder.build());
         expected.put(W003, 2);
         expected.put(E047, 1);
         TestUtils.assertResults(expected, results);
@@ -281,7 +281,7 @@ public class CrossFeedDescriptorValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, null, null, feedMessageBuilder.build());
         expected.clear();
         expected.put(W003, 4);
         TestUtils.assertResults(expected, results);
@@ -309,7 +309,7 @@ public class CrossFeedDescriptorValidatorTest extends FeedMessageTest {
         feedEntityBuilder.clearTripUpdate();
         feedMessageBuilder.addEntity(1, feedEntityBuilder.build());
 
-        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, null, null, feedMessageBuilder.build());
         expected.clear();
         expected.put(W003, 4);
         TestUtils.assertResults(expected, results);
@@ -337,7 +337,7 @@ public class CrossFeedDescriptorValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         feedMessageBuilder.setEntity(1, feedEntityBuilder.build());
 
-        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, null, null, feedMessageBuilder.build());
         expected.clear();
         expected.put(W003, 4);
         TestUtils.assertResults(expected, results);
@@ -376,7 +376,7 @@ public class CrossFeedDescriptorValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         feedMessageBuilder.setEntity(1, feedEntityBuilder.build());
 
-        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, null, null, feedMessageBuilder.build());
         expected.clear();
         expected.put(W003, 4);
         TestUtils.assertResults(expected, results);
@@ -415,7 +415,7 @@ public class CrossFeedDescriptorValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         feedMessageBuilder.setEntity(1, feedEntityBuilder.build());
 
-        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = crossFeedDescriptorValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, null, null, feedMessageBuilder.build());
         expected.clear();
         expected.put(W003, 4);
         TestUtils.assertResults(expected, results);
