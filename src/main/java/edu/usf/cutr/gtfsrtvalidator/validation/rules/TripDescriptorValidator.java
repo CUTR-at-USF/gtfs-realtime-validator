@@ -26,6 +26,7 @@ import edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.hsqldb.lib.StringUtil;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
+import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
 import org.slf4j.LoggerFactory;
 
@@ -108,12 +109,14 @@ public class TripDescriptorValidator implements FeedEntityValidator {
                             // Trip is in GTFS data and is an ADDED trip - E016
                             RuleUtils.addOccurrence(E016, getTripId(entity, tripUpdate), errorListE016, _log);
                         }
+                        if (tripUpdate.getTrip().hasStartTime()) {
+                            checkE023(tripUpdate, tripUpdate.getTrip(), gtfsMetadata, errorListE023);
+                        }
                     }
                 }
 
                 if (tripUpdate.getTrip().hasStartTime()) {
                     checkE020(tripUpdate, tripUpdate.getTrip(), errorListE020);
-                    checkE023(tripUpdate, tripUpdate.getTrip(), gtfsMetadata, errorListE023);
                 }
 
                 checkE021(tripUpdate, tripUpdate.getTrip(), errorListE021);
@@ -154,13 +157,15 @@ public class TripDescriptorValidator implements FeedEntityValidator {
                                 // E016 - Trip is in GTFS data and is an ADDED trip
                                 RuleUtils.addOccurrence(E016, "vehicle_id " + entity.getVehicle().getVehicle().getId() + " trip_id " + tripId, errorListE016, _log);
                             }
+                            if (trip.hasStartTime()) {
+                                checkE023(entity.getVehicle(), trip, gtfsMetadata, errorListE023);
+                            }
                         }
                     }
                 }
 
                 if (trip.hasStartTime()) {
                     checkE020(entity.getVehicle(), trip, errorListE020);
-                    checkE023(entity.getVehicle(), trip, gtfsMetadata, errorListE023);
                 }
 
                 checkE004(entity.getVehicle(), trip, gtfsMetadata, errorListE004);
@@ -284,7 +289,12 @@ public class TripDescriptorValidator implements FeedEntityValidator {
         String tripId = trip.getTripId();
         if (tripId != null && !gtfsMetadata.getExactTimesZeroTripIds().contains(tripId) && !gtfsMetadata.getExactTimesOneTrips().containsKey(tripId)) {
             // Trip is a normal (not frequencies.txt) trip
-            int firstArrivalTime = gtfsMetadata.getTripStopTimes().get(tripId).get(0).getArrivalTime();
+            List<StopTime> stopTimes = gtfsMetadata.getTripStopTimes().get(tripId);
+            if (stopTimes == null || stopTimes.isEmpty()) {
+                // There isn't a trip in GTFS trips.txt for this trip, or it doesn't have any records in GTFS stop_times.txt
+                return;
+            }
+            int firstArrivalTime = stopTimes.get(0).getArrivalTime();
             String formattedArrivalTime = TimestampUtils.secondsAfterMidnightToClock(firstArrivalTime);
             if (!startTime.equals(formattedArrivalTime)) {
                 String prefix = "GTFS-rt " + getVehicleAndTripIdText(entity) + " start_time is " + startTime + " and GTFS initial arrival_time is " + formattedArrivalTime;

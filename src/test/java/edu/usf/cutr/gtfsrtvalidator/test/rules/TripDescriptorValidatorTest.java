@@ -330,6 +330,20 @@ public class TripDescriptorValidatorTest extends FeedMessageTest {
         expected.put(E023, 2);
         TestUtils.assertResults(expected, results);
 
+        // Set valid start_time, but with a trip_id that doesn't exist in GTFS data (to make sure no NPE - see #217) - no errors for E023, but 2 errors for E003 missing trip_id in GTFS)
+        tripDescriptorBuilder.setStartTime("00:20:00");
+        tripDescriptorBuilder.setTripId("100000000");
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripIdValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        expected.clear();
+        expected.put(E003, 2);
+        TestUtils.assertResults(expected, results);
+
         clearAndInitRequiredFeedFields();
     }
 
