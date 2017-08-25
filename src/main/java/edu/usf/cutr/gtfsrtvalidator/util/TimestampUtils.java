@@ -16,10 +16,13 @@
  */
 package edu.usf.cutr.gtfsrtvalidator.util;
 
-import java.text.DateFormat;
-import java.text.DecimalFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.text.*;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
+import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -32,11 +35,13 @@ public class TimestampUtils {
 
     public static long MIN_POSIX_TIME = 1104537600L;  // Minimum valid time for a timestamp to be POSIX (Jan 1, 2005)
     public static long MAX_POSIX_TIME = 1991620134L;  // Maximum valid time for a timestamp to be POSIX (Feb 10, 2033)
-
-    private static DateFormat mDateFormat = new SimpleDateFormat("yyyyMMdd");
-    private static DateFormat mTimeFormat = new SimpleDateFormat("HH:mm:ss");
+    private static String dateFormat = "yyyyMMdd";
+    private static String timeFormat = "HH:mm:ss";
+    private static DateTimeFormatter mDateFormat = new DateTimeFormatterBuilder().parseStrict()
+            .parseCaseInsensitive().appendPattern(dateFormat).toFormatter();
+    private static ThreadLocal<DateFormat> mTimeFormatTLocal = ThreadLocal.withInitial(() -> new SimpleDateFormat(timeFormat));
     private static Pattern mTimePattern = Pattern.compile("^[0-2][0-9]:[0-5][0-9]:[0-5][0-9]$"); // Up to 29 hrs
-    private static DecimalFormat mDecimalFormat = new DecimalFormat("0.0##");
+    private static ThreadLocal<DecimalFormat> mDecimalFormatTLocal= ThreadLocal.withInitial(() -> new DecimalFormat("0.0##"));
 
     /**
      * Returns true if the timestamp is a valid POSIX time, false if it is not
@@ -78,6 +83,7 @@ public class TimestampUtils {
      * @return A converted version of time in 24hr clock time like "06:00:00"
      */
     public static String posixToClock(long posixTime, TimeZone timeZone) {
+        DateFormat mTimeFormat = mTimeFormatTLocal.get();
         if (timeZone != null) {
             mTimeFormat.setTimeZone(timeZone);
         }
@@ -107,17 +113,16 @@ public class TimestampUtils {
      * @return true if the provided GTFS-rt start_date is in YYYYMMDD format, false if it is not
      */
     public static boolean isValidDateFormat(String startDate) {
-        mDateFormat.setLenient(false);
-
         if (startDate.length() != 8) {
             // SimpleDateFormat doesn't catch 2017011 as bad format, so check length first
             return false;
         }
-
-        try {
-            mDateFormat.parse(startDate);
-        } catch (ParseException e) {
-            // Date format or value is invalid
+        java.text.ParsePosition position = new ParsePosition(0);
+        position.setIndex(0);
+        position.setErrorIndex(-1);
+        try{
+            mDateFormat.parse(startDate, position);
+        }catch(DateTimeParseException e) {
             return false;
         }
         return true;
@@ -142,6 +147,7 @@ public class TimestampUtils {
      * @return a the elapsed time as a human readable string, like "2.5 seconds"
      */
     public static String getElapsedTimeString(double elapsedTimeSeconds) {
+        DecimalFormat mDecimalFormat = mDecimalFormatTLocal.get();
         return mDecimalFormat.format(elapsedTimeSeconds) + " seconds";
     }
 
