@@ -52,7 +52,7 @@ public class HeaderValidatorTest extends FeedMessageTest {
         headerBuilder.setGtfsRealtimeVersion("1.0");
         feedMessageBuilder.setHeader(headerBuilder.build());
 
-        results = headerValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = headerValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -60,7 +60,7 @@ public class HeaderValidatorTest extends FeedMessageTest {
         headerBuilder.setGtfsRealtimeVersion("2.0");
         feedMessageBuilder.setHeader(headerBuilder.build());
 
-        results = headerValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = headerValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E038, 1);
         TestUtils.assertResults(expected, results);
 
@@ -68,7 +68,7 @@ public class HeaderValidatorTest extends FeedMessageTest {
         headerBuilder.setGtfsRealtimeVersion("1");
         feedMessageBuilder.setHeader(headerBuilder.build());
 
-        results = headerValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = headerValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E038, 1);
         TestUtils.assertResults(expected, results);
 
@@ -76,7 +76,7 @@ public class HeaderValidatorTest extends FeedMessageTest {
         headerBuilder.setGtfsRealtimeVersion("abcd");
         feedMessageBuilder.setHeader(headerBuilder.build());
 
-        results = headerValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = headerValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E038, 1);
         TestUtils.assertResults(expected, results);
 
@@ -98,14 +98,14 @@ public class HeaderValidatorTest extends FeedMessageTest {
         headerBuilder.setIncrementality(GtfsRealtime.FeedHeader.Incrementality.FULL_DATASET);
         feedMessageBuilder.setHeader(headerBuilder.build());
 
-        results = headerValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = headerValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
         // DIFFERENTIAL feed without any entities - no errors
         headerBuilder.setIncrementality(GtfsRealtime.FeedHeader.Incrementality.DIFFERENTIAL);
         feedMessageBuilder.setHeader(headerBuilder.build());
-        results = headerValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = headerValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -113,7 +113,7 @@ public class HeaderValidatorTest extends FeedMessageTest {
         headerBuilder.setIncrementality(GtfsRealtime.FeedHeader.Incrementality.FULL_DATASET);
         feedMessageBuilder.setHeader(headerBuilder.build());
         feedMessageBuilder.addEntity(feedEntityBuilder.build());
-        results = headerValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = headerValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -121,7 +121,7 @@ public class HeaderValidatorTest extends FeedMessageTest {
         headerBuilder.setIncrementality(GtfsRealtime.FeedHeader.Incrementality.DIFFERENTIAL);
         feedMessageBuilder.setHeader(headerBuilder.build());
         feedMessageBuilder.addEntity(feedEntityBuilder.build());
-        results = headerValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = headerValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -130,7 +130,7 @@ public class HeaderValidatorTest extends FeedMessageTest {
         feedMessageBuilder.setHeader(headerBuilder.build());
         feedEntityBuilder.setIsDeleted(true);
         feedMessageBuilder.addEntity(feedEntityBuilder.build());
-        results = headerValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = headerValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E039, 1);
         TestUtils.assertResults(expected, results);
 
@@ -140,7 +140,7 @@ public class HeaderValidatorTest extends FeedMessageTest {
         feedMessageBuilder.setHeader(headerBuilder.build());
         feedEntityBuilder.setIsDeleted(true);
         feedMessageBuilder.addEntity(feedEntityBuilder.build());
-        results = headerValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = headerValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 

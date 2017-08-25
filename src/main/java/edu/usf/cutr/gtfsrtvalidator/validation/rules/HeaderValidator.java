@@ -41,7 +41,7 @@ public class HeaderValidator implements FeedEntityValidator {
     private static final org.slf4j.Logger _log = LoggerFactory.getLogger(HeaderValidator.class);
 
     @Override
-    public List<ErrorListHelperModel> validate(long currentTimeMillis, GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage) {
+    public List<ErrorListHelperModel> validate(long currentTimeMillis, GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage, GtfsRealtime.FeedMessage combinedFeedMessage) {
         List<OccurrenceModel> errorListE038 = new ArrayList<>();
         List<OccurrenceModel> errorListE039 = new ArrayList<>();
 

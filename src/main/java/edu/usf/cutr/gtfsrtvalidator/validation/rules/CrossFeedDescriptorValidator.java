@@ -36,6 +36,9 @@ import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.E047;
 import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.W003;
 
 /**
+ * This class examines multiple GTFS-rt feeds for the same GTFS dataset to identify potential discrepencies in them.
+ * It uses the combinedFeedMessage data structure for this, instead of the feedMessage
+ *
  * W003 - ID in one feed missing from the other
  * E047 - VehiclePosition and TripUpdate ID pairing mismatch
  */
@@ -44,7 +47,12 @@ public class CrossFeedDescriptorValidator implements FeedEntityValidator {
     private static final org.slf4j.Logger _log = LoggerFactory.getLogger(CrossFeedDescriptorValidator.class);
 
     @Override
-    public List<ErrorListHelperModel> validate(long currentTimeMillis, GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage) {
+    public List<ErrorListHelperModel> validate(long currentTimeMillis, GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage, GtfsRealtime.FeedMessage combinedFeedMessage) {
+        if (combinedFeedMessage == null) {
+            // If only one GTFS-rt feed is being monitored for the GTFS dataset, then don't run any of the cross-feed rules
+            return new ArrayList<>();
+        }
+
         List<OccurrenceModel> w003List = new ArrayList<>();
         List<OccurrenceModel> e047List = new ArrayList<>();
 
@@ -61,7 +69,7 @@ public class CrossFeedDescriptorValidator implements FeedEntityValidator {
         int vehiclePositionCount = 0;
 
         // Build the maps
-        for (GtfsRealtime.FeedEntity entity : feedMessage.getEntityList()) {
+        for (GtfsRealtime.FeedEntity entity : combinedFeedMessage.getEntityList()) {
             if (entity.hasTripUpdate() && hasTripId(entity.getTripUpdate())) {
                 tripUpdateCount++;
                 String tripId = entity.getTripUpdate().getTrip().getTripId();

@@ -73,7 +73,7 @@ public class FrequencyTypeOneValidatorTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = frequencyTypeOneValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = frequencyTypeOneValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -97,7 +97,7 @@ public class FrequencyTypeOneValidatorTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = frequencyTypeOneValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = frequencyTypeOneValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -121,7 +121,7 @@ public class FrequencyTypeOneValidatorTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = frequencyTypeOneValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null);
+        results = frequencyTypeOneValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E019, 2);
         TestUtils.assertResults(expected, results);
 

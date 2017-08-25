@@ -62,7 +62,7 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         // Start with no start date or time - 4 errors
-        results = frequencyTypeZeroValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = frequencyTypeZeroValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
         expectedErrorsWarnings.put(E006, 4);
         TestUtils.assertResults(expectedErrorsWarnings, results);
 
@@ -77,7 +77,7 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = frequencyTypeZeroValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = frequencyTypeZeroValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
         expectedErrorsWarnings.put(E006, 2);
         TestUtils.assertResults(expectedErrorsWarnings, results);
 
@@ -93,7 +93,7 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         // No errors
-        results = frequencyTypeZeroValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = frequencyTypeZeroValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
         expectedErrorsWarnings.clear();
         TestUtils.assertResults(expectedErrorsWarnings, results);
 
@@ -150,7 +150,7 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = frequencyTypeZeroValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = frequencyTypeZeroValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -165,7 +165,7 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = frequencyTypeZeroValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = frequencyTypeZeroValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E013, 2);
         TestUtils.assertResults(expected, results);
 
@@ -180,7 +180,7 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = frequencyTypeZeroValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = frequencyTypeZeroValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E013, 2);
         TestUtils.assertResults(expected, results);
 
@@ -195,7 +195,7 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = frequencyTypeZeroValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = frequencyTypeZeroValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E013, 2);
         TestUtils.assertResults(expected, results);
 
@@ -233,7 +233,7 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         // No vehicle Id in trip update or vehicle position - 2 warnings
-        results = frequencyTypeZeroValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = frequencyTypeZeroValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
         expected.put(W005, 2);
         TestUtils.assertResults(expected, results);
 
@@ -245,7 +245,7 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         // No vehicle Id in trip update - 1 warning
-        results = frequencyTypeZeroValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = frequencyTypeZeroValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
         expected.put(W005, 1);
         TestUtils.assertResults(expected, results);
 
@@ -257,7 +257,7 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         // Both have vehicle_id - no warnings
-        results = frequencyTypeZeroValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null);
+        results = frequencyTypeZeroValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
