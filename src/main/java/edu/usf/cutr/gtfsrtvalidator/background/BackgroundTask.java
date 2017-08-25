@@ -129,9 +129,7 @@ public class BackgroundTask implements Runnable {
                     isUniqueFeed = false;
                 }
 
-                InputStream is = new ByteArrayInputStream(gtfsRtProtobuf);
-                currentFeedMessage = GtfsRealtime.FeedMessage.parseFrom(is);
-
+                currentFeedMessage = GtfsRealtime.FeedMessage.parseFrom(gtfsRtProtobuf);
                 long feedTimestamp = TimeUnit.SECONDS.toMillis(currentFeedMessage.getHeader().getTimestamp());
 
                 // Create new feedIteration object and save the iteration to the database
