@@ -86,7 +86,8 @@ public class BackgroundTask implements Runnable {
             GtfsMetadata gtfsMetadata;
             // Holds data needed in the database under each iteration
             GtfsRtFeedIterationModel feedIteration;
-            StringBuffer consoleOutput;
+            StringBuffer consoleOutput = new StringBuffer();
+            
             // Get the GTFS feed from the GtfsDaoMap using the gtfsFeedId of the current feed.
             gtfsData = GtfsFeed.GtfsDaoMap.get(mCurrentGtfsRtFeed.getGtfsFeedModel().getFeedId());
             // Create the GTFS metadata if it doesn't already exist
@@ -108,8 +109,12 @@ public class BackgroundTask implements Runnable {
 
             try {
                 // Get the GTFS-RT feedMessage for this method
+                long startHttpRequest = System.nanoTime();
                 InputStream in = gtfsRtFeedUrl.openStream();
+                consoleOutput.append("\n" + mCurrentGtfsRtFeed.getGtfsUrl() + " gtfsRtFeedUrl.openStream() in " + getElapsedTimeString(getElapsedTime(startHttpRequest, System.nanoTime())));
+                long startToByteArray = System.nanoTime();
                 byte[] gtfsRtProtobuf = IOUtils.toByteArray(in);
+                consoleOutput.append("\n" + mCurrentGtfsRtFeed.getGtfsUrl() + " IOUtils.toByteArray(in) in " + getElapsedTimeString(getElapsedTime(startToByteArray, System.nanoTime())));
 
                 boolean isUniqueFeed = true;
                 MessageDigest md = MessageDigest.getInstance("MD5");
@@ -129,7 +134,12 @@ public class BackgroundTask implements Runnable {
                     isUniqueFeed = false;
                 }
 
+                long startProtobufDecode = System.nanoTime();
                 currentFeedMessage = GtfsRealtime.FeedMessage.parseFrom(gtfsRtProtobuf);
+                consoleOutput.append("\n" + mCurrentGtfsRtFeed.getGtfsUrl() + " protobuf decode in " + getElapsedTimeString(getElapsedTime(startProtobufDecode, System.nanoTime())));
+                _log.info(consoleOutput.toString());
+                consoleOutput.setLength(0);  // Clear the buffer for the next set of log statements
+
                 long feedTimestamp = TimeUnit.SECONDS.toMillis(currentFeedMessage.getHeader().getTimestamp());
 
                 // Create new feedIteration object and save the iteration to the database
@@ -204,12 +214,12 @@ public class BackgroundTask implements Runnable {
 
             // Use the same current time for all rules for consistency
             long currentTimeMillis = System.currentTimeMillis();
-            consoleOutput = new StringBuffer();
             // Run validation rules
             for (FeedEntityValidator rule : mValidationRules) {
                 consoleOutput.append(validateEntity(currentTimeMillis, currentFeedMessage, previousFeedMessage, combinedFeed, gtfsData, gtfsMetadata, feedIteration, rule));
             }
             consoleOutput.append("\nProcessed " + mCurrentGtfsRtFeed.getGtfsUrl() + " in " + getElapsedTimeString(getElapsedTime(startTimeNanos, System.nanoTime())));
+            consoleOutput.append("\n---------------------");
             _log.info(consoleOutput.toString());
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -223,8 +233,9 @@ public class BackgroundTask implements Runnable {
         StringBuffer consoleLine;
         List<ErrorListHelperModel> errorLists = feedEntityValidator.validate(currentTimeMillis, gtfsData, gtfsMetadata, currentFeedMessage, previousFeedMessage, combinedFeedMessage);
         consoleLine = new StringBuffer();
-        consoleLine.append("\nProcessed " + feedEntityValidator.getClass().getSimpleName() + " in " + getElapsedTimeString(getElapsedTime(startTimeNanos, System.nanoTime())));
+        consoleLine.append("\n" + feedEntityValidator.getClass().getSimpleName() + " - rule = " + getElapsedTimeString(getElapsedTime(startTimeNanos, System.nanoTime())));
         if (errorLists != null) {
+            startTimeNanos = System.nanoTime();
             for (ErrorListHelperModel errorList : errorLists) {
                 if (!errorList.getOccurrenceList().isEmpty()) {
                     //Set iteration Id
@@ -233,6 +244,7 @@ public class BackgroundTask implements Runnable {
                     DBHelper.saveError(errorList);
                 }
             }
+            consoleLine.append(", database = " + getElapsedTimeString(getElapsedTime(startTimeNanos, System.nanoTime())));
         }
         return consoleLine;
     }
