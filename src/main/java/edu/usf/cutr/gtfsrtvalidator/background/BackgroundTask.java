@@ -87,7 +87,7 @@ public class BackgroundTask implements Runnable {
             // Holds data needed in the database under each iteration
             GtfsRtFeedIterationModel feedIteration;
             StringBuffer consoleOutput = new StringBuffer();
-            ;
+            
             // Get the GTFS feed from the GtfsDaoMap using the gtfsFeedId of the current feed.
             gtfsData = GtfsFeed.GtfsDaoMap.get(mCurrentGtfsRtFeed.getGtfsFeedModel().getFeedId());
             // Create the GTFS metadata if it doesn't already exist
