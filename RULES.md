@@ -7,7 +7,7 @@ Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-U
 | Error ID      | Error Title         |
 |---------------|---------------------------|
 | [E001](#E001) | Not in POSIX time
-| [E002](#E002) | Unsorted `stop_sequence`
+| [E002](#E002) | `stop_time_updates` not strictly sorted
 | [E003](#E003) | GTFS-rt `trip_id` does not exist in GTFS data
 | [E004](#E004) | GTFS-rt `route_id` does not exist in GTFS data
 | [E006](#E006) | Missing required trip field for frequency-based `exact_times` = 0
@@ -85,23 +85,28 @@ All times and timestamps must be in [POSIX time](https://en.wikipedia.org/wiki/U
 
 <a name="E002"/>
 
-### E002 - Unsorted `stop_sequence`
+### E002 - `stop_time_updates` not strictly sorted
 
-`stop_time_updates` for a given `trip_id` must be sorted by increasing stop_sequence.
+`stop_time_updates` for a given `trip_id` must be strictly ordered by increasing `stop_sequence` - this also means that no `stop_sequence` should be repeated. 
 
 From [Stop Time Updates description](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#stop-time-updates):
 
 >Updates should be sorted by stop_sequence (or stop_ids in the order they occur in the trip).
 
-Note that this validation rule is currently implemented when `stop_sequence` is provided in the GTFS-rt feed, but not when `stop_sequence` is omitted from the GTFS-rt feed (see [issue #159](https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/159)).
+From [GTFS `stop_times.txt`](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#stop_timestxt):
+
+>The values for stop_sequence must be non-negative integers, and they must increase along the trip.
+
+This validation rule is implemented for both when `stop_sequence` is provided in the GTFS-rt feed, and when `stop_sequence` is omitted from the GTFS-rt feed.
 
 *Common mistakes* - Assuming that the GTFS `stop_times.txt` file will be grouped by `trip_id` and sorted by `stop_sequence` - while sorting the data is a good practice, it's not strictly required by the spec.   
 
-*Possible solution* - Group the GTFS `stop_times.txt` records by `trip_id` and sort by `stop_sequence`.
+*Possible solution* - Group the GTFS `stop_times.txt` records by `trip_id` and sort by `stop_sequence`.  Also, make sure that no `stop_sequence` is repeated in GTFS `stop_times.txt`.
 
 #### References:
 * [Stop Time Updates description](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#stop-time-updates)
 * [`stop_time_update` reference](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
+* [GTFS `stop_times.txt`](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#stop_timestxt)
 
 <a name="E003"/>
 
@@ -491,8 +496,17 @@ The GTFS-rt `trip.trip_id` should belong to the specified `trip.route_id` in GTF
 
 Sequential GTFS-rt trip `stop_time_updates` should never have the same `stop_sequence` - `stop_sequence` must increase for each `stop_time_update`.
 
+From [GTFS `stop_times.txt`](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#stop_timestxt):
+
+>The values for stop_sequence must be non-negative integers, and they must increase along the trip.
+
+*Common mistakes* - Repeated records in the GTFS `stop_times.txt` file   
+
+*Possible solution* - Make sure that no `stop_sequence` is repeated in GTFS `stop_times.txt`.
+
 #### References:
 * [`trip.stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/trip-updates.md#stop-time-updates)
+* [GTFS `stop_times.txt`](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#stop_timestxt)
 
 <a name="E037"/>
 

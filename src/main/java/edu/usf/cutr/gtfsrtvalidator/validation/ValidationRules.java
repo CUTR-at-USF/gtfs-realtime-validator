@@ -56,9 +56,9 @@ public class ValidationRules {
     public static final ValidationRule E001 = new ValidationRule("E001", "ERROR", "Not in POSIX time",
             "All timestamps must be in POSIX time (i.e., number of seconds since January 1st 1970 00:00:00 UTC)",
             "is not POSIX time");
-    public static final ValidationRule E002 = new ValidationRule("E002", "ERROR", "Unsorted stop_sequence",
-            "stop_time_updates for a given trip_id must be sorted by increasing stop_sequence",
-            "is not sorted by increasing stop_sequence");
+    public static final ValidationRule E002 = new ValidationRule("E002", "ERROR", "stop_times_updates not strictly sorted",
+            "stop_time_updates for a given trip_id must be strictly sorted by increasing stop_sequence",
+            "is not strictly sorted by increasing stop_sequence");
     public static final ValidationRule E003 = new ValidationRule("E003", "ERROR", "GTFS-rt trip_id does not exist in GTFS data and does not have schedule_relationship of ADDED",
             "All trip_ids provided in the GTFS-rt feed must exist in the GTFS data, unless the schedule_relationship is ADDED",
             "does not exist in the GTFS data and does not have schedule_relationship of ADDED");

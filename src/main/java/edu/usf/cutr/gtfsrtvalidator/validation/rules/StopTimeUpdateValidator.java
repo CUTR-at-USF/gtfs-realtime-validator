@@ -87,9 +87,11 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
                 List<GtfsRealtime.TripUpdate.StopTimeUpdate> rtStopTimeUpdateList = tripUpdate.getStopTimeUpdateList();
 
                 List<Integer> rtStopSequenceList = new ArrayList<>();
+                List<String> rtStopIdList = new ArrayList<>();
                 Integer previousRtStopSequence = null;
                 String previousRtStopId = null;
                 boolean foundE009error = false;
+                boolean addedStopSequenceFromStopId = false;
                 Map<String, List<String>> tripWithMultiStop = gtfsMetadata.getTripsWithMultiStops();
                 for (GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate : rtStopTimeUpdateList) {
                     if (!foundE009error && tripId != null && tripWithMultiStop.containsKey(tripId) && !stopTimeUpdate.hasStopSequence()) {
@@ -108,6 +110,9 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
                     previousRtStopId = stopTimeUpdate.getStopId();
                     if (stopTimeUpdate.hasStopSequence()) {
                         rtStopSequenceList.add(stopTimeUpdate.getStopSequence());
+                    }
+                    if (stopTimeUpdate.hasStopId()) {
+                        rtStopIdList.add(stopTimeUpdate.getStopId());
                     }
                     if (gtfsStopTimes != null) {
                         // Loop through GTFS stop_time.txt to try and find a matching GTFS stop
@@ -139,6 +144,12 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
                                 break;
                             } else {
                                 if (foundStopId) {
+                                    // For E002 - in the case when stop_sequence is missing from the GTFS-rt feed, add the GTFS stop_sequence (See #159)
+                                    if (!stopTimeUpdate.hasStopSequence()) {
+                                        rtStopSequenceList.add(gtfsStopSequence);
+                                        addedStopSequenceFromStopId = true;
+                                    }
+
                                     // E046 hasn't been checked yet if we didn't find a stop_sequence - check now
                                     checkE046(entity, tripUpdate, stopTimeUpdate, gtfsStopTimes.get(gtfsStopTimeIndex - 1), e046List);
                                     // We caught up with a matching stop_id in GTFS data - stop so we can pick up from here in next WHILE loop
@@ -154,14 +165,21 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
                     checkE044(entity, tripUpdate, stopTimeUpdate, e044List);
                 }
 
-                boolean sorted = Ordering.natural().isOrdered(rtStopSequenceList);
+                boolean sorted = Ordering.natural().isStrictlyOrdered(rtStopSequenceList);
                 if (!sorted) {
                     // E002 - stop_time_updates for a given trip_id must be sorted by increasing stop_sequence
                     String id = getTripId(entity, tripUpdate);
                     RuleUtils.addOccurrence(E002, id + " stop_sequence " + rtStopSequenceList.toString(), e002List, _log);
+                } else if (addedStopSequenceFromStopId) {
+                    // TripUpdate was missing at least one stop_sequence
+                    if (rtStopSequenceList.size() < rtStopTimeUpdateList.size()) {
+                        // We didn't find all of the stop_time_updates in GTFS using stop_id, so stop_time_updates are
+                        // out of sequence
+                        // E002 - stop_time_updates for a given trip_id must be sorted by increasing stop_sequence
+                        String id = getTripId(entity, tripUpdate);
+                        RuleUtils.addOccurrence(E002, id + " stop_sequence for stop_ids " + rtStopIdList.toString(), e002List, _log);
+                    }
                 }
-
-                // TODO - detect out-of-order stops when stop_sequence isn't provided - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/159
             }
         }
 
