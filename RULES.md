@@ -521,7 +521,7 @@ Sequential GTFS-rt trip `stop_time_updates` shouldn't have the same `stop_id` - 
 
 ### E038 - Invalid `header.gtfs_realtime_version`
 
-`header.gtfs_realtime_version` should be a valid value.  Currently, the only valid value is `1.0`.
+`header.gtfs_realtime_version` should be a valid value.  Currently, the only valid values are `1.0` and `v2.0`.
 
 #### References:
 * [`header.gtfs_realtime_version`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-feedheader)

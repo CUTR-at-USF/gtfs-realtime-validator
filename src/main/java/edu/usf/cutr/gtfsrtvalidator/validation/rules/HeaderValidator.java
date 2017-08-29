@@ -46,7 +46,7 @@ public class HeaderValidator implements FeedEntityValidator {
         List<OccurrenceModel> errorListE039 = new ArrayList<>();
 
         String version = feedMessage.getHeader().getGtfsRealtimeVersion();
-        if (!version.equals("1.0")) {
+        if (!(version.equals("1.0") || version.equals("2.0"))) {
             // E038 - Invalid header.gtfs_realtime_version
             RuleUtils.addOccurrence(E038, "header.gtfs_realtime_version of " + version, errorListE038, _log);
         }

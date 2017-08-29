@@ -56,12 +56,12 @@ public class HeaderValidatorTest extends FeedMessageTest {
         expected.clear();
         TestUtils.assertResults(expected, results);
 
-        // Bad version - one error
+        // Valid version - no errors
         headerBuilder.setGtfsRealtimeVersion("2.0");
         feedMessageBuilder.setHeader(headerBuilder.build());
 
         results = headerValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
-        expected.put(E038, 1);
+        expected.clear();
         TestUtils.assertResults(expected, results);
 
         // Bad version - one error
