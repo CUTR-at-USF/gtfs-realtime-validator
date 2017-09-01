@@ -36,12 +36,10 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.MessageDigest;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils.getElapsedTime;
 import static edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils.getElapsedTimeString;
@@ -178,6 +176,9 @@ public class BackgroundTask implements Runnable {
 
             GTFSDB.closeSession(session);
 
+            while (!mGtfsRtFeedMap.keySet().containsAll(gtfsRtFeedModelList.stream().map(GtfsRtFeedModel::getGtfsRtId).collect(Collectors.toSet()))) {
+                Thread.sleep(200);
+            }
             GtfsRealtime.FeedHeader header = null;
 
             if (gtfsRtFeedModelList.size() < 1) {
