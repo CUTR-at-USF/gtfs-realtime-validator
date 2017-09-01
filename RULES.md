@@ -49,6 +49,8 @@ Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-U
 | [E045](#E045) | GTFS-rt `stop_time_update` `stop_sequence` and `stop_id` do not match GTFS
 | [E046](#E046) | GTFS-rt `stop_time_update` without `time` doesn't have arrival/departure time in GTFS
 | [E047](#E047) | `VehiclePosition` and `TripUpdate` ID pairing mismatch
+| [E048](#E048) | `header` `timestamp` not populated (GTFS-rt v2.0 and higher)
+| [E049](#E049) | `header` `incrementality` not populated (GTFS-rt v2.0 and higher)
 
 ### Table of Warnings
 
@@ -521,7 +523,7 @@ Sequential GTFS-rt trip `stop_time_updates` shouldn't have the same `stop_id` - 
 
 ### E038 - Invalid `header.gtfs_realtime_version`
 
-`header.gtfs_realtime_version` should be a valid value.  Currently, the only valid values are `1.0` and `v2.0`.
+`header.gtfs_realtime_version` is required and must be a valid value.  Currently, the only valid values are `1.0` and `v2.0`.
 
 #### References:
 * [`header.gtfs_realtime_version`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-feedheader)
@@ -645,6 +647,24 @@ Note that this is different from W003, which simply checks to see if an ID that 
 #### References:
 * [`vehicle.id`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-vehicledescriptor)
 * [`trip.trip_id`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
+
+<a name="E048"/>
+
+### E048 - `header` `timestamp` not populated (GTFS-rt v2.0 and higher)
+
+`timestamp` must be populated in `FeedHeader` for `gtfs_realtime_version` v2.0 and higher.
+
+#### References:
+* [`header.timestamp`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-feedheader)
+
+<a name="E049"/>
+
+### E049 - `header` `incrementality` not populated (GTFS-rt v2.0 and higher)
+
+`incrementality` must be populated in `FeedHeader` for `gtfs_realtime_version` v2.0 and higher.
+
+#### References:
+* [`header.incrementality`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-feedheader)
 
 # Warnings
 
