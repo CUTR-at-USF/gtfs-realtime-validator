@@ -27,8 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils.MIN_POSIX_TIME;
-import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.E038;
-import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.E039;
+import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
 
 /**
  * Tests for rules implemented in HeaderValidator
@@ -56,8 +55,17 @@ public class HeaderValidatorTest extends FeedMessageTest {
         expected.clear();
         TestUtils.assertResults(expected, results);
 
-        // Bad version - one error
+        // Valid version, and set incrementality to avoid E049 - no errors
         headerBuilder.setGtfsRealtimeVersion("2.0");
+        headerBuilder.setIncrementality(GtfsRealtime.FeedHeader.Incrementality.FULL_DATASET);
+        feedMessageBuilder.setHeader(headerBuilder.build());
+
+        results = headerValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        expected.clear();
+        TestUtils.assertResults(expected, results);
+
+        // Bad version - 1 error
+        headerBuilder.setGtfsRealtimeVersion("3.0");
         feedMessageBuilder.setHeader(headerBuilder.build());
 
         results = headerValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
@@ -140,6 +148,44 @@ public class HeaderValidatorTest extends FeedMessageTest {
         feedMessageBuilder.setHeader(headerBuilder.build());
         feedEntityBuilder.setIsDeleted(true);
         feedMessageBuilder.addEntity(feedEntityBuilder.build());
+        results = headerValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        expected.clear();
+        TestUtils.assertResults(expected, results);
+
+        clearAndInitRequiredFeedFields();
+    }
+
+    /**
+     * E038 - Invalid header.gtfs_realtime_version
+     */
+    @Test
+    public void testE049() {
+        HeaderValidator headerValidator = new HeaderValidator();
+        Map<ValidationRule, Integer> expected = new HashMap<>();
+
+        GtfsRealtime.FeedHeader.Builder headerBuilder = GtfsRealtime.FeedHeader.newBuilder();
+
+        // GTFS-rt v1.0, and no incrementality - no errors
+        headerBuilder.setGtfsRealtimeVersion("1.0");
+        feedMessageBuilder.setHeader(headerBuilder.build());
+
+        results = headerValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        expected.clear();
+        TestUtils.assertResults(expected, results);
+
+        // GTFS-rt v2.0, and no incrementality - 1 error
+        headerBuilder.setGtfsRealtimeVersion("2.0");
+        feedMessageBuilder.setHeader(headerBuilder.build());
+
+        results = headerValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        expected.put(E049, 1);
+        TestUtils.assertResults(expected, results);
+
+        // GTFS-rt v2.0, and has incrementality - no errors
+        headerBuilder.setGtfsRealtimeVersion("2.0");
+        headerBuilder.setIncrementality(GtfsRealtime.FeedHeader.Incrementality.FULL_DATASET);
+        feedMessageBuilder.setHeader(headerBuilder.build());
+
         results = headerValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);

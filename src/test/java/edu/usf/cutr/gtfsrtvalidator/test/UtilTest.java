@@ -322,6 +322,20 @@ public class UtilTest {
     }
 
     @Test
+    public void testIsV2orHigher() {
+        GtfsRealtime.FeedHeader.Builder builder = GtfsRealtime.FeedHeader.newBuilder();
+
+        builder.setGtfsRealtimeVersion("1.0");
+        assertFalse(GtfsUtils.isV2orHigher(builder.build()));
+
+        builder.setGtfsRealtimeVersion("2.0");
+        assertTrue(GtfsUtils.isV2orHigher(builder.build()));
+
+        builder.setGtfsRealtimeVersion("3.0");
+        assertTrue(GtfsUtils.isV2orHigher(builder.build()));
+    }
+
+    @Test
     public void testGetVehicleAndTripId() {
         String text;
 

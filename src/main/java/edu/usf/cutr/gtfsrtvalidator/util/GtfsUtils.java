@@ -28,6 +28,33 @@ import static org.locationtech.spatial4j.context.SpatialContext.GEO;
  */
 public class GtfsUtils {
 
+    public static final String GTFS_RT_V1 = "1.0";
+    public static final String GTFS_RT_V2 = "2.0";
+
+    /**
+     * Returns true if the version for the provided GTFS-rt header is valid, false if it is not
+     *
+     * @param feedHeader the feed header to check the version for
+     * @return true if the version for the provided GTFS-rt header is valid, false if it is not
+     */
+    public static boolean isValidVersion(GtfsRealtime.FeedHeader feedHeader) {
+        return !feedHeader.hasGtfsRealtimeVersion() || feedHeader.getGtfsRealtimeVersion().equals(GTFS_RT_V1) || feedHeader.getGtfsRealtimeVersion().equals(GTFS_RT_V2);
+    }
+
+    /**
+     * Returns true if the version for the provided GTFS-rt header is v2 or higher, false if the version is v1 or unrecognized
+     *
+     * @param feedHeader the feed header to check the version for
+     * @return true if the version for the provided GTFS-rt header is v2 or higher, false if the version is v1 or unrecognized
+     */
+    public static boolean isV2orHigher(GtfsRealtime.FeedHeader feedHeader) {
+        float version = Float.parseFloat(feedHeader.getGtfsRealtimeVersion());
+        if (version >= 2.0f) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Returns true if this tripDescriptor has a schedule_relationship of ADDED, false if it does not
      *

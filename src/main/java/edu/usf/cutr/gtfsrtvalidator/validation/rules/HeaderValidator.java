@@ -21,6 +21,7 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.background.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
+import edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils;
 import edu.usf.cutr.gtfsrtvalidator.util.RuleUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
@@ -29,12 +30,12 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.E038;
-import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.E039;
+import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
 
 /**
  * E038 - Invalid header.gtfs_realtime_version
  * E039 - FULL_DATASET feeds should not include entity.is_deleted
+ * E049 - header incrementality not populated
  */
 public class HeaderValidator implements FeedEntityValidator {
 
@@ -44,11 +45,20 @@ public class HeaderValidator implements FeedEntityValidator {
     public List<ErrorListHelperModel> validate(long currentTimeMillis, GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage, GtfsRealtime.FeedMessage combinedFeedMessage) {
         List<OccurrenceModel> errorListE038 = new ArrayList<>();
         List<OccurrenceModel> errorListE039 = new ArrayList<>();
+        List<OccurrenceModel> errorListE049 = new ArrayList<>();
 
-        String version = feedMessage.getHeader().getGtfsRealtimeVersion();
-        if (!version.equals("1.0")) {
+        if (!GtfsUtils.isValidVersion(feedMessage.getHeader())) {
             // E038 - Invalid header.gtfs_realtime_version
-            RuleUtils.addOccurrence(E038, "header.gtfs_realtime_version of " + version, errorListE038, _log);
+            RuleUtils.addOccurrence(E038, "header.gtfs_realtime_version of " + feedMessage.getHeader().getGtfsRealtimeVersion(), errorListE038, _log);
+        }
+
+        try {
+            if (GtfsUtils.isV2orHigher(feedMessage.getHeader()) && !feedMessage.getHeader().hasIncrementality()) {
+                // E049 - header incrementality not populated
+                RuleUtils.addOccurrence(E049, "", errorListE049, _log);
+            }
+        } catch (Exception e) {
+            _log.error("Error checking header version for E049: " + e);
         }
 
         if (feedMessage.getHeader().getIncrementality().equals(GtfsRealtime.FeedHeader.Incrementality.FULL_DATASET)) {
@@ -66,6 +76,9 @@ public class HeaderValidator implements FeedEntityValidator {
         }
         if (!errorListE039.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(E039), errorListE039));
+        }
+        if (!errorListE049.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E049), errorListE049));
         }
         return errors;
     }

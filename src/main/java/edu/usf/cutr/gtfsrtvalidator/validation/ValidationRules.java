@@ -240,4 +240,12 @@ public class ValidationRules {
     public static final ValidationRule E047 = new ValidationRule("E047", "ERROR", "VehiclePosition and TripUpdate ID pairing mismatch",
             "If separate `VehiclePositions` and `TripUpdates` feeds are provided, `VehicleDescriptor` or `TripDescriptor` ID value pairing should match between the two feeds.",
             "- ID pairing between feeds should match");
+
+    public static final ValidationRule E048 = new ValidationRule("E048", "ERROR", "header timestamp not populated",
+            "Header timestamp must be populated for gtfs_realtime_version v2.0 and higher",
+            "Header does not have a timestamp and gtfs_realtime_version is v2.0 or higher");
+
+    public static final ValidationRule E049 = new ValidationRule("E049", "ERROR", "header incrementality not populated",
+            "Header incrementality must be populated for gtfs_realtime_version v2.0 and higher",
+            "Header does not have incrementality and gtfs_realtime_version is v2.0 or higher");
 }
