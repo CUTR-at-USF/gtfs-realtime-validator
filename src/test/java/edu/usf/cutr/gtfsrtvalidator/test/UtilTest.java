@@ -542,4 +542,162 @@ public class UtilTest {
         // Make sure we throw an exception if the method is provided objects other than TripUpdate or VehiclePosition
         GtfsUtils.getVehicleAndRouteId(GtfsRealtime.TripDescriptor.newBuilder().setRouteId("1").build());
     }
+
+    @Test
+    public void testIsCombinedFeed() {
+        GtfsRealtime.FeedMessage.Builder feedMessageBuilder = GtfsRealtime.FeedMessage.newBuilder();
+        GtfsRealtime.FeedHeader.Builder feedHeaderBuilder = GtfsRealtime.FeedHeader.newBuilder();
+        feedHeaderBuilder.setGtfsRealtimeVersion("1");
+        feedMessageBuilder.setHeader(feedHeaderBuilder);
+        GtfsRealtime.FeedEntity.Builder feedEntityBuilder = GtfsRealtime.FeedEntity.newBuilder();
+        feedEntityBuilder.setId("test");
+        GtfsRealtime.TripUpdate.Builder tripUpdateBuilder = GtfsRealtime.TripUpdate.newBuilder();
+        GtfsRealtime.VehiclePosition.Builder vehiclePositionBuilder = GtfsRealtime.VehiclePosition.newBuilder();
+        GtfsRealtime.Alert.Builder alertBuilder = GtfsRealtime.Alert.newBuilder();
+        GtfsRealtime.EntitySelector.Builder entitySelectorBuilder = GtfsRealtime.EntitySelector.newBuilder();
+
+        /**
+         * NOT combined feeds
+         */
+
+        // Add 3 trips, no vehicle positions or alerts
+        tripUpdateBuilder.setTrip(GtfsRealtime.TripDescriptor.newBuilder().setTripId("1"));
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        tripUpdateBuilder.setTrip(GtfsRealtime.TripDescriptor.newBuilder().setTripId("2"));
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        tripUpdateBuilder.setTrip(GtfsRealtime.TripDescriptor.newBuilder().setTripId("3"));
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        assertEquals(3, feedMessageBuilder.getEntityList().size());
+        assertFalse(GtfsUtils.isCombinedFeed(feedMessageBuilder.build()));
+
+        // Add 3 vehicle positions, no trip updates or alerts
+        feedMessageBuilder.clearEntity();
+        feedEntityBuilder.clearTripUpdate();
+        feedEntityBuilder.clearVehicle();
+        feedEntityBuilder.clearAlert();
+
+        vehiclePositionBuilder.setVehicle(GtfsRealtime.VehicleDescriptor.newBuilder().setId("A"));
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        vehiclePositionBuilder.setVehicle(GtfsRealtime.VehicleDescriptor.newBuilder().setId("B"));
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        vehiclePositionBuilder.setVehicle(GtfsRealtime.VehicleDescriptor.newBuilder().setId("C"));
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        assertEquals(3, feedMessageBuilder.getEntityList().size());
+        assertFalse(GtfsUtils.isCombinedFeed(feedMessageBuilder.build()));
+
+        // Add 3 alerts, no trip updates or vehicle positions
+        feedMessageBuilder.clearEntity();
+        feedEntityBuilder.clearTripUpdate();
+        feedEntityBuilder.clearVehicle();
+        feedEntityBuilder.clearAlert();
+
+        entitySelectorBuilder.setStopId("Z");
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        entitySelectorBuilder.setStopId("Y");
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        entitySelectorBuilder.setStopId("X");
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        assertEquals(3, feedMessageBuilder.getEntityList().size());
+        assertFalse(GtfsUtils.isCombinedFeed(feedMessageBuilder.build()));
+
+        /**
+         * Combined feeds
+         */
+
+        // Add 1 trip updates and 1 vehicle positions, no alerts
+        feedMessageBuilder.clearEntity();
+        feedEntityBuilder.clearTripUpdate();
+        feedEntityBuilder.clearVehicle();
+        feedEntityBuilder.clearAlert();
+
+        tripUpdateBuilder.setTrip(GtfsRealtime.TripDescriptor.newBuilder().setTripId("1"));
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        vehiclePositionBuilder.setVehicle(GtfsRealtime.VehicleDescriptor.newBuilder().setId("A"));
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        assertEquals(2, feedMessageBuilder.getEntityList().size());
+        assertTrue(GtfsUtils.isCombinedFeed(feedMessageBuilder.build()));
+
+        // Add 1 trip update and 1 alert, no vehicle positions
+        feedMessageBuilder.clearEntity();
+        feedEntityBuilder.clearTripUpdate();
+        feedEntityBuilder.clearVehicle();
+        feedEntityBuilder.clearAlert();
+
+        tripUpdateBuilder.setTrip(GtfsRealtime.TripDescriptor.newBuilder().setTripId("1"));
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        entitySelectorBuilder.setStopId("Z");
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        assertEquals(2, feedMessageBuilder.getEntityList().size());
+        assertTrue(GtfsUtils.isCombinedFeed(feedMessageBuilder.build()));
+
+        // Add 1 vehicle position and 1 alert, no trip updates
+        feedMessageBuilder.clearEntity();
+        feedEntityBuilder.clearTripUpdate();
+        feedEntityBuilder.clearVehicle();
+        feedEntityBuilder.clearAlert();
+
+        vehiclePositionBuilder.setVehicle(GtfsRealtime.VehicleDescriptor.newBuilder().setId("A"));
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        entitySelectorBuilder.setStopId("Z");
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        assertEquals(2, feedMessageBuilder.getEntityList().size());
+        assertTrue(GtfsUtils.isCombinedFeed(feedMessageBuilder.build()));
+
+        // Add 1 trip update, 1 vehicle position and 1 alert
+        feedMessageBuilder.clearEntity();
+        feedEntityBuilder.clearTripUpdate();
+        feedEntityBuilder.clearVehicle();
+        feedEntityBuilder.clearAlert();
+
+        tripUpdateBuilder.setTrip(GtfsRealtime.TripDescriptor.newBuilder().setTripId("1"));
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        vehiclePositionBuilder.setVehicle(GtfsRealtime.VehicleDescriptor.newBuilder().setId("A"));
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        entitySelectorBuilder.setStopId("Z");
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        assertEquals(3, feedMessageBuilder.getEntityList().size());
+        assertTrue(GtfsUtils.isCombinedFeed(feedMessageBuilder.build()));
+    }
 }

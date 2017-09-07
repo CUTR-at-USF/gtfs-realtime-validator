@@ -240,4 +240,37 @@ public class GtfsUtils {
             return "stop_id " + stopTimeUpdate.getStopId();
         }
     }
+
+    /**
+     * Checks for the presence of a "combined feed" with multiple entities at one URL (see #85)
+     *
+     * @param message GTFS-rt message (containing multiple entities) to be evaluated
+     * @return true if the provided message is a combined feed, false if it is not
+     */
+    public static boolean isCombinedFeed(GtfsRealtime.FeedMessage message) {
+        // See if more than one entity type exists in this feed
+        int countEntityTypes = 0;
+        boolean foundTu = false;
+        boolean foundVp = false;
+        boolean foundSa = false;
+        for (GtfsRealtime.FeedEntity entity : message.getEntityList()) {
+            if (entity.hasTripUpdate() && !foundTu) {
+                foundTu = true;
+                countEntityTypes++;
+            }
+            if (entity.hasVehicle() && !foundVp) {
+                foundVp = true;
+                countEntityTypes++;
+            }
+            if (entity.hasAlert() && !foundSa) {
+                foundSa = true;
+                countEntityTypes++;
+            }
+            // Terminate if we've already found more than one entity type
+            if (countEntityTypes > 1) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
