@@ -32,8 +32,7 @@ import org.hibernate.Session;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.MessageDigest;
@@ -247,6 +246,28 @@ public class BackgroundTask implements Runnable {
         long startTimeNanos = System.nanoTime();
         List<ErrorListHelperModel> errorLists = feedEntityValidator.validate(currentTimeMillis, gtfsData, gtfsMetadata, currentFeedMessage, previousFeedMessage, combinedFeedMessage);
         consoleLine.append("\n" + feedEntityValidator.getClass().getSimpleName() + " - rule = " + getElapsedTimeString(getElapsedTime(startTimeNanos, System.nanoTime())));
+
+        if (getElapsedTime(startTimeNanos, System.nanoTime()) > 3.0d) {
+            // A rule took a long time - write PB to file so we can test later
+            OutputStream out = null;
+            long time = System.nanoTime();
+            try {
+                out = new BufferedOutputStream(new FileOutputStream(time + "." + feedEntityValidator.getClass().getSimpleName()));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            try {
+                currentFeedMessage.writeTo(out);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                out.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         if (errorLists != null) {
             startTimeNanos = System.nanoTime();
             for (ErrorListHelperModel errorList : errorLists) {
