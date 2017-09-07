@@ -24,6 +24,7 @@ import edu.usf.cutr.gtfsrtvalidator.api.resource.GtfsFeed;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.helper.DBHelper;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
+import edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import edu.usf.cutr.gtfsrtvalidator.validation.rules.*;
 import org.apache.commons.io.IOUtils;
@@ -36,7 +37,10 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.MessageDigest;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -187,6 +191,15 @@ public class BackgroundTask implements Runnable {
             }
 
             GtfsRealtime.FeedMessage combinedFeed = null;
+
+            if (gtfsRtFeedModelList.size() == 1) {
+                // See if more than one entity type exists in this feed
+                GtfsRealtime.FeedMessage message = mGtfsRtFeedMap.get(gtfsRtFeedModelList.get(0).getGtfsRtId());
+                if (GtfsUtils.isCombinedFeed(message)) {
+                    // Run CrossFeedDescriptorValidator on this message
+                    combinedFeed = message;
+                }
+            }
 
             if (gtfsRtFeedModelList.size() > 1) {
                 // We're monitoring multiple GTFS-rt feeds for the same GTFS data - create a combined feed message include all entities for all of those GTFS-rt feeds
