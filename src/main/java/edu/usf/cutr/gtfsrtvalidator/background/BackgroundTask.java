@@ -243,10 +243,9 @@ public class BackgroundTask implements Runnable {
     private StringBuffer validateEntity(long currentTimeMillis, GtfsRealtime.FeedMessage currentFeedMessage, GtfsRealtime.FeedMessage previousFeedMessage,
                                         GtfsRealtime.FeedMessage combinedFeedMessage, GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata,
                                         GtfsRtFeedIterationModel feedIteration, FeedEntityValidator feedEntityValidator) {
+        StringBuffer consoleLine = new StringBuffer();
         long startTimeNanos = System.nanoTime();
-        StringBuffer consoleLine;
         List<ErrorListHelperModel> errorLists = feedEntityValidator.validate(currentTimeMillis, gtfsData, gtfsMetadata, currentFeedMessage, previousFeedMessage, combinedFeedMessage);
-        consoleLine = new StringBuffer();
         consoleLine.append("\n" + feedEntityValidator.getClass().getSimpleName() + " - rule = " + getElapsedTimeString(getElapsedTime(startTimeNanos, System.nanoTime())));
         if (errorLists != null) {
             startTimeNanos = System.nanoTime();
