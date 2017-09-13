@@ -711,23 +711,9 @@ public class UtilTest {
 
     @Test
     public void testSortDate() throws URISyntaxException, IOException {
-        /**
-         * SortUtils.compareByDateCreated()
-         */
-        // bullrunner-gtfs.zip is older than bullrunner-gtfs-no-shapes.zip
         Path bullrunnerGtfs = Paths.get(getClass().getClassLoader().getResource("bullrunner-gtfs.zip").toURI());
         Path bullrunnerGtfsNoShapes = Paths.get(getClass().getClassLoader().getResource("bullrunner-gtfs-no-shapes.zip").toURI());
-        assertTrue(SortUtils.compareByDateCreated(bullrunnerGtfs, bullrunnerGtfsNoShapes) < 0);
-        assertTrue(SortUtils.compareByDateCreated(bullrunnerGtfsNoShapes, bullrunnerGtfs) > 0);
-        assertFalse(SortUtils.compareByDateCreated(bullrunnerGtfs, bullrunnerGtfsNoShapes) > 0);
-        assertFalse(SortUtils.compareByDateCreated(bullrunnerGtfsNoShapes, bullrunnerGtfs) < 0);
-
-        // testagency2.zip is older than bullrunner-gtfs.zip
         Path testAgency2 = Paths.get(getClass().getClassLoader().getResource("testagency2.zip").toURI());
-        assertTrue(SortUtils.compareByDateCreated(testAgency2, bullrunnerGtfs) < 0);
-        assertTrue(SortUtils.compareByDateCreated(bullrunnerGtfs, testAgency2) > 0);
-        assertFalse(SortUtils.compareByDateCreated(bullrunnerGtfs, testAgency2) < 0);
-        assertFalse(SortUtils.compareByDateCreated(testAgency2, bullrunnerGtfs) > 0);
 
         /**
          * SortUtils.compareByDateModified()
@@ -815,7 +801,7 @@ public class UtilTest {
         assertEquals(1487448068000L, timestamp);
 
         String fileNameVp = "VehiclePositions-2017-02-18T20-01-08Z.pb";
-        timestamp = TimestampUtils.getTimestampFromFileName(fileNameTu);
+        timestamp = TimestampUtils.getTimestampFromFileName(fileNameVp);
         assertEquals(1487448068000L, timestamp);
 
     }

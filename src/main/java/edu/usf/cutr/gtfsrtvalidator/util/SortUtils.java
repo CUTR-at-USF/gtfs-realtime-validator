@@ -19,9 +19,7 @@ package edu.usf.cutr.gtfsrtvalidator.util;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -52,22 +50,6 @@ public class SortUtils {
      */
     public static int compareByDateModified(Path o1, Path o2) throws IOException {
         return Long.compare(o1.toFile().lastModified(), o2.toFile().lastModified());
-    }
-
-    /**
-     * Compares the value of two Path objects for order by date created
-     *
-     * @param o1 first path to compare
-     * @param o2 second path to compare
-     * @return 0 if o1 date created is equal to o2, a value less than 0 if o1 has a date
-     * created that is before o2, and a value greater than 0 if o1
-     * represents a date created that is after o2
-     */
-    public static int compareByDateCreated(Path o1, Path o2) throws IOException {
-        BasicFileAttributes att1, att2;
-        att1 = Files.readAttributes(o1, BasicFileAttributes.class);
-        att2 = Files.readAttributes(o2, BasicFileAttributes.class);
-        return Long.compare(att1.creationTime().toMillis(), att2.creationTime().toMillis());
     }
 
     /**
