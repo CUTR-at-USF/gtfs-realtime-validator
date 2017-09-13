@@ -23,14 +23,22 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.ValidationRule;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.test.util.TestUtils;
 import edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils;
+import edu.usf.cutr.gtfsrtvalidator.util.SortUtils;
 import edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
 import org.junit.Test;
 import org.locationtech.spatial4j.shape.Shape;
 import org.locationtech.spatial4j.shape.ShapeFactory;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils.MIN_POSIX_TIME;
 import static junit.framework.TestCase.assertFalse;
@@ -699,5 +707,116 @@ public class UtilTest {
 
         assertEquals(3, feedMessageBuilder.getEntityList().size());
         assertTrue(GtfsUtils.isCombinedFeed(feedMessageBuilder.build()));
+    }
+
+    @Test
+    public void testSortDate() throws URISyntaxException, IOException {
+        /**
+         * SortUtils.compareByDateCreated()
+         */
+        // bullrunner-gtfs.zip is older than bullrunner-gtfs-no-shapes.zip
+        Path bullrunnerGtfs = Paths.get(getClass().getClassLoader().getResource("bullrunner-gtfs.zip").toURI());
+        Path bullrunnerGtfsNoShapes = Paths.get(getClass().getClassLoader().getResource("bullrunner-gtfs-no-shapes.zip").toURI());
+        assertTrue(SortUtils.compareByDateCreated(bullrunnerGtfs, bullrunnerGtfsNoShapes) < 0);
+        assertTrue(SortUtils.compareByDateCreated(bullrunnerGtfsNoShapes, bullrunnerGtfs) > 0);
+        assertFalse(SortUtils.compareByDateCreated(bullrunnerGtfs, bullrunnerGtfsNoShapes) > 0);
+        assertFalse(SortUtils.compareByDateCreated(bullrunnerGtfsNoShapes, bullrunnerGtfs) < 0);
+
+        // testagency2.zip is older than bullrunner-gtfs.zip
+        Path testAgency2 = Paths.get(getClass().getClassLoader().getResource("testagency2.zip").toURI());
+        assertTrue(SortUtils.compareByDateCreated(testAgency2, bullrunnerGtfs) < 0);
+        assertTrue(SortUtils.compareByDateCreated(bullrunnerGtfs, testAgency2) > 0);
+        assertFalse(SortUtils.compareByDateCreated(bullrunnerGtfs, testAgency2) < 0);
+        assertFalse(SortUtils.compareByDateCreated(testAgency2, bullrunnerGtfs) > 0);
+
+        /**
+         * SortUtils.compareByDateModified()
+         */
+        // bullrunner-gtfs.zip is older than bullrunner-gtfs-no-shapes.zip
+        assertTrue(SortUtils.compareByDateModified(bullrunnerGtfs, bullrunnerGtfsNoShapes) < 0);
+        assertTrue(SortUtils.compareByDateModified(bullrunnerGtfsNoShapes, bullrunnerGtfs) > 0);
+        assertFalse(SortUtils.compareByDateModified(bullrunnerGtfs, bullrunnerGtfsNoShapes) > 0);
+        assertFalse(SortUtils.compareByDateModified(bullrunnerGtfsNoShapes, bullrunnerGtfs) < 0);
+
+        // testagency2.zip is older than bullrunner-gtfs.zip
+        assertTrue(SortUtils.compareByDateModified(testAgency2, bullrunnerGtfs) < 0);
+        assertTrue(SortUtils.compareByDateModified(bullrunnerGtfs, testAgency2) > 0);
+        assertFalse(SortUtils.compareByDateModified(bullrunnerGtfs, testAgency2) < 0);
+        assertFalse(SortUtils.compareByDateModified(testAgency2, bullrunnerGtfs) > 0);
+
+        /**
+         * SortUtils.sortByDateModified()
+         */
+        final List<File> files = Stream.of(bullrunnerGtfsNoShapes, bullrunnerGtfs, testAgency2).map(Path::toFile)
+                .collect(Collectors.toList());
+
+        // Before sorting - should be backwards, newest to oldest
+        File[] array = files.toArray(new File[files.size()]);
+        assertEquals("bullrunner-gtfs-no-shapes.zip", array[0].getName());
+        assertEquals("bullrunner-gtfs.zip", array[1].getName());
+        assertEquals("testagency2.zip", array[2].getName());
+
+        // After sorting, should be in date order (oldest to newest)
+        array = SortUtils.sortByDateModified(array);
+        assertEquals("testagency2.zip", array[0].getName());
+        assertEquals("bullrunner-gtfs.zip", array[1].getName());
+        assertEquals("bullrunner-gtfs-no-shapes.zip", array[2].getName());
+    }
+
+    @Test
+    public void testSortFileName() throws URISyntaxException {
+        /**
+         * SortUtils.compareByFileName()
+         */
+        // bullrunner-gtfs.zip is after bullrunner-gtfs-no-shapes.zip
+        Path bullrunnerGtfs = Paths.get(getClass().getClassLoader().getResource("bullrunner-gtfs.zip").toURI());
+        Path bullrunnerGtfsNoShapes = Paths.get(getClass().getClassLoader().getResource("bullrunner-gtfs-no-shapes.zip").toURI());
+        assertTrue(SortUtils.compareByFileName(bullrunnerGtfs, bullrunnerGtfsNoShapes) > 0);
+
+        // bullrunner-gtfs.zip is before testagency2.zip
+        Path testAgency2 = Paths.get(getClass().getClassLoader().getResource("testagency2.zip").toURI());
+        assertTrue(SortUtils.compareByFileName(bullrunnerGtfs, testAgency2) < 0);
+
+        // Should be sorted by date in file name (ascending)
+        Path tu1 = Paths.get(getClass().getClassLoader().getResource("TripUpdates-2017-02-18T20-00-08Z.txt").toURI());
+        Path tu2 = Paths.get(getClass().getClassLoader().getResource("TripUpdates-2017-02-18T20-00-23Z.txt").toURI());
+        Path tu3 = Paths.get(getClass().getClassLoader().getResource("TripUpdates-2017-02-18T20-01-08Z.txt").toURI());
+
+        assertTrue(SortUtils.compareByFileName(tu1, tu2) < 0);
+        assertTrue(SortUtils.compareByFileName(tu2, tu3) < 0);
+        assertTrue(SortUtils.compareByFileName(tu1, tu3) < 0);
+        assertTrue(SortUtils.compareByFileName(tu3, tu1) > 0);
+        assertTrue(SortUtils.compareByFileName(tu3, tu2) > 0);
+        assertTrue(SortUtils.compareByFileName(tu2, tu1) > 0);
+
+        /**
+         * SortUtils.sortByName()
+         */
+        final List<File> files = Stream.of(tu3, tu2, tu1).map(Path::toFile)
+                .collect(Collectors.toList());
+
+        // Before sorting - should be backwards
+        File[] array = files.toArray(new File[files.size()]);
+        assertEquals("TripUpdates-2017-02-18T20-01-08Z.txt", array[0].getName());
+        assertEquals("TripUpdates-2017-02-18T20-00-23Z.txt", array[1].getName());
+        assertEquals("TripUpdates-2017-02-18T20-00-08Z.txt", array[2].getName());
+
+        // After sorting, should be in alpha order
+        array = SortUtils.sortByName(array);
+        assertEquals("TripUpdates-2017-02-18T20-00-08Z.txt", array[0].getName());
+        assertEquals("TripUpdates-2017-02-18T20-00-23Z.txt", array[1].getName());
+        assertEquals("TripUpdates-2017-02-18T20-01-08Z.txt", array[2].getName());
+    }
+
+    @Test
+    public void testGetTimestampFromFileName() throws URISyntaxException {
+        String fileNameTu = "TripUpdates-2017-02-18T20-01-08Z.pb";
+        long timestamp = TimestampUtils.getTimestampFromFileName(fileNameTu);
+        assertEquals(1487448068000L, timestamp);
+
+        String fileNameVp = "VehiclePositions-2017-02-18T20-01-08Z.pb";
+        timestamp = TimestampUtils.getTimestampFromFileName(fileNameTu);
+        assertEquals(1487448068000L, timestamp);
+
     }
 }

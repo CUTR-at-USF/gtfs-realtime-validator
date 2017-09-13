@@ -107,6 +107,21 @@ If you'd like to change the logging level, for example to see all debug statemen
  
  A list of all the dialect properties for specific database versions is shown [here](http://www.tutorialspoint.com/hibernate/hibernate_configuration.htm).
  
+ **Batch processing**
+ 
+ We support a command-line batch processing mode for archived GTFS-realtime files.
+ 
+  Here's an example of a command to batch process a set of GTFS-realtime files:
+ 
+ `java -jar target/gtfs-rt-validator-1.0.0-SNAPSHOT.jar -batch yes -gtfs "D:\HART\google_transit.zip" -gtfsrealtimepath "D:\HART\gtfs-rt" -sort date`
+ 
+ Parameters:
+ 
+ * `-batch` - Must be provided for the validator to start in batch processing mode.  If this parameter isn't provided, the server will start in the normal mode.
+ * `-gtfs` - The path and file name of the GTFS zip file.  GTFS zip file must cover the time period for the GTFS-rt archived files.  You can combine GTFS zip files if needed using the [Google transitfeed tool's](https://github.com/google/transitfeed/wiki/Merge).
+ * `-gtfsrealtimepath` - The path to the folder that contains the individual GTFS-realtime protocol buffer files
+ * `-sort` *(Optional)* - `date` if the GTFS-realtime files should be processed chronologically by the "last modified" date of the file (default), or `name` if the files should be ordered by the name of the file. If you use the name of the file to order the files, then the validator will try to parse the date/time from each individual file name and use that date/time as the "current" time.  Date/times in file names must be in the [ISO_DATE_TIME](https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html#ISO_DATE_TIME) format and must be the last 20 characters prior to the file extension - for example, `TripUpdates-2017-02-18T20-00-08Z.pb`.  If a date/time can't be parsed from the file name, then the last modified date is used as the "current" time. GTFS-realtime file order is important for rules such as E012, E018, and W007, which compare the previous feed iteration against the current one.     
+ 
  **Docker**
  
  Want to run this in [Docker](https://www.docker.com/)?  Check out [gtfs-realtime-validator-docker](https://github.com/scrudden/gtfs-realtime-validator-docker).
