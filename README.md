@@ -122,6 +122,47 @@ If you'd like to change the logging level, for example to see all debug statemen
  * `-gtfsrealtimepath` - The path to the folder that contains the individual GTFS-realtime protocol buffer files
  * `-sort` *(Optional)* - `date` if the GTFS-realtime files should be processed chronologically by the "last modified" date of the file (default), or `name` if the files should be ordered by the name of the file. If you use the name of the file to order the files, then the validator will try to parse the date/time from each individual file name and use that date/time as the "current" time.  Date/times in file names must be in the [ISO_DATE_TIME](https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html#ISO_DATE_TIME) format and must be the last 20 characters prior to the file extension - for example, `TripUpdates-2017-02-18T20-00-08Z.pb`.  If a date/time can't be parsed from the file name, then the last modified date is used as the "current" time. GTFS-realtime file order is important for rules such as E012, E018, and W007, which compare the previous feed iteration against the current one.     
  
+ After execution finishes, the results for each GTFS-realtime protocol buffer file will be output in JSON format with the same file name, but with "results.json" appended to the end.  For example, if one GTFS-realtime procotol buffer file name was `TripUpdates-2017-02-18T20-00-08Z.pb`, the validation results for that file name will be output as `TripUpdates-2017-02-18T20-00-08Z.pb.results.json`. 
+ 
+ It will look something like:
+ 
+ ~~~
+ [ {
+   "errorMessage" : {
+     "messageId" : 0,
+     "gtfsRtFeedIterationModel" : null,
+     "validationRule" : {
+       "errorId" : "W001",
+       "severity" : "WARNING",
+       "title" : "timestamp not populated",
+       "errorDescription" : "Timestamps should be populated for all elements",
+       "occurrenceSuffix" : "does not have a timestamp"
+     },
+     "errorDetails" : null
+   },
+   "occurrenceList" : [ {
+     "occurrenceId" : 0,
+     "messageLogModel" : null,
+     "prefix" : "trip_id 277716"
+   }, {
+     "occurrenceId" : 0,
+     "messageLogModel" : null,
+     "prefix" : "trip_id 277767"
+   }, {
+     "occurrenceId" : 0,
+     "messageLogModel" : null,
+     "prefix" : "trip_id 277768"
+   }, 
+   ...
+~~~
+
+In the above example, three `trip_updates` have been validated, and each was missing a timestamp (warning `W001`).  To put together the full message for each occurrence of the warning or error, you add the occurrence `prefix` to the validationRule `occurrenceSuffix`.
+
+For example, in log format the above would look like:
+* `trip_id 277716 does not have a timestamp`
+* `trip_id 277767 does not have a timestamp`
+* `trip_id 277768 does not have a timestamp`
+ 
  **Docker**
  
  Want to run this in [Docker](https://www.docker.com/)?  Check out [gtfs-realtime-validator-docker](https://github.com/scrudden/gtfs-realtime-validator-docker).
