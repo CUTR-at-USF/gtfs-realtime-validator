@@ -199,7 +199,7 @@ function downloadGTFSFeed() {
                 'Accept': 'application/json',
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
-            data: {gtfsurl: paramVal},
+            data: {gtfsurl: paramVal, enablevalidation:sessionStorage.getItem("enablevalidation")},
             success: feedSuccess,
             error: feedError,
             dataType: 'json'

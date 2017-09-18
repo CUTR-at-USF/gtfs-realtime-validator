@@ -44,16 +44,16 @@ public class GtfsFeedTest extends TestCase {
     public void testGtfsFeed() {
         Response response;
 
-        response = gtfsFeed.postGtfsFeed(validGtfsFeedURL);
+        response = gtfsFeed.postGtfsFeed(validGtfsFeedURL, "checked");
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
-        response = gtfsFeed.postGtfsFeed(invalidGtfsFeedURL);
+        response = gtfsFeed.postGtfsFeed(invalidGtfsFeedURL, "checked");
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
 
-        response = gtfsFeed.postGtfsFeed(downloadFailURL);
+        response = gtfsFeed.postGtfsFeed(downloadFailURL, "checked");
         assertTrue(Response.Status.BAD_REQUEST.getStatusCode() == response.getStatus() || Response.Status.FORBIDDEN.getStatusCode() == response.getStatus());
 
-        response = gtfsFeed.postGtfsFeed(badGTFS);
+        response = gtfsFeed.postGtfsFeed(badGTFS, "checked");
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), response.getStatus());
     }
 }
