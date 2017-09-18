@@ -33,6 +33,7 @@ import org.locationtech.spatial4j.shape.ShapeFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -710,43 +711,50 @@ public class UtilTest {
     }
 
     @Test
-    public void testSortDate() throws URISyntaxException, IOException {
-        Path bullrunnerGtfs = Paths.get(getClass().getClassLoader().getResource("bullrunner-gtfs.zip").toURI());
-        Path bullrunnerGtfsNoShapes = Paths.get(getClass().getClassLoader().getResource("bullrunner-gtfs-no-shapes.zip").toURI());
-        Path testAgency2 = Paths.get(getClass().getClassLoader().getResource("testagency2.zip").toURI());
+    public void testSortDate() throws URISyntaxException, IOException, InterruptedException {
+        // Create three temporary files to test sorting order - sleep in between to make sure timestamps differ
+        Path file1 = Files.createTempFile("tempFileOldest", ".tmp");
+        Thread.sleep(100);
+        Path file2 = Files.createTempFile("tempFileMiddle", ".tmp");
+        Thread.sleep(100);
+        Path file3 = Files.createTempFile("tempFileNewest", ".tmp");
 
         /**
          * SortUtils.compareByDateModified()
          */
         // bullrunner-gtfs.zip is older than bullrunner-gtfs-no-shapes.zip
-        assertTrue(SortUtils.compareByDateModified(bullrunnerGtfs, bullrunnerGtfsNoShapes) < 0);
-        assertTrue(SortUtils.compareByDateModified(bullrunnerGtfsNoShapes, bullrunnerGtfs) > 0);
-        assertFalse(SortUtils.compareByDateModified(bullrunnerGtfs, bullrunnerGtfsNoShapes) > 0);
-        assertFalse(SortUtils.compareByDateModified(bullrunnerGtfsNoShapes, bullrunnerGtfs) < 0);
+        assertTrue(SortUtils.compareByDateModified(file2, file3) < 0);
+        assertTrue(SortUtils.compareByDateModified(file3, file2) > 0);
+        assertFalse(SortUtils.compareByDateModified(file2, file3) > 0);
+        assertFalse(SortUtils.compareByDateModified(file3, file2) < 0);
 
         // testagency2.zip is older than bullrunner-gtfs.zip
-        assertTrue(SortUtils.compareByDateModified(testAgency2, bullrunnerGtfs) < 0);
-        assertTrue(SortUtils.compareByDateModified(bullrunnerGtfs, testAgency2) > 0);
-        assertFalse(SortUtils.compareByDateModified(bullrunnerGtfs, testAgency2) < 0);
-        assertFalse(SortUtils.compareByDateModified(testAgency2, bullrunnerGtfs) > 0);
+        assertTrue(SortUtils.compareByDateModified(file1, file2) < 0);
+        assertTrue(SortUtils.compareByDateModified(file2, file1) > 0);
+        assertFalse(SortUtils.compareByDateModified(file2, file1) < 0);
+        assertFalse(SortUtils.compareByDateModified(file1, file2) > 0);
 
         /**
          * SortUtils.sortByDateModified()
          */
-        final List<File> files = Stream.of(bullrunnerGtfsNoShapes, bullrunnerGtfs, testAgency2).map(Path::toFile)
+        final List<File> files = Stream.of(file3, file2, file1).map(Path::toFile)
                 .collect(Collectors.toList());
 
         // Before sorting - should be backwards, newest to oldest
         File[] array = files.toArray(new File[files.size()]);
-        assertEquals("bullrunner-gtfs-no-shapes.zip", array[0].getName());
-        assertEquals("bullrunner-gtfs.zip", array[1].getName());
-        assertEquals("testagency2.zip", array[2].getName());
+        assertTrue(array[0].getName().startsWith("tempFileNewest"));
+        assertTrue(array[1].getName().startsWith("tempFileMiddle"));
+        assertTrue(array[2].getName().startsWith("tempFileOldest"));
 
         // After sorting, should be in date order (oldest to newest)
         array = SortUtils.sortByDateModified(array);
-        assertEquals("testagency2.zip", array[0].getName());
-        assertEquals("bullrunner-gtfs.zip", array[1].getName());
-        assertEquals("bullrunner-gtfs-no-shapes.zip", array[2].getName());
+        assertTrue(array[0].getName().startsWith("tempFileOldest"));
+        assertTrue(array[1].getName().startsWith("tempFileMiddle"));
+        assertTrue(array[2].getName().startsWith("tempFileNewest"));
+
+        for (File file : files) {
+            file.deleteOnExit();
+        }
     }
 
     @Test
