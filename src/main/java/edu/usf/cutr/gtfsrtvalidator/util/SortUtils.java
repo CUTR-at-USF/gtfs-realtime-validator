@@ -19,6 +19,7 @@ package edu.usf.cutr.gtfsrtvalidator.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -49,7 +50,7 @@ public class SortUtils {
      * represents a date modified that is after o2
      */
     public static int compareByDateModified(Path o1, Path o2) throws IOException {
-        return Long.compare(o1.toFile().lastModified(), o2.toFile().lastModified());
+        return Long.compare(Files.getLastModifiedTime(o1).toMillis(), Files.getLastModifiedTime(o2).toMillis());
     }
 
     /**
