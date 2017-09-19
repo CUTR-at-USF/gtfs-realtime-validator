@@ -717,9 +717,9 @@ public class UtilTest {
     public void testSortDate() throws URISyntaxException, IOException, InterruptedException {
         // Create three temporary files to test sorting order - sleep in between to make sure timestamps differ
         Path file1 = Files.createTempFile("tempFileOldest", ".tmp");
-        Thread.sleep(500);
+        Thread.sleep(1500);
         Path file2 = Files.createTempFile("tempFileMiddle", ".tmp");
-        Thread.sleep(500);
+        Thread.sleep(1500);
         Path file3 = Files.createTempFile("tempFileNewest", ".tmp");
 
         // FIX ME - remove debugging logs
