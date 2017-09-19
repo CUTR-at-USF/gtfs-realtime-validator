@@ -722,6 +722,7 @@ public class UtilTest {
         Thread.sleep(500);
         Path file3 = Files.createTempFile("tempFileNewest", ".tmp");
 
+        // FIX ME - remove debugging logs
         _log.error(file1.toFile().getName() + " " + Files.getLastModifiedTime(file1));
         _log.error(file2.toFile().getName() + " " + Files.getLastModifiedTime(file2));
         _log.error(file3.toFile().getName() + " " + Files.getLastModifiedTime(file3));
