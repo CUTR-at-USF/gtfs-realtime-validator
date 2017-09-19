@@ -29,7 +29,6 @@ import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
 import org.junit.Test;
 import org.locationtech.spatial4j.shape.Shape;
 import org.locationtech.spatial4j.shape.ShapeFactory;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,8 +51,6 @@ import static org.locationtech.spatial4j.context.SpatialContext.GEO;
  * Test utility methods
  */
 public class UtilTest {
-
-    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(UtilTest.class);
 
     /**
      * Make sure our utility method TestUtils.assertResults() properly asserts number of expected==actual
