@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.usf.cutr.gtfsrtvalidator.batch.BatchProcessor;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import org.junit.Test;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +32,8 @@ import static org.junit.Assert.assertEquals;
  * Tests for the batch processing validation mode
  */
 public class BatchTest {
+
+    private static final org.slf4j.Logger _log = LoggerFactory.getLogger(BatchTest.class);
 
     @Test
     public void testBatchProcessing() throws IOException, NoSuchAlgorithmException {
@@ -46,6 +49,7 @@ public class BatchTest {
         // We should have 3 warnings - W001, W006, and W009, with 10 occurrences each
         assertEquals(3, allErrorLists.length);
         for (ErrorListHelperModel model : allErrorLists) {
+            _log.error(model.getErrorMessage().getValidationRule().getErrorId() + " " + model.getErrorMessage().getValidationRule().getErrorDescription() + " - " + model.getOccurrenceList().size());
             switch (model.getErrorMessage().getValidationRule().getErrorId()) {
                 case "W001":
                     assertEquals(10, model.getOccurrenceList().size());
