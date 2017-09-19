@@ -47,6 +47,7 @@ public class Main {
     private final static String SORT_OPTION = "sort";
     private final static String SORT_OPTION_NAME = "name";
     private final static String SORT_OPTION_DATE = "date";
+    private final static String PLAIN_TEXT = "plaintext";
 
     public static void main(String[] args) throws InterruptedException, ParseException {
         // Parse command line parameters
@@ -61,8 +62,10 @@ public class Main {
                 throw new IllegalArgumentException("For batch mode you must provide a path and file name to GTFS data (e.g., -gtfs /dir/gtfs.zip) and path to directory of all archived GTFS-rt files (e.g., -gtfs-realtime-path /dir/gtfsarchive)");
             }
             BatchProcessor.SortBy sortBy = getSortBy(options, args);
+            String plainText = getPlainTextFileExtensionfromArgs(options, args);
             BatchProcessor.Builder builder = new BatchProcessor.Builder(gtfs, gtfsRealtime)
-                    .sortBy(sortBy);
+                    .sortBy(sortBy)
+                    .setPlainTextExtension(plainText);
             BatchProcessor processor = builder.build();
             try {
                 processor.processFeeds();
@@ -146,12 +149,17 @@ public class Main {
                 .hasArg()
                 .desc("'name' if the GTFS-rt files should be chronologically sorted based on file name, or 'date' if the file last modified date should be used to sort the files")
                 .build();
+        Option plainText = Option.builder(PLAIN_TEXT)
+                .hasArg()
+                .desc("If the validator should write the protocol buffer files as plain text during batch processing.  Provided option will be the file extension for the plain text files")
+                .build();
 
         options.addOption(portOption);
         options.addOption(batchOption);
         options.addOption(gtfsOption);
         options.addOption(gtfsRealtimeOption);
         options.addOption(sort);
+        options.addOption(plainText);
 
         return options;
     }
@@ -248,5 +256,22 @@ public class Main {
             // No parameter provided by user
             return BatchProcessor.SortBy.DATE_MODIFIED;
         }
+    }
+
+    /**
+     * Returns the extension that should be used when outputting a plain text version of the file (if provided by the user), or null if a plain text version shouldn't be output (option wasn't provided on command line)
+     *
+     * @param options parsed command line options
+     * @param args
+     * @return the extension that should be used when outputting a plain text version of the file (if provided by the user), or null if a plain text version shouldn't be output (option wasn't provided on command line)
+     */
+    private static String getPlainTextFileExtensionfromArgs(Options options, String[] args) throws ParseException {
+        String plainText = null;
+        CommandLineParser parser = new DefaultParser();
+        CommandLine cmd = parser.parse(options, args);
+        if (cmd.hasOption(PLAIN_TEXT)) {
+            plainText = cmd.getOptionValue(PLAIN_TEXT);
+        }
+        return plainText;
     }
 }

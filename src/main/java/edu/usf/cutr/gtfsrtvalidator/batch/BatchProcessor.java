@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.transit.realtime.GtfsRealtime;
+import com.googlecode.protobuf.format.JsonFormat;
 import edu.usf.cutr.gtfsrtvalidator.background.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils;
@@ -34,8 +35,7 @@ import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.serialization.GtfsReader;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -58,6 +58,7 @@ public class BatchProcessor {
     // Validation rules
     private final static List<FeedEntityValidator> mValidationRules = new ArrayList<>();
     private SortBy mSortBy = SortBy.DATE_MODIFIED;
+    private String mPlainTextExtension = null;
 
     // GTFS
     private GtfsDaoImpl mGtfsData = new GtfsDaoImpl();
@@ -83,6 +84,10 @@ public class BatchProcessor {
 
     private void setSortBy(SortBy sortBy) {
         mSortBy = sortBy;
+    }
+
+    private void setPlainTextExtension(String plainTextExtension) {
+        mPlainTextExtension = plainTextExtension;
     }
 
     public void processFeeds() throws NoSuchAlgorithmException, IOException {
@@ -203,8 +208,13 @@ public class BatchProcessor {
             consoleOutput.append("\n---------------------");
             _log.info(consoleOutput.toString());
 
-            // Write results for this file to JSON
+            // Write validation results for this file to JSON
             writeResults(mapper, path, allErrorLists);
+
+            if (mPlainTextExtension != null) {
+                // Write plain text version of protocol buffer
+                writePlainText(message, mapper, path);
+            }
 
             prevHash = currentHash;
             prevMessage = message;
@@ -226,6 +236,12 @@ public class BatchProcessor {
         mapper.writeValue(new File(path.toAbsolutePath() + ".results.json"), allErrorLists);
     }
 
+    private void writePlainText(GtfsRealtime.FeedMessage message, ObjectMapper mapper, Path path) throws IOException {
+        OutputStream out = new BufferedOutputStream(new FileOutputStream(path.toAbsolutePath() + "." + mPlainTextExtension));
+        out.write(JsonFormat.printToString(message).getBytes());
+        out.close();
+    }
+
     public enum SortBy {
         DATE_MODIFIED, NAME
     }
@@ -233,6 +249,7 @@ public class BatchProcessor {
     public static class Builder {
         private String mPathToGtfsFile, mPathToGtfsRealtime;
         private SortBy mSortBy = null;
+        private String mPlainTextExtension = null;
 
         public Builder(String pathToGtfsFile, String pathToGtfsRealtime) {
             mPathToGtfsFile = pathToGtfsFile;
@@ -250,10 +267,26 @@ public class BatchProcessor {
             return this;
         }
 
+        /**
+         * Sets the validator to output a plain text version of each processed file with the provided file extension.
+         * For example, if the protocol buffer file has the name "file.pb", and the text "txt" is provided, then the
+         * plain text version of this file will be "file.pb.txt".
+         *
+         * @param plainTextExtension the extension that should be used for the plain text version of all the processed feed files
+         * @return this Builder instance so methods can be chained together
+         */
+        public Builder setPlainTextExtension(String plainTextExtension) {
+            mPlainTextExtension = plainTextExtension;
+            return this;
+        }
+
         public BatchProcessor build() {
             BatchProcessor bp = new BatchProcessor(mPathToGtfsFile, mPathToGtfsRealtime);
             if (mSortBy != null) {
                 bp.setSortBy(mSortBy);
+            }
+            if (mPlainTextExtension != null) {
+                bp.setPlainTextExtension(mPlainTextExtension);
             }
             return bp;
         }
