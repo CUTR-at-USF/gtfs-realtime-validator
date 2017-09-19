@@ -57,6 +57,7 @@ public class BatchProcessor {
 
     // Validation rules
     private final static List<FeedEntityValidator> mValidationRules = new ArrayList<>();
+    private final static String RESULTS_FILE_EXTENSION = ".results.json";
     private SortBy mSortBy = SortBy.DATE_MODIFIED;
     private String mPlainTextExtension = null;
 
@@ -233,7 +234,7 @@ public class BatchProcessor {
     }
 
     private void writeResults(ObjectMapper mapper, Path path, List<ErrorListHelperModel> allErrorLists) throws IOException {
-        mapper.writeValue(new File(path.toAbsolutePath() + ".results.json"), allErrorLists);
+        mapper.writeValue(new File(path.toAbsolutePath() + RESULTS_FILE_EXTENSION), allErrorLists);
     }
 
     private void writePlainText(GtfsRealtime.FeedMessage message, ObjectMapper mapper, Path path) throws IOException {
