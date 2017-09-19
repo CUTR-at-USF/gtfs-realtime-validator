@@ -20,8 +20,8 @@ package edu.usf.cutr.gtfsrtvalidator.batch;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.TextFormat;
 import com.google.transit.realtime.GtfsRealtime;
-import com.googlecode.protobuf.format.JsonFormat;
 import edu.usf.cutr.gtfsrtvalidator.background.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils;
@@ -239,7 +239,7 @@ public class BatchProcessor {
 
     private void writePlainText(GtfsRealtime.FeedMessage message, ObjectMapper mapper, Path path) throws IOException {
         OutputStream out = new BufferedOutputStream(new FileOutputStream(path.toAbsolutePath() + "." + mPlainTextExtension));
-        out.write(JsonFormat.printToString(message).getBytes());
+        out.write(TextFormat.printToString(message).getBytes());
         out.close();
     }
 
