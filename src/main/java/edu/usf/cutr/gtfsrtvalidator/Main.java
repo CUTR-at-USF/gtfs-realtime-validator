@@ -22,6 +22,7 @@ import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.helper.GetFile;
 import edu.usf.cutr.gtfsrtvalidator.hibernate.HibernateUtil;
 import edu.usf.cutr.gtfsrtvalidator.servlets.GetFeedJSON;
+import edu.usf.cutr.gtfsrtvalidator.validation.IterationStatistics;
 import org.apache.commons.cli.*;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.DefaultServlet;
@@ -34,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 public class Main {
     private static final org.slf4j.Logger _log = LoggerFactory.getLogger(Main.class);
@@ -48,6 +50,7 @@ public class Main {
     private final static String SORT_OPTION_NAME = "name";
     private final static String SORT_OPTION_DATE = "date";
     private final static String PLAIN_TEXT = "plaintext";
+    private final static String RETURN_STATS = "stats";
 
     public static void main(String[] args) throws InterruptedException, ParseException {
         // Parse command line parameters
@@ -63,12 +66,22 @@ public class Main {
             }
             BatchProcessor.SortBy sortBy = getSortBy(options, args);
             String plainText = getPlainTextFileExtensionfromArgs(options, args);
+            boolean returnStats = getReturnStatsFromArgs(options, args);
             BatchProcessor.Builder builder = new BatchProcessor.Builder(gtfs, gtfsRealtime)
                     .sortBy(sortBy)
-                    .setPlainTextExtension(plainText);
+                    .setPlainTextExtension(plainText)
+                    .setReturnStatistics(returnStats);
             BatchProcessor processor = builder.build();
             try {
-                processor.processFeeds();
+                List<IterationStatistics> stats = processor.processFeeds();
+                if (returnStats) {
+                    _log.info("-------------------------");
+                    _log.info("  Validation Statistics");
+                    _log.info("-------------------------");
+                    for (IterationStatistics stat : stats) {
+                        _log.info(stat.toString());
+                    }
+                }
             } catch (IOException | NoSuchAlgorithmException e) {
                 _log.error("Error running batch processor: " + e);
             }
@@ -153,6 +166,10 @@ public class Main {
                 .hasArg()
                 .desc("If the validator should write the protocol buffer files as plain text during batch processing.  Provided option will be the file extension for the plain text files")
                 .build();
+        Option saveStats = Option.builder(RETURN_STATS)
+                .hasArg()
+                .desc("If the validator should keep tracks of statistics for all validated GTFS-realtime files.")
+                .build();
 
         options.addOption(portOption);
         options.addOption(batchOption);
@@ -160,6 +177,7 @@ public class Main {
         options.addOption(gtfsRealtimeOption);
         options.addOption(sort);
         options.addOption(plainText);
+        options.addOption(saveStats);
 
         return options;
     }
@@ -273,5 +291,18 @@ public class Main {
             plainText = cmd.getOptionValue(PLAIN_TEXT);
         }
         return plainText;
+    }
+
+    /**
+     * Returns true if the "-stats" parameter is included, false it if is not
+     *
+     * @param options command line options that this application supports
+     * @param args
+     * @return true if the "-stats" parameter is included, false it if is not
+     */
+    private static boolean getReturnStatsFromArgs(Options options, String[] args) throws ParseException {
+        CommandLineParser parser = new DefaultParser();
+        CommandLine cmd = parser.parse(options, args);
+        return cmd.hasOption(RETURN_STATS);
     }
 }

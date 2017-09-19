@@ -27,6 +27,8 @@ import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils;
 import edu.usf.cutr.gtfsrtvalidator.util.SortUtils;
 import edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils;
+import edu.usf.cutr.gtfsrtvalidator.validation.IterationStatistics;
+import edu.usf.cutr.gtfsrtvalidator.validation.RuleStatistics;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import edu.usf.cutr.gtfsrtvalidator.validation.rules.*;
 import org.apache.commons.io.IOUtils;
@@ -60,6 +62,8 @@ public class BatchProcessor {
     public final static String RESULTS_FILE_EXTENSION = ".results.json";
     private SortBy mSortBy = SortBy.DATE_MODIFIED;
     private String mPlainTextExtension = null;
+    private boolean mReturnStatistics = false;
+    private List<IterationStatistics> mIterationStatistics;
 
     // GTFS
     private GtfsDaoImpl mGtfsData = new GtfsDaoImpl();
@@ -91,11 +95,24 @@ public class BatchProcessor {
         mPlainTextExtension = plainTextExtension;
     }
 
-    public void processFeeds() throws NoSuchAlgorithmException, IOException {
+    /**
+     * Sets the validator to save statistics for each file validated, which are then returned as a list of IterationStatistics objects from BatchProcess.processFeeds().  Default setting is false,
+     * as large batch operations with many files could return in an extremely large list of statistics in memory.
+     *
+     * @param returnStatistics true the batch processor should keep a record of all validation statistics to be returned by processFeeds(), false it if is not
+     */
+    private void setReturnStatistics(boolean returnStatistics) {
+        mReturnStatistics = returnStatistics;
+    }
+
+    public List<IterationStatistics> processFeeds() throws NoSuchAlgorithmException, IOException {
         // Read GTFS data into a GtfsDaoImpl
         _log.info("Starting batch processor...");
+        if (mReturnStatistics) {
+            mIterationStatistics = new ArrayList<>();
+        }
         String timeZoneText = null;
-        readGtfsData();
+        double gtfsReadTime = readGtfsData();
 
         Collection<Agency> agencies = mGtfsData.getAllAgencies();
         for (Agency agency : agencies) {
@@ -149,6 +166,11 @@ public class BatchProcessor {
         byte[] prevHash = null;
 
         for (Path path : paths) {
+            IterationStatistics stats = null;
+            if (mReturnStatistics) {
+                stats = new IterationStatistics();
+                stats.setGtfsReadTime(gtfsReadTime);
+            }
             long startTimeNanos = System.nanoTime();
             long startToByteArray = System.nanoTime();
             byte[] protobuf;
@@ -158,7 +180,11 @@ public class BatchProcessor {
                 _log.error("Error reading GTFS-rt file to byte array, skipping to next file: " + e);
                 continue;
             }
-            _log.info("Read " + path.getFileName() + " to byte array in " + getElapsedTimeString(getElapsedTime(startToByteArray, System.nanoTime())));
+            double toByteArray = getElapsedTime(startToByteArray, System.nanoTime());
+            _log.info("Read " + path.getFileName() + " to byte array in " + getElapsedTimeString(toByteArray));
+            if (mReturnStatistics) {
+                stats.setToByteArrayTime(toByteArray);
+            }
 
             byte[] currentHash = md.digest(protobuf);
             if (MessageDigest.isEqual(currentHash, prevHash)) {
@@ -188,7 +214,11 @@ public class BatchProcessor {
                 _log.error("Error reading GTFS-rt message from byte array, skipping to next file: " + e);
                 continue;
             }
-            _log.info("Decoded " + path.getFileName() + " protobuf in " + getElapsedTimeString(getElapsedTime(startProtobufDecode, System.nanoTime())));
+            double pbDecode = getElapsedTime(startProtobufDecode, System.nanoTime());
+            _log.info("Decoded " + path.getFileName() + " protobuf in " + getElapsedTimeString(pbDecode));
+            if (mReturnStatistics) {
+                stats.setDecodeProtobufTime(pbDecode);
+            }
 
             GtfsRealtime.FeedMessage combinedMessage = null;
             // See if more than one entity type exists in this feed
@@ -199,15 +229,31 @@ public class BatchProcessor {
 
             List<ErrorListHelperModel> allErrorLists = new ArrayList<>();
             StringBuilder consoleOutput = new StringBuilder();
+            List<RuleStatistics> ruleStatistics = null;
+            if (mReturnStatistics) {
+                ruleStatistics = new ArrayList<>();
+            }
             for (FeedEntityValidator rule : mValidationRules) {
                 long startRuleNanos = System.nanoTime();
                 List<ErrorListHelperModel> errorLists = rule.validate(timestamp, mGtfsData, mGtfsMetadata, message, prevMessage, combinedMessage);
                 allErrorLists.addAll(errorLists);
-                consoleOutput.append("\n" + rule.getClass().getSimpleName() + " - rule = " + getElapsedTimeString(getElapsedTime(startRuleNanos, System.nanoTime())));
+                double ruleExecutionTime = getElapsedTime(startRuleNanos, System.nanoTime());
+                consoleOutput.append("\n" + rule.getClass().getSimpleName() + " - rule = " + getElapsedTimeString(ruleExecutionTime));
+                if (mReturnStatistics) {
+                    RuleStatistics ruleStat = new RuleStatistics();
+                    ruleStat.setRuleExecutionTime(ruleExecutionTime);
+                    ruleStat.setValidator(rule.getClass().getSimpleName());
+                    ruleStatistics.add(ruleStat);
+                }
             }
-            consoleOutput.append("\nProcessed " + path.getFileName() + " in " + getElapsedTimeString(getElapsedTime(startTimeNanos, System.nanoTime())));
+            double totalIterationTime = getElapsedTime(startTimeNanos, System.nanoTime());
+            consoleOutput.append("\nProcessed " + path.getFileName() + " in " + getElapsedTimeString(totalIterationTime));
             consoleOutput.append("\n---------------------");
             _log.info(consoleOutput.toString());
+            if (mReturnStatistics) {
+                stats.setRuleStatistics(ruleStatistics);
+                stats.setTotalIterationTime(totalIterationTime);
+            }
 
             // Write validation results for this file to JSON
             writeResults(mapper, path, allErrorLists);
@@ -217,12 +263,23 @@ public class BatchProcessor {
                 writePlainText(message, mapper, path);
             }
 
+            if (mReturnStatistics) {
+                mIterationStatistics.add(stats);
+            }
+
             prevHash = currentHash;
             prevMessage = message;
         }
+        return mIterationStatistics;
     }
 
-    private void readGtfsData() throws IOException {
+    /**
+     * Read the GTFS data into an internal data model
+     *
+     * @return the amount of time to read the GTFS data, in seconds as a decimal (0.22)
+     * @throws IOException
+     */
+    private double readGtfsData() throws IOException {
         _log.info("Reading GTFS data from " + mPathToGtfsFile + "...");
         mGtfsData = new GtfsDaoImpl();
         mReader = new GtfsReader();
@@ -230,7 +287,9 @@ public class BatchProcessor {
         mReader.setEntityStore(mGtfsData);
         long startGtfsRead = System.nanoTime();
         mReader.run();
-        _log.info(mPathToGtfsFile.getName() + " read in " + getElapsedTimeString(getElapsedTime(startGtfsRead, System.nanoTime())));
+        double readTime = getElapsedTime(startGtfsRead, System.nanoTime());
+        _log.info(mPathToGtfsFile.getName() + " read in " + getElapsedTimeString(readTime));
+        return readTime;
     }
 
     private void writeResults(ObjectMapper mapper, Path path, List<ErrorListHelperModel> allErrorLists) throws IOException {
@@ -251,6 +310,7 @@ public class BatchProcessor {
         private String mPathToGtfsFile, mPathToGtfsRealtime;
         private SortBy mSortBy = null;
         private String mPlainTextExtension = null;
+        private boolean mReturnStatistics = false;
 
         public Builder(String pathToGtfsFile, String pathToGtfsRealtime) {
             mPathToGtfsFile = pathToGtfsFile;
@@ -281,6 +341,18 @@ public class BatchProcessor {
             return this;
         }
 
+        /**
+         * Sets the validator to save statistics for each file validated, which are then returned as a list of IterationStatistics objects from BatchProcess.processFeeds().  Default setting is false,
+         * as large batch operations with many files could return in an extremely large list of statistics in memory.
+         *
+         * @param returnStatistics true the batch processor should keep a record of all validation statistics to be returned by processFeeds(), false it if is not
+         * @return this Builder instance so methods can be chained together
+         */
+        public Builder setReturnStatistics(boolean returnStatistics) {
+            mReturnStatistics = returnStatistics;
+            return this;
+        }
+
         public BatchProcessor build() {
             BatchProcessor bp = new BatchProcessor(mPathToGtfsFile, mPathToGtfsRealtime);
             if (mSortBy != null) {
@@ -289,6 +361,7 @@ public class BatchProcessor {
             if (mPlainTextExtension != null) {
                 bp.setPlainTextExtension(mPlainTextExtension);
             }
+            bp.setReturnStatistics(mReturnStatistics);
             return bp;
         }
     }
