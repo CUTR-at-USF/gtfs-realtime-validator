@@ -57,7 +57,7 @@ public class BatchProcessor {
 
     // Validation rules
     private final static List<FeedEntityValidator> mValidationRules = new ArrayList<>();
-    private final static String RESULTS_FILE_EXTENSION = ".results.json";
+    public final static String RESULTS_FILE_EXTENSION = ".results.json";
     private SortBy mSortBy = SortBy.DATE_MODIFIED;
     private String mPlainTextExtension = null;
 
