@@ -169,14 +169,14 @@ public class BatchProcessor {
             long timestamp;
             if (mSortBy.equals(SortBy.DATE_MODIFIED)) {
                 // Use file last modified date as "current" timestamp
-                timestamp = path.toFile().lastModified();
+                timestamp = Files.getLastModifiedTime(path).toMillis();
             } else {
                 // Use time parsed from file name as "current" timestamp
                 try {
                     timestamp = TimestampUtils.getTimestampFromFileName(path.toFile().getName());
                 } catch (DateTimeParseException | StringIndexOutOfBoundsException e) {
                     _log.error("Couldn't parse timestamp from file name '" + path.toFile().getName() + "' - using date modified instead: " + e);
-                    timestamp = path.toFile().lastModified();
+                    timestamp = Files.getLastModifiedTime(path).toMillis();
                 }
             }
 
