@@ -722,13 +722,11 @@ public class UtilTest {
         /**
          * SortUtils.compareByDateModified()
          */
-        // bullrunner-gtfs.zip is older than bullrunner-gtfs-no-shapes.zip
         assertTrue(SortUtils.compareByDateModified(file2, file3) < 0);
         assertTrue(SortUtils.compareByDateModified(file3, file2) > 0);
         assertFalse(SortUtils.compareByDateModified(file2, file3) > 0);
         assertFalse(SortUtils.compareByDateModified(file3, file2) < 0);
 
-        // testagency2.zip is older than bullrunner-gtfs.zip
         assertTrue(SortUtils.compareByDateModified(file1, file2) < 0);
         assertTrue(SortUtils.compareByDateModified(file2, file1) > 0);
         assertFalse(SortUtils.compareByDateModified(file2, file1) < 0);
@@ -746,13 +744,19 @@ public class UtilTest {
         assertTrue(array[1].getName().startsWith("tempFileMiddle"));
         assertTrue(array[2].getName().startsWith("tempFileOldest"));
 
+        // FIXME - remove debugging loop
+        for (File file : array) {
+            System.out.println(file.getName());
+        }
+
         // After sorting, should be in date order (oldest to newest)
         array = SortUtils.sortByDateModified(array);
         assertTrue(array[0].getName().startsWith("tempFileOldest"));
         assertTrue(array[1].getName().startsWith("tempFileMiddle"));
         assertTrue(array[2].getName().startsWith("tempFileNewest"));
 
-        for (File file : files) {
+        for (File file : array) {
+            System.out.println(file.getName());  // FIXME - remove debug statement
             file.deleteOnExit();
         }
     }
