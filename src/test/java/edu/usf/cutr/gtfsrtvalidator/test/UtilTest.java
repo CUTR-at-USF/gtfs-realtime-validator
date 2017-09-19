@@ -715,17 +715,12 @@ public class UtilTest {
 
     @Test
     public void testSortDate() throws URISyntaxException, IOException, InterruptedException {
-        // Create three temporary files to test sorting order - sleep in between to make sure timestamps differ
+        // Create three temporary files to test sorting order - sleep in between to make sure timestamps differ by seconds
         Path file1 = Files.createTempFile("tempFileOldest", ".tmp");
         Thread.sleep(1500);
         Path file2 = Files.createTempFile("tempFileMiddle", ".tmp");
         Thread.sleep(1500);
         Path file3 = Files.createTempFile("tempFileNewest", ".tmp");
-
-        // FIX ME - remove debugging logs
-        _log.error(file1.toFile().getName() + " " + Files.getLastModifiedTime(file1));
-        _log.error(file2.toFile().getName() + " " + Files.getLastModifiedTime(file2));
-        _log.error(file3.toFile().getName() + " " + Files.getLastModifiedTime(file3));
 
         /**
          * SortUtils.compareByDateModified()
@@ -752,11 +747,6 @@ public class UtilTest {
         assertTrue(array[1].getName().startsWith("tempFileMiddle"));
         assertTrue(array[2].getName().startsWith("tempFileOldest"));
 
-        // FIXME - remove debugging loop
-        for (File file : array) {
-            _log.error(file.getName());
-        }
-
         // After sorting, should be in date order (oldest to newest)
         array = SortUtils.sortByDateModified(array);
         assertTrue(array[0].getName().startsWith("tempFileOldest"));
@@ -764,7 +754,6 @@ public class UtilTest {
         assertTrue(array[2].getName().startsWith("tempFileNewest"));
 
         for (File file : array) {
-            _log.error(file.getName());  // FIXME - remove debug statement
             file.deleteOnExit();
         }
     }
