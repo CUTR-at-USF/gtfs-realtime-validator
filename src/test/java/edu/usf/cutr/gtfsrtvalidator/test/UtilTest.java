@@ -749,7 +749,7 @@ public class UtilTest {
 
         // FIXME - remove debugging loop
         for (File file : array) {
-            _log.info(file.getName());
+            _log.error(file.getName());
         }
 
         // After sorting, should be in date order (oldest to newest)
@@ -759,7 +759,7 @@ public class UtilTest {
         assertTrue(array[2].getName().startsWith("tempFileNewest"));
 
         for (File file : array) {
-            _log.info(file.getName());  // FIXME - remove debug statement
+            _log.error(file.getName());  // FIXME - remove debug statement
             file.deleteOnExit();
         }
     }
