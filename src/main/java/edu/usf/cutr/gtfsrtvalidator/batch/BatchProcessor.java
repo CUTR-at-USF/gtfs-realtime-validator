@@ -112,7 +112,7 @@ public class BatchProcessor {
      *
      * @return If setReturnStatistics() is set to true, it will return a list of IterationStatistics (one per GTFS-rt
      * file) for performance in the batch validation.  By default this method will return null to avoid memory issues
-     * with extremely large batch processes.
+     * when processing an extremely large number of files.
      * @throws NoSuchAlgorithmException If the MD5 hash algorithm (used to determine feed uniqueness) is not available on the machine executing the code
      * @throws IOException              If the GTFS or GTFS-realtime files cannot be read or the results cannot be written to disk
      */
