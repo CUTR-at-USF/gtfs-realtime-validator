@@ -85,7 +85,8 @@ public class CrossFeedDescriptorValidator implements FeedEntityValidator {
                     try {
                         tripUpdates.put(tripId, vehicleId);
                     } catch (IllegalArgumentException e) {
-                        // TODO - We should log this as error under new rule - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/33
+                        // TODO - Maybe log this as error under new rule? - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/33
+                        // However, there are legitimate cases that will end up here - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/255
                         _log.error("Error adding trip_id " + tripId + " -> vehicle_id " + vehicleId + " to TripUpdates HashBiMap.  TripUpdate exists twice in feed, or more than one TripUpdate is assigned to the same vehicle. " + e);
                     }
                 }

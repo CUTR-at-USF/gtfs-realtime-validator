@@ -16,13 +16,16 @@
  */
 package edu.usf.cutr.gtfsrtvalidator.util;
 
-import java.text.*;
-import java.time.Instant;
+import org.apache.commons.io.FilenameUtils;
+
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
-import java.time.format.ResolverStyle;
-import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -164,5 +167,21 @@ public class TimestampUtils {
     public static void logDuration(org.slf4j.Logger log, String prefix, long startTimeNanos) {
         double elapsedTime = getElapsedTime(startTimeNanos, System.nanoTime());
         log.info(prefix + getElapsedTimeString(elapsedTime));
+    }
+
+    /**
+     * Returns a timestamp in UTC time extracted from a file name in the format of "TripUpdates-2017-02-18T20-01-08Z.pb".
+     * The last 20 characters of the file name, prior to the file extension, must be the time in the above format.
+     * The prefix prior to the last 20 characters and the file extension can be any characters.
+     *
+     * @param fileName name of the file containing the time and date in the format of "TripUpdates-2017-02-18T20-01-08Z.pb"
+     * @return time, measured in milliseconds, between the date/time in the file name and midnight, January 1, 1970 UTC
+     */
+    public static long getTimestampFromFileName(String fileName) {
+        String fileNameNoExtension = FilenameUtils.removeExtension(fileName);
+        String date = fileNameNoExtension.substring(fileNameNoExtension.length() - 20, fileNameNoExtension.length() - 10);
+        String time = fileNameNoExtension.substring(fileNameNoExtension.length() - 10, fileNameNoExtension.length()).replaceAll("-", ":");
+        ZonedDateTime zdt = ZonedDateTime.parse(date + time, DateTimeFormatter.ISO_DATE_TIME);
+        return zdt.toInstant().toEpochMilli();
     }
 }

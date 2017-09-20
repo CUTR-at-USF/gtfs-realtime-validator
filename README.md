@@ -13,6 +13,9 @@ A tool that validates [General Transit Feed Specification (GTFS)-realtime](https
 1. Install [Java Development Kit (JDK) 1.8 or higher](http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html)
 2. Download the latest alpha build:
     * [gtfs-rt-validator-1.0.0-SNAPSHOT.jar](https://s3.amazonaws.com/gtfs-rt-validator/travis_builds/gtfs-rt-validator-1.0.0-SNAPSHOT.jar)
+
+**To run the validator in default server mode, which provides a web user interface:**
+
 3. From the command line run `java -Djsse.enableSNIExtension=false -jar gtfs-rt-validator-1.0.0-SNAPSHOT.jar`
 4. When prompted, in your browser go to `http://localhost:8080`
 5. Enter your [General Transit Feed Specification (GTFS)-realtime](https://developers.google.com/transit/gtfs-realtime/) and [GTFS](https://developers.google.com/transit/gtfs/) feed URLs and click "Start".  Example feeds:
@@ -25,6 +28,14 @@ A tool that validates [General Transit Feed Specification (GTFS)-realtime](https
     * ...more at [Transitfeeds.com](http://transitfeeds.com/search?q=gtfsrt) and [Transitland Feed Registry](https://transit.land/feed-registry/)
 
 Please note that if you're using `https` URLS, you'll need to use the `-Djsse.enableSNIExtension=false` command-line parameter or install the [Java Cryptography Extension (JCE)](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html) - see the [Prerequisites](https://github.com/CUTR-at-USF/gtfs-realtime-validator#prerequisites) section for details.
+
+**To run the validator in batch processing mode, to validate a large number of archived feed files:**
+
+3. From the command line run `java -jar target/gtfs-rt-validator-1.0.0-SNAPSHOT.jar -batch yes -gtfs "D:\HART\google_transit.zip" -gtfsrealtimepath "D:\HART\gtfs-rt"`
+    * `-gtfs` should point to the GTFS zip file 
+    * `-gtfsrealtimepath` should point to the directory holding the GTFS-realtime files
+
+See ["Configuration Options -> Batch Processing"](https://github.com/CUTR-at-USF/gtfs-realtime-validator#batch-processing) for more documentation.
 
 ## Rules
 
@@ -62,7 +73,7 @@ If you're going to be rebuilding the project frequently (e.g., editing source co
 
 #### 2. Run the application
 
-From the command-line, run: 
+To start up the server so you can view the web interface, from the command-line, run: 
 
 `java -Djsse.enableSNIExtension=false -jar target/gtfs-rt-validator-1.0.0-SNAPSHOT.jar`
 
@@ -73,10 +84,12 @@ You should see some output, and a message saying `Go to http://localhost:8080 in
 Once the application has been started, you can enter URLs for the feeds you'd like to have validated at:
  
  http://localhost:8080
+ 
+Note that there is also an option for [Batch Processing](https://github.com/CUTR-at-USF/gtfs-realtime-validator#batch-processing) feeds from the command line.
 
 ## Configuration options
  
-**Logging**
+#### Logging
 
 If you'd like to change the logging level, for example to see all debug statements, in `src/main/resources/simplelogger.properties` change the following line to say `DEBUG`:
  
@@ -88,13 +101,13 @@ If you'd like to change the logging level, for example to see all debug statemen
 
 `WARN` will show a smaller number of informational messages.
 
- **Port number**
+#### Port number
  
  Port `8080` is used by default.  If you'd like to change the port number (e.g., port `80`), you can use the command line parameter `-port 80`:
  
  `java -jar target/gtfs-rt-validator-1.0.0-SNAPSHOT.jar -port 80`
  
- **Database**
+#### Database
  
  We use [Hibernate](http://hibernate.org/) to manage data persistence to a database.  To allow you to get the tool up and running quickly, we use the embedded [HSQLDB](http://hsqldb.org/) by default.  This is not recommended for a production deployment.
  
@@ -107,9 +120,67 @@ If you'd like to change the logging level, for example to see all debug statemen
  
  A list of all the dialect properties for specific database versions is shown [here](http://www.tutorialspoint.com/hibernate/hibernate_configuration.htm).
  
- **Docker**
+#### Batch processing
  
- Want to run this in [Docker](https://www.docker.com/)?  Check out [gtfs-realtime-validator-docker](https://github.com/scrudden/gtfs-realtime-validator-docker).
+ We support a command-line batch processing mode for archived GTFS-realtime files.
+ 
+ Here's an example of a command to batch process a set of GTFS-realtime files:
+ 
+ `java -jar target/gtfs-rt-validator-1.0.0-SNAPSHOT.jar -batch yes -gtfs "D:\HART\google_transit.zip" -gtfsrealtimepath "D:\HART\gtfs-rt" -sort date`
+ 
+ Parameters:
+ 
+ * `-batch` - Must be provided for the validator to start in batch processing mode.  If this parameter isn't provided, the server will start in the normal mode.
+ * `-gtfs` - The path and file name of the GTFS zip file.  GTFS zip file must cover the time period for the GTFS-rt archived files.  You can combine GTFS zip files if needed using the [Google transitfeed tool's](https://github.com/google/transitfeed/wiki/Merge).
+ * `-gtfsrealtimepath` - The path to the folder that contains the individual GTFS-realtime protocol buffer files
+ * `-sort` *(Optional)* - `date` if the GTFS-realtime files should be processed chronologically by the "last modified" date of the file (default), or `name` if the files should be ordered by the name of the file. If you use the name of the file to order the files, then the validator will try to parse the date/time from each individual file name and use that date/time as the "current" time.  Date/times in file names must be in the [ISO_DATE_TIME](https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html#ISO_DATE_TIME) format and must be the last 20 characters prior to the file extension - for example, `TripUpdates-2017-02-18T20-00-08Z.pb`.  If a date/time can't be parsed from the file name, then the last modified date is used as the "current" time. GTFS-realtime file order is important for rules such as E012, E018, and W007, which compare the previous feed iteration against the current one.     
+ * `-plaintext` *(Optional)* - If this argument is supplied, the validator will output a plain text version of each of the protocol buffer files with the provided file extension.  For example, if the protocol buffer file has the name `trip-update.pb`, and the text `-plaintext txt` is provided as the argument, then the plain text version of this file will be `trip-update.pb.txt`.
+ * `-stats` *(Optional)* - If this argument is supplied (e.g., `-stats yes`), the validator will save statistics to memory for each of the validation files that are processed, and will return a list of `ValidationStatistics` objects from `BatchProcessor.processFeeds()` that can be examined to see individual iteration and rule processing times (in decimal seconds).
+ 
+ After execution finishes, the results for each GTFS-realtime protocol buffer file will be output in JSON format with the same file name, but with "results.json" appended to the end.  For example, if one GTFS-realtime procotol buffer file name was `TripUpdates-2017-02-18T20-00-08Z.pb`, the validation results for that file name will be output as `TripUpdates-2017-02-18T20-00-08Z.pb.results.json`. 
+ 
+ It will look something like:
+ 
+ ~~~
+ [ {
+   "errorMessage" : {
+     "messageId" : 0,
+     "gtfsRtFeedIterationModel" : null,
+     "validationRule" : {
+       "errorId" : "W001",
+       "severity" : "WARNING",
+       "title" : "timestamp not populated",
+       "errorDescription" : "Timestamps should be populated for all elements",
+       "occurrenceSuffix" : "does not have a timestamp"
+     },
+     "errorDetails" : null
+   },
+   "occurrenceList" : [ {
+     "occurrenceId" : 0,
+     "messageLogModel" : null,
+     "prefix" : "trip_id 277716"
+   }, {
+     "occurrenceId" : 0,
+     "messageLogModel" : null,
+     "prefix" : "trip_id 277767"
+   }, {
+     "occurrenceId" : 0,
+     "messageLogModel" : null,
+     "prefix" : "trip_id 277768"
+   }, 
+   ...
+~~~
+
+In the above example, three `trip_updates` have been validated, and each was missing a timestamp (warning `W001`).  To put together the full message for each occurrence of the warning or error, you add the occurrence `prefix` to the validationRule `occurrenceSuffix`.
+
+For example, in log format the above would look like:
+* `trip_id 277716 does not have a timestamp`
+* `trip_id 277767 does not have a timestamp`
+* `trip_id 277768 does not have a timestamp`
+ 
+#### Docker
+ 
+Want to run this in [Docker](https://www.docker.com/)?  Check out [gtfs-realtime-validator-docker](https://github.com/scrudden/gtfs-realtime-validator-docker).
 
 ## Acknowledgements
 

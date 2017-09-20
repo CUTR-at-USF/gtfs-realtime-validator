@@ -24,6 +24,7 @@ import edu.usf.cutr.gtfsrtvalidator.api.resource.GtfsFeed;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.helper.DBHelper;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
+import edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
 import edu.usf.cutr.gtfsrtvalidator.validation.rules.*;
 import org.apache.commons.io.IOUtils;
@@ -42,6 +43,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils.getElapsedTime;
 import static edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils.getElapsedTimeString;
@@ -178,6 +180,9 @@ public class BackgroundTask implements Runnable {
 
             GTFSDB.closeSession(session);
 
+            while (!mGtfsRtFeedMap.keySet().containsAll(gtfsRtFeedModelList.stream().map(GtfsRtFeedModel::getGtfsRtId).collect(Collectors.toSet()))) {
+                Thread.sleep(200);
+            }
             GtfsRealtime.FeedHeader header = null;
 
             if (gtfsRtFeedModelList.size() < 1) {
@@ -186,6 +191,15 @@ public class BackgroundTask implements Runnable {
             }
 
             GtfsRealtime.FeedMessage combinedFeed = null;
+
+            if (gtfsRtFeedModelList.size() == 1) {
+                // See if more than one entity type exists in this feed
+                GtfsRealtime.FeedMessage message = mGtfsRtFeedMap.get(gtfsRtFeedModelList.get(0).getGtfsRtId());
+                if (GtfsUtils.isCombinedFeed(message)) {
+                    // Run CrossFeedDescriptorValidator on this message
+                    combinedFeed = message;
+                }
+            }
 
             if (gtfsRtFeedModelList.size() > 1) {
                 // We're monitoring multiple GTFS-rt feeds for the same GTFS data - create a combined feed message include all entities for all of those GTFS-rt feeds
@@ -229,10 +243,9 @@ public class BackgroundTask implements Runnable {
     private StringBuffer validateEntity(long currentTimeMillis, GtfsRealtime.FeedMessage currentFeedMessage, GtfsRealtime.FeedMessage previousFeedMessage,
                                         GtfsRealtime.FeedMessage combinedFeedMessage, GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata,
                                         GtfsRtFeedIterationModel feedIteration, FeedEntityValidator feedEntityValidator) {
+        StringBuffer consoleLine = new StringBuffer();
         long startTimeNanos = System.nanoTime();
-        StringBuffer consoleLine;
         List<ErrorListHelperModel> errorLists = feedEntityValidator.validate(currentTimeMillis, gtfsData, gtfsMetadata, currentFeedMessage, previousFeedMessage, combinedFeedMessage);
-        consoleLine = new StringBuffer();
         consoleLine.append("\n" + feedEntityValidator.getClass().getSimpleName() + " - rule = " + getElapsedTimeString(getElapsedTime(startTimeNanos, System.nanoTime())));
         if (errorLists != null) {
             startTimeNanos = System.nanoTime();

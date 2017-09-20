@@ -94,6 +94,43 @@ public class TimestampValidatorTest extends FeedMessageTest {
     }
 
     /**
+     * E048 - header` `timestamp` not populated (GTFS-rt v2.0 and higher)
+     */
+    @Test
+    public void testE048() {
+        TimestampValidator timestampValidator = new TimestampValidator();
+        Map<ValidationRule, Integer> expected = new HashMap<>();
+        GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+
+        // Set version to v2.0
+        feedHeaderBuilder.setGtfsRealtimeVersion("2.0");
+        feedMessageBuilder.setHeader(feedHeaderBuilder.build());
+
+        // Timestamp will be zero initially in FeedHeader, TripUpdate and VehiclePosition. Should return 2 W003 results, and 1 E048 for header
+        vehiclePositionBuilder.setVehicle(GtfsRealtime.VehicleDescriptor.newBuilder());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        expected.put(W001, 2);
+        expected.put(E048, 1);
+        TestUtils.assertResults(expected, results);
+
+        // Populate timestamp to any value greater than zero in FeedHeader
+        feedHeaderBuilder.setTimestamp(MIN_POSIX_TIME);
+        feedMessageBuilder.setHeader(feedHeaderBuilder.build());
+        // Invalid timestamp in TripUpdate and VehiclePosition. Should return 2 W001 warnings, and no E048 errors
+        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        expected.clear();
+        expected.put(W001, 2);
+        TestUtils.assertResults(expected, results);
+
+        clearAndInitRequiredFeedFields();
+    }
+
+    /**
      * W007 - Refresh interval is more than 35 seconds
      */
     @Test

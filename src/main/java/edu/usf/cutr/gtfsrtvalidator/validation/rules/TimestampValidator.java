@@ -22,6 +22,7 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.background.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
+import edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils;
 import edu.usf.cutr.gtfsrtvalidator.util.RuleUtils;
 import edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
@@ -50,6 +51,7 @@ import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.*;
  *  E018 - GTFS-rt header timestamp decreased between two sequential iterations
  *  E022 - trip stop_time_update times are not increasing
  *  E025 - stop_time_update departure time is before arrival time
+ *  E048 - header` `timestamp` not populated
  */
 public class TimestampValidator implements FeedEntityValidator {
 
@@ -72,14 +74,27 @@ public class TimestampValidator implements FeedEntityValidator {
         List<OccurrenceModel> e018List = new ArrayList<>();
         List<OccurrenceModel> e022List = new ArrayList<>();
         List<OccurrenceModel> e025List = new ArrayList<>();
+        List<OccurrenceModel> e048List = new ArrayList<>();
 
         /**
          * Validate FeedHeader timestamp
          */
         long headerTimestamp = feedMessage.getHeader().getTimestamp();
         if (headerTimestamp == 0) {
-            // W001 - Timestamp not populated
-            RuleUtils.addOccurrence(W001, "header", w001List, _log);
+            boolean isV2orHigher = true;
+            try {
+                isV2orHigher = GtfsUtils.isV2orHigher(feedMessage.getHeader());
+            } catch (Exception e) {
+                _log.error("Error checking header version for E048/W001, logging as E048: " + e);
+            }
+            if (isV2orHigher) {
+                // E048 - header timestamp not populated
+                RuleUtils.addOccurrence(E048, "", e048List, _log);
+            } else {
+                // W001 - Timestamp not populated
+                RuleUtils.addOccurrence(W001, "header", w001List, _log);
+            }
+
         } else {
             if (!isPosix(headerTimestamp)) {
                 // E001 - Not in POSIX time
@@ -285,6 +300,9 @@ public class TimestampValidator implements FeedEntityValidator {
         }
         if (!e025List.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(E025), e025List));
+        }
+        if (!e048List.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E048), e048List));
         }
         return errors;
     }

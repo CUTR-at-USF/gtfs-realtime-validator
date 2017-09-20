@@ -23,14 +23,23 @@ import edu.usf.cutr.gtfsrtvalidator.api.model.ValidationRule;
 import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.test.util.TestUtils;
 import edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils;
+import edu.usf.cutr.gtfsrtvalidator.util.SortUtils;
 import edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
 import org.junit.Test;
 import org.locationtech.spatial4j.shape.Shape;
 import org.locationtech.spatial4j.shape.ShapeFactory;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils.MIN_POSIX_TIME;
 import static junit.framework.TestCase.assertFalse;
@@ -322,6 +331,20 @@ public class UtilTest {
     }
 
     @Test
+    public void testIsV2orHigher() {
+        GtfsRealtime.FeedHeader.Builder builder = GtfsRealtime.FeedHeader.newBuilder();
+
+        builder.setGtfsRealtimeVersion("1.0");
+        assertFalse(GtfsUtils.isV2orHigher(builder.build()));
+
+        builder.setGtfsRealtimeVersion("2.0");
+        assertTrue(GtfsUtils.isV2orHigher(builder.build()));
+
+        builder.setGtfsRealtimeVersion("3.0");
+        assertTrue(GtfsUtils.isV2orHigher(builder.build()));
+    }
+
+    @Test
     public void testGetVehicleAndTripId() {
         String text;
 
@@ -527,5 +550,265 @@ public class UtilTest {
     public void testAssertVehicleAndRouteIdThrowException() {
         // Make sure we throw an exception if the method is provided objects other than TripUpdate or VehiclePosition
         GtfsUtils.getVehicleAndRouteId(GtfsRealtime.TripDescriptor.newBuilder().setRouteId("1").build());
+    }
+
+    @Test
+    public void testIsCombinedFeed() {
+        GtfsRealtime.FeedMessage.Builder feedMessageBuilder = GtfsRealtime.FeedMessage.newBuilder();
+        GtfsRealtime.FeedHeader.Builder feedHeaderBuilder = GtfsRealtime.FeedHeader.newBuilder();
+        feedHeaderBuilder.setGtfsRealtimeVersion("1");
+        feedMessageBuilder.setHeader(feedHeaderBuilder);
+        GtfsRealtime.FeedEntity.Builder feedEntityBuilder = GtfsRealtime.FeedEntity.newBuilder();
+        feedEntityBuilder.setId("test");
+        GtfsRealtime.TripUpdate.Builder tripUpdateBuilder = GtfsRealtime.TripUpdate.newBuilder();
+        GtfsRealtime.VehiclePosition.Builder vehiclePositionBuilder = GtfsRealtime.VehiclePosition.newBuilder();
+        GtfsRealtime.Alert.Builder alertBuilder = GtfsRealtime.Alert.newBuilder();
+        GtfsRealtime.EntitySelector.Builder entitySelectorBuilder = GtfsRealtime.EntitySelector.newBuilder();
+
+        /**
+         * NOT combined feeds
+         */
+
+        // Add 3 trips, no vehicle positions or alerts
+        tripUpdateBuilder.setTrip(GtfsRealtime.TripDescriptor.newBuilder().setTripId("1"));
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        tripUpdateBuilder.setTrip(GtfsRealtime.TripDescriptor.newBuilder().setTripId("2"));
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        tripUpdateBuilder.setTrip(GtfsRealtime.TripDescriptor.newBuilder().setTripId("3"));
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        assertEquals(3, feedMessageBuilder.getEntityList().size());
+        assertFalse(GtfsUtils.isCombinedFeed(feedMessageBuilder.build()));
+
+        // Add 3 vehicle positions, no trip updates or alerts
+        feedMessageBuilder.clearEntity();
+        feedEntityBuilder.clearTripUpdate();
+        feedEntityBuilder.clearVehicle();
+        feedEntityBuilder.clearAlert();
+
+        vehiclePositionBuilder.setVehicle(GtfsRealtime.VehicleDescriptor.newBuilder().setId("A"));
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        vehiclePositionBuilder.setVehicle(GtfsRealtime.VehicleDescriptor.newBuilder().setId("B"));
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        vehiclePositionBuilder.setVehicle(GtfsRealtime.VehicleDescriptor.newBuilder().setId("C"));
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        assertEquals(3, feedMessageBuilder.getEntityList().size());
+        assertFalse(GtfsUtils.isCombinedFeed(feedMessageBuilder.build()));
+
+        // Add 3 alerts, no trip updates or vehicle positions
+        feedMessageBuilder.clearEntity();
+        feedEntityBuilder.clearTripUpdate();
+        feedEntityBuilder.clearVehicle();
+        feedEntityBuilder.clearAlert();
+
+        entitySelectorBuilder.setStopId("Z");
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        entitySelectorBuilder.setStopId("Y");
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        entitySelectorBuilder.setStopId("X");
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        assertEquals(3, feedMessageBuilder.getEntityList().size());
+        assertFalse(GtfsUtils.isCombinedFeed(feedMessageBuilder.build()));
+
+        /**
+         * Combined feeds
+         */
+
+        // Add 1 trip updates and 1 vehicle positions, no alerts
+        feedMessageBuilder.clearEntity();
+        feedEntityBuilder.clearTripUpdate();
+        feedEntityBuilder.clearVehicle();
+        feedEntityBuilder.clearAlert();
+
+        tripUpdateBuilder.setTrip(GtfsRealtime.TripDescriptor.newBuilder().setTripId("1"));
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        vehiclePositionBuilder.setVehicle(GtfsRealtime.VehicleDescriptor.newBuilder().setId("A"));
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        assertEquals(2, feedMessageBuilder.getEntityList().size());
+        assertTrue(GtfsUtils.isCombinedFeed(feedMessageBuilder.build()));
+
+        // Add 1 trip update and 1 alert, no vehicle positions
+        feedMessageBuilder.clearEntity();
+        feedEntityBuilder.clearTripUpdate();
+        feedEntityBuilder.clearVehicle();
+        feedEntityBuilder.clearAlert();
+
+        tripUpdateBuilder.setTrip(GtfsRealtime.TripDescriptor.newBuilder().setTripId("1"));
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        entitySelectorBuilder.setStopId("Z");
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        assertEquals(2, feedMessageBuilder.getEntityList().size());
+        assertTrue(GtfsUtils.isCombinedFeed(feedMessageBuilder.build()));
+
+        // Add 1 vehicle position and 1 alert, no trip updates
+        feedMessageBuilder.clearEntity();
+        feedEntityBuilder.clearTripUpdate();
+        feedEntityBuilder.clearVehicle();
+        feedEntityBuilder.clearAlert();
+
+        vehiclePositionBuilder.setVehicle(GtfsRealtime.VehicleDescriptor.newBuilder().setId("A"));
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        entitySelectorBuilder.setStopId("Z");
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        assertEquals(2, feedMessageBuilder.getEntityList().size());
+        assertTrue(GtfsUtils.isCombinedFeed(feedMessageBuilder.build()));
+
+        // Add 1 trip update, 1 vehicle position and 1 alert
+        feedMessageBuilder.clearEntity();
+        feedEntityBuilder.clearTripUpdate();
+        feedEntityBuilder.clearVehicle();
+        feedEntityBuilder.clearAlert();
+
+        tripUpdateBuilder.setTrip(GtfsRealtime.TripDescriptor.newBuilder().setTripId("1"));
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        vehiclePositionBuilder.setVehicle(GtfsRealtime.VehicleDescriptor.newBuilder().setId("A"));
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        entitySelectorBuilder.setStopId("Z");
+        alertBuilder.addInformedEntity(entitySelectorBuilder.build());
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.addEntity(feedEntityBuilder.build());
+
+        assertEquals(3, feedMessageBuilder.getEntityList().size());
+        assertTrue(GtfsUtils.isCombinedFeed(feedMessageBuilder.build()));
+    }
+
+    @Test
+    public void testSortDate() throws URISyntaxException, IOException, InterruptedException {
+        // Create three temporary files to test sorting order - sleep in between to make sure timestamps differ by seconds
+        Path file1 = Files.createTempFile("tempFileOldest", ".tmp");
+        Thread.sleep(1500);
+        Path file2 = Files.createTempFile("tempFileMiddle", ".tmp");
+        Thread.sleep(1500);
+        Path file3 = Files.createTempFile("tempFileNewest", ".tmp");
+
+        /**
+         * SortUtils.compareByDateModified()
+         */
+        assertTrue(SortUtils.compareByDateModified(file2, file3) < 0);
+        assertTrue(SortUtils.compareByDateModified(file3, file2) > 0);
+        assertFalse(SortUtils.compareByDateModified(file2, file3) > 0);
+        assertFalse(SortUtils.compareByDateModified(file3, file2) < 0);
+
+        assertTrue(SortUtils.compareByDateModified(file1, file2) < 0);
+        assertTrue(SortUtils.compareByDateModified(file2, file1) > 0);
+        assertFalse(SortUtils.compareByDateModified(file2, file1) < 0);
+        assertFalse(SortUtils.compareByDateModified(file1, file2) > 0);
+
+        /**
+         * SortUtils.sortByDateModified()
+         */
+        final List<File> files = Stream.of(file3, file2, file1).map(Path::toFile)
+                .collect(Collectors.toList());
+
+        // Before sorting - should be backwards, newest to oldest
+        File[] array = files.toArray(new File[files.size()]);
+        assertTrue(array[0].getName().startsWith("tempFileNewest"));
+        assertTrue(array[1].getName().startsWith("tempFileMiddle"));
+        assertTrue(array[2].getName().startsWith("tempFileOldest"));
+
+        // After sorting, should be in date order (oldest to newest)
+        array = SortUtils.sortByDateModified(array);
+        assertTrue(array[0].getName().startsWith("tempFileOldest"));
+        assertTrue(array[1].getName().startsWith("tempFileMiddle"));
+        assertTrue(array[2].getName().startsWith("tempFileNewest"));
+
+        for (File file : array) {
+            file.deleteOnExit();
+        }
+    }
+
+    @Test
+    public void testSortFileName() throws URISyntaxException {
+        /**
+         * SortUtils.compareByFileName()
+         */
+        // bullrunner-gtfs.zip is after bullrunner-gtfs-no-shapes.zip
+        Path bullrunnerGtfs = Paths.get(getClass().getClassLoader().getResource("bullrunner-gtfs.zip").toURI());
+        Path bullrunnerGtfsNoShapes = Paths.get(getClass().getClassLoader().getResource("bullrunner-gtfs-no-shapes.zip").toURI());
+        assertTrue(SortUtils.compareByFileName(bullrunnerGtfs, bullrunnerGtfsNoShapes) > 0);
+
+        // bullrunner-gtfs.zip is before testagency2.zip
+        Path testAgency2 = Paths.get(getClass().getClassLoader().getResource("testagency2.zip").toURI());
+        assertTrue(SortUtils.compareByFileName(bullrunnerGtfs, testAgency2) < 0);
+
+        // Should be sorted by date in file name (ascending)
+        Path tu1 = Paths.get(getClass().getClassLoader().getResource("TripUpdates-2017-02-18T20-00-08Z.txt").toURI());
+        Path tu2 = Paths.get(getClass().getClassLoader().getResource("TripUpdates-2017-02-18T20-00-23Z.txt").toURI());
+        Path tu3 = Paths.get(getClass().getClassLoader().getResource("TripUpdates-2017-02-18T20-01-08Z.txt").toURI());
+
+        assertTrue(SortUtils.compareByFileName(tu1, tu2) < 0);
+        assertTrue(SortUtils.compareByFileName(tu2, tu3) < 0);
+        assertTrue(SortUtils.compareByFileName(tu1, tu3) < 0);
+        assertTrue(SortUtils.compareByFileName(tu3, tu1) > 0);
+        assertTrue(SortUtils.compareByFileName(tu3, tu2) > 0);
+        assertTrue(SortUtils.compareByFileName(tu2, tu1) > 0);
+
+        /**
+         * SortUtils.sortByName()
+         */
+        final List<File> files = Stream.of(tu3, tu2, tu1).map(Path::toFile)
+                .collect(Collectors.toList());
+
+        // Before sorting - should be backwards
+        File[] array = files.toArray(new File[files.size()]);
+        assertEquals("TripUpdates-2017-02-18T20-01-08Z.txt", array[0].getName());
+        assertEquals("TripUpdates-2017-02-18T20-00-23Z.txt", array[1].getName());
+        assertEquals("TripUpdates-2017-02-18T20-00-08Z.txt", array[2].getName());
+
+        // After sorting, should be in alpha order
+        array = SortUtils.sortByName(array);
+        assertEquals("TripUpdates-2017-02-18T20-00-08Z.txt", array[0].getName());
+        assertEquals("TripUpdates-2017-02-18T20-00-23Z.txt", array[1].getName());
+        assertEquals("TripUpdates-2017-02-18T20-01-08Z.txt", array[2].getName());
+    }
+
+    @Test
+    public void testGetTimestampFromFileName() throws URISyntaxException {
+        String fileNameTu = "TripUpdates-2017-02-18T20-01-08Z.pb";
+        long timestamp = TimestampUtils.getTimestampFromFileName(fileNameTu);
+        assertEquals(1487448068000L, timestamp);
+
+        String fileNameVp = "VehiclePositions-2017-02-18T20-01-08Z.pb";
+        timestamp = TimestampUtils.getTimestampFromFileName(fileNameVp);
+        assertEquals(1487448068000L, timestamp);
+
     }
 }

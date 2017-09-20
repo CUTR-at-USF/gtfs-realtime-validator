@@ -28,6 +28,33 @@ import static org.locationtech.spatial4j.context.SpatialContext.GEO;
  */
 public class GtfsUtils {
 
+    public static final String GTFS_RT_V1 = "1.0";
+    public static final String GTFS_RT_V2 = "2.0";
+
+    /**
+     * Returns true if the version for the provided GTFS-rt header is valid, false if it is not
+     *
+     * @param feedHeader the feed header to check the version for
+     * @return true if the version for the provided GTFS-rt header is valid, false if it is not
+     */
+    public static boolean isValidVersion(GtfsRealtime.FeedHeader feedHeader) {
+        return !feedHeader.hasGtfsRealtimeVersion() || feedHeader.getGtfsRealtimeVersion().equals(GTFS_RT_V1) || feedHeader.getGtfsRealtimeVersion().equals(GTFS_RT_V2);
+    }
+
+    /**
+     * Returns true if the version for the provided GTFS-rt header is v2 or higher, false if the version is v1 or unrecognized
+     *
+     * @param feedHeader the feed header to check the version for
+     * @return true if the version for the provided GTFS-rt header is v2 or higher, false if the version is v1 or unrecognized
+     */
+    public static boolean isV2orHigher(GtfsRealtime.FeedHeader feedHeader) {
+        float version = Float.parseFloat(feedHeader.getGtfsRealtimeVersion());
+        if (version >= 2.0f) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Returns true if this tripDescriptor has a schedule_relationship of ADDED, false if it does not
      *
@@ -212,5 +239,38 @@ public class GtfsUtils {
         } else {
             return "stop_id " + stopTimeUpdate.getStopId();
         }
+    }
+
+    /**
+     * Checks for the presence of a "combined feed" with multiple entities at one URL (see #85)
+     *
+     * @param message GTFS-rt message (containing multiple entities) to be evaluated
+     * @return true if the provided message is a combined feed, false if it is not
+     */
+    public static boolean isCombinedFeed(GtfsRealtime.FeedMessage message) {
+        // See if more than one entity type exists in this feed
+        int countEntityTypes = 0;
+        boolean foundTu = false;
+        boolean foundVp = false;
+        boolean foundSa = false;
+        for (GtfsRealtime.FeedEntity entity : message.getEntityList()) {
+            if (entity.hasTripUpdate() && !foundTu) {
+                foundTu = true;
+                countEntityTypes++;
+            }
+            if (entity.hasVehicle() && !foundVp) {
+                foundVp = true;
+                countEntityTypes++;
+            }
+            if (entity.hasAlert() && !foundSa) {
+                foundSa = true;
+                countEntityTypes++;
+            }
+            // Terminate if we've already found more than one entity type
+            if (countEntityTypes > 1) {
+                return true;
+            }
+        }
+        return false;
     }
 }
