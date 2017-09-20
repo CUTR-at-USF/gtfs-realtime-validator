@@ -18,6 +18,7 @@
 var counter = 1;
 var limit = 5;
 var clientId;
+var enableValidation;
 
 var server = window.location.protocol + "//" + window.location.host;
 
@@ -101,15 +102,25 @@ $('input[type="submit"]').click(function () {
     })
 });
 
-clientId = readCookie();
+clientId = readCookie("clientId");
+enableValidation = readCookie("enableValidation");
+if (enableValidation == "checked" || enableValidation == "") {
+    document.getElementById("enable-validation").checked=true;
+    document.getElementById("enable-validation").value = "checked";
+    enableValidation = "checked";
+} else {
+    document.getElementById("enable-validation").checked=false;
+    document.getElementById("enable-validation").value = "unchecked";
+}
+sessionStorage.setItem("enablevalidation", enableValidation);
 // Get past session data for the user.
 $.get(server + "/api/gtfs-rt-feed/pastSessions?clientId=" + clientId).done(function (data) {
     if (clientId == "") {
-        createCookie(data["clientId"], 1000);
+        createCookie("clientId", data["clientId"], 1000);
     } else {
         displayPastSessionData(data);
     }
-    sessionStorage.setItem("clientId", readCookie());
+    sessionStorage.setItem("clientId", readCookie("clientId"));
 });
 
 function displayPastSessionData(data) {
@@ -119,19 +130,20 @@ function displayPastSessionData(data) {
     $("#past-session-data").html(compiledHtml);
 }
 
-function createCookie(value, days) {
+function createCookie (name, value, days) {
     var expires = "";
     if (days) {
         var date = new Date();
         date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-        expires = "; expires = " + date.toUTCString();
+        expires = "expires=" + date.toUTCString();
     }
-    document.cookie = "clientId = " + value + expires + "; path =/";
+    document.cookie = name + "=" + value + ";" + expires + ";path =/";
 }
 
-function readCookie() {
-    var nameEQ = "clientId=";
-    var ca = document.cookie.split(';');
+function readCookie(name) {
+    var nameEQ = name + "=";
+    var decodedCookie = decodeURIComponent(document.cookie);
+    var ca = decodedCookie.split(';');
     for (var i=0; i < ca.length; i++) {
         var c = ca[i];
         while (c.charAt(0) == ' ') {
@@ -142,4 +154,18 @@ function readCookie() {
         }
     }
     return "";
+}
+
+function toggleValidation(){
+    var checkboxStatus;
+    if(document.getElementById("enable-validation").checked) {
+        checkboxStatus = "checked";
+        document.getElementById("enable-validation").value = "checked";
+    } else {
+        checkboxStatus = "unchecked";
+        document.getElementById("enable-validation").value = "unchecked";
+    }
+    createCookie("enableValidation", checkboxStatus);
+    enableValidation = checkboxStatus;
+    sessionStorage.setItem("enablevalidation", enableValidation);
 }

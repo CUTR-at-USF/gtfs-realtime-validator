@@ -96,7 +96,8 @@ public class GtfsFeed {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public Response postGtfsFeed(@FormParam("gtfsurl") String gtfsFeedUrl) {
+    public Response postGtfsFeed(@FormParam("gtfsurl") String gtfsFeedUrl,
+                                 @FormParam("enablevalidation") String enableValidation) {
 
         //Extract the URL from the provided gtfsFeedUrl
         URL url = getUrlFromString(gtfsFeedUrl);
@@ -173,6 +174,13 @@ public class GtfsFeed {
         if(canReturn)
             return Response.ok(gtfsFeed).build();
         
+        if ("checked".equalsIgnoreCase(enableValidation)) {
+            return runStaticGTFSValidation(saveFileName, gtfsFeedUrl, gtfsFeed);
+        }
+       return Response.ok(gtfsFeed).build();
+    }
+
+    private Response runStaticGTFSValidation (String saveFileName, String gtfsFeedUrl, GtfsFeedModel gtfsFeed) {
         FileSystemFeedBackend backend = new FileSystemFeedBackend();
         FeedValidationResultSet results = new FeedValidationResultSet();
         File input = backend.getFeed(saveFileName);
@@ -196,7 +204,7 @@ public class GtfsFeed {
             _log.info("Static GTFS validation data written to " + saveFileName);
         } catch (Exception e) {
             _log.error("Exception running static GTFS validation on " + gtfsFeedUrl + ": " + e.getMessage());
-        } 
+        }
         return Response.ok(gtfsFeed).build();
     }
 
