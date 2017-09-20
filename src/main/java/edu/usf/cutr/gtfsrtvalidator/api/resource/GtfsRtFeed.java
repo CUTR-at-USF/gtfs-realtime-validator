@@ -71,7 +71,7 @@ public class GtfsRtFeed {
     public Response postGtfsRtFeed(GtfsRtFeedModel feedInfo) {
         //feedInfo.setGtfsId(1);
         //Validate URL for GTFS feed and the GTFS ID.
-        if (feedInfo.getGtfsUrl() == null) {
+        if (feedInfo.getGtfsRtUrl() == null) {
             return generateError("GTFS-RT URL is required");
         } else if (feedInfo.getGtfsFeedModel().getFeedId() == 0) {
             return generateError("GTFS Feed id is required");
@@ -79,7 +79,7 @@ public class GtfsRtFeed {
 
         //Check if URL is valid
         try {
-            URL feedUrl = new URL(feedInfo.getGtfsUrl());
+            URL feedUrl = new URL(feedInfo.getGtfsRtUrl());
             HttpURLConnection connection = (HttpURLConnection) feedUrl.openConnection();
             connection.setRequestMethod("GET");
             connection.connect();
@@ -93,13 +93,13 @@ public class GtfsRtFeed {
 
 
         //Checks if the GTFS-RT feed returns valid protobuf
-        if (checkFeedType(feedInfo.getGtfsUrl()) == INVALID_FEED) {
+        if (checkFeedType(feedInfo.getGtfsRtUrl()) == INVALID_FEED) {
             return generateError("The GTFS-RT URL given is not a valid feed");
         }
 
         Session session = GTFSDB.initSessionBeginTrans();
         GtfsRtFeedModel storedFeedInfo = (GtfsRtFeedModel) session.createQuery(" FROM GtfsRtFeedModel WHERE "
-                + "gtfsUrl= '"+feedInfo.getGtfsUrl()+"' AND gtfsFeedModel.feedId = "+feedInfo.getGtfsFeedModel().getFeedId()).uniqueResult();
+                + "gtfsUrl= '"+feedInfo.getGtfsRtUrl()+"' AND gtfsFeedModel.feedId = "+feedInfo.getGtfsFeedModel().getFeedId()).uniqueResult();
         GTFSDB.commitAndCloseSession(session);
         if(storedFeedInfo == null) {    //If null, create the gtfs-rt feed in the DB and return the feed
             session = GTFSDB.initSessionBeginTrans();
@@ -152,8 +152,8 @@ public class GtfsRtFeed {
         GTFSDB.commitAndCloseSession(session);
         boolean intervalUpdated = false;
         int leastInterval = updateInterval;
-        if(runningTasks.containsKey(sessionModel.getGtfsRtFeedModel().getGtfsUrl()) &&
-                leastInterval< runningTasks.get(sessionModel.getGtfsRtFeedModel().getGtfsUrl()).getUpdateInterval()){
+        if(runningTasks.containsKey(sessionModel.getGtfsRtFeedModel().getGtfsRtUrl()) &&
+                leastInterval< runningTasks.get(sessionModel.getGtfsRtFeedModel().getGtfsRtUrl()).getUpdateInterval()){
             intervalUpdated=true;
         }
         //Extract the Url and gtfsId to start the background process
@@ -431,12 +431,12 @@ public class GtfsRtFeed {
         sessionModel.setWarningCount(warningCount);
         session.saveOrUpdate(sessionModel);
         GTFSDB.commitAndCloseSession(session);
-        if (runningTasks.get(sessionModel.getGtfsRtFeedModel().getGtfsUrl()).getParallelClientCount() == 1) {
-            runningTasks.get(sessionModel.getGtfsRtFeedModel().getGtfsUrl()).getScheduler().shutdown();
-            runningTasks.remove(sessionModel.getGtfsRtFeedModel().getGtfsUrl());
+        if (runningTasks.get(sessionModel.getGtfsRtFeedModel().getGtfsRtUrl()).getParallelClientCount() == 1) {
+            runningTasks.get(sessionModel.getGtfsRtFeedModel().getGtfsRtUrl()).getScheduler().shutdown();
+            runningTasks.remove(sessionModel.getGtfsRtFeedModel().getGtfsRtUrl());
         } else {
-            runningTasks.get(sessionModel.getGtfsRtFeedModel().getGtfsUrl()).setParallelClientCount(
-                    runningTasks.get(sessionModel.getGtfsRtFeedModel().getGtfsUrl()).getParallelClientCount()-1);
+            runningTasks.get(sessionModel.getGtfsRtFeedModel().getGtfsRtUrl()).setParallelClientCount(
+                    runningTasks.get(sessionModel.getGtfsRtFeedModel().getGtfsRtUrl()).getParallelClientCount()-1);
         }
     }
 
@@ -495,7 +495,7 @@ public class GtfsRtFeed {
 
     public synchronized static ServiceScheduler startBackgroundTask(GtfsRtFeedModel gtfsRtFeed, int updateInterval,
                                                                             boolean intervalUpdated) {
-        String rtFeedUrl = gtfsRtFeed.getGtfsUrl();
+        String rtFeedUrl = gtfsRtFeed.getGtfsRtUrl();
 
         if (!runningTasks.containsKey(rtFeedUrl)) {
             ServiceScheduler serviceScheduler = new ServiceScheduler();
