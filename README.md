@@ -87,7 +87,7 @@ Once the application has been started, you can enter URLs for the feeds you'd li
 
 ## Configuration options
  
-**Logging**
+#### Logging
 
 If you'd like to change the logging level, for example to see all debug statements, in `src/main/resources/simplelogger.properties` change the following line to say `DEBUG`:
  
@@ -99,13 +99,13 @@ If you'd like to change the logging level, for example to see all debug statemen
 
 `WARN` will show a smaller number of informational messages.
 
- **Port number**
+#### Port number
  
  Port `8080` is used by default.  If you'd like to change the port number (e.g., port `80`), you can use the command line parameter `-port 80`:
  
  `java -jar target/gtfs-rt-validator-1.0.0-SNAPSHOT.jar -port 80`
  
- **Database**
+#### Database
  
  We use [Hibernate](http://hibernate.org/) to manage data persistence to a database.  To allow you to get the tool up and running quickly, we use the embedded [HSQLDB](http://hsqldb.org/) by default.  This is not recommended for a production deployment.
  
@@ -118,7 +118,7 @@ If you'd like to change the logging level, for example to see all debug statemen
  
  A list of all the dialect properties for specific database versions is shown [here](http://www.tutorialspoint.com/hibernate/hibernate_configuration.htm).
  
- **Batch processing**
+#### Batch processing
  
  We support a command-line batch processing mode for archived GTFS-realtime files.
  
@@ -176,9 +176,9 @@ For example, in log format the above would look like:
 * `trip_id 277767 does not have a timestamp`
 * `trip_id 277768 does not have a timestamp`
  
- **Docker**
+#### Docker
  
- Want to run this in [Docker](https://www.docker.com/)?  Check out [gtfs-realtime-validator-docker](https://github.com/scrudden/gtfs-realtime-validator-docker).
+Want to run this in [Docker](https://www.docker.com/)?  Check out [gtfs-realtime-validator-docker](https://github.com/scrudden/gtfs-realtime-validator-docker).
 
 ## Acknowledgements
 
