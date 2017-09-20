@@ -35,7 +35,7 @@ Please note that if you're using `https` URLS, you'll need to use the `-Djsse.en
     * `-gtfs` should point to the GTFS zip file 
     * `-gtfsrealtimepath` should point to the directory holding the GTFS-realtime files
 
-See ["Configuration Options -> Batch Processing"](https://github.com/CUTR-at-USF/gtfs-realtime-validator#configuration-options) for more documentation.
+See ["Configuration Options -> Batch Processing"](https://github.com/CUTR-at-USF/gtfs-realtime-validator#batch-processing) for more documentation.
 
 ## Rules
 
