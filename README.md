@@ -13,6 +13,9 @@ A tool that validates [General Transit Feed Specification (GTFS)-realtime](https
 1. Install [Java Development Kit (JDK) 1.8 or higher](http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html)
 2. Download the latest alpha build:
     * [gtfs-rt-validator-1.0.0-SNAPSHOT.jar](https://s3.amazonaws.com/gtfs-rt-validator/travis_builds/gtfs-rt-validator-1.0.0-SNAPSHOT.jar)
+
+**To run the validator in default server mode, which provides a web user interface:**
+
 3. From the command line run `java -Djsse.enableSNIExtension=false -jar gtfs-rt-validator-1.0.0-SNAPSHOT.jar`
 4. When prompted, in your browser go to `http://localhost:8080`
 5. Enter your [General Transit Feed Specification (GTFS)-realtime](https://developers.google.com/transit/gtfs-realtime/) and [GTFS](https://developers.google.com/transit/gtfs/) feed URLs and click "Start".  Example feeds:
@@ -25,6 +28,14 @@ A tool that validates [General Transit Feed Specification (GTFS)-realtime](https
     * ...more at [Transitfeeds.com](http://transitfeeds.com/search?q=gtfsrt) and [Transitland Feed Registry](https://transit.land/feed-registry/)
 
 Please note that if you're using `https` URLS, you'll need to use the `-Djsse.enableSNIExtension=false` command-line parameter or install the [Java Cryptography Extension (JCE)](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html) - see the [Prerequisites](https://github.com/CUTR-at-USF/gtfs-realtime-validator#prerequisites) section for details.
+
+**To run the validator in batch processing mode, to validate a large number of archived feed files:**
+
+3. From the command line run `java -jar target/gtfs-rt-validator-1.0.0-SNAPSHOT.jar -batch yes -gtfs "D:\HART\google_transit.zip" -gtfsrealtimepath "D:\HART\gtfs-rt"`
+    * `-gtfs` should point to the GTFS zip file 
+    * `-gtfsrealtimepath` should point to the directory holding the GTFS-realtime files
+
+See ["Configuration Options -> Batch Processing"](https://github.com/CUTR-at-USF/gtfs-realtime-validator#configuration-options) for more documentation.
 
 ## Rules
 
