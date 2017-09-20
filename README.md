@@ -124,7 +124,7 @@ If you'd like to change the logging level, for example to see all debug statemen
  
  We support a command-line batch processing mode for archived GTFS-realtime files.
  
-  Here's an example of a command to batch process a set of GTFS-realtime files:
+ Here's an example of a command to batch process a set of GTFS-realtime files:
  
  `java -jar target/gtfs-rt-validator-1.0.0-SNAPSHOT.jar -batch yes -gtfs "D:\HART\google_transit.zip" -gtfsrealtimepath "D:\HART\gtfs-rt" -sort date`
  
