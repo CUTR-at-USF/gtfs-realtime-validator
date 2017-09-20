@@ -73,7 +73,7 @@ If you're going to be rebuilding the project frequently (e.g., editing source co
 
 #### 2. Run the application
 
-From the command-line, run: 
+To start up the server so you can view the web interface, from the command-line, run: 
 
 `java -Djsse.enableSNIExtension=false -jar target/gtfs-rt-validator-1.0.0-SNAPSHOT.jar`
 
@@ -84,6 +84,8 @@ You should see some output, and a message saying `Go to http://localhost:8080 in
 Once the application has been started, you can enter URLs for the feeds you'd like to have validated at:
  
  http://localhost:8080
+ 
+Note that there is also an option for [Batch Processing](https://github.com/CUTR-at-USF/gtfs-realtime-validator#batch-processing) feeds from the command line.
 
 ## Configuration options
  
