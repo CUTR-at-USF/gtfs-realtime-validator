@@ -104,7 +104,7 @@ $('input[type="submit"]').click(function () {
 
 clientId = readCookie("clientId");
 enableValidation = readCookie("enableValidation");
-if(enableValidation == "checked" || enableValidation == "") {
+if (enableValidation == "checked" || enableValidation == "") {
     document.getElementById("enable-validation").checked=true;
     document.getElementById("enable-validation").value = "checked";
     enableValidation = "checked";
@@ -130,7 +130,7 @@ function displayPastSessionData(data) {
     $("#past-session-data").html(compiledHtml);
 }
 
-function createCookie(name ,value, days) {
+function createCookie (name, value, days) {
     var expires = "";
     if (days) {
         var date = new Date();

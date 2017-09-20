@@ -174,12 +174,13 @@ public class GtfsFeed {
         if(canReturn)
             return Response.ok(gtfsFeed).build();
         
-        if("checked".equalsIgnoreCase(enableValidation))
+        if ("checked".equalsIgnoreCase(enableValidation)) {
             return runStaticGTFSValidation(saveFileName, gtfsFeedUrl, gtfsFeed);
+        }
        return Response.ok(gtfsFeed).build();
     }
 
-    private Response runStaticGTFSValidation(String saveFileName, String gtfsFeedUrl, GtfsFeedModel gtfsFeed){
+    private Response runStaticGTFSValidation (String saveFileName, String gtfsFeedUrl, GtfsFeedModel gtfsFeed) {
         FileSystemFeedBackend backend = new FileSystemFeedBackend();
         FeedValidationResultSet results = new FeedValidationResultSet();
         File input = backend.getFeed(saveFileName);
