@@ -105,6 +105,17 @@ public class BatchProcessor {
         mReturnStatistics = returnStatistics;
     }
 
+    /**
+     * Process the GTFS and GTFS-realtime feeds provided in the constructor. If setReturnStatistics() is set to true,
+     * the method will return a list of IterationStatistics (one per GTFS-rt file) for performance in the batch
+     * validation.  By default this method will return null to avoid memory issues with extremely large batch processes.
+     *
+     * @return If setReturnStatistics() is set to true, it will return a list of IterationStatistics (one per GTFS-rt
+     * file) for performance in the batch validation.  By default this method will return null to avoid memory issues
+     * with extremely large batch processes.
+     * @throws NoSuchAlgorithmException If the MD5 hash algorithm (used to determine feed uniqueness) is not available on the machine executing the code
+     * @throws IOException              If the GTFS or GTFS-realtime files cannot be read or the results cannot be written to disk
+     */
     public List<IterationStatistics> processFeeds() throws NoSuchAlgorithmException, IOException {
         // Read GTFS data into a GtfsDaoImpl
         _log.info("Starting batch processor...");
