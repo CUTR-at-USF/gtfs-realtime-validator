@@ -102,9 +102,9 @@ public class BackgroundTask implements Runnable {
             URL gtfsRtFeedUrl;
             Session session;
             try {
-                gtfsRtFeedUrl = new URL(mCurrentGtfsRtFeed.getGtfsRtUrl());
+                gtfsRtFeedUrl = new URL(mCurrentGtfsRtFeed.getGtfsUrl());
             } catch (MalformedURLException e) {
-                _log.error("Malformed Url: " + mCurrentGtfsRtFeed.getGtfsRtUrl(), e);
+                _log.error("Malformed Url: " + mCurrentGtfsRtFeed.getGtfsUrl(), e);
                 e.printStackTrace();
                 return;
             }
@@ -113,10 +113,10 @@ public class BackgroundTask implements Runnable {
                 // Get the GTFS-RT feedMessage for this method
                 long startHttpRequest = System.nanoTime();
                 InputStream in = gtfsRtFeedUrl.openStream();
-                consoleOutput.append("\n" + mCurrentGtfsRtFeed.getGtfsRtUrl() + " gtfsRtFeedUrl.openStream() in " + getElapsedTimeString(getElapsedTime(startHttpRequest, System.nanoTime())));
+                consoleOutput.append("\n" + mCurrentGtfsRtFeed.getGtfsUrl() + " gtfsRtFeedUrl.openStream() in " + getElapsedTimeString(getElapsedTime(startHttpRequest, System.nanoTime())));
                 long startToByteArray = System.nanoTime();
                 byte[] gtfsRtProtobuf = IOUtils.toByteArray(in);
-                consoleOutput.append("\n" + mCurrentGtfsRtFeed.getGtfsRtUrl() + " IOUtils.toByteArray(in) in " + getElapsedTimeString(getElapsedTime(startToByteArray, System.nanoTime())));
+                consoleOutput.append("\n" + mCurrentGtfsRtFeed.getGtfsUrl() + " IOUtils.toByteArray(in) in " + getElapsedTimeString(getElapsedTime(startToByteArray, System.nanoTime())));
 
                 boolean isUniqueFeed = true;
                 MessageDigest md = MessageDigest.getInstance("MD5");
@@ -138,7 +138,7 @@ public class BackgroundTask implements Runnable {
 
                 long startProtobufDecode = System.nanoTime();
                 currentFeedMessage = GtfsRealtime.FeedMessage.parseFrom(gtfsRtProtobuf);
-                consoleOutput.append("\n" + mCurrentGtfsRtFeed.getGtfsRtUrl() + " protobuf decode in " + getElapsedTimeString(getElapsedTime(startProtobufDecode, System.nanoTime())));
+                consoleOutput.append("\n" + mCurrentGtfsRtFeed.getGtfsUrl() + " protobuf decode in " + getElapsedTimeString(getElapsedTime(startProtobufDecode, System.nanoTime())));
                 _log.info(consoleOutput.toString());
                 consoleOutput.setLength(0);  // Clear the buffer for the next set of log statements
 
@@ -232,7 +232,7 @@ public class BackgroundTask implements Runnable {
             for (FeedEntityValidator rule : mValidationRules) {
                 consoleOutput.append(validateEntity(currentTimeMillis, currentFeedMessage, previousFeedMessage, combinedFeed, gtfsData, gtfsMetadata, feedIteration, rule));
             }
-            consoleOutput.append("\nProcessed " + mCurrentGtfsRtFeed.getGtfsRtUrl() + " in " + getElapsedTimeString(getElapsedTime(startTimeNanos, System.nanoTime())));
+            consoleOutput.append("\nProcessed " + mCurrentGtfsRtFeed.getGtfsUrl() + " in " + getElapsedTimeString(getElapsedTime(startTimeNanos, System.nanoTime())));
             consoleOutput.append("\n---------------------");
             _log.info(consoleOutput.toString());
         } catch (Exception ex) {
