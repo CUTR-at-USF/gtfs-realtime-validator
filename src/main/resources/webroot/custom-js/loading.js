@@ -23,7 +23,7 @@ validUrlList.gtfsFeeds = [];
 
 var server = window.location.protocol + "//" + window.location.host;
 
-localStorage.setItem("reportURL", server + "/gtfs-rt-validator-webapp/gtfs-validator-master/gtfs-validator-webapp/index.html?report=" + server + "/");
+localStorage.setItem("reportURL", server + "/gtfs-realtime-validator-webapp/gtfs-validator-master/gtfs-validator-webapp/index.html?report=" + server + "/");
 
 //Generic function that given a name, retrieves get parameters from the URL
 function getUrlParameter(sParam) {

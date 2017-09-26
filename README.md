@@ -12,11 +12,11 @@ A tool that validates [General Transit Feed Specification (GTFS)-realtime](https
 
 1. Install [Java Development Kit (JDK) 1.8 or higher](http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html)
 2. Download the latest alpha build:
-    * [gtfs-rt-validator-1.0.0-SNAPSHOT.jar](https://s3.amazonaws.com/gtfs-rt-validator/travis_builds/gtfs-rt-validator-1.0.0-SNAPSHOT.jar)
+    * [gtfs-realtime-validator-1.0.0-SNAPSHOT.jar](https://s3.amazonaws.com/gtfs-rt-validator/travis_builds/gtfs-realtime-validator-1.0.0-SNAPSHOT.jar)
 
 **To run the validator in default server mode, which provides a web user interface:**
 
-3. From the command line run `java -Djsse.enableSNIExtension=false -jar gtfs-rt-validator-1.0.0-SNAPSHOT.jar`
+3. From the command line run `java -Djsse.enableSNIExtension=false -jar gtfs-realtime-validator-1.0.0-SNAPSHOT.jar`
 4. When prompted, in your browser go to `http://localhost:8080`
 5. Enter your [General Transit Feed Specification (GTFS)-realtime](https://developers.google.com/transit/gtfs-realtime/) and [GTFS](https://developers.google.com/transit/gtfs/) feed URLs and click "Start".  Example feeds:
     * HART (Tampa, FL)
@@ -31,7 +31,7 @@ Please note that if you're using `https` URLS, you'll need to use the `-Djsse.en
 
 **To run the validator in batch processing mode, to validate a large number of archived feed files:**
 
-3. From the command line run `java -jar target/gtfs-rt-validator-1.0.0-SNAPSHOT.jar -batch yes -gtfs "D:\HART\google_transit.zip" -gtfsrealtimepath "D:\HART\gtfs-rt"`
+3. From the command line run `java -jar target/gtfs-realtime-validator-1.0.0-SNAPSHOT.jar -batch yes -gtfs "D:\HART\google_transit.zip" -gtfsrealtimepath "D:\HART\gtfs-rt"`
     * `-gtfs` should point to the GTFS zip file 
     * `-gtfsrealtimepath` should point to the directory holding the GTFS-realtime files
 
@@ -75,7 +75,7 @@ If you're going to be rebuilding the project frequently (e.g., editing source co
 
 To start up the server so you can view the web interface, from the command-line, run: 
 
-`java -Djsse.enableSNIExtension=false -jar target/gtfs-rt-validator-1.0.0-SNAPSHOT.jar`
+`java -Djsse.enableSNIExtension=false -jar target/gtfs-realtime-validator-1.0.0-SNAPSHOT.jar`
 
 You should see some output, and a message saying `Go to http://localhost:8080 in your browser`. 
 
@@ -105,7 +105,7 @@ If you'd like to change the logging level, for example to see all debug statemen
  
  Port `8080` is used by default.  If you'd like to change the port number (e.g., port `80`), you can use the command line parameter `-port 80`:
  
- `java -jar target/gtfs-rt-validator-1.0.0-SNAPSHOT.jar -port 80`
+ `java -jar target/gtfs-realtime-validator-1.0.0-SNAPSHOT.jar -port 80`
  
 #### Database
  
@@ -126,7 +126,7 @@ If you'd like to change the logging level, for example to see all debug statemen
  
  Here's an example of a command to batch process a set of GTFS-realtime files:
  
- `java -jar target/gtfs-rt-validator-1.0.0-SNAPSHOT.jar -batch yes -gtfs "D:\HART\google_transit.zip" -gtfsrealtimepath "D:\HART\gtfs-rt" -sort date`
+ `java -jar target/gtfs-realtime-validator-1.0.0-SNAPSHOT.jar -batch yes -gtfs "D:\HART\google_transit.zip" -gtfsrealtimepath "D:\HART\gtfs-rt" -sort date`
  
  Parameters:
  
@@ -181,6 +181,31 @@ For example, in log format the above would look like:
 #### Docker
  
 Want to run this in [Docker](https://www.docker.com/)?  Check out [gtfs-realtime-validator-docker](https://github.com/scrudden/gtfs-realtime-validator-docker).
+
+## CUTR Release Process
+
+**Snapshots**
+
+We've set up a Maven repository to hold the snapshot artifacts from this project in a Github project - [cutr-mvn-repo](https://github.com/CUTR-at-USF/cutr-mvn-repo).
+
+At CUTR, we should run the following at the command-line to create a new artifact:
+~~~
+mvn -Dgpg.skip -DaltDeploymentRepository=cutr-snapshots::default::file:"/Git Projects/cutr-mvn-repo/snapshots" clean deploy
+~~~
+
+Then commit using Git and push new artifacts to Github.
+
+If you want to include snapshot releases in your project, you'll need to add the following to the `pom.xml` of the project you want to use it in:
+
+~~~
+<!-- CUTR SNAPSHOTs/RELEASES -->
+<repositories>
+    <repository>
+        <id>cutr-snapshots</id>
+        <url>https://raw.githubusercontent.com/CUTR-at-USF/cutr-mvn-repo/master/snapshots</url>
+    </repository>        
+</repositories>
+~~~
 
 ## Acknowledgements
 
