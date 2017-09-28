@@ -259,16 +259,24 @@ public class GtfsRtFeed {
 
     // Returns feed message for a requested iteration
      @GET
-     @Path("/{iterationId : \\d+}/feedMessage")
+     @Path("/{iterationId : -?\\d+}/{gtfsRtId : \\d+}/feedMessage")
      @Produces(MediaType.APPLICATION_JSON)
      public String getFeedMessage(
-             @PathParam("iterationId") int iterationId) {
+             @PathParam("iterationId") int iterationId,
+             @PathParam("gtfsRtId") int gtfsRtId) {
 
         ViewFeedMessageModel feedMessageModel;
          Session session = GTFSDB.initSessionBeginTrans();
-        feedMessageModel = session.createNamedQuery("feedMessageByIterationId", ViewFeedMessageModel.class)
-                .setParameter(0, iterationId)
-                .uniqueResult();
+         if(iterationId != -1) {
+             feedMessageModel = session.createNamedQuery("feedMessageByIterationId", ViewFeedMessageModel.class)
+                 .setParameter(0, iterationId)
+                 .uniqueResult();
+         } else {
+             feedMessageModel = session.createNamedQuery("feedMessageByGtfsRtId", ViewFeedMessageModel.class)
+                     .setParameter(0, gtfsRtId)
+                     .setMaxResults(1).getSingleResult();
+         }
+
         GTFSDB.commitAndCloseSession(session);
         feedMessageModel.setJsonFeedMessage(feedMessageModel.getByteFeedMessage());
         return feedMessageModel.getJsonFeedMessage();
@@ -337,17 +345,25 @@ public class GtfsRtFeed {
 
     // Returns iteration details.
     @GET
-    @Path("/{iterationId : \\d+}/iterationDetails")
+    @Path("/{iterationId : -?\\d+}/{gtfsRtId : \\d+}/iterationDetails")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getIterationDetails(
-            @PathParam("iterationId") int iterationId) {
+            @PathParam("iterationId") int iterationId,
+            @PathParam("gtfsRtId") int gtfsRtId) {
 
         GtfsRtFeedIterationModel gtfsRtFeedIterationModel;
         Session session = GTFSDB.initSessionBeginTrans();
 
-        gtfsRtFeedIterationModel = (GtfsRtFeedIterationModel) session.createQuery(" FROM GtfsRtFeedIterationModel" +
-                                                                                      " WHERE IterationId = " + iterationId)
-                                                                                      .uniqueResult();
+        if(iterationId > -1) {
+            gtfsRtFeedIterationModel = (GtfsRtFeedIterationModel) session.createQuery(" FROM GtfsRtFeedIterationModel" +
+                    " WHERE IterationId = " + iterationId)
+                    .uniqueResult();
+        } else {
+            gtfsRtFeedIterationModel = (GtfsRtFeedIterationModel) session.createQuery(" FROM GtfsRtFeedIterationModel" +
+                    " WHERE rtFeedID = " + gtfsRtId + "  ORDER BY IterationTimestamp DESC")
+                    .setMaxResults(1).getSingleResult();
+        }
+
 
         GTFSDB.closeSession(session);
         gtfsRtFeedIterationModel.setDateFormat(getDateFormat(gtfsRtFeedIterationModel.getFeedTimestamp(), gtfsRtFeedIterationModel.getGtfsRtFeedModel().getGtfsRtId()));

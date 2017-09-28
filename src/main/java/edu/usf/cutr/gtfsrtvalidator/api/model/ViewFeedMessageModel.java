@@ -27,11 +27,18 @@ import java.io.InputStream;
 
 @XmlRootElement
 @Entity
-@NamedNativeQuery(name = "feedMessageByIterationId",
-        query = "SELECT feedProtobuf AS feedMessage " +
-                "FROM GtfsRtFeedIteration " +
-                "WHERE IterationID = ? ",
-        resultClass = ViewFeedMessageModel.class)
+@NamedNativeQueries ({
+    @NamedNativeQuery (name = "feedMessageByIterationId",
+            query = "SELECT feedProtobuf AS feedMessage " +
+                    "FROM GtfsRtFeedIteration " +
+                    "WHERE IterationID = ? ",
+            resultClass = ViewFeedMessageModel.class),
+    @NamedNativeQuery (name = "feedMessageByGtfsRtId",
+            query = "SELECT feedProtobuf AS feedMessage " +
+                    "FROM GtfsRtFeedIteration " +
+                    "WHERE rtFeedId = ?  ORDER BY IterationTimestamp DESC",
+            resultClass = ViewFeedMessageModel.class)
+})
 public class ViewFeedMessageModel {
 
     @Id
