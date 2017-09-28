@@ -27,7 +27,7 @@ import java.io.Serializable;
 public class GtfsRtFeedModel implements Serializable {
 
     @Column(name="feedURL")
-    private String gtfsUrl;
+    private String gtfsRtUrl;
     @ManyToOne
     @JoinColumn(name = "gtfsFeedID")
     private GtfsFeedModel gtfsFeedModel;
@@ -38,12 +38,12 @@ public class GtfsRtFeedModel implements Serializable {
 
     public GtfsRtFeedModel(){}
 
-    public String getGtfsUrl() {
-        return gtfsUrl;
+    public String getGtfsRtUrl () {
+        return gtfsRtUrl;
     }
 
-    public void setGtfsUrl(String gtfsUrl) {
-        this.gtfsUrl = gtfsUrl;
+    public void setGtfsRtUrl (String gtfsRtUrl) {
+        this.gtfsRtUrl = gtfsRtUrl;
     }
 
     public GtfsFeedModel getGtfsFeedModel() {
@@ -65,7 +65,7 @@ public class GtfsRtFeedModel implements Serializable {
     @Override
     public String toString() {
         return "GtfsRtFeedModel{" +
-                "gtfsUrl='" + gtfsUrl + '\'' +
+                "gtfsRtUrl='" + gtfsRtUrl + '\'' +
                 ", gtfsId=" + gtfsFeedModel.getFeedId() +
                 ", gtfsRtId=" + gtfsRtId +
                 '}';

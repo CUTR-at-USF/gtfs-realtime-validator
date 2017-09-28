@@ -83,7 +83,7 @@ function monitorGtfsRtFeeds(gtfsrtUrlList, gtfsFeedId) {
 
             //POST request to api/gtfs-rt to add
             function success(data){
-                if (data["gtfsUrl"] != null) {
+                if (data["gtfsRtUrl"] != null) {
 
                     $(progressID).removeClass("progress-striped active");
                     $(progressID + " .progress-bar").addClass("progress-bar-success");
@@ -128,7 +128,7 @@ function monitorGtfsRtFeeds(gtfsrtUrlList, gtfsFeedId) {
                 displayErrorModalDialog(errorMessage);
             }
 
-            var jsonData = {"gtfsUrl":url, "gtfsFeedModel":{"feedId": gtfsFeedId}};
+            var jsonData = {"gtfsRtUrl":url, "gtfsFeedModel":{"feedId": gtfsFeedId}};
 
             $.ajax({
                 type: "POST",
