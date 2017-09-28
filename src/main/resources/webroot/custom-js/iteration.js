@@ -34,7 +34,7 @@ $(".issues-page-loader").show();
 $.get(server + "/api/gtfs-rt-feed/" + iterationId + "/iterationDetails").done(function (data) {
     var timestamp = data["feedTimestamp"];
     var dateFormat = data["dateFormat"];
-    var gtfsRtUrl = data["gtfsRtFeedModel"]["gtfsUrl"];
+    var gtfsRtUrl = data["gtfsRtFeedModel"]["gtfsRtUrl"];
 
     $("#title-text").text("Iteration " + rowId + " - " + dateFormat + " (" + timestamp + ") - " + gtfsRtUrl);
 });
