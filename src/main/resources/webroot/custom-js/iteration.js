@@ -30,7 +30,7 @@ var allTablesData = '';
 
 var server = window.location.protocol + "//" + window.location.host;
 $(".feed-page-loader").show();
-if(iterationId != -1) {
+if (iterationId != -1) {
     $(".issues-page-loader").show();
 } else {
     $(".issues-page-loader").hide();
@@ -69,7 +69,7 @@ clipboard.on('error', function(e) {
     hideTooltip(btn);
 });
 
-if(iterationId != -1) {
+if (iterationId != -1) {
 // Get the list of errors/warnings and list of their occurrences from server for a particular 'iterationId'.
     $.get(server + "/api/gtfs-rt-feed/" + iterationId + "/iterationErrors").done(function (data) {
 
