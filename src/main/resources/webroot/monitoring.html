@@ -131,6 +131,11 @@
                         Unique responses:
                         <span class="info-text" id="responses-{{gtfsRtId}}">0</span>
                     </div>
+                    <div class="col-md-4 pull-right">
+                        <div id="most-recent-iteration-{{gtfsRtId}}">
+                            <a href="iteration.html?iteration=-1&sessionIteration=0&gtfsRtId={{gtfsRtId}}" target="_blank">Most recent response</a>
+                        </div>
+                    </div>
                 </div>
                 <hr/>
                 <table class="table">
@@ -191,7 +196,7 @@
         <td>{{title}}</td>
 
         <td>{{severity}}</td>
-        <td><a href="iteration.html?iteration={{lastIterationId}}&sessionIteration={{lastRowId}}" target="_blank">{{lastRowId}}</a></td>
+        <td><a href="iteration.html?iteration={{lastIterationId}}&sessionIteration={{lastRowId}}&gtfsRtId={{gtfsRtId}}" target="_blank">{{lastRowId}}</a></td>
         <td title="Time zone: {{timeZone}}">{{formattedTimestamp}} ({{lastFeedTime}})</td>
 
         <td>{{count}}</td>
@@ -203,7 +208,7 @@
 <script id="feed-monitor-log-row-template" type="text/x-handlebars-template">
     {{#each this}}
     <tr>
-        <td><a href="iteration.html?iteration={{iterationId}}&sessionIteration={{rowId}}" target="_blank">{{rowId}}</a></td>
+        <td><a href="iteration.html?iteration={{iterationId}}&sessionIteration={{rowId}}&gtfsRtId={{gtfsRtId}}" target="_blank">{{rowId}}</a></td>
         <td><a href="https://github.com/CUTR-at-USF/gtfs-realtime-validator/blob/master/RULES.md#{{id}}" target="_blank">{{id}}</a></td>
         <td>{{title}}</td>
 

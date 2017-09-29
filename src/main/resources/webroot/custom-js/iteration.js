@@ -18,6 +18,7 @@
 // Get data from URL.
 var rowId = getUrlParameter("sessionIteration");
 var iterationId = getUrlParameter("iteration");
+var gtfsRtId = getUrlParameter("gtfsRtId");
 
 // These variables store data that is needed when showing more and less errors for each error/warning.
 var showMoreErrorList;
@@ -29,9 +30,12 @@ var allTablesData = '';
 
 var server = window.location.protocol + "//" + window.location.host;
 $(".feed-page-loader").show();
-$(".issues-page-loader").show();
-
-$.get(server + "/api/gtfs-rt-feed/" + iterationId + "/iterationDetails").done(function (data) {
+if (iterationId != -1) {
+    $(".issues-page-loader").show();
+} else {
+    $(".issues-page-loader").hide();
+}
+$.get(server + "/api/gtfs-rt-feed/" + iterationId + "/" + gtfsRtId + "/iterationDetails").done(function (data) {
     var timestamp = data["feedTimestamp"];
     var dateFormat = data["dateFormat"];
     var gtfsRtUrl = data["gtfsRtFeedModel"]["gtfsRtUrl"];
@@ -40,7 +44,7 @@ $.get(server + "/api/gtfs-rt-feed/" + iterationId + "/iterationDetails").done(fu
 });
 
 // Get the feedMessage from server for a particular 'iterationId' and display in plain text format to user.
-$.get(server + "/api/gtfs-rt-feed/" + iterationId + "/feedMessage").done(function (data) {
+$.get(server + "/api/gtfs-rt-feed/" + iterationId + "/" + gtfsRtId + "/feedMessage").done(function (data) {
     var jsonFeed = JSON.stringify(data, undefined, 2);
     document.getElementById("feedMessage").innerHTML = jsonFeed;
 
@@ -65,81 +69,82 @@ clipboard.on('error', function(e) {
     hideTooltip(btn);
 });
 
+if (iterationId != -1) {
 // Get the list of errors/warnings and list of their occurrences from server for a particular 'iterationId'.
-$.get(server + "/api/gtfs-rt-feed/" + iterationId + "/iterationErrors").done(function (data) {
+    $.get(server + "/api/gtfs-rt-feed/" + iterationId + "/iterationErrors").done(function (data) {
 
-    showMoreErrorList = data;
-    var errorCount = 0;
-    var warningCount = 0;
+        showMoreErrorList = data;
+        var errorCount = 0;
+        var warningCount = 0;
 
-    // Get the correct count of error occurrences to show in text '...and xx more'
-    for (errorListIndex in data) {
-        data[errorListIndex]["errorOccurrences"] = data[errorListIndex]["errorOccurrences"] - MAX_ERRORS_TO_DISPLAY;
-    }
-
-    /*
-     * Form the required number of error/warning cards table structure.
-     * The size of 'data' is the number of error/warning cards required.
-     */
-    var eachCardTemplateScript = $("#error-card-table-template").html();
-    var eachCardTemplate = Handlebars.compile(eachCardTemplateScript);
-    var cardsCompiledHtml = eachCardTemplate(data);
-    $("#error-cards").html(cardsCompiledHtml);
-
-    for (errorListIndex in data) {
-        // Hide '...and xx more' message if occurrences <= 0
-        if (data[errorListIndex]["errorOccurrences"] <= 0) {
-            $(".show-more-" + errorListIndex).hide();
+        // Get the correct count of error occurrences to show in text '...and xx more'
+        for (errorListIndex in data) {
+            data[errorListIndex]["errorOccurrences"] = data[errorListIndex]["errorOccurrences"] - MAX_ERRORS_TO_DISPLAY;
         }
-        // Calculate the count of errors and warnings.
-        if (data[errorListIndex]["errorId"].startsWith("E")) {
-            errorCount++;
-        } else if (data[errorListIndex]["errorId"].startsWith("W")) {
-            warningCount++;
-        }
-
-        // Fill each error/warning card table data
-        var cardBodyTemplateScript = $("#error-card-body-template").html();
-        var cardBodyTemplate = Handlebars.compile(cardBodyTemplateScript);
-
-        showLessErrorList[errorListIndex] = {};
 
         /*
-         * At first, we will display less number of rows in each error/warning table.
-         * 'MAX_ERRORS_TO_DISPLAY' is the number of error/warning occurrences to display.
-         * 'showLessErrorList' will store each error occurrences data size to <= 'MAX_ERRORS_TO_DISPLAY'
+         * Form the required number of error/warning cards table structure.
+         * The size of 'data' is the number of error/warning cards required.
          */
-        for (numErrorsIndex in data[errorListIndex]["viewIterationErrorsModelList"]) {
-            if (numErrorsIndex < MAX_ERRORS_TO_DISPLAY) {
-                showLessErrorList[errorListIndex][numErrorsIndex] = data[errorListIndex]["viewIterationErrorsModelList"][numErrorsIndex];
+        var eachCardTemplateScript = $("#error-card-table-template").html();
+        var eachCardTemplate = Handlebars.compile(eachCardTemplateScript);
+        var cardsCompiledHtml = eachCardTemplate(data);
+        $("#error-cards").html(cardsCompiledHtml);
+
+        for (errorListIndex in data) {
+            // Hide '...and xx more' message if occurrences <= 0
+            if (data[errorListIndex]["errorOccurrences"] <= 0) {
+                $(".show-more-" + errorListIndex).hide();
             }
+            // Calculate the count of errors and warnings.
+            if (data[errorListIndex]["errorId"].startsWith("E")) {
+                errorCount++;
+            } else if (data[errorListIndex]["errorId"].startsWith("W")) {
+                warningCount++;
+            }
+
+            // Fill each error/warning card table data
+            var cardBodyTemplateScript = $("#error-card-body-template").html();
+            var cardBodyTemplate = Handlebars.compile(cardBodyTemplateScript);
+
+            showLessErrorList[errorListIndex] = {};
+
+            /*
+             * At first, we will display less number of rows in each error/warning table.
+             * 'MAX_ERRORS_TO_DISPLAY' is the number of error/warning occurrences to display.
+             * 'showLessErrorList' will store each error occurrences data size to <= 'MAX_ERRORS_TO_DISPLAY'
+             */
+            for (numErrorsIndex in data[errorListIndex]["viewIterationErrorsModelList"]) {
+                if (numErrorsIndex < MAX_ERRORS_TO_DISPLAY) {
+                    showLessErrorList[errorListIndex][numErrorsIndex] = data[errorListIndex]["viewIterationErrorsModelList"][numErrorsIndex];
+                }
+            }
+
+            /*
+             * 'setupExportData' method sets all the rows of each table to be exported as csv file.
+             * Creates a click event for each download button.
+             */
+            setupExportData(errorListIndex, cardBodyTemplate);
+
+            // Show less number of rows in each table.
+            var bodyCompiledHtml = cardBodyTemplate(showLessErrorList[errorListIndex]);
+            $("#error-card-body-" + errorListIndex).html(bodyCompiledHtml);
         }
 
-        /*
-         * 'setupExportData' method sets all the rows of each table to be exported as csv file.
-         * Creates a click event for each download button.
-         */
-        setupExportData(errorListIndex, cardBodyTemplate);
+        $(".issues-page-loader").hide();
 
-        // Show less number of rows in each table.
-        var bodyCompiledHtml = cardBodyTemplate(showLessErrorList[errorListIndex]);
-        $("#error-card-body-" + errorListIndex).html(bodyCompiledHtml);
-    }
+        $("#error-count").text(errorCount);
+        $("#warning-count").text(warningCount);
 
-    $(".issues-page-loader").hide();
-
-    $("#error-count").text(errorCount);
-    $("#warning-count").text(warningCount);
-
-    // Add a click event listener for downloading all the tables data saved in 'allTablesData'
-    allTablesData = exportDataHeader + allTablesData;
-    var instance = new TableExport($('<div>')); // Instantiate TableExport
-    $('#download-all-button').on('click', function(e) {
-                             // File data,   mimeType,  filename,                   fileExtension
-        instance.export2file(allTablesData, 'text/csv', 'iteration_' + iterationId, '.csv');
+        // Add a click event listener for downloading all the tables data saved in 'allTablesData'
+        allTablesData = exportDataHeader + allTablesData;
+        var instance = new TableExport($('<div>')); // Instantiate TableExport
+        $('#download-all-button').on('click', function(e) {
+                                 // File data,   mimeType,  filename,                   fileExtension
+            instance.export2file(allTablesData, 'text/csv', 'iteration_' + iterationId, '.csv');
+        });
     });
-});
-
+}
 // On clicking '...and xx more' text, this method will show all the occurrences of that error/warning
 function showEntireList(errorIndex) {
     var cardDataTemplateScript = $("#error-card-body-template").html();
@@ -215,4 +220,5 @@ function getUrlParameter(param) {
             return parameterName[1];
         }
     }
+    return '';
 }

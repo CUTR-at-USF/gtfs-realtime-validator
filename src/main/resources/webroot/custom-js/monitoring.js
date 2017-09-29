@@ -116,6 +116,7 @@ function updateMonitorData(id, data) {
     updatePaginationLogData(id, data["viewGtfsRtFeedErrorCountModelList"]);
     updateSummaryTables(id, data["viewErrorSummaryModelList"]);
     updateLogTables(id, data["viewErrorLogModelList"]);
+    updateMostRecentFeedLink(id, data["viewErrorLogModelList"]);
 }
 
 function updateSummaryTables(index, data) {
@@ -172,6 +173,21 @@ function handleToggledData(index, data, summaryTable) {
             showOrHideError(index, errorId); // Toggle change event handler
         });
     });
+}
+
+function updateMostRecentFeedLink(id, data) {
+    $("#most-recent-iteration-"+id).children("a").first()
+    .attr("href", "iteration.html?iteration={{iterationId}}&sessionIteration={{rowId}}&gtfsRtId={{gtfsRtId}}");
+    var mostRecentIterationScript = $("#most-recent-iteration-"+id).html();
+    var mostRecentResponseTemplate = Handlebars.compile(mostRecentIterationScript);
+    var mostRecentResponseHtml;
+    if(data != null && data != '' && data != undefined) {
+        mostRecentResponseHtml = mostRecentResponseTemplate(data[0]);
+    } else {
+        var context = {iterationId : -1, rowId: requests[id], gtfsRtId: id};
+        mostRecentResponseHtml = mostRecentResponseTemplate(context);
+    }
+    $("#most-recent-iteration-"+id).html(mostRecentResponseHtml);
 }
 
 function updateLogTables(index, data) {
