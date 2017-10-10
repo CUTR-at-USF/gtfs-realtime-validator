@@ -411,6 +411,8 @@ public class VehicleValidatorTest extends FeedMessageTest {
         writer.append("\ntestagency.zip bounding box output --------------\n");
         shpWriter.write(writer, gtfsBoundingBox);
         writer.flush();
+
+        clearAndInitRequiredFeedFields();
     }
 
     /**
@@ -497,6 +499,8 @@ public class VehicleValidatorTest extends FeedMessageTest {
         results = vehicleValidator.validate(MIN_POSIX_TIME, bullRunnerGtfsNoShapes, bullRunnerGtfsNoShapesMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E028, 1);
         TestUtils.assertResults(expected, results);
+
+        clearAndInitRequiredFeedFields();
     }
 
     /**
@@ -685,6 +689,8 @@ public class VehicleValidatorTest extends FeedMessageTest {
         results = vehicleValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E029, 1);
         TestUtils.assertResults(expected, results);
+
+        clearAndInitRequiredFeedFields();
     }
 
     /**
