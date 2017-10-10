@@ -18,6 +18,7 @@ package edu.usf.cutr.gtfsrtvalidator.test.rules;
 
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.api.model.ValidationRule;
+import edu.usf.cutr.gtfsrtvalidator.background.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.test.FeedMessageTest;
 import edu.usf.cutr.gtfsrtvalidator.test.util.TestUtils;
 import edu.usf.cutr.gtfsrtvalidator.validation.rules.VehicleValidator;
@@ -684,5 +685,77 @@ public class VehicleValidatorTest extends FeedMessageTest {
         results = vehicleValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E029, 1);
         TestUtils.assertResults(expected, results);
+    }
+
+    /**
+     * E029 - Vehicle position outside trip shape buffer, but ignoring GTFS shapes.txt
+     */
+    @Test
+    public void testE029IgnoreShapes() {
+        // Re-create the metadata for this test, but this time ignoring the GTFS shapes.txt
+        bullRunnerGtfsMetadata = new GtfsMetadata("bullrunner-gtfs.zip", bullRunnerGtfsMetadata.getTimeZone(), bullRunnerGtfs, true);
+
+        VehicleValidator vehicleValidator = new VehicleValidator();
+        Map<ValidationRule, Integer> expected = new HashMap<>();
+
+        GtfsRealtime.VehicleDescriptor.Builder vehicleDescriptorBuilder = GtfsRealtime.VehicleDescriptor.newBuilder();
+        vehicleDescriptorBuilder.setId("1");
+
+        // USF Bull Runner - route_id=A, trip_id=2
+        GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+        tripDescriptorBuilder.setTripId("2");
+        tripDescriptorBuilder.setRouteId("A");
+
+        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        // Add the trip_id=2 to GTFS-rt message - now we can match against trip_id=2 in shapes.txt, and this should generate one error, but we're ignoring shapes.txt, so no error
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = vehicleValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
+        expected.clear();
+        TestUtils.assertResults(expected, results);
+
+         // Create alert with effect other than a detour with trip_id=2 - point is not allowed outside shape, one error normally, but we're ignoring shapes.txt, so no errors
+        GtfsRealtime.Alert.Builder alertBuilder = GtfsRealtime.Alert.newBuilder();
+        alertBuilder.setEffect(GtfsRealtime.Alert.Effect.UNKNOWN_EFFECT);
+        alertBuilder.addInformedEntity(GtfsRealtime.EntitySelector.newBuilder().setTrip(tripDescriptorBuilder.build()));
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = vehicleValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
+        expected.clear();
+        TestUtils.assertResults(expected, results);
+
+        // Change the alert back to DETOUR, but change the route_id to a different route - one error normally, as Route A is no longer on detour, but we're ignoring shapes.txt, so no errors
+        alertBuilder = GtfsRealtime.Alert.newBuilder();
+        alertBuilder.setEffect(GtfsRealtime.Alert.Effect.DETOUR);
+        alertBuilder.addInformedEntity(GtfsRealtime.EntitySelector.newBuilder().setTrip(GtfsRealtime.TripDescriptor.newBuilder().setRouteId("C").build()));
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = vehicleValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
+        expected.clear();
+        TestUtils.assertResults(expected, results);
+
+        // Alert is DETOUR again, but change the trip_id to a different trip - one error again normally, as trip_id=2 is no longer on detour, but we're ignoring shapes.txt, so no errors
+        alertBuilder = GtfsRealtime.Alert.newBuilder();
+        alertBuilder.setEffect(GtfsRealtime.Alert.Effect.DETOUR);
+        alertBuilder.addInformedEntity(GtfsRealtime.EntitySelector.newBuilder().setTrip(GtfsRealtime.TripDescriptor.newBuilder().setTripId("10").build()));
+        feedEntityBuilder.setAlert(alertBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = vehicleValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
+        expected.clear();
+        TestUtils.assertResults(expected, results);
+
+        // Re-create the metadata for next tests with shapes.txt metadata
+        bullRunnerGtfsMetadata = new GtfsMetadata("bullrunner-gtfs.zip", bullRunnerGtfsMetadata.getTimeZone(), bullRunnerGtfs, false);
+
+        clearAndInitRequiredFeedFields();
     }
 }

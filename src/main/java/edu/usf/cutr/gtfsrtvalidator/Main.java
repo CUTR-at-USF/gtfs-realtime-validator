@@ -51,6 +51,7 @@ public class Main {
     private final static String SORT_OPTION_DATE = "date";
     private final static String PLAIN_TEXT = "plaintext";
     private final static String RETURN_STATS = "stats";
+    private final static String IGNORE_SHAPES = "ignoreshapes";
 
     public static void main(String[] args) throws InterruptedException, ParseException {
         // Parse command line parameters
@@ -67,10 +68,12 @@ public class Main {
             BatchProcessor.SortBy sortBy = getSortBy(options, args);
             String plainText = getPlainTextFileExtensionfromArgs(options, args);
             boolean returnStats = getReturnStatsFromArgs(options, args);
+            boolean ignoreShapes = getIgnoreShapesFromArgs(options, args);
             BatchProcessor.Builder builder = new BatchProcessor.Builder(gtfs, gtfsRealtime)
                     .sortBy(sortBy)
                     .setPlainTextExtension(plainText)
-                    .setReturnStatistics(returnStats);
+                    .setReturnStatistics(returnStats)
+                    .setIgnoreShapes(ignoreShapes);
             BatchProcessor processor = builder.build();
             try {
                 List<IterationStatistics> stats = processor.processFeeds();
@@ -170,6 +173,10 @@ public class Main {
                 .hasArg()
                 .desc("If the validator should keep tracks of statistics for all validated GTFS-realtime files.")
                 .build();
+        Option ignoreShapes = Option.builder(IGNORE_SHAPES)
+                .hasArg()
+                .desc("If the validator should ignore the shapes.txt file of the GTFS feed.")
+                .build();
 
         options.addOption(portOption);
         options.addOption(batchOption);
@@ -178,6 +185,7 @@ public class Main {
         options.addOption(sort);
         options.addOption(plainText);
         options.addOption(saveStats);
+        options.addOption(ignoreShapes);
 
         return options;
     }
@@ -304,5 +312,18 @@ public class Main {
         CommandLineParser parser = new DefaultParser();
         CommandLine cmd = parser.parse(options, args);
         return cmd.hasOption(RETURN_STATS);
+    }
+
+    /**
+     * Returns true if the "-ignoreshapes" parameter is included, false it if is not
+     *
+     * @param options command line options that this application supports
+     * @param args
+     * @return true if the "-ignoreshapes" parameter is included, false it if is not
+     */
+    private static boolean getIgnoreShapesFromArgs(Options options, String[] args) throws ParseException {
+        CommandLineParser parser = new DefaultParser();
+        CommandLine cmd = parser.parse(options, args);
+        return cmd.hasOption(IGNORE_SHAPES);
     }
 }

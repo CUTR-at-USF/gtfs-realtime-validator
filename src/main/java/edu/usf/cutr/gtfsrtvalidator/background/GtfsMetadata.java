@@ -93,8 +93,11 @@ public class GtfsMetadata {
      * @param feedUrl URL for the GTFS zip file
      * @param timeZone the agency_timezone from GTFS agency.txt, or null if the current time zone should be used.
      * @param gtfsData GTFS feed to build the metadata for
+     * @param ignoreShapes true if the GTFS shapes.txt should be ignored when generating metadata, or false if the shapes.txt metadata should be generated.  If
+     *                      you are getting OutOfMemoryErrors you can try setting this to true.  Note that if true
+     *                      certain spatial rules such as E029 will not be executed.
      */
-    public GtfsMetadata(String feedUrl, TimeZone timeZone, GtfsDaoImpl gtfsData) {
+    public GtfsMetadata(String feedUrl, TimeZone timeZone, GtfsDaoImpl gtfsData, boolean ignoreShapes) {
         long startTime = System.nanoTime();
         _log.info("Building GtfsMetadata for " + feedUrl + "...");
 
@@ -121,7 +124,7 @@ public class GtfsMetadata {
         ShapeFactory sf = JtsSpatialContext.GEO.getShapeFactory();
         ShapeFactory.MultiPointBuilder shapeBuilder = sf.multiPoint();
         Collection<ShapePoint> shapePoints = gtfsData.getAllShapePoints();
-        if (shapePoints != null && shapePoints.size() > 3) {
+        if (shapePoints != null && !ignoreShapes && shapePoints.size() > 3) {
             for (ShapePoint p : shapePoints) {
                 String shapeId = p.getShapeId().getId();
                 // If there isn't already a list for this shape_id, create one

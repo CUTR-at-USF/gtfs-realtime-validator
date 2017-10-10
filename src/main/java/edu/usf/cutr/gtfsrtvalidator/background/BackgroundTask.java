@@ -93,10 +93,11 @@ public class BackgroundTask implements Runnable {
             // Get the GTFS feed from the GtfsDaoMap using the gtfsFeedId of the current feed.
             gtfsData = GtfsFeed.GtfsDaoMap.get(mCurrentGtfsRtFeed.getGtfsFeedModel().getFeedId());
             // Create the GTFS metadata if it doesn't already exist
+            // TODO - read ignoreShapes from website checkbox - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/286
             gtfsMetadata = mGtfsMetadata.computeIfAbsent(mCurrentGtfsRtFeed.getGtfsFeedModel().getFeedId(),
                     k -> new GtfsMetadata(mCurrentGtfsRtFeed.getGtfsFeedModel().getGtfsUrl(),
                             TimeZone.getTimeZone(mCurrentGtfsRtFeed.getGtfsFeedModel().getAgency()),
-                            gtfsData));
+                            gtfsData, false));
 
             // Read the GTFS-rt feed from the feed URL
             URL gtfsRtFeedUrl;

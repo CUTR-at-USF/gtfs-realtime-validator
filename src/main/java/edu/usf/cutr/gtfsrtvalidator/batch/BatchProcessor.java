@@ -64,6 +64,7 @@ public class BatchProcessor {
     private String mPlainTextExtension = null;
     private boolean mReturnStatistics = false;
     private List<IterationStatistics> mIterationStatistics;
+    private boolean mIgnoreShapes = false;
 
     // GTFS
     private GtfsDaoImpl mGtfsData = new GtfsDaoImpl();
@@ -106,6 +107,17 @@ public class BatchProcessor {
     }
 
     /**
+     * Sets the validator to ignore shapes.txt if ignoreShapes is true, or to process the shapes.txt if ignoreShapes is false (default).
+     * If you are getting OutOfMemoryErrors when processing very large feeds, you should probably set this to true.  Setting this to true will
+     * prevent the validator from checking rules like E029 that require spatial data.  See https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/284.
+     *
+     * @param ignoreShapes true if the validator should ignore the shapes.txt file for this feed, or false if it should process shapes.txt
+     */
+    public void setIgnoreShapes(boolean ignoreShapes) {
+        mIgnoreShapes = ignoreShapes;
+    }
+
+    /**
      * Process the GTFS and GTFS-realtime feeds provided in the constructor. If setReturnStatistics() is set to true,
      * the method will return a list of IterationStatistics (one per GTFS-rt file) for performance in the batch
      * validation.  By default this method will return null to avoid memory issues with extremely large batch processes.
@@ -130,7 +142,7 @@ public class BatchProcessor {
             timeZoneText = agency.getTimezone();
             break;
         }
-        mGtfsMetadata = new GtfsMetadata(mPathToGtfsFile.getAbsolutePath(), TimeZone.getTimeZone(timeZoneText), mGtfsData);
+        mGtfsMetadata = new GtfsMetadata(mPathToGtfsFile.getAbsolutePath(), TimeZone.getTimeZone(timeZoneText), mGtfsData, mIgnoreShapes);
 
         // Initialize validation rules
         synchronized (mValidationRules) {
@@ -322,6 +334,7 @@ public class BatchProcessor {
         private SortBy mSortBy = null;
         private String mPlainTextExtension = null;
         private boolean mReturnStatistics = false;
+        private boolean mIgnoreShapes = false;
 
         public Builder(String pathToGtfsFile, String pathToGtfsRealtime) {
             mPathToGtfsFile = pathToGtfsFile;
@@ -364,6 +377,19 @@ public class BatchProcessor {
             return this;
         }
 
+        /**
+         * Sets the validator to ignore shapes.txt if ignoreShapes is true, or to process the shapes.txt if ignoreShapes is false (default).
+         * If you are getting OutOfMemoryErrors when processing very large feeds, you should probably set this to true.  Setting this to true will
+         * prevent the validator from checking rules like E029 that require spatial data.  See https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/284.
+         *
+         * @param ignoreShapes true if the validator should ignore the shapes.txt file for this feed, or false if it should process shapes.txt
+         * @return this Builder instance so methods can be chained together
+         */
+        public Builder setIgnoreShapes(boolean ignoreShapes) {
+            mIgnoreShapes = ignoreShapes;
+            return this;
+        }
+
         public BatchProcessor build() {
             BatchProcessor bp = new BatchProcessor(mPathToGtfsFile, mPathToGtfsRealtime);
             if (mSortBy != null) {
@@ -372,6 +398,7 @@ public class BatchProcessor {
             if (mPlainTextExtension != null) {
                 bp.setPlainTextExtension(mPlainTextExtension);
             }
+            bp.setIgnoreShapes(mIgnoreShapes);
             bp.setReturnStatistics(mReturnStatistics);
             return bp;
         }
