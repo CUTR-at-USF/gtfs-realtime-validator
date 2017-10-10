@@ -46,11 +46,11 @@ Have a suggestion for a new rule?  Open an issue with the ["new rule" label](htt
  
 ## Building the project 
 
+The main GTFS-Realtime Validator user interface is implemented as a web application, with the backend code written in Java.  An instance of the [Jetty embedded server](http://www.eclipse.org/jetty/) is used to run the application, with [Hibernate](http://hibernate.org/) used for data persistence.
+
 #### Prerequisites 
 
-The GTFS-Realtime Validator is implemented as a web application, with the backend code written in Java.  An instance of the [Jetty embedded server](http://www.eclipse.org/jetty/) is used to run the application.
-
-Following are the requirements to get the project up and running: 
+Following are the requirements to build and run the project from source code: 
 
 * [Java Development Kit (JDK) 1.8 or higher](http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html)
 * [Apache Maven](https://maven.apache.org/)
@@ -77,7 +77,9 @@ To start up the server so you can view the web interface, from the command-line,
 
 `java -Djsse.enableSNIExtension=false -jar target/gtfs-realtime-validator-1.0.0-SNAPSHOT.jar`
 
-You should see some output, and a message saying `Go to http://localhost:8080 in your browser`. 
+You should see some output, and a message saying `Go to http://localhost:8080 in your browser`.
+
+Note that there is also an option to run the validator as a batch process on archived feeds - see ["Configuration Options -> Batch Processing"](https://github.com/CUTR-at-USF/gtfs-realtime-validator#batch-processing).
 
 #### 3. View the application 
 
