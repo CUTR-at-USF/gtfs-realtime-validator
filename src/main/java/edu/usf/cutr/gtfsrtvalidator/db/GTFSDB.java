@@ -25,9 +25,6 @@ import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.List;
 
 public class GTFSDB {
@@ -35,38 +32,17 @@ public class GTFSDB {
     private static final Logger _log = LoggerFactory.getLogger(GTFSDB.class);
 
     public static void initializeDB() {
-
-        //Use reflection to get the list of rules from the ValidataionRules class
-        Field[] fields = ValidationRules.class.getDeclaredFields();
-
         Session session = initSessionBeginTrans();
-
-        List<ValidationRule> rulesInClass = new ArrayList<>();
-        for (Field field : fields) {
-            if (Modifier.isStatic(field.getModifiers())) {
-                Class classType = field.getType();
-                if (classType == ValidationRule.class) {
-                    ValidationRule rule = new ValidationRule();
-                    try {
-                        Object value = field.get(rule);
-                        rule = (ValidationRule)value;
-                        rulesInClass.add(rule);
-                    } catch (IllegalAccessException ex) {
-                        ex.printStackTrace();
-                    }
-                }
-            }
-        }
-
+        List<ValidationRule> rules = ValidationRules.getRules();
         try {
-            for (ValidationRule rule : rulesInClass) {
+            for (ValidationRule rule : rules) {
                 session.saveOrUpdate(rule);
             }
             commitAndCloseSession(session);
         } catch (Exception ex) {
             ex.printStackTrace();
+            return;
         }
-
         _log.info("Table initialized successfully");
     }
 

@@ -25,6 +25,7 @@ import edu.usf.cutr.gtfsrtvalidator.test.util.TestUtils;
 import edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils;
 import edu.usf.cutr.gtfsrtvalidator.util.SortUtils;
 import edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils;
+import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
 import org.junit.Test;
 import org.locationtech.spatial4j.shape.Shape;
 import org.locationtech.spatial4j.shape.ShapeFactory;
@@ -811,5 +812,11 @@ public class UtilTest {
         timestamp = TimestampUtils.getTimestampFromFileName(fileNameVp);
         assertEquals(1487448068000L, timestamp);
 
+    }
+
+    @Test
+    public void testGetAllRules() {
+        List<ValidationRule> rules = ValidationRules.getRules();
+        assertEquals(58, rules.size());
     }
 }

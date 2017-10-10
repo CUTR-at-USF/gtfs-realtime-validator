@@ -18,6 +18,12 @@
 package edu.usf.cutr.gtfsrtvalidator.validation;
 import edu.usf.cutr.gtfsrtvalidator.api.model.ValidationRule;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class ValidationRules {
     /**
      * Warnings
@@ -248,4 +254,34 @@ public class ValidationRules {
     public static final ValidationRule E049 = new ValidationRule("E049", "ERROR", "header incrementality not populated",
             "Header incrementality must be populated for gtfs_realtime_version v2.0 and higher",
             "Header does not have incrementality and gtfs_realtime_version is v2.0 or higher");
+
+    private static List<ValidationRule> mAllRules = new ArrayList<>();
+
+    /**
+     * Returns a read-only list of all currently-defined validation rules
+     * @return a read-only list of all currently-defined validation rules
+     */
+    public static synchronized List<ValidationRule> getRules() {
+        if (mAllRules.isEmpty()) {
+            // Use reflection to get the list of rules
+            Field[] fields = ValidationRules.class.getDeclaredFields();
+            for (Field field : fields) {
+                if (Modifier.isStatic(field.getModifiers())) {
+                    Class classType = field.getType();
+                    if (classType == ValidationRule.class) {
+                        ValidationRule rule = new ValidationRule();
+                        try {
+                            Object value = field.get(rule);
+                            rule = (ValidationRule)value;
+                            mAllRules.add(rule);
+                        } catch (IllegalAccessException ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }
+        // Return a read-only list of these rules so different threads can't modify the list
+        return Collections.unmodifiableList(mAllRules);
+    }
 }
