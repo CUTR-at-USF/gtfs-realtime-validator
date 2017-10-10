@@ -25,7 +25,6 @@ import edu.usf.cutr.gtfsrtvalidator.test.util.TestUtils;
 import edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils;
 import edu.usf.cutr.gtfsrtvalidator.util.SortUtils;
 import edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils;
-import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
 import org.junit.Test;
 import org.locationtech.spatial4j.shape.Shape;
 import org.locationtech.spatial4j.shape.ShapeFactory;
@@ -42,6 +41,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils.MIN_POSIX_TIME;
+import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.E001;
+import static edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules.E002;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
@@ -58,7 +59,7 @@ public class UtilTest {
      */
     @Test
     public void testAssertResults() {
-        MessageLogModel modelE001 = new MessageLogModel(ValidationRules.E001);
+        MessageLogModel modelE001 = new MessageLogModel(E001);
         OccurrenceModel errorE001 = new OccurrenceModel(String.valueOf(MIN_POSIX_TIME));
         List<OccurrenceModel> errorListE001 = new ArrayList<>();
 
@@ -74,12 +75,12 @@ public class UtilTest {
 
         // Test list of error results, with one MessageLogModel
         errorListE001.add(errorE001);
-        expected.put(ValidationRules.E001, 1);
+        expected.put(E001, 1);
         TestUtils.assertResults(expected, results);
 
         // Test list of error results, with two MessageLogModels
         errorListE001.add(errorE001);
-        expected.put(ValidationRules.E001, 2);
+        expected.put(E001, 2);
         TestUtils.assertResults(expected, results);
     }
 
@@ -99,17 +100,17 @@ public class UtilTest {
     public void testAssertResultsThrowExceptionMoreExpected() {
         // Make sure we fail if we have expected occurrences that aren't included in results
         List<ErrorListHelperModel> results = new ArrayList<>();
-        MessageLogModel modelE001 = new MessageLogModel(ValidationRules.E001);
+        MessageLogModel modelE001 = new MessageLogModel(E001);
         OccurrenceModel errorE001 = new OccurrenceModel(String.valueOf(MIN_POSIX_TIME));
         List<OccurrenceModel> errorListE001 = new ArrayList<>();
         errorListE001.add(errorE001);
         results.add(new ErrorListHelperModel(modelE001, errorListE001));
 
         Map<ValidationRule, Integer> expected = new HashMap<>();
-        expected.put(ValidationRules.E001, 1);
+        expected.put(E001, 1);
 
         // We're expecting 1 error for E001 and 1 error for E002, but get one actual error for E001 - this should throw an AssertionError
-        expected.put(ValidationRules.E002, 1);
+        expected.put(E002, 1);
         TestUtils.assertResults(expected, results);
     }
 
@@ -117,7 +118,7 @@ public class UtilTest {
     public void testAssertResultsThrowExceptionMoreActual() {
         // Make sure we fail if we have actual results that weren't expected
         List<ErrorListHelperModel> results = new ArrayList<>();
-        MessageLogModel modelE001 = new MessageLogModel(ValidationRules.E001);
+        MessageLogModel modelE001 = new MessageLogModel(E001);
         OccurrenceModel errorE001 = new OccurrenceModel(String.valueOf(MIN_POSIX_TIME));
         List<OccurrenceModel> errorListE001 = new ArrayList<>();
         errorListE001.add(errorE001);
@@ -132,14 +133,14 @@ public class UtilTest {
     public void testAssertResultsThrowExceptionMismatchActualExpected() {
         // Make sure we fail if we have actual results that don't match the expected results
         List<ErrorListHelperModel> results = new ArrayList<>();
-        MessageLogModel modelE001 = new MessageLogModel(ValidationRules.E001);
+        MessageLogModel modelE001 = new MessageLogModel(E001);
         OccurrenceModel errorE001 = new OccurrenceModel(String.valueOf(MIN_POSIX_TIME));
         List<OccurrenceModel> errorListE001 = new ArrayList<>();
         errorListE001.add(errorE001);
         results.add(new ErrorListHelperModel(modelE001, errorListE001));
 
         Map<ValidationRule, Integer> expected = new HashMap<>();
-        expected.put(ValidationRules.E002, 1);
+        expected.put(E002, 1);
         // We are expecting error for E002, but get one for E001 - this should throw an AssertionError
         TestUtils.assertResults(expected, results);
     }
