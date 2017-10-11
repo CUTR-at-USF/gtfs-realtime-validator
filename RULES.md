@@ -350,6 +350,10 @@ From [`trip.start_time`](https://github.com/google/transit/blob/master/gtfs-real
 
 >`start_time` - The initially scheduled start time of this trip instance. When the trip_id corresponds to a non-frequency-based trip, this field should either be omitted or be equal to the value in the GTFS feed.
 
+*Common mistakes* - Accidentally providing a GTFS-realtime time that is modulo 24hr, such as `00:02:00`, when that trip start time in GTFS `stop_times.txt` is after midnight of the service day, such as `24:02:00`  
+
+*Possible solution* - Make sure that any `start_times` in GTFS-realtime match that same trip start time in GTFS `stop_times.txt`, especially if the trip starts after midnight of the service day.
+
 #### References:
 * [`trip.start_time`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)
 * [GTFS `stop_times.txt`](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#stop_timestxt)
