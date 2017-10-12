@@ -564,7 +564,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
         TestUtils.assertResults(expected, results);
 
         /**
-         * Switch to a different GTFS feed with a trip that doesn't visit the same stop_id more than once in the same trip
+         * Switch to a different GTFS feed with a trip_id 1.1 that doesn't visit the same stop_id more than once in the same trip
          *
          * gtfsData (testagency.zip) has the following for trip 1.1:
          *
@@ -573,6 +573,9 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
          * 1.1	    0:10:00	        0:10:00	        B	    2
          * 1.1	    0:20:00	        0:20:00	        C	    3
          */
+        tripDescriptorBuilder.setTripId("1.1");
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+
         // Include stop_sequence and stop_id - no errors
         tripUpdateBuilder.clearStopTimeUpdate();
 

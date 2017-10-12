@@ -207,7 +207,9 @@ public class GtfsMetadata {
                 allStopIds.add(stopTime.getStop().getId().getId());
             }
 
-            mTripsWithMultiStops.put(tripId, duplicateStopIds);
+            if (!duplicateStopIds.isEmpty()) {
+                mTripsWithMultiStops.put(tripId, duplicateStopIds);
+            }
         }
         logDuration(_log, "Repeated stop_ids for trips in stop_times.txt processed for " + feedUrl + " in ", stopTimesStartTime);
 
