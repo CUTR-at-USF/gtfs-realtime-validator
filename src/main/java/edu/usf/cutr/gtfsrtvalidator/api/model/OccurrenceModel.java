@@ -56,7 +56,7 @@ public class OccurrenceModel implements Serializable {
      *
      * @see ValidationRule
      */
-    @Column(name = "prefix", length = 500)
+    @Column(name = "prefix", length = 1000)
     private String prefix;
 
     public int getOccurrenceId() {
