@@ -18,15 +18,15 @@
 package edu.usf.cutr.gtfsrtvalidator.background;
 
 import com.google.transit.realtime.GtfsRealtime;
-import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsRtFeedIterationModel;
-import edu.usf.cutr.gtfsrtvalidator.api.model.GtfsRtFeedModel;
 import edu.usf.cutr.gtfsrtvalidator.api.resource.GtfsFeed;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.helper.DBHelper;
-import edu.usf.cutr.gtfsrtvalidator.helper.ErrorListHelperModel;
-import edu.usf.cutr.gtfsrtvalidator.util.GtfsUtils;
-import edu.usf.cutr.gtfsrtvalidator.validation.interfaces.FeedEntityValidator;
-import edu.usf.cutr.gtfsrtvalidator.validation.rules.*;
+import edu.usf.cutr.gtfsrtvalidator.lib.GtfsMetadata;
+import edu.usf.cutr.gtfsrtvalidator.lib.model.GtfsRtFeedIterationModel;
+import edu.usf.cutr.gtfsrtvalidator.lib.model.GtfsRtFeedModel;
+import edu.usf.cutr.gtfsrtvalidator.lib.model.helper.ErrorListHelperModel;
+import edu.usf.cutr.gtfsrtvalidator.lib.util.GtfsUtils;
+import edu.usf.cutr.gtfsrtvalidator.lib.validation.interfaces.FeedEntityValidator;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
@@ -45,15 +45,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils.getElapsedTime;
-import static edu.usf.cutr.gtfsrtvalidator.util.TimestampUtils.getElapsedTimeString;
+import static edu.usf.cutr.gtfsrtvalidator.lib.util.TimestampUtils.getElapsedTime;
+import static edu.usf.cutr.gtfsrtvalidator.lib.util.TimestampUtils.getElapsedTimeString;
 
 public class BackgroundTask implements Runnable {
 
     private static final org.slf4j.Logger _log = LoggerFactory.getLogger(BackgroundTask.class);
 
     private static Map<Integer, GtfsRealtime.FeedMessage> mGtfsRtFeedMap = new ConcurrentHashMap<>();
-    private static Map<Integer, edu.usf.cutr.gtfsrtvalidator.background.GtfsMetadata> mGtfsMetadata = new ConcurrentHashMap<>();
+    private static Map<Integer, GtfsMetadata> mGtfsMetadata = new ConcurrentHashMap<>();
     private final static List<FeedEntityValidator> mValidationRules = new ArrayList<>();
 
     private GtfsRtFeedModel mCurrentGtfsRtFeed = null;

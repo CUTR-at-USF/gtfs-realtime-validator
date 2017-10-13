@@ -17,9 +17,9 @@
 
 package edu.usf.cutr.gtfsrtvalidator.db;
 
-import edu.usf.cutr.gtfsrtvalidator.api.model.ValidationRule;
 import edu.usf.cutr.gtfsrtvalidator.hibernate.HibernateUtil;
-import edu.usf.cutr.gtfsrtvalidator.validation.ValidationRules;
+import edu.usf.cutr.gtfsrtvalidator.lib.model.ValidationRule;
+import edu.usf.cutr.gtfsrtvalidator.lib.validation.ValidationRules;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.slf4j.Logger;

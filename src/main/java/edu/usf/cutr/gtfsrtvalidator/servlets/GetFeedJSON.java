@@ -17,7 +17,7 @@
 
 package edu.usf.cutr.gtfsrtvalidator.servlets;
 
-import edu.usf.cutr.gtfsrtvalidator.helper.ProtoBuf;
+import edu.usf.cutr.gtfsrtvalidator.lib.helper.ProtoBuf;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;

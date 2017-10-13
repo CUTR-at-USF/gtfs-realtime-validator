@@ -17,8 +17,9 @@
 
 package edu.usf.cutr.gtfsrtvalidator.helper;
 
-import edu.usf.cutr.gtfsrtvalidator.api.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
+import edu.usf.cutr.gtfsrtvalidator.lib.model.OccurrenceModel;
+import edu.usf.cutr.gtfsrtvalidator.lib.model.helper.ErrorListHelperModel;
 import org.hibernate.Session;
 
 public class DBHelper {

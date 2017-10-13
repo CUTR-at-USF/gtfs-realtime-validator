@@ -19,15 +19,14 @@ package edu.usf.cutr.gtfsrtvalidator.api.resource;
 
 import com.google.gson.JsonObject;
 import com.google.transit.realtime.GtfsRealtime;
-import edu.usf.cutr.gtfsrtvalidator.api.model.*;
-import edu.usf.cutr.gtfsrtvalidator.api.model.combined.CombinedIterationMessageModel;
-import edu.usf.cutr.gtfsrtvalidator.api.model.combined.CombinedMessageOccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.background.BackgroundTask;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
-import edu.usf.cutr.gtfsrtvalidator.helper.IterationErrorListHelperModel;
-import edu.usf.cutr.gtfsrtvalidator.helper.MergeMonitorData;
 import edu.usf.cutr.gtfsrtvalidator.helper.QueryHelper;
 import edu.usf.cutr.gtfsrtvalidator.helper.ServiceScheduler;
+import edu.usf.cutr.gtfsrtvalidator.lib.model.combined.CombinedIterationMessageModel;
+import edu.usf.cutr.gtfsrtvalidator.lib.model.combined.CombinedMessageOccurrenceModel;
+import edu.usf.cutr.gtfsrtvalidator.lib.model.helper.IterationErrorListHelperModel;
+import edu.usf.cutr.gtfsrtvalidator.lib.model.helper.MergeMonitorData;
 import org.hibernate.Session;
 import org.slf4j.LoggerFactory;
 

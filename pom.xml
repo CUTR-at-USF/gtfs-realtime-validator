@@ -7,6 +7,12 @@
     <groupId>edu.usf.cutr</groupId>
     <artifactId>gtfs-realtime-validator</artifactId>
     <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <!-- GTFS-realtime validation library submodule in this repository -->
+    <modules>
+        <module>gtfs-realtime-validator-lib</module>
+    </modules>
 
     <properties>
         <jetty-version>9.4.5.v20170502</jetty-version>
@@ -27,6 +33,7 @@
             <url>http://nexus.onebusaway.org/content/groups/public/</url>
         </repository>
     </repositories>
+
     <dependencies>
         <dependency>
             <groupId>javax.servlet</groupId>
