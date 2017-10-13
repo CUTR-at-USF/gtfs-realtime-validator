@@ -13,7 +13,7 @@ We have a bleeding-edge alpha version running here as a demo:
  
  Feel free to check it out, but just be aware that it may be unavailable at any time, or prone to hiccups.
 
-## Quick start
+## Quick start - Run it yourself
 
 *Please note that this project is still under active development and is in an early alpha state.*
 
