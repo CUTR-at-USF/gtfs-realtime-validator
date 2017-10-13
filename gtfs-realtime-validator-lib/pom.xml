@@ -11,13 +11,8 @@
     </parent>
 
     <artifactId>gtfs-realtime-validator-lib</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
 
-    <repositories>
-        <repository>
-            <id>public.onebusaway.org</id>
-            <url>http://nexus.onebusaway.org/content/groups/public/</url>
-        </repository>
-    </repositories>
     <dependencies>
         <!-- JSON (de)serialization -->
         <dependency>

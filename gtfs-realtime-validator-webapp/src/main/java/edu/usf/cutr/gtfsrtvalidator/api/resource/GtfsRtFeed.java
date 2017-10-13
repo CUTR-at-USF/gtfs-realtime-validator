@@ -23,6 +23,7 @@ import edu.usf.cutr.gtfsrtvalidator.background.BackgroundTask;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.helper.QueryHelper;
 import edu.usf.cutr.gtfsrtvalidator.helper.ServiceScheduler;
+import edu.usf.cutr.gtfsrtvalidator.lib.model.*;
 import edu.usf.cutr.gtfsrtvalidator.lib.model.combined.CombinedIterationMessageModel;
 import edu.usf.cutr.gtfsrtvalidator.lib.model.combined.CombinedMessageOccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.lib.model.helper.IterationErrorListHelperModel;

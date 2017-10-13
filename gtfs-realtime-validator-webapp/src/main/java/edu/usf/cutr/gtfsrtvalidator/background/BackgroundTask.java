@@ -27,6 +27,7 @@ import edu.usf.cutr.gtfsrtvalidator.lib.model.GtfsRtFeedModel;
 import edu.usf.cutr.gtfsrtvalidator.lib.model.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.lib.util.GtfsUtils;
 import edu.usf.cutr.gtfsrtvalidator.lib.validation.interfaces.FeedEntityValidator;
+import edu.usf.cutr.gtfsrtvalidator.lib.validation.rules.*;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
