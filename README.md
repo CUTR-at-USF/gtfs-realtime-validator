@@ -5,6 +5,13 @@ A tool that validates [General Transit Feed Specification (GTFS)-realtime](https
 
 <img src="https://cloud.githubusercontent.com/assets/928045/25874575/2afaa3b0-34e1-11e7-92a4-b0a68f233748.png" width="1000">
 
+## Live demo
+
+We have a bleeding-edge alpha version running here as a demo:
+ 
+ [http://transittools.forest.usf.edu/](http://transittools.forest.usf.edu/)
+ 
+ Feel free to check it out, but just be aware that it may be unavailable at any time, or prone to hiccups.
 
 ## Quick start
 
