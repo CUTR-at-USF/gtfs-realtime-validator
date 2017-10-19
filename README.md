@@ -32,7 +32,7 @@ We have a bleeding-edge alpha version running here as a demo:
     * MBTA (Boston, MA)
         * GTFS-realtime - http://developer.mbta.com/lib/GTRTFS/Alerts/TripUpdates.pb
         * GTFS - http://www.mbta.com/uploadedfiles/MBTA_GTFS.zip
-    * ...more at [Transitfeeds.com](http://transitfeeds.com/search?q=gtfsrt) and [Transitland Feed Registry](https://transit.land/feed-registry/)
+    * ...more at [Transitfeeds.com](http://transitfeeds.com/search?q=gtfsrt)
 
 Please note that if you're using `https` URLS, you'll need to use the `-Djsse.enableSNIExtension=false` command-line parameter or install the [Java Cryptography Extension (JCE)](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html) - see the [Prerequisites](https://github.com/CUTR-at-USF/gtfs-realtime-validator#prerequisites) section for details.
 
