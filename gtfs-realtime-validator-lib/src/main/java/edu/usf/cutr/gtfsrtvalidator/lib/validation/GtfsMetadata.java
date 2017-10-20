@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package edu.usf.cutr.gtfsrtvalidator.lib;
+package edu.usf.cutr.gtfsrtvalidator.lib.validation;
 
 import edu.usf.cutr.gtfsrtvalidator.lib.util.TimestampUtils;
 import org.locationtech.spatial4j.context.jts.JtsSpatialContext;

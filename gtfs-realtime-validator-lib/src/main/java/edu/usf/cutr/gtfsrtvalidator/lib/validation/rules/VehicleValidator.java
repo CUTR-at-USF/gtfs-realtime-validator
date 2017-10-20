@@ -18,12 +18,12 @@
 package edu.usf.cutr.gtfsrtvalidator.lib.validation.rules;
 
 import com.google.transit.realtime.GtfsRealtime;
-import edu.usf.cutr.gtfsrtvalidator.lib.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.lib.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.lib.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.lib.model.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.lib.util.GtfsUtils;
 import edu.usf.cutr.gtfsrtvalidator.lib.util.RuleUtils;
+import edu.usf.cutr.gtfsrtvalidator.lib.validation.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.lib.validation.interfaces.FeedEntityValidator;
 import org.apache.commons.lang3.StringUtils;
 import org.locationtech.spatial4j.shape.Shape;
@@ -33,9 +33,9 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-import static edu.usf.cutr.gtfsrtvalidator.lib.GtfsMetadata.TRIP_BUFFER_METERS;
 import static edu.usf.cutr.gtfsrtvalidator.lib.util.GtfsUtils.getTripId;
 import static edu.usf.cutr.gtfsrtvalidator.lib.util.GtfsUtils.getVehicleId;
+import static edu.usf.cutr.gtfsrtvalidator.lib.validation.GtfsMetadata.TRIP_BUFFER_METERS;
 import static edu.usf.cutr.gtfsrtvalidator.lib.validation.ValidationRules.*;
 
 

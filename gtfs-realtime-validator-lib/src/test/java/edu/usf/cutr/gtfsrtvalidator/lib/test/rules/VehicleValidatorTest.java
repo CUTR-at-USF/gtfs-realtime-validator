@@ -17,10 +17,10 @@
 package edu.usf.cutr.gtfsrtvalidator.lib.test.rules;
 
 import com.google.transit.realtime.GtfsRealtime;
-import edu.usf.cutr.gtfsrtvalidator.lib.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.lib.model.ValidationRule;
 import edu.usf.cutr.gtfsrtvalidator.lib.test.FeedMessageTest;
 import edu.usf.cutr.gtfsrtvalidator.lib.test.util.TestUtils;
+import edu.usf.cutr.gtfsrtvalidator.lib.validation.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.lib.validation.rules.VehicleValidator;
 import org.junit.Test;
 import org.locationtech.spatial4j.context.jts.JtsSpatialContext;

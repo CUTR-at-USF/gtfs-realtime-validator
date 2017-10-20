@@ -17,8 +17,8 @@
 package edu.usf.cutr.gtfsrtvalidator.lib.test;
 
 import com.google.transit.realtime.GtfsRealtime;
-import edu.usf.cutr.gtfsrtvalidator.lib.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.lib.model.helper.ErrorListHelperModel;
+import edu.usf.cutr.gtfsrtvalidator.lib.validation.GtfsMetadata;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.serialization.GtfsReader;
