@@ -17,7 +17,7 @@
 
 package edu.usf.cutr.gtfsrtvalidator.servlets;
 
-import edu.usf.cutr.gtfsrtvalidator.util.ProtoBufUtil;
+import edu.usf.cutr.gtfsrtvalidator.util.ProtoBufUtils;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -29,7 +29,7 @@ public class GetFeedJSON extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response){
         String value = request.getParameter("path");
-        String jsonString = ProtoBufUtil.protoToJSON(value);
+        String jsonString = ProtoBufUtils.protoToJSON(value);
 
         response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_OK);

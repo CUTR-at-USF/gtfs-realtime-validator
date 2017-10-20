@@ -23,7 +23,7 @@
  import java.io.FileInputStream;
  import java.io.IOException;
 
- public class ProtoBufUtil {
+ public class ProtoBufUtils {
 
      // Convert profbuf to JSON
     public static String protoToJSON(String path) {
