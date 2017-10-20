@@ -26,8 +26,6 @@ import java.io.IOException;
 
 public class GetFeedJSON extends HttpServlet {
 
-    private static final int BUFFER_SIZE = 4096;
-
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response){
         String value = request.getParameter("path");
