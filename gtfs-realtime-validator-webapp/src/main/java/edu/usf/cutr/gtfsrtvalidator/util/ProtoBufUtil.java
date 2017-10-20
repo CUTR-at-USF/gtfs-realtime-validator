@@ -15,16 +15,17 @@
  * limitations under the License.
  */
 
-package edu.usf.cutr.gtfsrtvalidator.lib.helper;
+ package edu.usf.cutr.gtfsrtvalidator.util;
 
  import com.google.transit.realtime.GtfsRealtime;
-import com.googlecode.protobuf.format.JsonFormat;
+ import com.googlecode.protobuf.format.JsonFormat;
 
-import java.io.FileInputStream;
+ import java.io.FileInputStream;
+ import java.io.IOException;
 
- public class ProtoBuf {
+ public class ProtoBufUtil {
 
-    //Read profbuf in to JSON
+     // Convert profbuf to JSON
     public static String protoToJSON(String path) {
 
         String workingDir = System.getProperty("user.dir");
@@ -36,11 +37,8 @@ import java.io.FileInputStream;
             GtfsRealtime.FeedMessage message = GtfsRealtime.FeedMessage.parseFrom(fis);
 
             json = JsonFormat.printToString(message);
-
-            //System.out.println(message.toString());
-            //json = message.toString();
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return json;
     }
