@@ -259,11 +259,11 @@ public class GtfsRtFeed {
 
     // Returns feed message for a requested iteration
      @GET
-     @Path("/{iterationId : -?\\d+}/{gtfsRtId : \\d+}/feedMessage")
+     @Path("/feedMessage")
      @Produces(MediaType.APPLICATION_JSON)
      public String getFeedMessage(
-             @PathParam("iterationId") int iterationId,
-             @PathParam("gtfsRtId") int gtfsRtId) {
+             @QueryParam("iterationId") int iterationId,
+             @QueryParam("gtfsRtId") int gtfsRtId) {
 
         ViewFeedMessageModel feedMessageModel;
          Session session = GTFSDB.initSessionBeginTrans();
@@ -284,10 +284,10 @@ public class GtfsRtFeed {
 
     // Returns feed errors/warnings for a requested iteration.
     @GET
-    @Path("/{iterationId : \\d+}/iterationErrors")
+    @Path("/iterationErrors")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getIterationErrors(
-            @PathParam("iterationId") int iterationId)  {
+            @QueryParam("iterationId") int iterationId)  {
 
         List<ViewIterationErrorsModel> viewIterationErrorsModelList;
         IterationErrorListHelperModel iterationErrorListHelperModel;
@@ -345,11 +345,11 @@ public class GtfsRtFeed {
 
     // Returns iteration details.
     @GET
-    @Path("/{iterationId : -?\\d+}/{gtfsRtId : \\d+}/iterationDetails")
+    @Path("/iterationSummary")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getIterationDetails(
-            @PathParam("iterationId") int iterationId,
-            @PathParam("gtfsRtId") int gtfsRtId) {
+            @QueryParam("iterationId") int iterationId,
+            @QueryParam("gtfsRtId") int gtfsRtId) {
 
         GtfsRtFeedIterationModel gtfsRtFeedIterationModel;
         Session session = GTFSDB.initSessionBeginTrans();
