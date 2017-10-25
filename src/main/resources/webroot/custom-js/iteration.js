@@ -35,7 +35,7 @@ if (iterationId != -1) {
 } else {
     $(".issues-page-loader").hide();
 }
-$.get(server + "/api/gtfs-rt-feed/" + iterationId + "/" + gtfsRtId + "/iterationDetails").done(function (data) {
+$.get(server + "/api/gtfs-rt-feed/iterationSummary?iterationId=" + iterationId + "&gtfsRtId=" + gtfsRtId).done(function (data) {
     var timestamp = data["feedTimestamp"];
     var dateFormat = data["dateFormat"];
     var gtfsRtUrl = data["gtfsRtFeedModel"]["gtfsRtUrl"];
@@ -44,7 +44,7 @@ $.get(server + "/api/gtfs-rt-feed/" + iterationId + "/" + gtfsRtId + "/iteration
 });
 
 // Get the feedMessage from server for a particular 'iterationId' and display in plain text format to user.
-$.get(server + "/api/gtfs-rt-feed/" + iterationId + "/" + gtfsRtId + "/feedMessage").done(function (data) {
+$.get(server + "/api/gtfs-rt-feed/feedMessage?iterationId=" + iterationId + "&gtfsRtId=" + gtfsRtId).done(function (data) {
     var jsonFeed = JSON.stringify(data, undefined, 2);
     document.getElementById("feedMessage").innerHTML = jsonFeed;
 
@@ -71,7 +71,7 @@ clipboard.on('error', function(e) {
 
 if (iterationId != -1) {
 // Get the list of errors/warnings and list of their occurrences from server for a particular 'iterationId'.
-    $.get(server + "/api/gtfs-rt-feed/" + iterationId + "/iterationErrors").done(function (data) {
+    $.get(server + "/api/gtfs-rt-feed/iterationErrors?iterationId=" + iterationId).done(function (data) {
 
         showMoreErrorList = data;
         var errorCount = 0;
