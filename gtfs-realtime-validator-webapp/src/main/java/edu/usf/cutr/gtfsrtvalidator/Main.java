@@ -38,18 +38,10 @@ public class Main {
     static String BASE_RESOURCE = Main.class.getResource("/webroot").toExternalForm();
     static String jsonFilePath = new GetFile().getJarLocation().getParentFile() + "/classes" + File.separator + "/webroot";
     private final static String PORT_NUMBER_OPTION = "port";
-    private final static String BATCH_OPTION = "batch";
 
     public static void main(String[] args) throws InterruptedException, ParseException {
         // Parse command line parameters
         Options options = setupCommandLineOptions();
-
-        boolean batchMode = getBatchFromArgs(options, args);
-        if (batchMode) {
-            // Pass arguments to the library Main for batch processing
-            edu.usf.cutr.gtfsrtvalidator.lib.Main.main(args);
-            return;
-        }
 
         // Start validator in normal server mode
         int port = getPortFromArgs(options, args);
@@ -109,13 +101,7 @@ public class Main {
                 .hasArg()
                 .desc("Port number the server should run on")
                 .build();
-        Option batchOption = Option.builder(BATCH_OPTION)
-                .hasArg()
-                .desc("If the validator should run in batch mode on archived files")
-                .build();
-
         options.addOption(portOption);
-        options.addOption(batchOption);
         return options;
     }
 
@@ -134,18 +120,5 @@ public class Main {
             port = Integer.valueOf(cmd.getOptionValue(PORT_NUMBER_OPTION));
         }
         return port;
-    }
-
-    /**
-     * Returns true if the "-batch" parameter is included, false it if is not
-     *
-     * @param options command line options that this application supports
-     * @param args
-     * @return true if the "-batch" parameter is included, false it if is not
-     */
-    private static boolean getBatchFromArgs(Options options, String[] args) throws ParseException {
-        CommandLineParser parser = new DefaultParser();
-        CommandLine cmd = parser.parse(options, args);
-        return cmd.hasOption(BATCH_OPTION);
     }
 }
