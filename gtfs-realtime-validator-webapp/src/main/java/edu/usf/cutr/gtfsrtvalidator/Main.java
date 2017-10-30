@@ -47,7 +47,7 @@ public class Main {
         boolean batchMode = getBatchFromArgs(options, args);
         if (batchMode) {
             // Pass arguments to the library Main for batch processing
-            edu.usf.cutr.gtfsrtvalidator.lib.Main.main((args));
+            edu.usf.cutr.gtfsrtvalidator.lib.Main.main(args);
             return;
         }
 
