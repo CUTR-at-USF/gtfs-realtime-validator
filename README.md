@@ -100,7 +100,7 @@ See our [Configuration Guide](CONFIG.md) for various configuration options, incl
 
 Note that the validator also has a [batch processing mode](gtfs-realtime-validator-lib/README.md#batch-processing) - see the [**gtfs-realtime-validator-lib** README](gtfs-realtime-validator-lib/README.md).
  
-#### Docker
+## Docker
  
 Want to run this in [Docker](https://www.docker.com/)?  Check out [gtfs-realtime-validator-docker](https://github.com/scrudden/gtfs-realtime-validator-docker).
 
