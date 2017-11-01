@@ -94,3 +94,32 @@ From the command-line, run:
 `mvn package`
 
 This will generate a JAR file in the `gtfs-realtime-validator-lib/target/` directory with all the dependencies needed to use the validation rules in your own project or to run batch processing mode.
+
+## Using validation rules or the batch process in your project
+
+You can use the **gtfs-realtime-validator-lib** library in your own project as well.  
+
+To include a snapshot JAR via Maven, you'll need to add the below repository to your `pom.xml` 
+
+~~~
+<!-- CUTR SNAPSHOTs -->
+<repositories>
+    <repository>
+        <id>cutr-snapshots</id>
+        <url>https://raw.githubusercontent.com/CUTR-at-USF/cutr-mvn-repo/master/snapshots</url>
+    </repository>        
+</repositories>
+~~~
+
+Then, you can use this dependency:
+
+~~~
+<dependencies>
+	<dependency>
+		<groupId>edu.usf.cutr</groupId>
+		<artifactId>gtfs-realtime-validator-lib</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</dependency>
+</dependencies>
+
+See the [**transit-feed-quality-calculator**](https://github.com/CUTR-at-USF/transit-feed-quality-calculator) for an example of using this library in another project.
