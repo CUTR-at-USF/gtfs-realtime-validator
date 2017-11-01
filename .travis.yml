@@ -18,9 +18,8 @@ deploy:
   skip_cleanup: true
   acl: public_read
   # Path to build artifacts
-  local_dir:
-    $HOME/.m2/repository/edu/usf/cutr/gtfs-realtime-validator-webapp/1.0.0-SNAPSHOT
-    $HOME/.m2/repository/edu/usf/cutr/gtfs-realtime-validator-lib/1.0.0-SNAPSHOT
+  - local_dir: $HOME/.m2/repository/edu/usf/cutr/gtfs-realtime-validator-webapp/1.0.0-SNAPSHOT
+  - local_dir: $HOME/.m2/repository/edu/usf/cutr/gtfs-realtime-validator-lib/1.0.0-SNAPSHOT
   upload_dir: travis_builds
   # Set the Cache-Control header.
   cache_control: "max-age=21600"
