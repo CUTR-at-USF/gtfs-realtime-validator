@@ -52,7 +52,7 @@ Have a suggestion for a new rule?  Open an issue with the ["new rule" label](htt
 ## Building the project 
 
 There are two components to this project:
-* **gtfs-realtime-validator-lib** - The core library that implements GTFS-realtime [validation rules](RULES.md) as well as [batch processing mode](BATCH.md).
+* **gtfs-realtime-validator-lib** - The core library that implements GTFS-realtime [validation rules](RULES.md) as well as [batch processing mode](BATCH.md).  You can use this same library [in your own project](gtfs-realtime-validator-lib/README.md#using-validation-rules-or-the-batch-processor-in-your-project).
 * **gtfs-realtime-validator-webapp** - A server and website that allows multiple users to validate GTFS-relatime feeds by simply entering URLs into the website.
 
 The main **gtfs-realtime-validator-webapp** user interface is implemented as a web application, with the backend code written in Java.  An instance of the [Jetty embedded server](http://www.eclipse.org/jetty/) is used to run the application, with [Hibernate](http://hibernate.org/) used for data persistence.

@@ -95,7 +95,7 @@ From the command-line, run:
 
 This will generate a JAR file in the `gtfs-realtime-validator-lib/target/` directory with all the dependencies needed to use the validation rules in your own project or to run batch processing mode.
 
-## Using validation rules or the batch process in your project
+## Using validation rules or the batch processor in your project
 
 You can use the **gtfs-realtime-validator-lib** library in your own project as well.  
 
