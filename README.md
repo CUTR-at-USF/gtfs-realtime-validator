@@ -17,15 +17,11 @@ We have a bleeding-edge alpha version running here as a demo:
 
 *Please note that this project is still under active development and is in an early alpha state.*
 
-## Prerequisites
+### Prerequisites
 
 1. Install [Java Development Kit (JDK) 1.8 or higher](http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html)
 
-There are two components to this project:
-* **gtfs-realtime-validator-lib** - The core library that implements GTFS-realtime [validation rules](RULES.md) as well as [batch processing mode](BATCH.md).
-* **gtfs-realtime-validator-webapp** - A server and website that allows multiple users to validate GTFS-relatime feeds by simply entering URLs into the website.
-
-## Run the webapp
+### Run the webapp
 
 1. Download the latest webapp alpha build:
     * [gtfs-realtime-validator-webapp-1.0.0-SNAPSHOT.jar](https://s3.amazonaws.com/gtfs-rt-validator/travis_builds/gtfs-realtime-validator-webapp-1.0.0-SNAPSHOT.jar)
@@ -42,7 +38,7 @@ There are two components to this project:
 
 Please note that if you're using `https` URLS, you'll need to use the `-Djsse.enableSNIExtension=false` command-line parameter or install the [Java Cryptography Extension (JCE)](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html) - see the [Prerequisites](https://github.com/CUTR-at-USF/gtfs-realtime-validator#prerequisites) section for details.
 
-## Run batch validation
+### Run batch validation
 
 See the [batch processing](gtfs-realtime-validator-lib/README.md#batch-processing) section of the [**gtfs-realtime-validator-lib** README](gtfs-realtime-validator-lib/README.md).
 
@@ -54,6 +50,10 @@ See the [batch processing](gtfs-realtime-validator-lib/README.md#batch-processin
 Have a suggestion for a new rule?  Open an issue with the ["new rule" label](https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues?q=is%3Aissue+is%3Aopen+label%3A%22new+rule%22).
  
 ## Building the project 
+
+There are two components to this project:
+* **gtfs-realtime-validator-lib** - The core library that implements GTFS-realtime [validation rules](RULES.md) as well as [batch processing mode](BATCH.md).
+* **gtfs-realtime-validator-webapp** - A server and website that allows multiple users to validate GTFS-relatime feeds by simply entering URLs into the website.
 
 The main **gtfs-realtime-validator-webapp** user interface is implemented as a web application, with the backend code written in Java.  An instance of the [Jetty embedded server](http://www.eclipse.org/jetty/) is used to run the application, with [Hibernate](http://hibernate.org/) used for data persistence.
 
