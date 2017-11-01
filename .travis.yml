@@ -17,7 +17,7 @@ deploy:
   # Prevent Travis from deleting build directory
   skip_cleanup: true
   acl: public_read
-  # Path to build artifacts
+  # Path to build artifacts - we can't specify two directories (?), so specify parent for both -lib and -webapp
   local_dir: $HOME/.m2/repository/edu/usf/cutr/
   upload_dir: travis_builds
   # Set the Cache-Control header.

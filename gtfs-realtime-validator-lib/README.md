@@ -15,7 +15,7 @@ As part of the **gtfs-realtime-validator-lib** module we support a command-line 
 ### Run it yourself
  
 1. Download the latest library build:
-    * [gtfs-realtime-validator-lib-1.0.0-SNAPSHOT.jar](https://s3.amazonaws.com/gtfs-rt-validator/travis_builds/gtfs-realtime-validator-lib-1.0.0-SNAPSHOT.jar)
+    * [gtfs-realtime-validator-lib-1.0.0-SNAPSHOT.jar](https://s3.amazonaws.com/gtfs-rt-validator/travis_builds/gtfs-realtime-validator-lib/1.0.0-SNAPSHOT/gtfs-realtime-validator-lib-1.0.0-SNAPSHOT.jar)
 1. From the command line run `java -jar target/gtfs-realtime-validator-lib-1.0.0-SNAPSHOT.jar -gtfs "D:\HART\google_transit.zip" -gtfsrealtimepath "D:\HART\gtfs-rt"`
     * `-gtfs` should point to the GTFS zip file 
     * `-gtfsrealtimepath` should point to the directory holding the GTFS-realtime files
