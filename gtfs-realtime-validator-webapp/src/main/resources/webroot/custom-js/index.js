@@ -19,6 +19,7 @@ var counter = 1;
 var limit = 5;
 var clientId;
 var enableValidation;
+var enableShapes;
 
 var server = window.location.protocol + "//" + window.location.host;
 
@@ -113,6 +114,17 @@ if (enableValidation == "checked" || enableValidation == "") {
     document.getElementById("enable-validation").value = "unchecked";
 }
 sessionStorage.setItem("enablevalidation", enableValidation);
+
+enableShapes = readCookie("enableShapes");
+if (enableShapes == "true" || enableShapes == "") {
+    document.getElementById("enable-shapes").checked=true;
+    document.getElementById("enable-shapes").value = "true";
+    enableShapes = "true";
+} else {
+    document.getElementById("enable-shapes").checked=false;
+    document.getElementById("enable-shapes").value = "false";
+}
+sessionStorage.setItem("enableshapes", enableShapes);
 // Get past session data for the user.
 $.get(server + "/api/gtfs-rt-feed/pastSessions?clientId=" + clientId).done(function (data) {
     if (clientId == "") {
@@ -156,7 +168,7 @@ function readCookie(name) {
     return "";
 }
 
-function toggleValidation(){
+function toggleValidation() {
     var checkboxStatus;
     if(document.getElementById("enable-validation").checked) {
         checkboxStatus = "checked";
@@ -168,4 +180,18 @@ function toggleValidation(){
     createCookie("enableValidation", checkboxStatus);
     enableValidation = checkboxStatus;
     sessionStorage.setItem("enablevalidation", enableValidation);
+}
+
+function toggleEnableShapes() {
+    var checkboxStatus;
+    if(document.getElementById("enable-shapes").checked) {
+        checkboxStatus = "true";
+        document.getElementById("enable-shapes").value = "true";
+    } else {
+        checkboxStatus = "false";
+        document.getElementById("enable-shapes").value = "false";
+    }
+    createCookie("enableShapes", checkboxStatus);
+    enableShapes = checkboxStatus;
+    sessionStorage.setItem("enableshapes", enableShapes);
 }

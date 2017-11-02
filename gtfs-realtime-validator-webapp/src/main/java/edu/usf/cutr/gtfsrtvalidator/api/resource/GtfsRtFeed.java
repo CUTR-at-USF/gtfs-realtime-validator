@@ -134,7 +134,8 @@ public class GtfsRtFeed {
     public Response startMonitor(
             @PathParam("id") int id,
             @QueryParam("clientId") String clientId,
-            @DefaultValue("10") @QueryParam("updateInterval") int updateInterval) {
+            @DefaultValue("10") @QueryParam("updateInterval") int updateInterval,
+            @DefaultValue("true") @QueryParam("enableShapes") String enableShapesStr) {
         // Store the timestamp when we start monitoring feeds that can be used to query database
         currentTimestamp = System.currentTimeMillis();
         //Get RtFeedModel from id
@@ -156,8 +157,12 @@ public class GtfsRtFeed {
                 leastInterval< runningTasks.get(sessionModel.getGtfsRtFeedModel().getGtfsRtUrl()).getUpdateInterval()){
             intervalUpdated=true;
         }
+        boolean enableShapes = true;
+        if ("false".equals(enableShapesStr)) {
+            enableShapes = false;
+        }
         //Extract the Url and gtfsId to start the background process
-        startBackgroundTask(gtfsRtFeed, leastInterval, intervalUpdated);
+        startBackgroundTask(gtfsRtFeed, leastInterval, intervalUpdated, enableShapes);
 
         return Response.ok(sessionModel, MediaType.APPLICATION_JSON).build();
     }
@@ -510,9 +515,9 @@ public class GtfsRtFeed {
     }
 
     public synchronized static ServiceScheduler startBackgroundTask(GtfsRtFeedModel gtfsRtFeed, int updateInterval,
-                                                                            boolean intervalUpdated) {
+                                                                    boolean intervalUpdated, boolean enableShapes) {
         String rtFeedUrl = gtfsRtFeed.getGtfsRtUrl();
-
+        gtfsRtFeed.setEnableShapes(enableShapes);
         if (!runningTasks.containsKey(rtFeedUrl)) {
             ServiceScheduler serviceScheduler = new ServiceScheduler();
             ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
