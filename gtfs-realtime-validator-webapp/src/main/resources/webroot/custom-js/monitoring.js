@@ -47,7 +47,8 @@ var sessionClosed = 0;
 for (var gtfsRtFeed in gtfsRtFeeds) {
     if (gtfsRtFeeds.hasOwnProperty(gtfsRtFeed)) {
         $.ajax({
-            url: server + "/api/gtfs-rt-feed/monitor/" + gtfsRtFeeds[gtfsRtFeed]["feedId"] + "?clientId=" + clientId + "&updateInterval=" + serverUpdateInterval,
+            url: server + "/api/gtfs-rt-feed/monitor/" + gtfsRtFeeds[gtfsRtFeed]["feedId"] + "?clientId=" + clientId + "&updateInterval=" + serverUpdateInterval
+            + "&enableShapes=" + sessionStorage.getItem("enableshapes"),
             type: 'PUT',
             success: function (data) {
                 initializeInterface(data["gtfsRtFeedModel"]);

@@ -23,7 +23,7 @@ import java.io.Serializable;
 
 @XmlRootElement
 @Entity
-@Table(name = "GtfsRtFeed") 
+@Table(name = "GtfsRtFeed")
 public class GtfsRtFeedModel implements Serializable {
 
     @Column(name="feedURL")
@@ -35,6 +35,8 @@ public class GtfsRtFeedModel implements Serializable {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="rtFeedID")
     private int gtfsRtId;
+    @Transient
+    private boolean enableShapes;
 
     public GtfsRtFeedModel(){}
 
@@ -62,12 +64,21 @@ public class GtfsRtFeedModel implements Serializable {
         this.gtfsRtId = gtfsRtId;
     }
 
+    public boolean getEnableShapes() {
+        return enableShapes;
+    }
+
+    public void setEnableShapes (boolean enableShapes) {
+        this.enableShapes = enableShapes;
+    }
+
     @Override
     public String toString() {
         return "GtfsRtFeedModel{" +
                 "gtfsRtUrl='" + gtfsRtUrl + '\'' +
                 ", gtfsId=" + gtfsFeedModel.getFeedId() +
                 ", gtfsRtId=" + gtfsRtId +
+                ", enableShapes=" + enableShapes +
                 '}';
     }
 }

@@ -98,7 +98,7 @@ public class BackgroundTask implements Runnable {
             gtfsMetadata = mGtfsMetadata.computeIfAbsent(mCurrentGtfsRtFeed.getGtfsFeedModel().getFeedId(),
                     k -> new GtfsMetadata(mCurrentGtfsRtFeed.getGtfsFeedModel().getGtfsUrl(),
                             TimeZone.getTimeZone(mCurrentGtfsRtFeed.getGtfsFeedModel().getAgency()),
-                            gtfsData, false));
+                            gtfsData, mCurrentGtfsRtFeed.getEnableShapes()));
 
             // Read the GTFS-rt feed from the feed URL
             URL gtfsRtFeedUrl;
