@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>gtfs-realtime-validator-lib</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT-arrive-and-depart</version>
 
     <dependencies>
         <!-- JSON (de)serialization -->

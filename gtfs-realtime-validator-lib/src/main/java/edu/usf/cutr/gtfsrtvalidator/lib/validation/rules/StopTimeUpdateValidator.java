@@ -70,6 +70,9 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
         List<OccurrenceModel> e044List = new ArrayList<>();
         List<OccurrenceModel> e045List = new ArrayList<>();
         List<OccurrenceModel> e046List = new ArrayList<>();
+        List<OccurrenceModel> e100List = new ArrayList<>();
+        List<OccurrenceModel> e101List = new ArrayList<>();
+        List<OccurrenceModel> e102List = new ArrayList<>();
 
         for (GtfsRealtime.FeedEntity entity : entityList) {
             if (entity.hasTripUpdate()) {
@@ -92,6 +95,9 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
                 boolean foundE009error = false;
                 boolean addedStopSequenceFromStopId = false;
                 Map<String, List<String>> tripWithMultiStop = gtfsMetadata.getTripsWithMultiStops();
+                boolean arrivalsOrDepartures = false;
+                boolean arrivalsAndDeparturesSame = false;
+                boolean arrivalsAndDeparturesDifferent = false;
                 for (GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate : rtStopTimeUpdateList) {
                     if (!foundE009error && tripId != null && tripWithMultiStop.containsKey(tripId) && !stopTimeUpdate.hasStopSequence()) {
                         // E009 - GTFS-rt stop_sequence isn't provided for trip that visits same stop_id more than once
@@ -162,6 +168,28 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
                     checkE042(entity, tripUpdate, stopTimeUpdate, e042List);
                     checkE043(entity, tripUpdate, stopTimeUpdate, e043List);
                     checkE044(entity, tripUpdate, stopTimeUpdate, e044List);
+
+                    if (stopTimeUpdate.hasArrival() && stopTimeUpdate.hasDeparture()) {
+                        // Test for arrival and departure same - E101
+                        if (stopTimeUpdate.getArrival().hasDelay() && stopTimeUpdate.getDeparture().hasDelay() && (stopTimeUpdate.getArrival().getDelay() == stopTimeUpdate.getDeparture().getDelay())) {
+                            RuleUtils.addOccurrence(ValidationRules.E101, tripId + " has same arrival and departure prediction delay (" + stopTimeUpdate.getArrival().getDelay() + "," + stopTimeUpdate.getDeparture().getDelay(), e101List, _log);
+                        }
+                        if (stopTimeUpdate.getArrival().hasTime() && stopTimeUpdate.getDeparture().hasTime() && (stopTimeUpdate.getArrival().getTime() == stopTimeUpdate.getDeparture().getTime())) {
+                            RuleUtils.addOccurrence(ValidationRules.E101, tripId + " has same arrival and departure prediction time (" + stopTimeUpdate.getArrival().getTime() + "," + stopTimeUpdate.getDeparture().getTime(), e101List, _log);
+                        }
+
+                        // Test for arrival and departure different - E102
+                        if (stopTimeUpdate.getArrival().hasDelay() && stopTimeUpdate.getDeparture().hasDelay() && (stopTimeUpdate.getArrival().getDelay() != stopTimeUpdate.getDeparture().getDelay())) {
+                            RuleUtils.addOccurrence(ValidationRules.E102, tripId + " has stop_time_update with different arrival and departure prediction delay (" + stopTimeUpdate.getArrival().getDelay() + "," + stopTimeUpdate.getDeparture().getDelay(), e102List, _log);
+                        }
+                        if (stopTimeUpdate.getArrival().hasTime() && stopTimeUpdate.getDeparture().hasTime() && (stopTimeUpdate.getArrival().getTime() != stopTimeUpdate.getDeparture().getTime())) {
+                            RuleUtils.addOccurrence(ValidationRules.E101, tripId + " has stop_time_update with different arrival and departure prediction time (" + stopTimeUpdate.getArrival().getTime() + "," + stopTimeUpdate.getDeparture().getTime(), e102List, _log);
+                        }
+
+                    } else {
+                        // E100 - arrivals OR departures
+                        RuleUtils.addOccurrence(ValidationRules.E100, tripId + " has only arrival OR departure", e102List, _log);
+                    }
                 }
 
                 boolean sorted = Ordering.natural().isStrictlyOrdered(rtStopSequenceList);
@@ -215,6 +243,15 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
         }
         if (!e046List.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.E046), e046List));
+        }
+        if (!e100List.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.E100), e100List));
+        }
+        if (!e101List.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.E101), e101List));
+        }
+        if (!e102List.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.E102), e102List));
         }
         return errors;
     }

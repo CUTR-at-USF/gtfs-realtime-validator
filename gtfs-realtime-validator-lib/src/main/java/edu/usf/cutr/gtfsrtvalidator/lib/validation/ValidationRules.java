@@ -256,6 +256,18 @@ public class ValidationRules {
             "Header incrementality must be populated for gtfs_realtime_version v2.0 and higher",
             "Header does not have incrementality and gtfs_realtime_version is v2.0 or higher");
 
+    public static final ValidationRule E100 = new ValidationRule("E100", "ERROR", "arrivals OR departures",
+            "arrivals OR departures",
+            "");
+
+    public static final ValidationRule E101 = new ValidationRule("E101", "ERROR", "arrivals AND departures same",
+            "arrivals AND departures same",
+            "");
+
+    public static final ValidationRule E102 = new ValidationRule("E102", "ERROR", "arrivals AND departures different",
+            "arrivals AND departures different",
+            "");
+
     private static List<ValidationRule> mAllRules = new ArrayList<>();
 
     /**
