@@ -121,5 +121,6 @@ Then, you can use this dependency:
 		<version>1.0.0-SNAPSHOT</version>
 	</dependency>
 </dependencies>
+~~~
 
 See the [**transit-feed-quality-calculator**](https://github.com/CUTR-at-USF/transit-feed-quality-calculator) for an example of using this library in another project.
