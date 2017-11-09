@@ -183,12 +183,12 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
                             RuleUtils.addOccurrence(ValidationRules.E102, tripId + " has stop_time_update with different arrival and departure prediction delay (" + stopTimeUpdate.getArrival().getDelay() + "," + stopTimeUpdate.getDeparture().getDelay() + ")", e102List, _log);
                         }
                         if (stopTimeUpdate.getArrival().hasTime() && stopTimeUpdate.getDeparture().hasTime() && (stopTimeUpdate.getArrival().getTime() != stopTimeUpdate.getDeparture().getTime())) {
-                            RuleUtils.addOccurrence(ValidationRules.E101, tripId + " has stop_time_update with different arrival and departure prediction time (" + stopTimeUpdate.getArrival().getTime() + "," + stopTimeUpdate.getDeparture().getTime() + ")", e102List, _log);
+                            RuleUtils.addOccurrence(ValidationRules.E102, tripId + " has stop_time_update with different arrival and departure prediction time (" + stopTimeUpdate.getArrival().getTime() + "," + stopTimeUpdate.getDeparture().getTime() + ")", e102List, _log);
                         }
 
                     } else {
                         // E100 - arrivals OR departures
-                        RuleUtils.addOccurrence(ValidationRules.E100, tripId + " has only arrival OR departure", e102List, _log);
+                        RuleUtils.addOccurrence(ValidationRules.E100, tripId + " has only arrival OR departure", e100List, _log);
                     }
                 }
 
