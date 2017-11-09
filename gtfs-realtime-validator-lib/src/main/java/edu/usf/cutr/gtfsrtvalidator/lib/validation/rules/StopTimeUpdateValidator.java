@@ -172,18 +172,18 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
                     if (stopTimeUpdate.hasArrival() && stopTimeUpdate.hasDeparture()) {
                         // Test for arrival and departure same - E101
                         if (stopTimeUpdate.getArrival().hasDelay() && stopTimeUpdate.getDeparture().hasDelay() && (stopTimeUpdate.getArrival().getDelay() == stopTimeUpdate.getDeparture().getDelay())) {
-                            RuleUtils.addOccurrence(ValidationRules.E101, tripId + " has same arrival and departure prediction delay (" + stopTimeUpdate.getArrival().getDelay() + "," + stopTimeUpdate.getDeparture().getDelay(), e101List, _log);
+                            RuleUtils.addOccurrence(ValidationRules.E101, tripId + " has same arrival and departure prediction delay (" + stopTimeUpdate.getArrival().getDelay() + "," + stopTimeUpdate.getDeparture().getDelay() + ")", e101List, _log);
                         }
                         if (stopTimeUpdate.getArrival().hasTime() && stopTimeUpdate.getDeparture().hasTime() && (stopTimeUpdate.getArrival().getTime() == stopTimeUpdate.getDeparture().getTime())) {
-                            RuleUtils.addOccurrence(ValidationRules.E101, tripId + " has same arrival and departure prediction time (" + stopTimeUpdate.getArrival().getTime() + "," + stopTimeUpdate.getDeparture().getTime(), e101List, _log);
+                            RuleUtils.addOccurrence(ValidationRules.E101, tripId + " has same arrival and departure prediction time (" + stopTimeUpdate.getArrival().getTime() + "," + stopTimeUpdate.getDeparture().getTime() + ")", e101List, _log);
                         }
 
                         // Test for arrival and departure different - E102
                         if (stopTimeUpdate.getArrival().hasDelay() && stopTimeUpdate.getDeparture().hasDelay() && (stopTimeUpdate.getArrival().getDelay() != stopTimeUpdate.getDeparture().getDelay())) {
-                            RuleUtils.addOccurrence(ValidationRules.E102, tripId + " has stop_time_update with different arrival and departure prediction delay (" + stopTimeUpdate.getArrival().getDelay() + "," + stopTimeUpdate.getDeparture().getDelay(), e102List, _log);
+                            RuleUtils.addOccurrence(ValidationRules.E102, tripId + " has stop_time_update with different arrival and departure prediction delay (" + stopTimeUpdate.getArrival().getDelay() + "," + stopTimeUpdate.getDeparture().getDelay() + ")", e102List, _log);
                         }
                         if (stopTimeUpdate.getArrival().hasTime() && stopTimeUpdate.getDeparture().hasTime() && (stopTimeUpdate.getArrival().getTime() != stopTimeUpdate.getDeparture().getTime())) {
-                            RuleUtils.addOccurrence(ValidationRules.E101, tripId + " has stop_time_update with different arrival and departure prediction time (" + stopTimeUpdate.getArrival().getTime() + "," + stopTimeUpdate.getDeparture().getTime(), e102List, _log);
+                            RuleUtils.addOccurrence(ValidationRules.E101, tripId + " has stop_time_update with different arrival and departure prediction time (" + stopTimeUpdate.getArrival().getTime() + "," + stopTimeUpdate.getDeparture().getTime() + ")", e102List, _log);
                         }
 
                     } else {
