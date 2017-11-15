@@ -65,7 +65,7 @@ Following are the requirements to build and run the project from source code:
 * [Apache Maven](https://maven.apache.org/)
 
 If you're using `https` URLs for GTFS or GTFS-rt feeds, either:
-* Use the `-Djsse.enableSNIExtension=false` parameter when running the tool
+* Use the `-Djsse.enableSNIExtension=true` parameter when running the tool
 * Install the [Java Cryptography Extension (JCE)](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html) - You will need to replace the `US_export_policy.jar` and `local_policy.jar` files in your JVM `/security` directory, such as `C:\Program Files\Java\jdk1.8.0_73\jre\lib\security`, with the JAR files in the JCE Extension download.
 
 #### 1. Build the project 
