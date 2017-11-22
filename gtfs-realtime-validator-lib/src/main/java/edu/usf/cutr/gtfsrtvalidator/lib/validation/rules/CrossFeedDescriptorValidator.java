@@ -26,6 +26,7 @@ import edu.usf.cutr.gtfsrtvalidator.lib.validation.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.lib.validation.interfaces.FeedEntityValidator;
 import org.apache.commons.lang3.StringUtils;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
+import org.onebusaway.gtfs.model.Trip;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
@@ -158,7 +159,7 @@ public class CrossFeedDescriptorValidator implements FeedEntityValidator {
                 // W003 - VehiclePositions has a trip_id that's not in the TripUpdates feed
                 RuleUtils.addOccurrence(W003, "trip_id " + vehiclePosition.getValue() + " is in VehiclePositions but not in TripUpdates feed", w003List, _log);
             }
-            checkE047VehiclePositions(vehiclePosition, tripUpdatesVehicleIdToTripId, e047List);
+            checkE047VehiclePositions(vehiclePosition, tripUpdatesVehicleIdToTripId, gtfsMetadata, e047List);
         }
 
         // Check all trips that did NOT contain a vehicle
@@ -207,7 +208,7 @@ public class CrossFeedDescriptorValidator implements FeedEntityValidator {
     }
 
     /**
-     * Checks E036 - "VehiclePosition and TripUpdate ID pairing mismatch" for TripUpdates, and adds a found error to the provided error list.
+     * Checks E047 - "VehiclePosition and TripUpdate ID pairing mismatch" for TripUpdates, and adds a found error to the provided error list.
      *
      * @param trip                    A map entry of a trip_id to a vehicle_id that represents a trip in TripUpdates and a vehicle_id that the trip contains
      * @param vehiclePositionsInverse An inverse map of a VehiclePositions feed, with keys that represent the trip_ids that each VehiclePosition contains, and the value being the VehiclePosition vehicle.id that contains the trip_id
@@ -224,18 +225,26 @@ public class CrossFeedDescriptorValidator implements FeedEntityValidator {
     }
 
     /**
-     * Checks E036 - "VehiclePosition and TripUpdate ID pairing mismatch" for VehiclePositions, and adds a found error to the provided error list.
+     * Checks E047 - "VehiclePosition and TripUpdate ID pairing mismatch" for VehiclePositions, and adds a found error to the provided error list.
      *
      * @param vehicle            A map entry of a vehicle_id to a trip_id that represents a vehicle in VehiclePositions and the trip_id that the vehicle contains
      * @param tripUpdatesInverse An inverse map of a TripUpdates feed, with keys that represent the vehicle_ids that each TripUpdate contains, and the value being the TripUpdate trip_id that contains the vehicle.id
      * @param errors             the list to add the errors to
      */
-    private void checkE047VehiclePositions(Map.Entry<String, String> vehicle, HashMap<String, String> tripUpdatesInverse, List<OccurrenceModel> errors) {
+    private void checkE047VehiclePositions(Map.Entry<String, String> vehicle, HashMap<String, String> tripUpdatesInverse, GtfsMetadata gtfsMetadata, List<OccurrenceModel> errors) {
         String tripUpdatesTripId = tripUpdatesInverse.get(vehicle.getKey());
         String vehiclePositionsTripId = vehicle.getValue();
         if (!StringUtils.isEmpty(tripUpdatesTripId)) {
             if (!vehiclePositionsTripId.equals(tripUpdatesTripId)) {
-                RuleUtils.addOccurrence(E047, "trip_id " + vehicle.getValue() + " and vehicle_id " + vehicle.getKey() + " pairing in VehiclePositions does not match trip_id " + tripUpdatesTripId + " and vehicle_id " + vehicle.getKey() + " pairing in TripUpdates feed", errors, _log);
+                // Log E047 if either trip_id is missing from GTFS, if the block_id is missing for either trip (block_id is an optional field) or if the two trips aren't in the same block
+                Trip tripA = gtfsMetadata.getTrips().get(vehiclePositionsTripId);
+                Trip tripB = gtfsMetadata.getTrips().get(tripUpdatesTripId);
+                if (tripA == null || tripB == null ||
+                        StringUtils.isEmpty(tripA.getBlockId()) || StringUtils.isEmpty(tripB.getBlockId()) ||
+                        !tripA.getBlockId().equals(tripB.getBlockId())) {
+                    // E036 - "VehiclePosition and TripUpdate ID pairing mismatch" for VehiclePositions
+                    RuleUtils.addOccurrence(E047, "trip_id " + vehicle.getValue() + " and vehicle_id " + vehicle.getKey() + " pairing in VehiclePositions does not match trip_id " + tripUpdatesTripId + " and vehicle_id " + vehicle.getKey() + " pairing in TripUpdates feed and trip block_ids aren't the same", errors, _log);
+                }
             }
         }
     }
