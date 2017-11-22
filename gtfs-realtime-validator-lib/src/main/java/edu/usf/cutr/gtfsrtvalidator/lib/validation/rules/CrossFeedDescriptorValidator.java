@@ -55,6 +55,11 @@ public class CrossFeedDescriptorValidator implements FeedEntityValidator {
         List<OccurrenceModel> w003List = new ArrayList<>();
         List<OccurrenceModel> e047List = new ArrayList<>();
 
+        /*
+          Create inverse maps, so we can efficiently check if a trip_id in TripUpdates is in VehiclePositions, and if
+          vehicle_id in VehiclePositions is in TripUpdates.
+         */
+
         // key is trip_id from TripUpdates feed, value is vehicle.id
         HashMap<String, String> tripUpdatesTripIdToVehicleId = new HashMap<>();
         // key is vehicle.id from TripUpdates feed, value is trip_id
@@ -81,18 +86,13 @@ public class CrossFeedDescriptorValidator implements FeedEntityValidator {
                     vehicleId = entity.getTripUpdate().getVehicle().getId();
                 }
                 if (StringUtils.isEmpty(vehicleId)) {
-                    // Trip does not have a vehicle.id - add it to the set (it can't exist in HashBiMap)
+                    // Trip does not have a vehicle.id - add it to the set
                     tripsWithoutVehicles.add(tripId);
                 } else {
-                    // Trip has a vehicle.id - add it to the HashBiMap
-                    try {
-                        tripUpdatesTripIdToVehicleId.put(tripId, vehicleId);
-                        tripUpdatesVehicleIdToTripId.put(vehicleId, tripId);
-                    } catch (IllegalArgumentException e) {
-                        // TODO - Maybe log this as error under new rule? - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/33
-                        // However, there are legitimate cases that will end up here - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/255
-                        _log.error("Error adding trip_id " + tripId + " -> vehicle_id " + vehicleId + " to TripUpdates HashBiMap.  TripUpdate exists twice in feed, or more than one TripUpdate is assigned to the same vehicle. " + e);
-                    }
+                    // Trip has a vehicle.id - add it to the HashMap
+                    tripUpdatesTripIdToVehicleId.put(tripId, vehicleId);
+                    tripUpdatesVehicleIdToTripId.put(vehicleId, tripId);
+                    // TODO - New rule - check that there is at most one TripUpdate entity per scheduled trip_id - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/33
                 }
 
             }
@@ -104,17 +104,13 @@ public class CrossFeedDescriptorValidator implements FeedEntityValidator {
                     tripId = entity.getVehicle().getTrip().getTripId();
                 }
                 if (StringUtils.isEmpty(tripId)) {
-                    // Vehicle does not have a trip_id - add it to the set (it can't exist in HashBiMap)
+                    // Vehicle does not have a trip_id - add it to the set
                     vehiclesWithoutTrips.add(vehicleId);
                 } else {
-                    // Vehicle has a trip_id - add it to the HashBiMap
-                    try {
-                        vehiclePositionsVehicleIdToTripId.put(vehicleId, tripId);
-                        vehiclePositionsTripIdToVehicleId.put(tripId, vehicleId);
-                    } catch (IllegalArgumentException e) {
-                        // TODO - We should log this as error under new rule - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/38
-                        _log.error("Error adding vehicle.id " + vehicleId + " -> trip_id " + tripId + " to VehiclePositions HashBiMap.  Vehicle exists twice in feed, or more than one vehicle is assigned to same trip. " + e);
-                    }
+                    // Vehicle has a trip_id - add it to the HashMap
+                    vehiclePositionsVehicleIdToTripId.put(vehicleId, tripId);
+                    vehiclePositionsTripIdToVehicleId.put(tripId, vehicleId);
+                    // TODO - New rule - check that there is at most one vehicle assigned each trip - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/38
                 }
             }
         }
@@ -124,17 +120,6 @@ public class CrossFeedDescriptorValidator implements FeedEntityValidator {
             // We are missing a VehiclePositions or TripUpdates feed, so we can't compare across feeds - return empty list;
             return errors;
         }
-
-        /**
-         * Create inverse maps, so we can efficiently check if a trip_id in TripUpdates is in VehiclePositions, and if
-         * vehicle_id in VehiclePositions is in TripUpdates.
-         *
-         * tripUpdatesInverse - A map of vehicle_ids to trip_ids, from the TripUpdates feed
-         * vehiclePositionsInverse - A map of trip_ids to vehicle_ids, from the VehiclePositions feed
-         *
-         * Note that we still need to check vehiclesWithoutTrips and tripsWithoutVehicles, as these trips/vehicles can't exist in HashBiMaps.
-         * See https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/241#issuecomment-313194304.
-         */
 
         // Check all trips that contained a vehicle
         for (Map.Entry<String, String> trip : tripUpdatesTripIdToVehicleId.entrySet()) {

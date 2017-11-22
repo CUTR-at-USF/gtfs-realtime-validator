@@ -83,8 +83,9 @@ public class CrossFeedDescriptorValidatorTest extends FeedMessageTest {
 
         /**
          * Clear the VehiclePosition trip_id, and clear the TripUpdates vehicle.id, and add two versions of each
-         * (to make sure we detect HashBiMap IllegalArgumentException - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/241#issuecomment-313194304)
-         * - 4 warnings.
+         * (to make sure we catch this case - see
+         * https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/241#issuecomment-313194304, although we're no
+         * longer using HashBiMaps) - 4 warnings.
          */
         vehicleDescriptorBuilder.clearId();
         tripDescriptorBuilder.setTripId("100");
@@ -120,8 +121,8 @@ public class CrossFeedDescriptorValidatorTest extends FeedMessageTest {
 
         /**
          * Set the VehiclePosition trip_id to empty string, and set the TripUpdates vehicle.id to empty string, and add two versions of each
-         * (to make sure we detect HashBiMap IllegalArgumentException - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/241#issuecomment-313194304)
-         * - 4 warnings.
+         * (to make sure we catch this case - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/241#issuecomment-313194304, although we're no
+         * longer using HashBiMaps) - 4 warnings.
          */
         vehicleDescriptorBuilder.setId("");
         tripDescriptorBuilder.setTripId("100");
@@ -286,10 +287,10 @@ public class CrossFeedDescriptorValidatorTest extends FeedMessageTest {
         TestUtils.assertResults(expected, results);
 
         /**
-         * Set the VehiclePosition trip_id to empty string (and create two entities like this, to make sure we detect
-         * HashBiMap IllegalArgumentException - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/241#issuecomment-313194304),
-         * and change TripUpdate to trip_id 1.1 and vehicle_id 1 - 0 mismatch, so 0 errors.
-         * Also, 4 warnings for W003 (2 for TripUpdate, and 1 for each VehiclePosition).
+         * Set the VehiclePosition trip_id to empty string (and create two entities like this, to make sure catch this
+         * case - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/241#issuecomment-313194304, although
+         * we're no longer using HashBiMaps), and change TripUpdate to trip_id 1.1 and vehicle_id 1 - 0 mismatch, so 0
+         * errors. Also, 4 warnings for W003 (2 for TripUpdate, and 1 for each VehiclePosition).
          */
         vehicleB.setId("45");
         tripB.setTripId("");
@@ -314,9 +315,9 @@ public class CrossFeedDescriptorValidatorTest extends FeedMessageTest {
         TestUtils.assertResults(expected, results);
 
         /**
-         * Clear the VehiclePosition trip_id (and create two entities like this to make sure we detect HashBiMap
-         * IllegalArgumentException - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/241#issuecomment-313194304),
-         * while TripUpdate still has trip_id 1.1 and vehicle_id 1 - 0 mismatch, so 0 errors.
+         * Clear the VehiclePosition trip_id (and create two entities like this to make sure we catch this case - see
+         * https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/241#issuecomment-313194304, although we're no
+         * longer using HashBiMaps), while TripUpdate still has trip_id 1.1 and vehicle_id 1 - 0 mismatch, so 0 errors.
          * Also, 4 warnings for W003 (2 for TripUpdate, and 1 for each VehiclePosition).
          */
         vehicleB.setId("45");
@@ -342,9 +343,9 @@ public class CrossFeedDescriptorValidatorTest extends FeedMessageTest {
         TestUtils.assertResults(expected, results);
 
         /**
-         * Set the TripUpdate vehicle.id to empty string and VehiclePosition trip_id to empty string (and create two entities like this to make sure we detect
-         * HashBiMap IllegalArgumentException - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/241#issuecomment-313194304)
-         * - 0 mismatch, so 0 errors.
+         * Set the TripUpdate vehicle.id to empty string and VehiclePosition trip_id to empty string (and create two entities like this to make we
+         * catch this case - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/241#issuecomment-313194304, although we're no
+         * longer using HashBiMaps) - 0 mismatch, so 0 errors.
          * Also, 4 warnings for W003 (two for each entity with empty string IDs).
          */
         vehicleB.setId("45");
@@ -381,9 +382,10 @@ public class CrossFeedDescriptorValidatorTest extends FeedMessageTest {
         TestUtils.assertResults(expected, results);
 
         /**
-         * Clear the TripUpdate vehicle.id and VehiclePosition trip_id (and create two entities like this to make sure we detect HashBiMap
-         * IllegalArgumentException - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/241#issuecomment-313194304)
-         * - 0 mismatch, so 0 errors.
+         * Clear the TripUpdate vehicle.id and VehiclePosition trip_id (and create two entities like this to make sure
+         * we catch this case - see
+         * https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/241#issuecomment-313194304, although we're no
+         * longer using HashBiMaps) - 0 mismatch, so 0 errors.
          * Also, 4 warnings for W003 (two for each entity with cleared IDs).
          */
         vehicleB.setId("45");
