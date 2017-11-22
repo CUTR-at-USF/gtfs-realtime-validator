@@ -251,7 +251,8 @@ public class CrossFeedDescriptorValidatorTest extends FeedMessageTest {
         TestUtils.assertResults(expected, results);
 
         /**
-         * Change the VehiclePosition to have trip_id 44 and vehicle.id = 1, while TripUpdate still has trip_id 1.1 and vehicle_id 1 - 1 mismatch, so 1 error.
+         * Change the VehiclePosition to have trip_id 44 and vehicle.id = 1, while TripUpdate still has trip_id 1.1 and vehicle_id 1.
+         * These trips aren't in the same block (same trips.txt block_id), so 1 mismatch, so 1 error.
          * Also, 2 warnings for W003.
          */
         vehicleB.setId("1");
@@ -282,6 +283,31 @@ public class CrossFeedDescriptorValidatorTest extends FeedMessageTest {
         results = crossFeedDescriptorValidator.validate(TimestampUtils.MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, null, null, feedMessageBuilder.build());
         expected.clear();
         expected.put(ValidationRules.W003, 4);
+        TestUtils.assertResults(expected, results);
+
+        /**
+         * Change the TripUpdate to have trip_id 6.1 and vehicle.id = 45, while VehiclePosition is changed to have trip_id 7.1 and vehicle_id 45.
+         * Trips 6.1 and 7.1 have the same block_id block.1 (i.e., the same vehicle is going to serve both trips), so having the same vehicle_id is ok - 0 errors.
+         * See https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/255 for details on same vehicle running more than one trip in the same block.
+         * Also 2 occurrences of W003.
+         */
+        vehicleA.setId("45");
+        tripA.setTripId("6.1");
+        tripUpdateBuilder.setVehicle(vehicleA.build());
+        tripUpdateBuilder.setTrip(tripA.build());
+
+        vehicleB.setId("45");
+        tripB.setTripId("7.1");
+        vehiclePositionBuilder.setVehicle(vehicleB.build());
+        vehiclePositionBuilder.setTrip(tripB.build());
+
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = crossFeedDescriptorValidator.validate(TimestampUtils.MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, null, null, feedMessageBuilder.build());
+        expected.clear();
+        expected.put(ValidationRules.W003, 2);
         TestUtils.assertResults(expected, results);
 
         /**
