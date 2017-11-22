@@ -227,7 +227,7 @@ public class CrossFeedDescriptorValidator implements FeedEntityValidator {
                 if (tripA == null || tripB == null ||
                         StringUtils.isEmpty(tripA.getBlockId()) || StringUtils.isEmpty(tripB.getBlockId()) ||
                         !tripA.getBlockId().equals(tripB.getBlockId())) {
-                    // E036 - "VehiclePosition and TripUpdate ID pairing mismatch" for VehiclePositions
+                    // E047 - "VehiclePosition and TripUpdate ID pairing mismatch" for VehiclePositions
                     RuleUtils.addOccurrence(E047, "trip_id " + vehicle.getValue() + " and vehicle_id " + vehicle.getKey() + " pairing in VehiclePositions does not match trip_id " + tripUpdatesTripId + " and vehicle_id " + vehicle.getKey() + " pairing in TripUpdates feed and trip block_ids aren't the same", errors, _log);
                 }
             }
