@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 import static edu.usf.cutr.gtfsrtvalidator.lib.util.TimestampUtils.MAX_POSIX_TIME;
 import static edu.usf.cutr.gtfsrtvalidator.lib.util.TimestampUtils.MIN_POSIX_TIME;
 import static edu.usf.cutr.gtfsrtvalidator.lib.validation.ValidationRules.*;
+import static org.junit.Assert.assertEquals;
 
 /*
  * Tests all the warnings and rules that validate timestamps in TimestampValidator:
@@ -51,13 +52,15 @@ public class TimestampValidatorTest extends FeedMessageTest {
         Map<ValidationRule, Integer> expected = new HashMap<>();
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
 
+        final long CURRENT_TIME_MILLIS = TimeUnit.SECONDS.toMillis(MIN_POSIX_TIME);
+
         // Timestamp will be zero initially in FeedHeader, TripUpdate and VehiclePosition. Should return 3 results.
         vehiclePositionBuilder.setVehicle(GtfsRealtime.VehicleDescriptor.newBuilder());
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(W001, 3);
         TestUtils.assertResults(expected, results);
 
@@ -65,7 +68,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
         feedHeaderBuilder.setTimestamp(MIN_POSIX_TIME);
         feedMessageBuilder.setHeader(feedHeaderBuilder.build());
         // Invalid timestamp in TripUpdate and VehiclePosition. Should return 2 results.
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(W001, 2);
         TestUtils.assertResults(expected, results);
 
@@ -78,7 +81,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
         // Invalid timestamp only in VehiclePosition. Should return 1 results.
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(W001, 1);
         TestUtils.assertResults(expected, results);
 
@@ -86,7 +89,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
         // Now timestamp is populated in FeedHeader, TripUpdate and VehiclePosition . Should return no error.
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -102,6 +105,8 @@ public class TimestampValidatorTest extends FeedMessageTest {
         Map<ValidationRule, Integer> expected = new HashMap<>();
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
 
+        final long CURRENT_TIME_MILLIS = TimeUnit.SECONDS.toMillis(MIN_POSIX_TIME);
+
         // Set version to v2.0
         feedHeaderBuilder.setGtfsRealtimeVersion("2.0");
         feedMessageBuilder.setHeader(feedHeaderBuilder.build());
@@ -113,7 +118,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(W001, 2);
         expected.put(E048, 1);
         TestUtils.assertResults(expected, results);
@@ -121,8 +126,9 @@ public class TimestampValidatorTest extends FeedMessageTest {
         // Populate timestamp to any value greater than zero in FeedHeader
         feedHeaderBuilder.setTimestamp(MIN_POSIX_TIME);
         feedMessageBuilder.setHeader(feedHeaderBuilder.build());
+
         // Invalid timestamp in TripUpdate and VehiclePosition. Should return 2 W001 warnings, and no E048 errors
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         expected.put(W001, 2);
         TestUtils.assertResults(expected, results);
@@ -141,6 +147,8 @@ public class TimestampValidatorTest extends FeedMessageTest {
         // Set valid trip_id = 1.1
         tripDescriptorBuilder.setTripId("1.1");
 
+        final long CURRENT_TIME_MILLIS = TimeUnit.SECONDS.toMillis(MIN_POSIX_TIME);
+
         /**
          * No previous feed message (i.e., it's the first iteration) - no warnings
          */
@@ -157,7 +165,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
         GtfsRealtime.FeedMessage currentIteration = feedMessageBuilder.setEntity(0, feedEntityBuilder.build()).build();
 
         // No previous iteration - no errors
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, currentIteration, null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, currentIteration, null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -176,7 +184,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
 
         GtfsRealtime.FeedMessage previousIteration = feedMessageBuilder.setEntity(0, feedEntityBuilder.build()).build();
 
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, currentIteration, previousIteration, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, currentIteration, previousIteration, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -195,7 +203,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
 
         previousIteration = feedMessageBuilder.setEntity(0, feedEntityBuilder.build()).build();
 
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, currentIteration, previousIteration, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, currentIteration, previousIteration, null);
         expected.put(W007, 1);
         TestUtils.assertResults(expected, results);
 
@@ -263,6 +271,8 @@ public class TimestampValidatorTest extends FeedMessageTest {
         Map<ValidationRule, Integer> expected = new HashMap<>();
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
 
+        final long CURRENT_TIME_MILLIS = TimeUnit.SECONDS.toMillis(MIN_POSIX_TIME);
+
         /**
          * All times are POSIX - no errors
          */
@@ -278,7 +288,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -292,7 +302,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
         feedMessageBuilder.setHeader(feedHeaderBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E001, 1);
         TestUtils.assertResults(expected, results);
 
@@ -305,7 +315,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E001, 2);
         TestUtils.assertResults(expected, results);
 
@@ -317,7 +327,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E001, 3);
         TestUtils.assertResults(expected, results);
 
@@ -350,7 +360,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -372,7 +382,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E001, 4);
         TestUtils.assertResults(expected, results);
 
@@ -392,7 +402,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setAlert(alertBuilder);
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -406,7 +416,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setAlert(alertBuilder);
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E001, 2);
         TestUtils.assertResults(expected, results);
 
@@ -419,6 +429,8 @@ public class TimestampValidatorTest extends FeedMessageTest {
         TimestampValidator timestampValidator = new TimestampValidator();
         Map<ValidationRule, Integer> expected = new HashMap<>();
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+
+        final long CURRENT_TIME_MILLIS = TimeUnit.SECONDS.toMillis(MIN_POSIX_TIME);
 
         /**
          * Header timestamp greater than other entities - no error
@@ -435,7 +447,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -454,7 +466,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -470,7 +482,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E012, 1);
         TestUtils.assertResults(expected, results);
 
@@ -487,7 +499,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         // Feed header timestamp is less than TripUpdate - we should see one error of type E012
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E012, 1);
         TestUtils.assertResults(expected, results);
 
@@ -504,7 +516,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
         // Feed header timestamp is less than VehiclePosition and TripUpdate - we should see two results of type E012
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E012, 2);
         TestUtils.assertResults(expected, results);
 
@@ -518,6 +530,8 @@ public class TimestampValidatorTest extends FeedMessageTest {
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
         // Set valid trip_id = 1.1
         tripDescriptorBuilder.setTripId("1.1");
+
+        final long CURRENT_TIME_MILLIS = TimeUnit.SECONDS.toMillis(MIN_POSIX_TIME);
 
         /**
          * No previous feed message (i.e., it's the first iteration) - no errors
@@ -535,7 +549,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
         GtfsRealtime.FeedMessage currentIteration = feedMessageBuilder.setEntity(0, feedEntityBuilder.build()).build();
 
         // No previous iteration - no errors
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, currentIteration, null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, currentIteration, null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -558,7 +572,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
 
         GtfsRealtime.FeedMessage previousIteration = feedMessageBuilder.setEntity(0, feedEntityBuilder.build()).build();
 
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, currentIteration, previousIteration, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, currentIteration, previousIteration, null);
         expected.put(E017, 1);
         TestUtils.assertResults(expected, results);
 
@@ -579,7 +593,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
 
         currentIteration = feedMessageBuilder.setEntity(0, feedEntityBuilder.build()).build();
 
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, currentIteration, previousIteration, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, currentIteration, previousIteration, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -593,6 +607,8 @@ public class TimestampValidatorTest extends FeedMessageTest {
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
         // Set valid trip_id = 1.1
         tripDescriptorBuilder.setTripId("1.1");
+
+        final long CURRENT_TIME_MILLIS = TimeUnit.SECONDS.toMillis(MIN_POSIX_TIME);
 
         /**
          * No previous feed message (i.e., it's the first iteration) - no errors
@@ -610,7 +626,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
         GtfsRealtime.FeedMessage currentIteration = feedMessageBuilder.setEntity(0, feedEntityBuilder.build()).build();
 
         // No previous iteration - no errors
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, currentIteration, null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, currentIteration, null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -629,7 +645,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
 
         GtfsRealtime.FeedMessage previousIteration = feedMessageBuilder.setEntity(0, feedEntityBuilder.build()).build();
 
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, currentIteration, previousIteration, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, currentIteration, previousIteration, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -648,7 +664,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
 
         previousIteration = feedMessageBuilder.setEntity(0, feedEntityBuilder.build()).build();
 
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, currentIteration, previousIteration, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, currentIteration, previousIteration, null);
         expected.put(E018, 1);
         TestUtils.assertResults(expected, results);
 
@@ -663,6 +679,8 @@ public class TimestampValidatorTest extends FeedMessageTest {
         TimestampValidator timestampValidator = new TimestampValidator();
         Map<ValidationRule, Integer> expected = new HashMap<>();
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+
+        final long CURRENT_TIME_MILLIS = TimeUnit.SECONDS.toMillis(MIN_POSIX_TIME);
 
         /**
          * Set timestamps on objects (without StopTimeUpdates first) so no errors
@@ -679,7 +697,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -706,7 +724,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -731,7 +749,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -755,7 +773,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -780,7 +798,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -805,7 +823,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E022, 4);
         TestUtils.assertResults(expected, results);
 
@@ -830,7 +848,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E022, 2);
         TestUtils.assertResults(expected, results);
 
@@ -855,7 +873,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E022, 2);
         TestUtils.assertResults(expected, results);
 
@@ -880,7 +898,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E022, 2);
         TestUtils.assertResults(expected, results);
 
@@ -905,7 +923,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E022, 2);
         TestUtils.assertResults(expected, results);
 
@@ -930,7 +948,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E022, 4);
         TestUtils.assertResults(expected, results);
 
@@ -945,6 +963,8 @@ public class TimestampValidatorTest extends FeedMessageTest {
         TimestampValidator timestampValidator = new TimestampValidator();
         Map<ValidationRule, Integer> expected = new HashMap<>();
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+
+        final long CURRENT_TIME_MILLIS = TimeUnit.SECONDS.toMillis(MIN_POSIX_TIME);
 
         /**
          * Set timestamps on objects (without StopTimeUpdates first) so no errors
@@ -961,7 +981,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -982,7 +1002,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -1000,7 +1020,7 @@ public class TimestampValidatorTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
@@ -1018,8 +1038,107 @@ public class TimestampValidatorTest extends FeedMessageTest {
 
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        results = timestampValidator.validate(MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E025, 1);
+        TestUtils.assertResults(expected, results);
+
+        clearAndInitRequiredFeedFields();
+    }
+
+    /**
+     * E050 - timestamp is in the future.  Tolerance is defined in TimestampValidator.IN_FUTURE_TOLERANCE_SECONDS.
+     */
+    @Test
+    public void testE050() {
+        TimestampValidator timestampValidator = new TimestampValidator();
+        Map<ValidationRule, Integer> expected = new HashMap<>();
+        GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+
+        // "Current time" in milliseconds for test - let's use 100 seconds after the minimum valid POSIX TIME (for our validator)
+        final long CURRENT_TIME_MILLIS = TimeUnit.SECONDS.toMillis(MIN_POSIX_TIME + 100);
+
+        // Good timestamp (seconds) - 50 seconds behind "current time"
+        final long RECENT = TimeUnit.MILLISECONDS.toSeconds(CURRENT_TIME_MILLIS) - 50;
+        // Good timestamp (seconds) - in the future by 60 seconds, but still within the 60 second tolerance, so shouldn't log error
+        final long FUTURE_60_SEC = TimeUnit.MILLISECONDS.toSeconds(CURRENT_TIME_MILLIS) + 60;
+        // Bad future timestamp (SECONDS) - 60 seconds in the future
+        final long FUTURE_61_SEC = TimeUnit.MILLISECONDS.toSeconds(CURRENT_TIME_MILLIS) + 61;
+
+        /**
+         * All timestamps are in the past - no errors
+         */
+        feedHeaderBuilder.setTimestamp(RECENT);
+        feedMessageBuilder.setHeader(feedHeaderBuilder.build());
+
+        tripUpdateBuilder.setTimestamp(RECENT);
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder);
+
+        vehiclePositionBuilder.setTimestamp(RECENT);
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        expected.clear();
+        TestUtils.assertResults(expected, results);
+
+        /**
+         * All timestamps are in the future, but only by 60 seconds (within the tolerance) - no errors
+         */
+        feedHeaderBuilder.setTimestamp(FUTURE_60_SEC);
+        feedMessageBuilder.setHeader(feedHeaderBuilder.build());
+
+        tripUpdateBuilder.setTimestamp(FUTURE_60_SEC);
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder);
+
+        vehiclePositionBuilder.setTimestamp(FUTURE_60_SEC);
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        expected.clear();
+        TestUtils.assertResults(expected, results);
+
+        /**
+         * Header timestamp is 61 seconds in future (outside of 60 second tolerance)- one error
+         */
+        feedHeaderBuilder.setTimestamp(FUTURE_61_SEC);
+        feedMessageBuilder.setHeader(feedHeaderBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        expected.put(E050, 1);
+        TestUtils.assertResults(expected, results);
+
+        // Check prefix text for error occurrence
+        assertEquals("header.timestamp 19:02:41 (1104537761) is 1 min 1 sec greater than 19:01:40 (1104537700000)", results.get(0).getOccurrenceList().get(0).getPrefix());
+
+        /**
+         * Header and TripUpdate are 61 seconds in future- 2 errors
+         */
+        tripUpdateBuilder.setTimestamp(FUTURE_61_SEC);
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder);
+
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        expected.put(E050, 2);
+        TestUtils.assertResults(expected, results);
+
+        /**
+         * Header, TripUpdate, and VehiclePosition are 61 seconds in future - 3 errors
+         */
+        vehiclePositionBuilder.setTimestamp(FUTURE_61_SEC);
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = timestampValidator.validate(CURRENT_TIME_MILLIS, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
+        expected.put(E050, 3);
         TestUtils.assertResults(expected, results);
 
         clearAndInitRequiredFeedFields();

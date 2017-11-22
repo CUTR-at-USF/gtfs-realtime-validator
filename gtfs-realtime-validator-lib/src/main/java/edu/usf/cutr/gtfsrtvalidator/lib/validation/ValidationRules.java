@@ -256,6 +256,10 @@ public class ValidationRules {
             "Header incrementality must be populated for gtfs_realtime_version v2.0 and higher",
             "Header does not have incrementality and gtfs_realtime_version is v2.0 or higher");
 
+    public static final ValidationRule E050 = new ValidationRule("E050", "ERROR", "timestamp is in the future",
+            "All timestamps must be less than the current time",
+            "- the current time in milliseconds");
+
     private static List<ValidationRule> mAllRules = new ArrayList<>();
 
     /**

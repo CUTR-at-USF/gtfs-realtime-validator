@@ -51,6 +51,7 @@ Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-U
 | [E047](#E047) | `VehiclePosition` and `TripUpdate` ID pairing mismatch
 | [E048](#E048) | `header` `timestamp` not populated (GTFS-rt v2.0 and higher)
 | [E049](#E049) | `header` `incrementality` not populated (GTFS-rt v2.0 and higher)
+| [E050](#E050) | `timestamp` is in the future
 
 ### Table of Warnings
 
@@ -669,6 +670,23 @@ Note that this is different from W003, which simply checks to see if an ID that 
 
 #### References:
 * [`header.incrementality`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-feedheader)
+
+<a name="E050"/>
+
+### E050 - `timestamp` is in the future
+
+All timestamps should be less than the current time.
+
+[`header.timestamp`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-feedheader) says:
+
+>This timestamp identifies the moment when the content of this feed has been created (in server time). In POSIX time (i.e., number of seconds since January 1st 1970 00:00:00 UTC). To avoid time skew between systems producing and consuming realtime information it is strongly advised to derive timestamp from a time server. It is completely acceptable to use Stratum 3 or even lower strata servers since time differences up to a couple of seconds are tolerable.
+
+Timestamps are flagged as being in the future if they greater than the current time plus `TimestampValidator.MAX_IN_FUTURE_SECONDS`, which is currently set to 60 seconds.
+
+#### References:
+* [`header.timestamp`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-feedheader)
+* [`trip_update.timestamp`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripupdate)
+* [`vehicle_postion.timestamp`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-vehicleposition)
 
 # Warnings
 

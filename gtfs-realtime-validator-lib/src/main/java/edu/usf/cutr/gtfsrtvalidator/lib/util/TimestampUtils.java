@@ -57,14 +57,14 @@ public class TimestampUtils {
     }
 
     /**
-     * Returns the age of the GTFS-realtime feed, based on the provided current time and GTFS-realtime header time, in milliseconds
+     * Returns the age of the feed timestamp in milliseconds, based on the provided current time (in milliseconds) and provided feed timestamp (in POSIX time)
      *
      * @param currentTimeMillis  current time in milliseconds
-     * @param headerTimestampSec the timestamp of the GTFS-realtime header, in SECONDS (POSIX time)
-     * @return the age of the GTFS-realtime feed, based on the provided current time and GTFS-realtime header time, in milliseconds
+     * @param timestampSec the timestamp from the GTFS-realtime feed (header, vehicle, or trip), in SECONDS (POSIX time)
+     * @return the age of the provided timestamp in milliseconds, based on the provided current time (in milliseconds) and timestampSec (in milliseconds)
      */
-    public static long getAge(long currentTimeMillis, long headerTimestampSec) {
-        long headerTimeMillis = TimeUnit.SECONDS.toMillis(headerTimestampSec);
+    public static long getAge(long currentTimeMillis, long timestampSec) {
+        long headerTimeMillis = TimeUnit.SECONDS.toMillis(timestampSec);
         return currentTimeMillis - headerTimeMillis;
     }
 
@@ -183,5 +183,23 @@ public class TimestampUtils {
         String time = fileNameNoExtension.substring(fileNameNoExtension.length() - 10, fileNameNoExtension.length()).replaceAll("-", ":");
         ZonedDateTime zdt = ZonedDateTime.parse(date + time, DateTimeFormatter.ISO_DATE_TIME);
         return zdt.toInstant().toEpochMilli();
+    }
+
+    /**
+     * Returns true if the timestampSec is too far in the future - if the difference between the provided current time
+     * (in milliseconds) and the provided current timestampSec (in POSIX time) is greater than the provided tolerance in seconds, or false
+     * if it's not too far in the future (difference is less than or equal to tolerance).
+     *
+     * @param currentTimeMillis current time, in milliseconds
+     * @param timestampSec the provided timestampSec to examine, in POSIX time (seconds)
+     * @param toleranceSec the provided tolerance to use when checking the timestamp in seconds - if the provided
+     *                     timestampSec age is negative and greater than or equal to this value, it will return true
+     * @return true if the timestampSec is too far in the future - if the difference between the provided current time
+     * (in milliseconds) and the provided current timestampSec (in POSIX time) is greater than the provided tolerance in seconds, or false
+     * if it's not too far in the future (difference is less than or equal to tolerance).
+     */
+    public static boolean isInFuture(long currentTimeMillis, long timestampSec, long toleranceSec) {
+        long ageMillis = getAge(currentTimeMillis, timestampSec);
+        return ageMillis < 0 && (TimeUnit.MILLISECONDS.toSeconds(Math.abs(ageMillis)) > toleranceSec);
     }
 }

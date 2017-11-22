@@ -816,8 +816,34 @@ public class UtilTest {
     }
 
     @Test
+    public void testIsInFuture() {
+        final long TOLERANCE_SECONDS = 5;
+        boolean inFuture;
+
+        // Same time - should return false
+        inFuture = TimestampUtils.isInFuture(TimeUnit.SECONDS.toMillis(100), 100, TOLERANCE_SECONDS);
+        assertEquals(false, inFuture);
+
+        // Timestamp is in past within tolerance - should return false
+        inFuture = TimestampUtils.isInFuture(TimeUnit.SECONDS.toMillis(100), 95, TOLERANCE_SECONDS);
+        assertEquals(false, inFuture);
+
+        // Timestamp is in past outside of tolerance - should return false
+        inFuture = TimestampUtils.isInFuture(TimeUnit.SECONDS.toMillis(100), 94, TOLERANCE_SECONDS);
+        assertEquals(false, inFuture);
+
+        // Timestamp is in future within tolerance - should return false
+        inFuture = TimestampUtils.isInFuture(TimeUnit.SECONDS.toMillis(100), 105, TOLERANCE_SECONDS);
+        assertEquals(false, inFuture);
+
+        // Timestamp is in future outside of tolerance - should return true
+        inFuture = TimestampUtils.isInFuture(TimeUnit.SECONDS.toMillis(100), 106, TOLERANCE_SECONDS);
+        assertEquals(true, inFuture);
+    }
+
+    @Test
     public void testGetAllRules() {
         List<ValidationRule> rules = ValidationRules.getRules();
-        assertEquals(58, rules.size());
+        assertEquals(59, rules.size());
     }
 }

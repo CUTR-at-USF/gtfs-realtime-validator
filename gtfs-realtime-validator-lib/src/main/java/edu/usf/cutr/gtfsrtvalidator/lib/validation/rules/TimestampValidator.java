@@ -51,13 +51,15 @@ import static edu.usf.cutr.gtfsrtvalidator.lib.validation.ValidationRules.*;
  *  E022 - trip stop_time_update times are not increasing
  *  E025 - stop_time_update departure time is before arrival time
  *  E048 - header` `timestamp` not populated
+ *  E050 - `timestamp` is in the future
  */
 public class TimestampValidator implements FeedEntityValidator {
 
     private static final org.slf4j.Logger _log = LoggerFactory.getLogger(TimestampValidator.class);
 
-    private static long MINIMUM_REFRESH_INTERVAL_SECONDS = 35L;
-    public static long MAX_AGE_SECONDS = 65L; // Maximum allowed age for GTFS-realtime feed, in seconds (W008)
+    private final static long MINIMUM_REFRESH_INTERVAL_SECONDS = 35L;
+    private final static long MAX_AGE_SECONDS = 65L; // Maximum allowed age for GTFS-realtime feed, in seconds (W008)
+    private final static long IN_FUTURE_TOLERANCE_SECONDS = 60L; // Maximum allowed amount of time for a timetamp to be in the future, in seconds (E050)
 
     @Override
     public List<ErrorListHelperModel> validate(long currentTimeMillis, GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage, GtfsRealtime.FeedMessage combinedFeedMessage) {
@@ -74,6 +76,9 @@ public class TimestampValidator implements FeedEntityValidator {
         List<OccurrenceModel> e022List = new ArrayList<>();
         List<OccurrenceModel> e025List = new ArrayList<>();
         List<OccurrenceModel> e048List = new ArrayList<>();
+        List<OccurrenceModel> e050List = new ArrayList<>();
+
+        String currentTimeText = TimestampUtils.posixToClock(TimeUnit.MILLISECONDS.toSeconds(currentTimeMillis), gtfsMetadata.getTimeZone());
 
         /**
          * Validate FeedHeader timestamp
@@ -93,18 +98,22 @@ public class TimestampValidator implements FeedEntityValidator {
                 // W001 - Timestamp not populated
                 RuleUtils.addOccurrence(W001, "header", w001List, _log);
             }
-
         } else {
             if (!isPosix(headerTimestamp)) {
                 // E001 - Not in POSIX time
                 RuleUtils.addOccurrence(E001, "header.timestamp", e001List, _log);
             } else {
-                long age = getAge(currentTimeMillis, headerTimestamp);
-                if (age > TimeUnit.SECONDS.toMillis(MAX_AGE_SECONDS)) {
+                long ageMillis = getAge(currentTimeMillis, headerTimestamp);
+                long ageMinutes = TimeUnit.MILLISECONDS.toMinutes(ageMillis);
+                long ageSeconds = TimeUnit.MILLISECONDS.toSeconds(ageMillis);
+                if (ageMillis > TimeUnit.SECONDS.toMillis(MAX_AGE_SECONDS)) {
                     // W008 - Header timestamp is older than 65 seconds
-                    long ageMinutes = TimeUnit.MILLISECONDS.toMinutes(age);
-                    long ageSeconds = TimeUnit.MILLISECONDS.toSeconds(age);
                     RuleUtils.addOccurrence(W008, "header.timestamp is " + ageMinutes + " min " + ageSeconds % 60 + " sec", w008List, _log);
+                }
+                if (TimestampUtils.isInFuture(currentTimeMillis, headerTimestamp, IN_FUTURE_TOLERANCE_SECONDS)) {
+                    // E050 - timestamp is in the future
+                    String headerTimestampText = TimestampUtils.posixToClock(headerTimestamp, gtfsMetadata.getTimeZone());
+                    RuleUtils.addOccurrence(E050, "header.timestamp " + headerTimestampText + " (" + headerTimestamp + ") is " + Math.abs(ageMinutes) + " min " + Math.abs(ageSeconds) % 60 + " sec greater than " + currentTimeText + " (" + currentTimeMillis + ")", e050List, _log);
                 }
             }
 
@@ -145,6 +154,15 @@ public class TimestampValidator implements FeedEntityValidator {
                     if (!isPosix(tripUpdateTimestamp)) {
                         // E001 - Not in POSIX time
                         RuleUtils.addOccurrence(E001, id + " timestamp " + tripUpdateTimestamp, e001List, _log);
+                    } else {
+                        if (TimestampUtils.isInFuture(currentTimeMillis, tripUpdateTimestamp, IN_FUTURE_TOLERANCE_SECONDS)) {
+                            // E050 - timestamp is in the future
+                            long ageMillis = getAge(currentTimeMillis, tripUpdateTimestamp);
+                            long ageMinutes = Math.abs(TimeUnit.MILLISECONDS.toMinutes(ageMillis));
+                            long ageSeconds = Math.abs(TimeUnit.MILLISECONDS.toSeconds(ageMillis));
+                            String tripUpdateTimestampText = TimestampUtils.posixToClock(tripUpdateTimestamp, gtfsMetadata.getTimeZone());
+                            RuleUtils.addOccurrence(E050, id + " timestamp " + tripUpdateTimestampText + " (" + tripUpdateTimestamp + ") is " + ageMinutes + " min " + ageSeconds % 60 + " sec greater than " + currentTimeText + " (" + currentTimeMillis + ")", e050List, _log);
+                        }
                     }
                 }
 
@@ -153,7 +171,6 @@ public class TimestampValidator implements FeedEntityValidator {
                  */
                 List<GtfsRealtime.TripUpdate.StopTimeUpdate> stopTimeUpdates = tripUpdate.getStopTimeUpdateList();
                 if (stopTimeUpdates != null) {
-
                     Long previousArrivalTime = null;
                     String previousArrivalTimeText = null;
                     Long previousDepartureTime = null;
@@ -264,6 +281,15 @@ public class TimestampValidator implements FeedEntityValidator {
                     if (!isPosix(vehicleTimestamp)) {
                         // E001 - Not in POSIX time
                         RuleUtils.addOccurrence(E001, prefix, e001List, _log);
+                    } else {
+                        if (TimestampUtils.isInFuture(currentTimeMillis, vehicleTimestamp, IN_FUTURE_TOLERANCE_SECONDS)) {
+                            // E050 - timestamp is in the future
+                            long ageMillis = getAge(currentTimeMillis, vehicleTimestamp);
+                            long ageMinutes = Math.abs(TimeUnit.MILLISECONDS.toMinutes(ageMillis));
+                            long ageSeconds = Math.abs(TimeUnit.MILLISECONDS.toSeconds(ageMillis));
+                            String vehicleTimestampText = TimestampUtils.posixToClock(vehicleTimestamp, gtfsMetadata.getTimeZone());
+                            RuleUtils.addOccurrence(E050, "vehicle_id " + vehiclePosition.getVehicle().getId() + " timestamp " + vehicleTimestampText + " (" + vehicleTimestamp + ") is " + ageMinutes + " min " + ageSeconds % 60 + " sec greater than " + currentTimeText + " (" + currentTimeMillis + ")", e050List, _log);
+                        }
                     }
                 }
             }
@@ -302,6 +328,9 @@ public class TimestampValidator implements FeedEntityValidator {
         }
         if (!e048List.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(E048), e048List));
+        }
+        if (!e050List.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E050), e050List));
         }
         return errors;
     }
