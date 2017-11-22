@@ -37,7 +37,7 @@
             <artifactId>commons-cli</artifactId>
             <version>1.4</version>
         </dependency>
-        <!-- For Bidirectional HashMap (i.e., BiMap) (see E047) -->
+        <!-- For ordering of stop_time_updates (see E002) and @Immutable (See ViewMessageDetailsModel) -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
