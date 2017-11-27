@@ -65,7 +65,7 @@ Following are the requirements to build and run the project from source code:
 * [Apache Maven](https://maven.apache.org/)
 
 If you're using `https` URLs for GTFS or GTFS-rt feeds, either:
-* Use the `-Djsse.enableSNIExtension=true` parameter when running the tool
+* Use the `-Djsse.enableSNIExtension=false` parameter when running the tool
 * Install the [Java Cryptography Extension (JCE)](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html) - You will need to replace the `US_export_policy.jar` and `local_policy.jar` files in your JVM `/security` directory, such as `C:\Program Files\Java\jdk1.8.0_73\jre\lib\security`, with the JAR files in the JCE Extension download.
 
 #### 1. Build the project 
@@ -103,6 +103,13 @@ Note that the validator also has a [batch processing mode](gtfs-realtime-validat
 ## Docker
  
 Want to run this in [Docker](https://www.docker.com/)?  Check out [gtfs-realtime-validator-docker](https://github.com/scrudden/gtfs-realtime-validator-docker).
+
+## Troubleshooting
+
+### SSL handshake still fails after following [prerequisites](https://github.com/CUTR-at-USF/gtfs-realtime-validator#prerequisites-1)
+
+The issue is probably the distant server certificate configuration.
+When running the tool locally, try to change the parameter: `-Djsse.enableSNIExtension=false`.
 
 ## CUTR Release Process
 
