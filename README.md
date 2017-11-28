@@ -107,6 +107,13 @@ Note that the validator also has a [batch processing mode](gtfs-realtime-validat
  
 Want to run this in [Docker](https://www.docker.com/)?  Check out [gtfs-realtime-validator-docker](https://github.com/scrudden/gtfs-realtime-validator-docker).
 
+## Troubleshooting
+
+### SSL handshake still fails after following [prerequisites](https://github.com/CUTR-at-USF/gtfs-realtime-validator#prerequisites-1)
+
+The issue is probably the distant server certificate configuration.
+When running the tool locally, try to change the parameter: `-Djsse.enableSNIExtension=false`.
+
 ## CUTR Release Process
 
 **Snapshots**
