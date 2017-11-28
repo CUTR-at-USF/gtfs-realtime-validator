@@ -26,6 +26,7 @@ We have a bleeding-edge alpha version running here as a demo:
 1. Download the latest webapp alpha build:
     * [gtfs-realtime-validator-webapp-1.0.0-SNAPSHOT.jar](https://s3.amazonaws.com/gtfs-rt-validator/travis_builds/gtfs-realtime-validator-webapp/1.0.0-SNAPSHOT/gtfs-realtime-validator-webapp-1.0.0-SNAPSHOT.jar)
 1. From the command line run `java -Djsse.enableSNIExtension=false -jar gtfs-realtime-validator-webapp-1.0.0-SNAPSHOT.jar`
+    * Note that if you're running on Java 9, you'll need to instead run `java -Djsee.enableSNIExtension=false --add-modules java.xml.bind -jar gtfs-realtime-validator-webapp/target/gtfs-realtime-validator-webapp-1.0.0-SNAPSHOT.jar`
 1. When prompted, in your browser go to `http://localhost:8080`
 1. Enter your [General Transit Feed Specification (GTFS)-realtime](https://developers.google.com/transit/gtfs-realtime/) and [GTFS](https://developers.google.com/transit/gtfs/) feed URLs and click "Start".  Example feeds:
     * HART (Tampa, FL)
@@ -84,7 +85,9 @@ If you're going to be rebuilding the project frequently (e.g., editing source co
 
 To start up the server so you can view the web interface, from the command-line, run: 
 
-`java -Djsse.enableSNIExtension=false -jar gtfs-realtime-validator-webapp/target/gtfs-realtime-validator-webapp-1.0.0-SNAPSHOT.jar`
+* *Java 8 and lower*: `java -Djsse.enableSNIExtension=false -jar gtfs-realtime-validator-webapp/target/gtfs-realtime-validator-webapp-1.0.0-SNAPSHOT.jar`
+
+* *Java 9 and above*: `java -Djsee.enableSNIExtension=false --add-modules java.xml.bind -jar gtfs-realtime-validator-webapp/target/gtfs-realtime-validator-webapp-1.0.0-SNAPSHOT.jar`
 
 You should see some output, and a message saying `Go to http://localhost:8080 in your browser`.
 
