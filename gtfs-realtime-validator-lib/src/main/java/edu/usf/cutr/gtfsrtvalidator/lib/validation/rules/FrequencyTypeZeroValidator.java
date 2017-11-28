@@ -37,6 +37,7 @@ import static edu.usf.cutr.gtfsrtvalidator.lib.validation.ValidationRules.*;
  * E006 - Missing required vehicle_position trip field for frequency-based exact_times = 0
  * E013 - Frequency type 0 trip schedule_relationship should be UNSCHEDULED or empty
  * W005 - Missing vehicle_id in trip_update for frequency-based exact_times = 0
+ * E200 - Frequency type zero trip update
  */
 public class FrequencyTypeZeroValidator implements FeedEntityValidator {
 
@@ -47,12 +48,16 @@ public class FrequencyTypeZeroValidator implements FeedEntityValidator {
         List<OccurrenceModel> errorListE006 = new ArrayList<>();
         List<OccurrenceModel> errorListE013 = new ArrayList<>();
         List<OccurrenceModel> errorListW005 = new ArrayList<>();
+        List<OccurrenceModel> errorListE200 = new ArrayList<>();
 
         for (GtfsRealtime.FeedEntity entity : feedMessage.getEntityList()) {
             if (entity.hasTripUpdate()) {
                 GtfsRealtime.TripUpdate tripUpdate = entity.getTripUpdate();
 
                 if (gtfsMetadata.getExactTimesZeroTripIds().contains(tripUpdate.getTrip().getTripId())) {
+                    // E200 - Frequency type zero trip update
+                    RuleUtils.addOccurrence(E200, "trip_id " + tripUpdate.getTrip().getTripId(), errorListE200, _log);
+
                     /**
                      * NOTE - W006 checks for missing trip_ids, because we can't check for that here - we need the trip_id to know if it's exact_times=0
                      */
@@ -118,6 +123,9 @@ public class FrequencyTypeZeroValidator implements FeedEntityValidator {
         }
         if (!errorListW005.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(W005), errorListW005));
+        }
+        if (!errorListE200.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E200), errorListE200));
         }
         return errors;
     }

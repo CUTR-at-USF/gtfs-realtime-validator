@@ -260,6 +260,10 @@ public class ValidationRules {
             "All timestamps must be less than the current time",
             "- the current time in milliseconds");
 
+    public static final ValidationRule E200 = new ValidationRule("E200", "ERROR", "Frequency type zero trip update",
+            "A trip update for a frequencies.txt trip with exact_times=0",
+            "has a trip_update and is an exact_times=0 trip");
+
     private static List<ValidationRule> mAllRules = new ArrayList<>();
 
     /**
