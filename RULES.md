@@ -52,6 +52,7 @@ Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-U
 | [E048](#E048) | `header` `timestamp` not populated (GTFS-rt v2.0 and higher)
 | [E049](#E049) | `header` `incrementality` not populated (GTFS-rt v2.0 and higher)
 | [E050](#E050) | `timestamp` is in the future
+| [E051](#E051) | GTFS-rt `stop_sequence` not found in GTFS data
 
 ### Table of Warnings
 
@@ -687,6 +688,20 @@ Timestamps are flagged as being in the future if they greater than the current t
 * [`header.timestamp`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-feedheader)
 * [`trip_update.timestamp`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripupdate)
 * [`vehicle_postion.timestamp`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-vehicleposition)
+
+<a name="E051"/>
+
+### E051 - GTFS-rt `stop_sequence` not found in GTFS data
+
+All `stop_time_update` `stop_sequences` in GTFS-realtime data must appear in GTFS `stop_times.txt` for that trip.
+
+Note that the validator checks if `stop_sequence` and `stop_id` pairing from GTFS match GTFS-realtime in [E045](https://github.com/CUTR-at-USF/gtfs-realtime-validator/blob/master/RULES.md#E045), and if `stop_sequences` are out of order in [E002](https://github.com/CUTR-at-USF/gtfs-realtime-validator/blob/master/RULES.md#E002).  Therefore, these rules may flag some invalid `stop_sequences` in GTFS-realtime data.  If [E045](https://github.com/CUTR-at-USF/gtfs-realtime-validator/blob/master/RULES.md#E045) or [E002](https://github.com/CUTR-at-USF/gtfs-realtime-validator/blob/master/RULES.md#E002) are triggered, E051 may not be logged to avoid duplicate errors for the same problem.  Allowing other rules to flag these problems also helps improve validator performance by avoiding redundent checks. 
+
+See [this issue](https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/261) for details.
+
+#### References:
+* [`stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
+* [GTFS `stop_times.txt`](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#stop_timestxt)
 
 # Warnings
 
