@@ -52,6 +52,7 @@ Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-U
 | [E048](#E048) | `header` `timestamp` not populated (GTFS-rt v2.0 and higher)
 | [E049](#E049) | `header` `incrementality` not populated (GTFS-rt v2.0 and higher)
 | [E050](#E050) | `timestamp` is in the future
+| [E051](#E051) | GTFS-rt `stop_sequence` not found in GTFS data
 
 ### Table of Warnings
 
@@ -687,6 +688,20 @@ Timestamps are flagged as being in the future if they greater than the current t
 * [`header.timestamp`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-feedheader)
 * [`trip_update.timestamp`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripupdate)
 * [`vehicle_postion.timestamp`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-vehicleposition)
+
+<a name="E051"/>
+
+### E051 - GTFS-rt `stop_sequence` not found in GTFS data
+
+All `stop_time_update` `stop_sequences` in GTFS-realtime data must appear in GTFS `stop_times.txt` for that trip.
+
+To keep GTFS-rt validator runtime performance at O(n) for GTFS stop_times.txt (i.e., so we don't have to loop through the entire GTFS stop_times.txt for each GTFS-rt stop_time_update, which would be O(n*m)), if E051 is logged for a `stop_time_update`, subsequent `stop_time_updates` in that same GTFS-rt trip will not be checked for other errors or warnings (e.g., [E046 - GTFS-rt `stop_time_update` without `time` doesn't have arrival/departure_time in GTFS](https://github.com/CUTR-at-USF/gtfs-realtime-validator/blob/master/RULES.md#E046)).
+
+See [this issue](https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/261) for details.
+
+#### References:
+* [`stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
+* [GTFS `stop_times.txt`](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#stop_timestxt)
 
 # Warnings
 

@@ -260,6 +260,10 @@ public class ValidationRules {
             "All timestamps must be less than the current time",
             "- the current time in milliseconds");
 
+    public static final ValidationRule E051 = new ValidationRule("E051", "ERROR", "GTFS-rt stop_sequence not found in GTFS data",
+            "All stop_time_update stop_sequences in GTFS-realtime data must appear in GTFS stop_times.txt for that trip",
+            "that does not exist in GTFS stop_times.txt for this trip");
+
     private static List<ValidationRule> mAllRules = new ArrayList<>();
 
     /**

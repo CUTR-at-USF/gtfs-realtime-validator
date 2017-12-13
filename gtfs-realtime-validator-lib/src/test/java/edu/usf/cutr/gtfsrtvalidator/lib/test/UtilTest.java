@@ -844,6 +844,6 @@ public class UtilTest {
     @Test
     public void testGetAllRules() {
         List<ValidationRule> rules = ValidationRules.getRules();
-        assertEquals(59, rules.size());
+        assertEquals(60, rules.size());
     }
 }

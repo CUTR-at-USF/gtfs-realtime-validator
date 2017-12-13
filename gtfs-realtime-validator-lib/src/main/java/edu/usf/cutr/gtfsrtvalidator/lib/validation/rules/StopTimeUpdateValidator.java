@@ -51,6 +51,7 @@ import static com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate
  * E044 - stop_time_update arrival/departure doesn't have delay or time
  * E045 - GTFS-rt stop_time_update stop_sequence and stop_id do not match GTFS
  * E046 - GTFS-rt stop_time_update without time doesn't have arrival/departure_time in GTFS
+ * E051 - GTFS-rt stop_sequence not found in GTFS data
  */
 public class StopTimeUpdateValidator implements FeedEntityValidator {
 
@@ -70,6 +71,7 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
         List<OccurrenceModel> e044List = new ArrayList<>();
         List<OccurrenceModel> e045List = new ArrayList<>();
         List<OccurrenceModel> e046List = new ArrayList<>();
+        List<OccurrenceModel> e051List = new ArrayList<>();
 
         for (GtfsRealtime.FeedEntity entity : entityList) {
             if (entity.hasTripUpdate()) {
@@ -92,6 +94,7 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
                 boolean foundE009error = false;
                 boolean addedStopSequenceFromStopId = false;
                 Map<String, List<String>> tripWithMultiStop = gtfsMetadata.getTripsWithMultiStops();
+                boolean unknownRtStopSequence = false;
                 for (GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate : rtStopTimeUpdateList) {
                     if (!foundE009error && tripId != null && tripWithMultiStop.containsKey(tripId) && !stopTimeUpdate.hasStopSequence()) {
                         // E009 - GTFS-rt stop_sequence isn't provided for trip that visits same stop_id more than once
@@ -142,14 +145,18 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
                                 // We caught up with the stop_sequence in GTFS data - stop so we can pick up from here in next WHILE loop
                                 break;
                             } else {
-                                if (foundStopId) {
+                                if (stopTimeUpdate.hasStopSequence() && gtfsStopTimeIndex == gtfsStopTimes.size()) {
+                                    // For E051 - we've reached the last GTFS stop_times.txt record for the GTFS-rt stop_time_update and haven't found stop_sequence (#261)
+                                    unknownRtStopSequence = true;
+                                }
+                                if (!stopTimeUpdate.hasStopSequence() && foundStopId) {
                                     // For E002 - in the case when stop_sequence is missing from the GTFS-rt feed, add the GTFS stop_sequence (See #159)
                                     if (!stopTimeUpdate.hasStopSequence()) {
                                         rtStopSequenceList.add(gtfsStopSequence);
                                         addedStopSequenceFromStopId = true;
                                     }
 
-                                    // E046 hasn't been checked yet if we didn't find a stop_sequence - check now
+                                    // E046 hasn't been checked yet if a stop_sequence doesn't exist - check now
                                     checkE046(entity, tripUpdate, stopTimeUpdate, gtfsStopTimes.get(gtfsStopTimeIndex - 1), e046List);
                                     // We caught up with a matching stop_id in GTFS data - stop so we can pick up from here in next WHILE loop
                                     // Note that for routes with loops, we could potentially be stopping prematurely
@@ -162,6 +169,16 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
                     checkE042(entity, tripUpdate, stopTimeUpdate, e042List);
                     checkE043(entity, tripUpdate, stopTimeUpdate, e043List);
                     checkE044(entity, tripUpdate, stopTimeUpdate, e044List);
+
+                    if (unknownRtStopSequence) {
+                        // E051 - GTFS-rt stop_sequence not found in GTFS data
+                        RuleUtils.addOccurrence(ValidationRules.E051, "GTFS-rt " + GtfsUtils.getTripId(entity, tripUpdate) + " contains stop_sequence " + stopTimeUpdate.getStopSequence(), e051List, _log);
+                        // We couldn't find this stopTimeUpdate.stop_sequence in the GTFS stop_times.txt for this trip (E051). To keep validator running complexity
+                        // at O(n) for evaluating TripUpdates w/ GTFS stop_times.txt (i.e., don't loop through the entire GTFS stop_times.txt for each GTFS-rt stop_time_update, which would be O(n*m)), we
+                        // will skip validating the stop_time_updates for the rest of this trip.  When the producer fixes this erroneous stop_time_update.stop_sequence,
+                        // the remaining stop_time_updates for this GTFS-rt trip will be validated.
+                        break;
+                    }
                 }
 
                 boolean sorted = Ordering.natural().isStrictlyOrdered(rtStopSequenceList);
@@ -215,6 +232,9 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
         }
         if (!e046List.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.E046), e046List));
+        }
+        if (!e051List.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.E051), e051List));
         }
         return errors;
     }
