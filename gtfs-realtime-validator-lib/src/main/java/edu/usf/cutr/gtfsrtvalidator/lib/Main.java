@@ -30,13 +30,13 @@ public class Main {
     private static final org.slf4j.Logger _log = LoggerFactory.getLogger(Main.class);
 
     private final static String GTFS_PATH_AND_FILE = "gtfs";
-    private final static String GTFS_RT_PATH = "gtfsrealtimepath";
+    private final static String GTFS_RT_PATH = "gtfsRealtimePath";
     private final static String SORT_OPTION = "sort";
     private final static String SORT_OPTION_NAME = "name";
     private final static String SORT_OPTION_DATE = "date";
-    private final static String PLAIN_TEXT = "plaintext";
+    private final static String PLAIN_TEXT = "plainText";
     private final static String RETURN_STATS = "stats";
-    private final static String IGNORE_SHAPES = "ignoreshapes";
+    private final static String IGNORE_SHAPES = "ignoreShapes";
 
     public static void main(String[] args) throws InterruptedException, ParseException {
         // Parse command line parameters

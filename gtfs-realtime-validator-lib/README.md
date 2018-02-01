@@ -16,9 +16,9 @@ As part of the **gtfs-realtime-validator-lib** module we support a command-line 
  
 1. Download the latest library build:
     * [gtfs-realtime-validator-lib-1.0.0-SNAPSHOT.jar](https://s3.amazonaws.com/gtfs-rt-validator/travis_builds/gtfs-realtime-validator-lib/1.0.0-SNAPSHOT/gtfs-realtime-validator-lib-1.0.0-SNAPSHOT.jar)
-1. From the command line run `java -jar target/gtfs-realtime-validator-lib-1.0.0-SNAPSHOT.jar -gtfs "D:\HART\google_transit.zip" -gtfsrealtimepath "D:\HART\gtfs-rt"`
+1. From the command line run `java -jar target/gtfs-realtime-validator-lib-1.0.0-SNAPSHOT.jar -gtfs "D:\HART\google_transit.zip" -gtfsRealtimePath "D:\HART\gtfs-rt"`
     * `-gtfs` should point to the GTFS zip file 
-    * `-gtfsrealtimepath` should point to the directory holding the GTFS-realtime files
+    * `-gtfsRealtimePath` should point to the directory holding the GTFS-realtime files
 
 ### Output
  
@@ -66,11 +66,11 @@ For example, in log format the above would look like:
 ### Command-line config parameters
  
  * `-gtfs` - The path and file name of the GTFS zip file.  GTFS zip file must cover the time period for the GTFS-rt archived files.  You can combine GTFS zip files if needed using the [Google transitfeed tool's](https://github.com/google/transitfeed/wiki/Merge).
- * `-gtfsrealtimepath` - The path to the folder that contains the individual GTFS-realtime protocol buffer files
+ * `-gtfsRealtimePath` - The path to the folder that contains the individual GTFS-realtime protocol buffer files
  * `-sort` *(Optional)* - `date` if the GTFS-realtime files should be processed chronologically by the "last modified" date of the file (default), or `name` if the files should be ordered by the name of the file. If you use the name of the file to order the files, then the validator will try to parse the date/time from each individual file name and use that date/time as the "current" time.  Date/times in file names must be in the [ISO_DATE_TIME](https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html#ISO_DATE_TIME) format and must be the last 20 characters prior to the file extension - for example, `TripUpdates-2017-02-18T20-00-08Z.pb`.  If a date/time can't be parsed from the file name, then the last modified date is used as the "current" time. GTFS-realtime file order is important for rules such as E012, E018, and W007, which compare the previous feed iteration against the current one.     
- * `-plaintext` *(Optional)* - If this argument is supplied, the validator will output a plain text version of each of the protocol buffer files with the provided file extension.  For example, if the protocol buffer file has the name `trip-update.pb`, and the text `-plaintext txt` is provided as the argument, then the plain text version of this file will be `trip-update.pb.txt`.
+ * `-plainText` *(Optional)* - If this argument is supplied, the validator will output a plain text version of each of the protocol buffer files with the provided file extension.  For example, if the protocol buffer file has the name `trip-update.pb`, and the text `-plainText txt` is provided as the argument, then the plain text version of this file will be `trip-update.pb.txt`.
  * `-stats` *(Optional)* - If this argument is supplied (e.g., `-stats yes`), the validator will save statistics to memory for each of the validation files that are processed, and will return a list of `ValidationStatistics` objects from `BatchProcessor.processFeeds()` that can be examined to see individual iteration and rule processing times (in decimal seconds).
- * `-ignoreshapes` *(Optional)* - If this argument is supplied (e.g., `-ignoreshapes yes`), the validator will ignore the shapes.txt file for the GTFS feed.  If you are getting OutOfMemoryErrors when processing very large feeds, you should try setting this to true.  Note that setting this to true will prevent the validator from checking rules like E029 that require spatial data.  See [this issue](https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/284) for details.
+ * `-ignoreShapes` *(Optional)* - If this argument is supplied (e.g., `-ignoreShapes yes`), the validator will ignore the shapes.txt file for the GTFS feed.  If you are getting OutOfMemoryErrors when processing very large feeds, you should try setting this to true.  Note that setting this to true will prevent the validator from checking rules like E029 that require spatial data.  See [this issue](https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/284) for details.
 
 For logging configuration, see the [Config->Logging](../CONFIG.md#logging) section.
 
