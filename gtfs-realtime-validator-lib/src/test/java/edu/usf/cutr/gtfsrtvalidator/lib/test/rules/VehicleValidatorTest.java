@@ -764,4 +764,42 @@ public class VehicleValidatorTest extends FeedMessageTest {
 
         clearAndInitRequiredFeedFields();
     }
+
+    /**
+     * E052 - vehicle.id is not unique
+     */
+    @Test
+    public void testE052() {
+        VehicleValidator vehicleValidator = new VehicleValidator();
+        Map<ValidationRule, Integer> expected = new HashMap<>();
+
+        GtfsRealtime.VehicleDescriptor.Builder vehicleDescriptorBuilder = GtfsRealtime.VehicleDescriptor.newBuilder();
+        vehicleDescriptorBuilder.setId("1");
+
+        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        // No warnings, if position isn't populated
+        results = vehicleValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
+        expected.clear();
+        TestUtils.assertResults(expected, results);
+
+        GtfsRealtime.Position.Builder positionBuilder = GtfsRealtime.Position.newBuilder();
+
+        // Set valid lat and long (USF Campus in Tampa, FL), as they are required fields
+        positionBuilder.setLatitude(28.0587f);
+        positionBuilder.setLongitude(-82.4139f);
+
+        vehiclePositionBuilder.setPosition(positionBuilder.build());
+
+        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        // No warnings, if bearing isn't populated
+        results = vehicleValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
+        expected.clear();
+        TestUtils.assertResults(expected, results);
+    }
 }

@@ -241,3 +241,25 @@ To better understand that last step, let's break down the line:
 * `_log` - The log to which system output will be printed for testing
 
 That's it for the rule itself!  If you run this code it will now log an error for every vehicle with an ID that's not unique.
+
+### 5. Add a unit test for the new rule
+
+Like any software project, we add [unit tests](v) for all new rules to make sure that as the application continues to grow we don't accidentally break anything.
+
+Because we added the rule in `VehicleValidator`, we'll add the unit test for this rule in [`VehicleValidatorTest`](https://github.com/CUTR-at-USF/gtfs-realtime-validator/blob/master/gtfs-realtime-validator-lib/src/test/java/edu/usf/cutr/gtfsrtvalidator/lib/test/rules/VehicleValidatorTest.java).
+
+(If you created a new `MyValidator.java` class earlier, you'll want to create a new `MyValidatorTest.java` class in the [`test/rules`](https://github.com/CUTR-at-USF/gtfs-realtime-validator/tree/master/gtfs-realtime-validator-lib/src/test/java/edu/usf/cutr/gtfsrtvalidator/lib/test/rules) directory, and have it extend [`FeedMessageTest`](https://github.com/CUTR-at-USF/gtfs-realtime-validator/blob/master/gtfs-realtime-validator-lib/src/test/java/edu/usf/cutr/gtfsrtvalidator/lib/test/FeedMessageTest.java))
+
+Because our test classes extend [`FeedMessageTest`](https://github.com/CUTR-at-USF/gtfs-realtime-validator/blob/master/gtfs-realtime-validator-lib/src/test/java/edu/usf/cutr/gtfsrtvalidator/lib/test/FeedMessageTest.java), a lot of the setup of loading test GTFS data and initializing GTFS-realtime data structures is already taken care of.  We'll only cover the details that you absolutely need to know for writing a new rule. 
+
+First, we will create a new method annotated with `@Test` in [`VehicleValidatorTest`](https://github.com/CUTR-at-USF/gtfs-realtime-validator/blob/master/gtfs-realtime-validator-lib/src/test/java/edu/usf/cutr/gtfsrtvalidator/lib/test/rules/VehicleValidatorTest.java):
+
+    /**
+     * E052 - vehicle.id is not unique
+     */
+    @Test
+    public void testE052() {
+    
+    }
+    
+Then, we'll add 
