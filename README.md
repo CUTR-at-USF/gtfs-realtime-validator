@@ -48,7 +48,7 @@ See the [batch processing](gtfs-realtime-validator-lib/README.md#batch-processin
 * [Implemented rules](RULES.md)
 * [Planned future rules](https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues?q=is%3Aissue+is%3Aopen+label%3A%22new+rule%22)
 
-Have a suggestion for a new rule?  Open an issue with the ["new rule" label](https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues?q=is%3Aissue+is%3Aopen+label%3A%22new+rule%22).
+Have a suggestion for a new rule?  Open an issue with the ["new rule" label](https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues?q=is%3Aissue+is%3Aopen+label%3A%22new+rule%22).  You can see the complete process for adding new rules on the [Adding new rules](ADDING_NEW_RULES.md) page.
  
 ## Building the project 
 

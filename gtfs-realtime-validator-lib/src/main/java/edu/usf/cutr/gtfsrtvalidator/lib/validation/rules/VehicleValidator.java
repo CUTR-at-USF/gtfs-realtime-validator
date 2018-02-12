@@ -31,6 +31,7 @@ import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import static edu.usf.cutr.gtfsrtvalidator.lib.util.GtfsUtils.getTripId;
@@ -46,6 +47,7 @@ import static edu.usf.cutr.gtfsrtvalidator.lib.validation.ValidationRules.*;
  * E029 - Vehicle position outside trip shape buffer
  * W002 - vehicle_id not populated
  * W004 - vehicle speed is unrealistic
+ * E052 - vehicle.id is not unique
  */
 
 public class VehicleValidator implements FeedEntityValidator {
@@ -63,6 +65,9 @@ public class VehicleValidator implements FeedEntityValidator {
         List<OccurrenceModel> e029List = new ArrayList<>();
         List<OccurrenceModel> w002List = new ArrayList<>();
         List<OccurrenceModel> w004List = new ArrayList<>();
+        List<OccurrenceModel> e052List = new ArrayList<>();
+
+        HashSet<String> vehicleIds = new HashSet<>(entityList.size());
 
         for (GtfsRealtime.FeedEntity entity : entityList) {
             if (entity.hasTripUpdate()) {
@@ -79,6 +84,13 @@ public class VehicleValidator implements FeedEntityValidator {
                 if (StringUtils.isEmpty(v.getVehicle().getId())) {
                     // W002 - vehicle_id not populated
                     RuleUtils.addOccurrence(W002, "entity ID " + entity.getId(), w002List, _log);
+                } else {
+                    if (vehicleIds.contains(v.getVehicle().getId())) {
+                        // E052 - vehicle.id is not unique
+                        RuleUtils.addOccurrence(E052, "entity ID " + entity.getId() + " has vehicle.id " + v.getVehicle().getId(), e052List, _log);
+                    } else {
+                        vehicleIds.add(v.getVehicle().getId());
+                    }
                 }
 
                 if (v.hasPosition() && v.getPosition().hasSpeed()) {
@@ -134,6 +146,9 @@ public class VehicleValidator implements FeedEntityValidator {
         }
         if (!w004List.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(W004), w004List));
+        }
+        if (!e052List.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E052), e052List));
         }
         return errors;
     }
