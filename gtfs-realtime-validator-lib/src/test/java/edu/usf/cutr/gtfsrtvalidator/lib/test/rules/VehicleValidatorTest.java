@@ -780,26 +780,10 @@ public class VehicleValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-        // No warnings, if position isn't populated
+        // No warnings, as there is only one vehicle in the feed
         results = vehicleValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
         TestUtils.assertResults(expected, results);
 
-        GtfsRealtime.Position.Builder positionBuilder = GtfsRealtime.Position.newBuilder();
-
-        // Set valid lat and long (USF Campus in Tampa, FL), as they are required fields
-        positionBuilder.setLatitude(28.0587f);
-        positionBuilder.setLongitude(-82.4139f);
-
-        vehiclePositionBuilder.setPosition(positionBuilder.build());
-
-        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
-        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
-        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-
-        // No warnings, if bearing isn't populated
-        results = vehicleValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
-        expected.clear();
-        TestUtils.assertResults(expected, results);
     }
 }

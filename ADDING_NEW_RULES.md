@@ -262,4 +262,136 @@ First, we will create a new method annotated with `@Test` in [`VehicleValidatorT
     
     }
     
-Then, we'll add 
+Then, we'll add the validator class we're testing:
+
+    /**
+     * E052 - vehicle.id is not unique
+     */
+    @Test
+    public void testE052() {
+        VehicleValidator vehicleValidator = new VehicleValidator();  // This contains the code for the rule we just wrote
+        
+    }
+    
+Next, we need to add a data structure to hold the expected results from the unit test.  In our case, it's the number of occurrences of each error or warning, in the form of a map of the `ValidationRule` to the number of expected errors or warnings (an `Integer`):
+
+    /**
+     * E052 - vehicle.id is not unique
+     */
+    @Test
+    public void testE052() {
+        VehicleValidator vehicleValidator = new VehicleValidator();
+        Map<ValidationRule, Integer> expected = new HashMap<>();  // This will contain the expected output of the validator
+        
+    }
+    
+Now we can create the GTFS-realtime VehiclePosition messages that we're going to test our rule against.  First, let's just add a single message with the vehicle ID of `1`:
+
+    /**
+     * E052 - vehicle.id is not unique
+     */
+    @Test
+    public void testE052() {
+        VehicleValidator vehicleValidator = new VehicleValidator();
+        Map<ValidationRule, Integer> expected = new HashMap<>();
+
+        // The below code declares a VehicleDescription with the "id" of "1"
+        GtfsRealtime.VehicleDescriptor.Builder vehicleDescriptorBuilder = GtfsRealtime.VehicleDescriptor.newBuilder();
+        vehicleDescriptorBuilder.setId("1");
+
+        // The below code adds the above VehicleDescriptor to a VehiclePosition entity, and builds a new GTFS-realtime message that contains that entity
+        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+    }
+    
+We now have a GTFS-realtime feed with a single `VehiclePosition` message. Note that the `vehiclePositionBuilder` we're adding the `VehicleDescriptor` has already been declared and initialized in the class we're extending, which is `FeedMessageTest`.  This cuts down on the boilerplace code in each unit test.
+
+Now let's run our test data through the `vehicleValidator` to actually validate it using the rule we just wrote:
+
+    /**
+     * E052 - vehicle.id is not unique
+     */
+    @Test
+    public void testE052() {
+        VehicleValidator vehicleValidator = new VehicleValidator();
+        Map<ValidationRule, Integer> expected = new HashMap<>();
+
+        GtfsRealtime.VehicleDescriptor.Builder vehicleDescriptorBuilder = GtfsRealtime.VehicleDescriptor.newBuilder();
+        vehicleDescriptorBuilder.setId("1");
+
+        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        // Execute all rules in the VehicleValidator class, including E052 that we just wrote and store results in "results"
+        results = vehicleValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
+        
+    }
+
+We again use several fields from the `FeedMessageTest` super class:
+    * `results` - Used to store a list of errors and warnings that were detected
+    * `bullRunnerGtfs` - GTFS data against which the rules are executed.  We support several different example GTFS datasets used to test rules under different conditions (e.g., frequency-based vs. schedule based, no shape data).  For the purpose of determining if the vehicle ID is unique, the GTFS data doesn't matter, so we can choose any GTFS dataset here.
+    * `bullRunnerGtfsMetadata` - The metadata calculated for the above GTFS data.  The important part for this parameter is that this metadata is always paired with the correct GTFS data (i.e., the metadata was created using this GTFS dataset).
+    
+We also need to pass in the "current time" for when this data was captured, so certain rules that measure message age can be calculated.  For our purposes here the current time doesn't matter, so we just use the minimum valid POSIX time (`MIN_POSIX_TIME`).
+
+We pass in the built testing message as `feedMessageBuilder.build()`.
+
+We can leave the last two parameters, `previousFeedMessage` and `combinedFeedMessage` as null for this test.  `previousFeedMessage` would be the message received just prior to the current message being evaluated - this allows us to execute rules that look at the interval of time between updates, whether or not the message contents actually change, etc.  The `combinedFeedMessage`  would include entities from all GTFS-rt feeds being monitored simultaneously for the same GTFS dataset (e.g., VehiclePosition and TripUpdate).  If only one GTFS-rt feed is being monitored for the GTFS dataset, then this is null.
+
+Now that we have the actual results of validation, we need to initialize the expected results in `expected`.  In this initial case, we only have a single vehicle, so rule `E052` shouldn't detect any errors - in this case we can just clear the `expected` map to make sure it doesn't contain any expected errors: 
+
+    /**
+     * E052 - vehicle.id is not unique
+     */
+    @Test
+    public void testE052() {
+        VehicleValidator vehicleValidator = new VehicleValidator();
+        Map<ValidationRule, Integer> expected = new HashMap<>();
+
+        GtfsRealtime.VehicleDescriptor.Builder vehicleDescriptorBuilder = GtfsRealtime.VehicleDescriptor.newBuilder();
+        vehicleDescriptorBuilder.setId("1");
+
+        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+        
+        results = vehicleValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
+        expected.clear(); // We don't expect any errors, so clear the map to make sure it's empty
+        
+    }
+
+Finally, we can use the `TestUtils` class to help assert that out actual output of the validation rule matches the expected output:
+
+    /**
+     * E052 - vehicle.id is not unique
+     */
+    @Test
+    public void testE052() {
+        VehicleValidator vehicleValidator = new VehicleValidator();
+        Map<ValidationRule, Integer> expected = new HashMap<>();
+
+        GtfsRealtime.VehicleDescriptor.Builder vehicleDescriptorBuilder = GtfsRealtime.VehicleDescriptor.newBuilder();
+        vehicleDescriptorBuilder.setId("1");
+
+        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = vehicleValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
+        expected.clear();
+        TestUtils.assertResults(expected, results); // Make sure that the actual output matches the expected output
+
+    }
+
+Now, we need to add another vehicle to the feed so there is a conflicting ID - this should trigger a single occurrence of rule E052.
+
+
+
+
+
+Note that in some scenarios you may need to create sample test data to evaluate a new rule that also triggers errors generated by other rules.  In that case, if this is expected behavior based on the rules, you can just add multiple entries to the `map`, one for each rule->count mapping. 
+
+    
