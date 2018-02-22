@@ -53,6 +53,7 @@ Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-U
 | [E049](#E049) | `header` `incrementality` not populated (GTFS-rt v2.0 and higher)
 | [E050](#E050) | `timestamp` is in the future
 | [E051](#E051) | GTFS-rt `stop_sequence` not found in GTFS data
+| [E052](#E052) | `vehicle.id` is not unique
 
 ### Table of Warnings
 
@@ -702,6 +703,19 @@ See [this issue](https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues/2
 #### References:
 * [`stop_time_update`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-stoptimeupdate)
 * [GTFS `stop_times.txt`](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#stop_timestxt)
+
+<a name="E052"/>
+
+### E052 - `vehicle.id` is not unique
+
+Each vehicle should have a unique ID.
+
+From [VehiclePosition.VehicleDescriptor](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-vehicledescriptor) for `vehicle.id`:
+
+>Internal system identification of the vehicle. Should be unique per vehicle, and is used for tracking the vehicle as it proceeds through the system. This id should not be made visible to the end-user; for that purpose use the label field
+
+#### References:
+* [`vehicle.id`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-vehicledescriptor)
 
 # Warnings
 

@@ -264,6 +264,10 @@ public class ValidationRules {
             "All stop_time_update stop_sequences in GTFS-realtime data must appear in GTFS stop_times.txt for that trip",
             "that does not exist in GTFS stop_times.txt for this trip");
 
+    public static final ValidationRule E052 = new ValidationRule("E052", "ERROR", "vehicle.id is not unique",
+            "Each vehicle should have a unique ID",
+            "which is used by more than one vehicle in the feed");
+
     private static List<ValidationRule> mAllRules = new ArrayList<>();
 
     /**
