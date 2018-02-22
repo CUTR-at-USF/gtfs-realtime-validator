@@ -130,7 +130,7 @@ To keep easy track of what rules are implemented in which `*Validator` class, ad
 public class VehicleValidator implements FeedEntityValidator {
 ~~~
 
-### 4. Add the validation logic for the new rule
+### 5. Add the validation logic for the new rule
 
 This exact process will differ for each rule, but first let's cover some of the basics that are the same across any rule implementation in the `*Validator.validate()` method.
 
@@ -244,7 +244,7 @@ To better understand that last step, let's break down the line:
 
 That's it for the rule itself!  If you run this code it will now log an error for every vehicle with an ID that's not unique.
 
-### 5. Add a unit test for the new rule
+### 6. Add a unit test for the new rule
 
 Like any software project, we add [unit tests](v) for all new rules to make sure that as the application continues to grow we don't accidentally break anything.
 
