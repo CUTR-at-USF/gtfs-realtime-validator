@@ -488,4 +488,4 @@ You can fix other failing unit tests by adding an occurrence of the new rule - f
         
 Before fixing other unit tests that start failing after you add a new test, it's important to make sure that you understand the rule that started failing as well as the input data to make sure that this is expected behavior, and that you didn't accidentally introduce a bug that's causing the other test to fail.
 
-You can take a look at a complete set of changes that implement the new rule E052 in [this commit on Github](https://github.com/CUTR-at-USF/gtfs-realtime-validator/commit/121173f5167cc0d460c3eb50b3582265470671c4).
+That's it, you're all done!  You can take a look at a complete set of changes that implement the new rule E052 in [this commit on Github](https://github.com/CUTR-at-USF/gtfs-realtime-validator/commit/121173f5167cc0d460c3eb50b3582265470671c4).
