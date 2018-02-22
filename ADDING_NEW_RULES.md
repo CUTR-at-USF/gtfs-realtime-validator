@@ -246,7 +246,7 @@ That's it for the rule itself!  If you run this code it will now log an error fo
 
 ### 6. Add a unit test for the new rule
 
-Like any software project, we add [unit tests](v) for all new rules to make sure that as the application continues to grow we don't accidentally break anything.
+Like any software project, we add [unit tests](https://en.wikipedia.org/wiki/Unit_testing) for all new rules to make sure that as the application continues to grow we don't accidentally break anything.
 
 Because we added the rule in `VehicleValidator`, we'll add the unit test for this rule in [`VehicleValidatorTest`](https://github.com/CUTR-at-USF/gtfs-realtime-validator/blob/master/gtfs-realtime-validator-lib/src/test/java/edu/usf/cutr/gtfsrtvalidator/lib/test/rules/VehicleValidatorTest.java).
 
