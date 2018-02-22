@@ -12,6 +12,8 @@ We will want to add new rules to this validator as the [GTFS-realtime spec](http
 
 For the below example, let's look at implementing a new rule that will make sure that each `vehicle.id` in a VehiclePositions feed is unique.  If there are two VehiclePosition entities in a feed with the same `vehicle.id`, then the validator should log an error.
 
+If you want to take a look at a complete set of changes that implement this new rule before diving into the instructions, see [this commit on Github](https://github.com/CUTR-at-USF/gtfs-realtime-validator/commit/121173f5167cc0d460c3eb50b3582265470671c4).
+
 ### 1. Add the rule to `ValidationRules.java`
 
 Rules are declared in the [`ValidationRules.java` class](https://github.com/CUTR-at-USF/gtfs-realtime-validator/blob/master/src/main/java/edu/usf/cutr/gtfsrtvalidator/validation/ValidationRules.java).
@@ -485,3 +487,5 @@ You can fix other failing unit tests by adding an occurrence of the new rule - f
         TestUtils.assertResults(expected, results);
         
 Before fixing other unit tests that start failing after you add a new test, it's important to make sure that you understand the rule that started failing as well as the input data to make sure that this is expected behavior, and that you didn't accidentally introduce a bug that's causing the other test to fail.
+
+You can take a look at a complete set of changes that implement the new rule E052 in [this commit on Github](https://github.com/CUTR-at-USF/gtfs-realtime-validator/commit/121173f5167cc0d460c3eb50b3582265470671c4).
