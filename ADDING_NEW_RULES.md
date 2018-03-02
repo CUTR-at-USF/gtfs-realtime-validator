@@ -2,7 +2,7 @@
 
 We will want to add new rules to this validator as the [GTFS-realtime spec](https://github.com/google/transit/tree/master/gtfs-realtime) and the surrounding applications and tools change.  This page outlines the process of adding new rules to this tool
 
-### 0. - Prepare for implementation 
+### 0. Prepare for implementation 
 
 * Check the list of [currently implemented rules](RULES.md) to make sure the rule doesn't already exist.
 * Check the list of [planned future rules](https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues?q=is%3Aissue+is%3Aopen+label%3A%22new+rule%22) to see if an issue already exists for the proposed rule.
