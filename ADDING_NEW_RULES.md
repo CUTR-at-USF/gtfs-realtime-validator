@@ -1,6 +1,6 @@
 # Adding new rules
 
-We will want to add new rules to this validator as the [GTFS-realtime spec](https://github.com/google/transit/tree/master/gtfs-realtime) and the surrounding applications and tools change.  This page outlines the process of adding new rules to this tool
+We will want to add new rules to this validator as the [GTFS-realtime spec](https://github.com/google/transit/tree/master/gtfs-realtime) and the surrounding applications and tools change.  This page outlines the process of adding new rules to this tool.
 
 ### 0. Prepare for implementation 
 
