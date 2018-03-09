@@ -109,6 +109,10 @@ Note that the validator also has a [batch processing mode](gtfs-realtime-validat
  
 Want to run this in [Docker](https://www.docker.com/)?  Check out [gtfs-realtime-validator-docker](https://github.com/scrudden/gtfs-realtime-validator-docker).
 
+## Troubleshooting
+
+Having problems?  Check out our [Troubleshooting guide](TROUBLESHOOTING.md).
+
 ## CUTR Release Process
 
 **Snapshots**
