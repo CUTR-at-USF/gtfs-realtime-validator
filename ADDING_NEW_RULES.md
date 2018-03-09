@@ -140,20 +140,14 @@ First, at the beginning of the `*Validator.validate()` method you'll need to dec
      public List<ErrorListHelperModel> validate(long currentTimeMillis, GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage, GtfsRealtime.FeedMessage combinedFeedMessage) {
          List<GtfsRealtime.FeedEntity> entityList = feedMessage.getEntityList();
          List<OccurrenceModel> e026List = new ArrayList<>();
-         List<OccurrenceModel> e027List = new ArrayList<>();
-         List<OccurrenceModel> e028List = new ArrayList<>();
-         List<OccurrenceModel> e029List = new ArrayList<>();
-         List<OccurrenceModel> w002List = new ArrayList<>();
-         List<OccurrenceModel> w004List = new ArrayList<>();
+         ...
          List<OccurrenceModel> e052List = new ArrayList<>(); // <--- Add this
 ~~~
 
 And, at the end of the `*Validator.validate()` method you'll need to add this list of E052 occurrences to the list of all errors/warnings that are returned by this `*Validator`:
 
 ~~~
-        if (!w002List.isEmpty()) {
-            errors.add(new ErrorListHelperModel(new MessageLogModel(W002), w002List));
-        }
+        ...
         if (!w004List.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(W004), w004List));
         }
@@ -294,8 +288,7 @@ Now we can create the GTFS-realtime VehiclePosition messages that we're going to
      */
     @Test
     public void testE052() {
-        VehicleValidator vehicleValidator = new VehicleValidator();
-        Map<ValidationRule, Integer> expected = new HashMap<>();
+        ...
 
         // The below code declares a VehicleDescription with the "id" of "1"
         GtfsRealtime.VehicleDescriptor.Builder vehicleDescriptorBuilder = GtfsRealtime.VehicleDescriptor.newBuilder();
@@ -317,15 +310,7 @@ Now let's run our test data through the `vehicleValidator` to actually validate 
      */
     @Test
     public void testE052() {
-        VehicleValidator vehicleValidator = new VehicleValidator();
-        Map<ValidationRule, Integer> expected = new HashMap<>();
-
-        GtfsRealtime.VehicleDescriptor.Builder vehicleDescriptorBuilder = GtfsRealtime.VehicleDescriptor.newBuilder();
-        vehicleDescriptorBuilder.setId("1");
-
-        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
-        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
-        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+        ...
 
         // Execute all rules in the VehicleValidator class, including E052 that we just wrote and store results in "results"
         results = vehicleValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
@@ -350,17 +335,8 @@ Now that we have the actual results of validation, we need to initialize the exp
      */
     @Test
     public void testE052() {
-        VehicleValidator vehicleValidator = new VehicleValidator();
-        Map<ValidationRule, Integer> expected = new HashMap<>();
-
-        GtfsRealtime.VehicleDescriptor.Builder vehicleDescriptorBuilder = GtfsRealtime.VehicleDescriptor.newBuilder();
-        vehicleDescriptorBuilder.setId("1");
-
-        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
-        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
-        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+        ...        
         
-        results = vehicleValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
         expected.clear(); // We don't expect any errors, so clear the map to make sure it's empty
         
     }
@@ -372,18 +348,8 @@ Finally, we can use the `TestUtils` class to help assert that out actual output 
      */
     @Test
     public void testE052() {
-        VehicleValidator vehicleValidator = new VehicleValidator();
-        Map<ValidationRule, Integer> expected = new HashMap<>();
-
-        GtfsRealtime.VehicleDescriptor.Builder vehicleDescriptorBuilder = GtfsRealtime.VehicleDescriptor.newBuilder();
-        vehicleDescriptorBuilder.setId("1");
-
-        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
-        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
-        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-
-        results = vehicleValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
-        expected.clear();
+        ...
+        
         TestUtils.assertResults(expected, results); // Make sure that the actual output matches the expected output
 
     }
@@ -397,19 +363,7 @@ Now, we need to add another vehicle to the feed so there is a conflicting ID - t
      */
     @Test
     public void testE052() {
-        VehicleValidator vehicleValidator = new VehicleValidator();
-        Map<ValidationRule, Integer> expected = new HashMap<>();
-
-        GtfsRealtime.VehicleDescriptor.Builder vehicleDescriptorBuilder = GtfsRealtime.VehicleDescriptor.newBuilder();
-        vehicleDescriptorBuilder.setId("1");
-
-        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
-        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
-        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-
-        results = vehicleValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
-        expected.clear();
-        TestUtils.assertResults(expected, results);
+        ...
         
         // Add a 2nd VehiclePosition entity with the same vehicle ID of 1
         GtfsRealtime.VehicleDescriptor.Builder vehicleDescriptorBuilderConflict = GtfsRealtime.VehicleDescriptor.newBuilder();
@@ -428,26 +382,7 @@ Now we need to run validation on this test data, set up the expected output to b
      */
     @Test
     public void testE052() {
-        VehicleValidator vehicleValidator = new VehicleValidator();
-        Map<ValidationRule, Integer> expected = new HashMap<>();
-
-        GtfsRealtime.VehicleDescriptor.Builder vehicleDescriptorBuilder = GtfsRealtime.VehicleDescriptor.newBuilder();
-        vehicleDescriptorBuilder.setId("1");
-
-        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
-        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
-        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
-
-        results = vehicleValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
-        expected.clear();
-        TestUtils.assertResults(expected, results);
-
-        GtfsRealtime.VehicleDescriptor.Builder vehicleDescriptorBuilderConflict = GtfsRealtime.VehicleDescriptor.newBuilder();
-        vehicleDescriptorBuilderConflict.setId("1");
-
-        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
-        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
-        feedMessageBuilder.addEntity(1, feedEntityBuilder.build());
+        ...
 
         // 1 error for duplicate vehicle ID of 1
         results = vehicleValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
@@ -457,7 +392,50 @@ Now we need to run validation on this test data, set up the expected output to b
         clearAndInitRequiredFeedFields(); // All unit tests should end with this method to make sure all the objects are re-initialized for the next test
     }
 
-That's it for this unit test! Note that in some scenarios you may create sample test data to evaluate a new rule that also triggers errors generated by other rules.  In that case, if this is expected behavior based on the rules, you can just add multiple entries to the `map`, one for each rule->count mapping.  For example:
+That's it for this unit test!  Here's the full unit test that includes all of the above code:
+
+     /**
+      * E052 - vehicle.id is not unique
+      */
+     @Test
+     public void testE052() {
+         VehicleValidator vehicleValidator = new VehicleValidator();
+         Map<ValidationRule, Integer> expected = new HashMap<>();
+     
+         // Set up the test data for a scenario with no errors (no vehicles with duplicate IDs)
+         GtfsRealtime.VehicleDescriptor.Builder vehicleDescriptorBuilder = GtfsRealtime.VehicleDescriptor.newBuilder();
+         vehicleDescriptorBuilder.setId("1");
+     
+         vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
+         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+     
+         // Run validation using the VehicleValidator
+         results = vehicleValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
+         // We aren't expecting any errors, so clear the expected errors data structure
+         expected.clear();
+         // Compare the expected results to the actual results of validation
+         TestUtils.assertResults(expected, results);
+     
+         // Set up the test data for a scenario with one error (ID "1" is duplicated in Entity 0 and Entity 1)
+         GtfsRealtime.VehicleDescriptor.Builder vehicleDescriptorBuilderConflict = GtfsRealtime.VehicleDescriptor.newBuilder();
+         vehicleDescriptorBuilderConflict.setId("1");
+     
+         vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
+         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+         feedMessageBuilder.addEntity(1, feedEntityBuilder.build());
+     
+         // Run validation using the VehicleValidator
+         results = vehicleValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
+         // Set up expected results of 1 error for E052
+         expected.put(E052, 1);
+         // Confirm that the validator returned one error for E052
+         TestUtils.assertResults(expected, results);
+     
+         clearAndInitRequiredFeedFields(); // All unit tests should end with this method to make sure all the objects are re-initialized for the next test
+     }
+
+Note that in some scenarios you may create sample test data to evaluate a new rule that also triggers errors generated by other rules.  In that case, if this is expected behavior based on the rules, you can just add multiple entries to the `map`, one for each rule->count mapping.  For example:
 
         // Expect 1 occurrence of E052 and 1 occurrence of E053 
         expected.put(E052, 1); 
