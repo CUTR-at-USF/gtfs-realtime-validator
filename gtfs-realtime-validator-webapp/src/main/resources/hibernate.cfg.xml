@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE hibernate-configuration PUBLIC "-//Hibernate/Hibernate Configuration DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<!DOCTYPE hibernate-configuration PUBLIC "-//Hibernate/Hibernate Configuration DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
 <hibernate-configuration>
   <session-factory>
-    <property name="hibernate.dialect">org.hibernate.dialect.HSQLDialect</property>
-    <property name="hibernate.connection.driver_class">org.hsqldb.jdbcDriver</property>
-    <property name="hibernate.connection.url">jdbc:hsqldb:file:gtfsrthsql;hsqldb.log_data=false</property>
+    <property name="hibernate.dialect">org.hibernate.dialect.SQLServer2012Dialect</property>
+    <property name="hibernate.connection.driver_class">com.microsoft.sqlserver.jdbc.SQLServerDriver</property>
+    <property name="hibernate.connection.url">jdbc:sqlserver://cutr-db2.forest.usf.edu:1433;databaseName=gtfs-realtime-validator</property>
     <property name="hibernate.c3p0.min_size">1</property>
     <property name="hibernate.c3p0.max_size">1</property>
     <property name="hibernate.c3p0.timeout">1800</property>
     <property name="hibernate.c3p0.max_statements">50</property>
-    <property name="hibernate.connection.username">sa</property>
-    <property name="hibernate.connection.password"></property>
+    <property name="hibernate.connection.username">gtfs-rt-user9555</property>
+    <property name="hibernate.connection.password">8444Test*&amp;</property>
     <property name="hibernate.hbm2ddl.auto">update</property>
+    <property name="show_sql">true</property>
     <mapping class="edu.usf.cutr.gtfsrtvalidator.lib.model.GtfsFeedIterationModel"/>
     <mapping class="edu.usf.cutr.gtfsrtvalidator.lib.model.GtfsFeedModel"/>
     <mapping class="edu.usf.cutr.gtfsrtvalidator.lib.model.GtfsRtFeedIterationModel"/>

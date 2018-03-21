@@ -69,15 +69,16 @@ public class QueryTest extends TestCase {
             String createQuery = new String(encoded, "UTF-8");
 
             String[] createStatements = createQuery.split(";");
-
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+            Connection con = DriverManager.getConnection("jdbc:sqlserver://cutr-db2.forest.usf.edu:1433;databaseName=gtfs-realtime-validator",
+                    "gtfs-rt-user9555", "8444Test*&");
             for (String createStatement : createStatements) {
-                Class.forName("org.hsqldb.jdbcDriver");
-                Connection con = DriverManager.getConnection("jdbc:hsqldb:file:gtfsrthsql", "sa", "");
                 stmt = con.createStatement();
+                System.out.println(createStatement);
                 stmt.execute(createStatement);
                 stmt.close();
-                con.close();
             }
+            con.close();
         } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
@@ -176,11 +177,38 @@ public class QueryTest extends TestCase {
         staticResult.add(viewErrorLogModel);
 
         viewErrorLogModel = new ViewErrorLogModel();
+        viewErrorLogModel.setRowId(1);
+        viewErrorLogModel.setGtfsRtId(gtfsRtId);
+        viewErrorLogModel.setIterationId(-2);
+        viewErrorLogModel.setOccurrence(1);
+        viewErrorLogModel.setLoggingTime(1);
+        viewErrorLogModel.setId("E002");
+        viewErrorLogModel.setSeverity("ERROR");
+        viewErrorLogModel.setTitle("Unsorted stop_sequence");
+        viewErrorLogModel.setFormattedTimestamp(gtfsRtFeed.getDateFormat(viewErrorLogModel.getOccurrence(), gtfsRtId));
+        viewErrorLogModel.setTimeZone(GtfsRtFeed.agencyTimezone);
+
+        staticResult.add(viewErrorLogModel);
+        viewErrorLogModel = new ViewErrorLogModel();
         viewErrorLogModel.setRowId(2);
         viewErrorLogModel.setGtfsRtId(gtfsRtId);
         viewErrorLogModel.setIterationId(-1);
         viewErrorLogModel.setOccurrence(2);
         viewErrorLogModel.setLoggingTime(2);
+        viewErrorLogModel.setId("W001");
+        viewErrorLogModel.setSeverity("WARNING");
+        viewErrorLogModel.setTitle("Timestamp not populated");
+        viewErrorLogModel.setFormattedTimestamp(gtfsRtFeed.getDateFormat(viewErrorLogModel.getOccurrence(), gtfsRtId));
+        viewErrorLogModel.setTimeZone(GtfsRtFeed.agencyTimezone);
+
+        staticResult.add(viewErrorLogModel);
+
+        viewErrorLogModel = new ViewErrorLogModel();
+        viewErrorLogModel.setRowId(1);
+        viewErrorLogModel.setGtfsRtId(gtfsRtId);
+        viewErrorLogModel.setIterationId(-2);
+        viewErrorLogModel.setOccurrence(1);
+        viewErrorLogModel.setLoggingTime(1);
         viewErrorLogModel.setId("W001");
         viewErrorLogModel.setSeverity("WARNING");
         viewErrorLogModel.setTitle("Timestamp not populated");
@@ -198,34 +226,6 @@ public class QueryTest extends TestCase {
         viewErrorLogModel.setId("W002");
         viewErrorLogModel.setSeverity("WARNING");
         viewErrorLogModel.setTitle("Vehicle_id not populated");
-        viewErrorLogModel.setFormattedTimestamp(gtfsRtFeed.getDateFormat(viewErrorLogModel.getOccurrence(), gtfsRtId));
-        viewErrorLogModel.setTimeZone(GtfsRtFeed.agencyTimezone);
-
-        staticResult.add(viewErrorLogModel);
-
-        viewErrorLogModel = new ViewErrorLogModel();
-        viewErrorLogModel.setRowId(1);
-        viewErrorLogModel.setGtfsRtId(gtfsRtId);
-        viewErrorLogModel.setIterationId(-2);
-        viewErrorLogModel.setOccurrence(1);
-        viewErrorLogModel.setLoggingTime(1);
-        viewErrorLogModel.setId("E002");
-        viewErrorLogModel.setSeverity("ERROR");
-        viewErrorLogModel.setTitle("Unsorted stop_sequence");
-        viewErrorLogModel.setFormattedTimestamp(gtfsRtFeed.getDateFormat(viewErrorLogModel.getOccurrence(), gtfsRtId));
-        viewErrorLogModel.setTimeZone(GtfsRtFeed.agencyTimezone);
-
-        staticResult.add(viewErrorLogModel);
-
-        viewErrorLogModel = new ViewErrorLogModel();
-        viewErrorLogModel.setRowId(1);
-        viewErrorLogModel.setGtfsRtId(gtfsRtId);
-        viewErrorLogModel.setIterationId(-2);
-        viewErrorLogModel.setOccurrence(1);
-        viewErrorLogModel.setLoggingTime(1);
-        viewErrorLogModel.setId("W001");
-        viewErrorLogModel.setSeverity("WARNING");
-        viewErrorLogModel.setTitle("Timestamp not populated");
         viewErrorLogModel.setFormattedTimestamp(gtfsRtFeed.getDateFormat(viewErrorLogModel.getOccurrence(), gtfsRtId));
         viewErrorLogModel.setTimeZone(GtfsRtFeed.agencyTimezone);
 

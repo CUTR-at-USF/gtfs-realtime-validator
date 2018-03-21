@@ -25,21 +25,20 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @Entity
 @NamedNativeQuery(name = "IterationIdErrors",
-        query = "SELECT ROWNUM() AS rowId, occurrenceId, " +
-                    "errorId, title, occurrencePrefix, occurrenceSuffix " +
+        query = "SELECT ROW_NUMBER() OVER(ORDER BY occurrenceId) AS rowId, occurrenceId, " +
+                    "Error.errorId, title, occurrencePrefix, occurrenceSuffix " +
                 "FROM Error " +
                 "INNER JOIN " +
-                    "(SELECT messageId, errorId, prefix AS occurrencePrefix, occurrenceId " +
+                    "(SELECT Occurrence.messageId, prefix AS occurrencePrefix, occurrenceId " +
                     "FROM " +
                     "Occurrence " +
                     "INNER JOIN " +
-                        "(SELECT messageId, errorId " +
+                        "(SELECT MessageLog.messageId, MessageLog.errorId " +
                         "FROM MessageLog " +
                         "WHERE iterationId = ?) MessageLogIteration " +
                     "ON Occurrence.messageId = MessageLogIteration.messageId " +
-                    "WHERE messageId = ? ) OccurrenceList " +
-                "ON Error.errorId = OccurrenceList.errorId " +
-                "ORDER BY occurrenceId ",
+                    "WHERE Occurrence.messageId = ? ) OccurrenceList " +
+                "ON Error.errorId = OccurrenceList.errorId ",
         resultClass = ViewIterationErrorsModel.class)
 public class ViewIterationErrorsModel {
 
