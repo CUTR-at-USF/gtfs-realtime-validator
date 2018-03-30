@@ -99,7 +99,10 @@ public class GtfsRtFeed {
 
         Session session = GTFSDB.initSessionBeginTrans();
         GtfsRtFeedModel storedFeedInfo = (GtfsRtFeedModel) session.createQuery(" FROM GtfsRtFeedModel WHERE "
-                + "gtfsRtUrl= '"+feedInfo.getGtfsRtUrl()+"' AND gtfsFeedModel.feedId = "+feedInfo.getGtfsFeedModel().getFeedId()).uniqueResult();
+                + "gtfsRtUrl= :gtfsRtUrl AND gtfsFeedModel.feedId = :feedId")
+                .setParameter("gtfsRtUrl", feedInfo.getGtfsRtUrl())
+                .setParameter("feedId", feedInfo.getGtfsFeedModel().getFeedId())
+                .uniqueResult();
         GTFSDB.commitAndCloseSession(session);
         if(storedFeedInfo == null) {    //If null, create the gtfs-rt feed in the DB and return the feed
             session = GTFSDB.initSessionBeginTrans();
@@ -141,7 +144,9 @@ public class GtfsRtFeed {
         //Get RtFeedModel from id
         Session session = GTFSDB.initSessionBeginTrans();
         GtfsRtFeedModel gtfsRtFeed = (GtfsRtFeedModel) session.createQuery(" FROM GtfsRtFeedModel "
-                + "WHERE rtFeedID = "+id).uniqueResult();
+                + "WHERE rtFeedID = :id")
+                .setParameter("id", id)
+                .uniqueResult();
 
         // Save the session data of a client monitoring feeds.
         SessionModel sessionModel = new SessionModel();
@@ -307,9 +312,10 @@ public class GtfsRtFeed {
          * ORDER BY errorId helps to have errors/warnings in ascending order i.e., first errors in ascending order then warnings in ascending order
          */
         messageIdList = session.createQuery(" SELECT messageId FROM MessageLogModel" +
-                                                " WHERE iterationId = " + iterationId +
+                                                " WHERE iterationId = :iterationId" +
                                                 " ORDER BY errorId")
-                                            .list();
+                .setParameter("iterationId", iterationId)
+                .list();
 
         GTFSDB.closeSession(session);
 
@@ -361,11 +367,13 @@ public class GtfsRtFeed {
 
         if(iterationId > -1) {
             gtfsRtFeedIterationModel = (GtfsRtFeedIterationModel) session.createQuery(" FROM GtfsRtFeedIterationModel" +
-                    " WHERE IterationId = " + iterationId)
+                    " WHERE IterationId = :iterationId")
+                    .setParameter("iterationId", iterationId)
                     .uniqueResult();
         } else {
             gtfsRtFeedIterationModel = (GtfsRtFeedIterationModel) session.createQuery(" FROM GtfsRtFeedIterationModel" +
-                    " WHERE rtFeedID = " + gtfsRtId + "  ORDER BY IterationTimestamp DESC")
+                    " WHERE rtFeedID = :gtfsRtId  ORDER BY IterationTimestamp DESC")
+                    .setParameter("gtfsRtId", gtfsRtId)
                     .setMaxResults(1).getSingleResult();
         }
 
@@ -397,7 +405,9 @@ public class GtfsRtFeed {
         int rowId = 1;
 
         sessionModelList = session.createQuery(" FROM SessionModel" +
-                " WHERE clientId = '" + clientId + "'").list();
+                " WHERE clientId = :clientId")
+                .setParameter("clientId", clientId)
+                .list();
 
         Iterator iterator = sessionModelList.listIterator();
         SessionModel eachSessionModel;
@@ -430,7 +440,9 @@ public class GtfsRtFeed {
         long currentTime = System.currentTimeMillis();
         Session session = GTFSDB.initSessionBeginTrans();
 
-        SessionModel sessionModel = (SessionModel) session.createQuery(" FROM SessionModel WHERE sessionId = " + sessionId).uniqueResult();
+        SessionModel sessionModel = (SessionModel) session.createQuery(" FROM SessionModel WHERE sessionId = :sessionId")
+                .setParameter("sessionId", sessionId)
+                .uniqueResult();
         sessionModel.setSessionEndTime(currentTime);
 
         List<String> errorAndWarningList = session.createQuery(QueryHelper.sessionErrorsAndWarnings)
@@ -467,8 +479,11 @@ public class GtfsRtFeed {
     public Response getMessageDetails(@PathParam("id") int id, @PathParam("iteration") int iterationId) {
         CombinedIterationMessageModel messageList = new CombinedIterationMessageModel();
         Session session = GTFSDB.initSessionBeginTrans();
-        GtfsRtFeedIterationModel iterationModel = (GtfsRtFeedIterationModel) session.
-                            createQuery("  FROM GtfsRtFeedIterationModel WHERE IterationId = "+iterationId).uniqueResult();
+        GtfsRtFeedIterationModel iterationModel =
+                (GtfsRtFeedIterationModel) session.createQuery("  FROM GtfsRtFeedIterationModel WHERE " +
+                        "IterationId = :iterationId")
+                        .setParameter("iterationId", iterationId)
+                        .uniqueResult();
 
         GtfsRtFeedIterationString iterationString = new GtfsRtFeedIterationString(iterationModel);
 
@@ -478,12 +493,16 @@ public class GtfsRtFeed {
 
         //Get a message list
         List<MessageLogModel> messageLogModels = session.createQuery(
-                            " FROM MessageLogModel WHERE IterationId = "+iterationId).list();
+                            " FROM MessageLogModel WHERE IterationId = :iterationId")
+                .setParameter("iterationId", iterationId)
+                .list();
 
         //For each message get the occurrences
         for (MessageLogModel messageLog : messageLogModels) {
             List<OccurrenceModel> occurrenceModels = session.createQuery(
-                            "FROM OccurrenceModel WHERE messageId = "+messageLog.getMessageId()).list();
+                            "FROM OccurrenceModel WHERE messageId = :messageId")
+                    .setParameter("messageId", messageLog.getMessageId())
+                    .list();
             //Add both to the returned list
             CombinedMessageOccurrenceModel messageOccurrence = new CombinedMessageOccurrenceModel();
             messageOccurrence.setMessageLogModel(messageLog);
@@ -549,10 +568,14 @@ public class GtfsRtFeed {
     public String getDateFormat(long feedTimestamp, int gtfsRtId) {
         Session session = GTFSDB.initSessionBeginTrans();
         GtfsRtFeedModel gtfsRtFeed = (GtfsRtFeedModel) session.createQuery(" FROM GtfsRtFeedModel "
-                + "WHERE rtFeedID = " + gtfsRtId).uniqueResult();
+                + "WHERE rtFeedID = :gtfsRtId")
+                .setParameter("gtfsRtId", gtfsRtId)
+                .uniqueResult();
 
         GtfsFeedModel gtfsFeed = (GtfsFeedModel) session.createQuery("FROM GtfsFeedModel "
-                + "WHERE feedID = " + gtfsRtFeed.getGtfsFeedModel().getFeedId()).uniqueResult();
+                + "WHERE feedID = :feedID")
+                .setParameter("feedID", gtfsRtFeed.getGtfsFeedModel().getFeedId())
+                .uniqueResult();
         GTFSDB.commitAndCloseSession(session);
         agencyTimezone = gtfsFeed.getAgency();
 

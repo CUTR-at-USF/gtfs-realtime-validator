@@ -68,7 +68,9 @@ public class GtfsFeed {
     @Path("/{id}")
     public Response deleteGtfsFeed(@PathParam("id") String id) {
         Session session = GTFSDB.initSessionBeginTrans();
-        session.createQuery("DELETE FROM GtfsFeedModel WHERE feedID = "+ id).executeUpdate();
+        session.createQuery("DELETE FROM GtfsFeedModel WHERE feedID = :feedID")
+                .setParameter("feedID", id)
+                .executeUpdate();
         GTFSDB.commitAndCloseSession(session);
         return Response.accepted().build();
     }
@@ -129,7 +131,9 @@ public class GtfsFeed {
         //Read gtfsFeedModel with the same URL in the database        
         Session session = GTFSDB.initSessionBeginTrans();
         GtfsFeedModel gtfsFeed = (GtfsFeedModel) session.createQuery("FROM GtfsFeedModel "
-                            + "WHERE gtfsUrl = '"+gtfsFeedUrl+"'").uniqueResult();
+                            + "WHERE gtfsUrl = :gtfsFeedUrl")
+                .setParameter("gtfsFeedUrl", gtfsFeedUrl)
+                .uniqueResult();
         Response.Status response = downloadGtfsFeed(saveFileName, connection);
         if (response == Response.Status.BAD_REQUEST) {
             return generateError("Download Failed", "Downloading static GTFS feed from provided Url failed.", Response.Status.BAD_REQUEST);
@@ -365,7 +369,9 @@ public class GtfsFeed {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getFeedErrorCount(@PathParam("id") int id) {
         Session session = GTFSDB.initSessionBeginTrans();
-        GtfsFeedModel gtfsFeed = (GtfsFeedModel) session.createQuery(" FROM GtfsFeedModel WHERE feedId = " + id).uniqueResult();
+        GtfsFeedModel gtfsFeed = (GtfsFeedModel) session.createQuery(" FROM GtfsFeedModel WHERE feedId = :id")
+                .setParameter("id", id)
+                .uniqueResult();
         GTFSDB.commitAndCloseSession(session);
 
         return Response.ok(gtfsFeed).build();

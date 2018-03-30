@@ -127,8 +127,11 @@ public class BackgroundTask implements Runnable {
 
                 session = GTFSDB.initSessionBeginTrans();
                 feedIteration = (GtfsRtFeedIterationModel) session.createQuery("FROM GtfsRtFeedIterationModel"
-                        + " WHERE rtFeedId = " + mCurrentGtfsRtFeed.getGtfsRtId()
-                        + " ORDER BY IterationId DESC").setMaxResults(1).uniqueResult();
+                        + " WHERE rtFeedId = :gtfsRtId"
+                        + " ORDER BY IterationId DESC")
+                        .setParameter("gtfsRtId", mCurrentGtfsRtFeed.getGtfsRtId())
+                        .setMaxResults(1)
+                        .uniqueResult();
                 if (feedIteration != null) {
                     prevFeedDigest = feedIteration.getFeedHash();
                 }
@@ -178,7 +181,9 @@ public class BackgroundTask implements Runnable {
 
             List<GtfsRtFeedModel> gtfsRtFeedModelList;
             gtfsRtFeedModelList = session.createQuery("FROM GtfsRtFeedModel"
-                    + " WHERE gtfsFeedID = " + mCurrentGtfsRtFeed.getGtfsFeedModel().getFeedId()).list();
+                    + " WHERE gtfsFeedID = :feedID")
+                    .setParameter("feedID", mCurrentGtfsRtFeed.getGtfsFeedModel().getFeedId())
+                    .list();
 
             GTFSDB.closeSession(session);
 
