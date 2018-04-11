@@ -29,6 +29,7 @@ import edu.usf.cutr.gtfsrtvalidator.lib.model.GtfsFeedModel;
 import org.hibernate.Session;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.onebusaway.gtfs.serialization.GtfsReader;
+import org.onebusaway.gtfs.services.GtfsMutableDao;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLHandshakeException;
@@ -61,7 +62,7 @@ public class GtfsFeed {
 
     private static final int BUFFER_SIZE = 4096;
     private static final String jsonFilePath = "classes"+File.separator+"webroot";
-    public static Map<Integer, GtfsDaoImpl> GtfsDaoMap = new ConcurrentHashMap<>();
+    public static Map<Integer, GtfsMutableDao> GtfsDaoMap = new ConcurrentHashMap<>();
 
     //DELETE {id} remove feed with the given id
     @DELETE
@@ -100,8 +101,7 @@ public class GtfsFeed {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response postGtfsFeed(@FormParam("gtfsurl") String gtfsFeedUrl,
                                  @FormParam("enablevalidation") String enableValidation) {
-
-        //Extract the URL from the provided gtfsFeedUrl
+        // Parse URL from the string provided by the web user
         URL url = getUrlFromString(gtfsFeedUrl);
         if (url == null) {
             return generateError("Malformed URL", "Malformed URL for the GTFS feed.", Response.Status.BAD_REQUEST);
@@ -109,10 +109,10 @@ public class GtfsFeed {
 
         _log.info(String.format("Downloading GTFS data from %s...", url));
 
+        // Open a connection for the given URL
         HttpURLConnection connection = null;
-        //Open a connection for the given URL u
         try {
-            connection = (HttpURLConnection)url.openConnection();
+            connection = (HttpURLConnection) url.openConnection();
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -127,13 +127,7 @@ public class GtfsFeed {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        boolean canReturn = false;
-        //Read gtfsFeedModel with the same URL in the database        
-        Session session = GTFSDB.initSessionBeginTrans();
-        GtfsFeedModel gtfsFeed = (GtfsFeedModel) session.createQuery("FROM GtfsFeedModel "
-                            + "WHERE gtfsUrl = :gtfsFeedUrl")
-                .setParameter("gtfsFeedUrl", gtfsFeedUrl)
-                .uniqueResult();
+        // Download GTFS data
         Response.Status response = downloadGtfsFeed(saveFileName, connection);
         if (response == Response.Status.BAD_REQUEST) {
             return generateError("Download Failed", "Downloading static GTFS feed from provided Url failed.", Response.Status.BAD_REQUEST);
@@ -141,47 +135,64 @@ public class GtfsFeed {
             return generateError("SSL Handshake Failed", "SSL handshake failed.  Try installing the JCE Extension - see https://github.com/CUTR-at-USF/gtfs-realtime-validator#prerequisites", Response.Status.FORBIDDEN);
         }
 
-        _log.info("GTFS data downloaded successfully");
+        _log.info("GTFS zip file downloaded successfully");
 
-        //TODO: Move to one method
-        if (gtfsFeed == null) {
-            gtfsFeed = createGtfsFeedModel(gtfsFeedUrl, saveFileName);
+        // Get validation request state and history
+        boolean validationRequested = "checked".equalsIgnoreCase(enableValidation);
+        String projectPath = new GetFile().getJarLocation().getParentFile().getAbsolutePath();
+        boolean validationFileExists = new File(projectPath + File.separator + jsonFilePath + File.separator + saveFileName + "_out.json").exists();
+
+        // See if a GTFS feed with the same URL exists in the database
+        Session session = GTFSDB.initSessionBeginTrans();
+        GtfsFeedModel gtfsFeedModel = (GtfsFeedModel) session.createQuery("FROM GtfsFeedModel "
+                + "WHERE gtfsUrl = :gtfsFeedUrl")
+                .setParameter("gtfsFeedUrl", gtfsFeedUrl)
+                .uniqueResult();
+
+        boolean gtfsChangedOrNew;
+        if (gtfsFeedModel == null) {
+            _log.info("GTFS URL is new - saving metadata to database...");
+            gtfsFeedModel = createGtfsFeedModel(gtfsFeedUrl, saveFileName);
+            gtfsChangedOrNew = true;
         } else {
-            _log.info("GTFS URL already exists exists in database - checking if data has changed...");
-            byte[] newChecksum = calculateMD5checksum(gtfsFeed.getFeedLocation());
-            byte[] oldChecksum = gtfsFeed.getChecksum();
-            // If file digest are equal, check whether validated json file exists
+            _log.info("GTFS URL already exists exists in database - checking if GTFS data has changed...");
+            byte[] newChecksum = calculateMD5checksum(gtfsFeedModel.getFeedLocation());
+            byte[] oldChecksum = gtfsFeedModel.getChecksum();
             if (MessageDigest.isEqual(newChecksum, oldChecksum)) {
                 _log.info("GTFS data hasn't changed since last execution");
-                String projectPath = new GetFile().getJarLocation().getParentFile().getAbsolutePath();
-                if (new File(projectPath + File.separator + jsonFilePath + File.separator + saveFileName + "_out.json").exists())
-                    canReturn = true;
+                gtfsChangedOrNew = false;
             } else {
-                _log.info("GTFS data has changed, updating database...");
-                gtfsFeed.setChecksum(newChecksum);
-                updateGtfsFeedModel(gtfsFeed);
+                _log.info("GTFS data has changed, updating metadata in database...");
+                gtfsFeedModel.setChecksum(newChecksum);
+                updateGtfsFeedModel(gtfsFeedModel);
+                gtfsChangedOrNew = true;
             }
         }
 
-        //Saves GTFS data to store and validates GTFS feed
-        GtfsDaoImpl store = saveGtfsFeed(gtfsFeed);
-        if (store == null) {
-            return generateError("Can't read content", "Can't read content from the GTFS URL", Response.Status.NOT_FOUND);
+        // If the GTFS data isn't loaded into memory, or it's changed, then load it into memory
+        GtfsMutableDao gtfsMutableDao = null;
+        if (!GtfsDaoMap.containsKey(gtfsFeedModel.getFeedId()) || gtfsChangedOrNew) {
+            _log.info("Loading GTFS from downloaded zip file on disk to memory...");
+            gtfsMutableDao = loadGtfsFeedFromDisk(gtfsFeedModel);
+            if (gtfsMutableDao == null) {
+                return generateError("Can't read content", "Can't read GTFS zip file from disk", Response.Status.NOT_FOUND);
+            }
+            // Keep reference in memory to loaded GTFS data
+            GtfsDaoMap.put(gtfsFeedModel.getFeedId(), gtfsMutableDao);
         }
-        // Save gtfs agency to the database
-        gtfsFeed.setAgency(store.getAllAgencies().iterator().next().getTimezone());
-        session.update(gtfsFeed);
-        GTFSDB.commitAndCloseSession(session);
 
-        GtfsDaoMap.put(gtfsFeed.getFeedId(), store);
-        
-        if(canReturn)
-            return Response.ok(gtfsFeed).build();
-        
-        if ("checked".equalsIgnoreCase(enableValidation)) {
-            return runStaticGTFSValidation(saveFileName, gtfsFeedUrl, gtfsFeed);
+        if (gtfsChangedOrNew) {
+            _log.info("Writing GTFS data to database...");
+            gtfsFeedModel.setAgency(gtfsMutableDao.getAllAgencies().iterator().next().getTimezone());
+            session.update(gtfsFeedModel);
+            GTFSDB.commitAndCloseSession(session);
         }
-       return Response.ok(gtfsFeed).build();
+
+        if (validationRequested && (gtfsChangedOrNew || !validationFileExists)) {
+            _log.info("Validating GTFS data...");
+            return runStaticGTFSValidation(saveFileName, gtfsFeedUrl, gtfsFeedModel);
+        }
+       return Response.ok(gtfsFeedModel).build();
     }
 
     private Response runStaticGTFSValidation (String saveFileName, String gtfsFeedUrl, GtfsFeedModel gtfsFeed) {
@@ -225,25 +236,6 @@ public class GtfsFeed {
         return url;
     }
 
-    private HttpURLConnection getHttpURLConnection(URL url) {
-        HttpURLConnection connection;
-        try {
-            connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
-            connection.connect();
-
-            //Check if the request is handled successfully
-            if (connection.getResponseCode() / 100 == 2) {
-                connection = null;
-            }
-
-        } catch (IOException ex) {
-            _log.error("Can't read from GTFS URL", ex);
-            connection = null;
-        }
-        return connection;
-    }
-
     private GtfsFeedModel createGtfsFeedModel(String gtfsFeedUrl, String saveFilePath) {
         GtfsFeedModel gtfsFeed;
         gtfsFeed = new GtfsFeedModel();
@@ -254,7 +246,7 @@ public class GtfsFeed {
         byte[] checksum = calculateMD5checksum(saveFilePath);
         gtfsFeed.setChecksum(checksum);
 
-        //Create GTFS feed row in database
+        // Create GTFS feed row in database
         Session session = GTFSDB.initSessionBeginTrans();
         session.save(gtfsFeed);
         GTFSDB.commitAndCloseSession(session);
@@ -268,6 +260,7 @@ public class GtfsFeed {
         GTFSDB.commitAndCloseSession(session);
         return gtfsFeed;
     }
+
     private byte[] calculateMD5checksum(String inputFile) {
         byte[] digest = null;
         byte[] dataBytes = new byte[1024];
@@ -287,8 +280,9 @@ public class GtfsFeed {
             }
         return digest;
     }
-    private GtfsDaoImpl saveGtfsFeed(GtfsFeedModel gtfsFeed) {
-        GtfsDaoImpl store = new GtfsDaoImpl();
+
+    private GtfsMutableDao loadGtfsFeedFromDisk(GtfsFeedModel gtfsFeed) {
+        GtfsMutableDao store = new GtfsDaoImpl();
 
         try {
             //Read GTFS data into a GtfsDaoImpl

@@ -30,7 +30,7 @@ import edu.usf.cutr.gtfsrtvalidator.lib.validation.interfaces.FeedEntityValidato
 import edu.usf.cutr.gtfsrtvalidator.lib.validation.rules.*;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
-import org.onebusaway.gtfs.impl.GtfsDaoImpl;
+import org.onebusaway.gtfs.services.GtfsMutableDao;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
@@ -85,7 +85,7 @@ public class BackgroundTask implements Runnable {
             long startTimeNanos = System.nanoTime();
             GtfsRealtime.FeedMessage currentFeedMessage;
             GtfsRealtime.FeedMessage previousFeedMessage = null;
-            GtfsDaoImpl gtfsData;
+            GtfsMutableDao gtfsData;
             GtfsMetadata gtfsMetadata;
             // Holds data needed in the database under each iteration
             GtfsRtFeedIterationModel feedIteration;
@@ -248,7 +248,7 @@ public class BackgroundTask implements Runnable {
     }
 
     private StringBuffer validateEntity(long currentTimeMillis, GtfsRealtime.FeedMessage currentFeedMessage, GtfsRealtime.FeedMessage previousFeedMessage,
-                                        GtfsRealtime.FeedMessage combinedFeedMessage, GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata,
+                                        GtfsRealtime.FeedMessage combinedFeedMessage, GtfsMutableDao gtfsData, GtfsMetadata gtfsMetadata,
                                         GtfsRtFeedIterationModel feedIteration, FeedEntityValidator feedEntityValidator) {
         StringBuffer consoleLine = new StringBuffer();
         long startTimeNanos = System.nanoTime();

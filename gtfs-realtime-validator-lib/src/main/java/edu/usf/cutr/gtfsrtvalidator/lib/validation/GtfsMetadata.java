@@ -23,8 +23,8 @@ import org.locationtech.spatial4j.distance.DistanceUtils;
 import org.locationtech.spatial4j.shape.Rectangle;
 import org.locationtech.spatial4j.shape.Shape;
 import org.locationtech.spatial4j.shape.ShapeFactory;
-import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.onebusaway.gtfs.model.*;
+import org.onebusaway.gtfs.services.GtfsMutableDao;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
@@ -97,7 +97,7 @@ public class GtfsMetadata {
      *                      you are getting OutOfMemoryErrors you can try setting this to true.  Note that if true
      *                      certain spatial rules such as E029 will not be executed.
      */
-    public GtfsMetadata(String feedUrl, TimeZone timeZone, GtfsDaoImpl gtfsData, boolean ignoreShapes) {
+    public GtfsMetadata(String feedUrl, TimeZone timeZone, GtfsMutableDao gtfsData, boolean ignoreShapes) {
         long startTime = System.nanoTime();
         _log.info("Building GtfsMetadata for " + feedUrl + "...");
 

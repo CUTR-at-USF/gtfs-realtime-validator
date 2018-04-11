@@ -27,7 +27,7 @@ import edu.usf.cutr.gtfsrtvalidator.lib.validation.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.lib.validation.interfaces.FeedEntityValidator;
 import org.apache.commons.lang3.StringUtils;
 import org.locationtech.spatial4j.shape.Shape;
-import org.onebusaway.gtfs.impl.GtfsDaoImpl;
+import org.onebusaway.gtfs.services.GtfsMutableDao;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
@@ -57,7 +57,7 @@ public class VehicleValidator implements FeedEntityValidator {
     public static final float MAX_REALISTIC_SPEED_METERS_PER_SECOND = 26.0f;  // Approx. 60 miles per hour
 
     @Override
-    public List<ErrorListHelperModel> validate(long currentTimeMillis, GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage, GtfsRealtime.FeedMessage combinedFeedMessage) {
+    public List<ErrorListHelperModel> validate(long currentTimeMillis, GtfsMutableDao gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage, GtfsRealtime.FeedMessage combinedFeedMessage) {
         List<GtfsRealtime.FeedEntity> entityList = feedMessage.getEntityList();
         List<OccurrenceModel> e026List = new ArrayList<>();
         List<OccurrenceModel> e027List = new ArrayList<>();
