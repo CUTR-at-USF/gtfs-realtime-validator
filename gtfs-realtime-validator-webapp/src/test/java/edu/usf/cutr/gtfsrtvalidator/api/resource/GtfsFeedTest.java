@@ -20,6 +20,7 @@ package edu.usf.cutr.gtfsrtvalidator.api.resource;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.hibernate.HibernateUtil;
 import edu.usf.cutr.gtfsrtvalidator.lib.model.GtfsFeedModel;
+import edu.usf.cutr.gtfsrtvalidator.util.FileUtil;
 import junit.framework.TestCase;
 
 import javax.ws.rs.core.Response;
@@ -32,7 +33,6 @@ import java.util.List;
 public class GtfsFeedTest extends TestCase {
 
     private final String validGtfsFeedURL = "https://github.com/CUTR-at-USF/gtfs-realtime-validator/raw/master/gtfs-realtime-validator-webapp/src/test/resources/bullrunner-gtfs.zip";
-    private final String validationFilePath = "E:\\Git Projects\\gtfs-realtime-validator\\gtfs-realtime-validator-webapp\\target\\classes\\webroot\\https%3A%2F%2Fgithub.com%2FCUTR-at-USF%2Fgtfs-realtime-validator%2Fraw%2Fmaster%2Fgtfs-realtime-validator-webapp%2Fsrc%2Ftest%2Fresources%2Fbullrunner-gtfs.zip_out.json";
     private final String invalidGtfsFeedURL = "DUMMY";
     private final String downloadFailURL = "http://gohart.org/google/file_not_exist.zip";
     private final String badGTFS = "https://github.com/CUTR-at-USF/gtfs-realtime-validator/raw/master/gtfs-realtime-validator-webapp/src/test/resources/badgtfs.zip";
@@ -46,15 +46,15 @@ public class GtfsFeedTest extends TestCase {
     }
 
     public void testGtfsFeed() {
-        Response response;
+        String gtfsFileName = FileUtil.getGtfsFileName(validGtfsFeedURL);
+        File validationFile = FileUtil.getGtfsValidationOutputFile(this, gtfsFileName);
 
         // Delete any existing validation file for the valid feed
-        File validationFile = new File(this.validationFilePath);
         validationFile.delete();
         assertFalse(validationFile.exists());
 
         // Valid feed URL with real GTFS data
-        response = mGtfsFeed.postGtfsFeed(validGtfsFeedURL, "checked");
+        Response response = mGtfsFeed.postGtfsFeed(validGtfsFeedURL, "checked");
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         GtfsFeedModel model = (GtfsFeedModel) response.getEntity();
         assertEquals(model.getGtfsUrl(), validGtfsFeedURL);

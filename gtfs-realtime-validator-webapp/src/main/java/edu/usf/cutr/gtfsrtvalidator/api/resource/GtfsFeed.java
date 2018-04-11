@@ -24,8 +24,8 @@ import com.conveyal.gtfs.validator.json.FeedValidationResultSet;
 import com.conveyal.gtfs.validator.json.backends.FileSystemFeedBackend;
 import com.conveyal.gtfs.validator.json.serialization.JsonSerializer;
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
-import edu.usf.cutr.gtfsrtvalidator.helper.GetFile;
 import edu.usf.cutr.gtfsrtvalidator.lib.model.GtfsFeedModel;
+import edu.usf.cutr.gtfsrtvalidator.util.FileUtil;
 import org.hibernate.Session;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.onebusaway.gtfs.serialization.GtfsReader;
@@ -37,11 +37,13 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
@@ -61,7 +63,6 @@ public class GtfsFeed {
     private static final org.slf4j.Logger _log = LoggerFactory.getLogger(GtfsFeed.class);
 
     private static final int BUFFER_SIZE = 4096;
-    private static final String jsonFilePath = "classes"+File.separator+"webroot";
     public static Map<Integer, GtfsMutableDao> GtfsDaoMap = new ConcurrentHashMap<>();
 
     //DELETE {id} remove feed with the given id
@@ -121,14 +122,9 @@ public class GtfsFeed {
             return generateError("Can't read from URL", "Failed to establish a connection to the GTFS URL.", Response.Status.BAD_REQUEST);
         }
 
-        String saveFileName = null;
-        try {
-            saveFileName = URLEncoder.encode(gtfsFeedUrl, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+        String gtfsFileName = FileUtil.getGtfsFileName(gtfsFeedUrl);
         // Download GTFS data
-        Response.Status response = downloadGtfsFeed(saveFileName, connection);
+        Response.Status response = downloadGtfsFeed(gtfsFileName, connection);
         if (response == Response.Status.BAD_REQUEST) {
             return generateError("Download Failed", "Downloading static GTFS feed from provided Url failed.", Response.Status.BAD_REQUEST);
         } else if (response == Response.Status.FORBIDDEN) {
@@ -139,8 +135,8 @@ public class GtfsFeed {
 
         // Get validation request state and history
         boolean validationRequested = "checked".equalsIgnoreCase(enableValidation);
-        String projectPath = new GetFile().getJarLocation().getParentFile().getAbsolutePath();
-        boolean validationFileExists = new File(projectPath + File.separator + jsonFilePath + File.separator + saveFileName + "_out.json").exists();
+        String projectPath = FileUtil.getJarLocation(this).getParentFile().getAbsolutePath();
+        boolean validationFileExists = new File(projectPath + File.separator + FileUtil.GTFS_VALIDATOR_OUTPUT_FILE_PATH + File.separator + gtfsFileName + "_out.json").exists();
 
         // See if a GTFS feed with the same URL exists in the database
         Session session = GTFSDB.initSessionBeginTrans();
@@ -152,7 +148,7 @@ public class GtfsFeed {
         boolean gtfsChangedOrNew;
         if (gtfsFeedModel == null) {
             _log.info("GTFS URL is new - saving metadata to database...");
-            gtfsFeedModel = createGtfsFeedModel(gtfsFeedUrl, saveFileName);
+            gtfsFeedModel = createGtfsFeedModel(gtfsFeedUrl, gtfsFileName);
             gtfsChangedOrNew = true;
         } else {
             _log.info("GTFS URL already exists exists in database - checking if GTFS data has changed...");
@@ -190,33 +186,30 @@ public class GtfsFeed {
 
         if (validationRequested && (gtfsChangedOrNew || !validationFileExists)) {
             _log.info("Validating GTFS data...");
-            return runStaticGTFSValidation(saveFileName, gtfsFeedUrl, gtfsFeedModel);
+            return runStaticGtfsValidation(gtfsFileName, gtfsFeedUrl, gtfsFeedModel);
         }
        return Response.ok(gtfsFeedModel).build();
     }
 
-    private Response runStaticGTFSValidation (String saveFileName, String gtfsFeedUrl, GtfsFeedModel gtfsFeed) {
+    private Response runStaticGtfsValidation(String gtfsFileName, String gtfsFeedUrl, GtfsFeedModel gtfsFeed) {
         FileSystemFeedBackend backend = new FileSystemFeedBackend();
         FeedValidationResultSet results = new FeedValidationResultSet();
-        File input = backend.getFeed(saveFileName);
+        File input = backend.getFeed(gtfsFileName);
         FeedProcessor processor = new FeedProcessor(input);
         try {
             _log.info("Running static GTFS validation on " + gtfsFeedUrl + "...");
             processor.run();
         } catch (IOException ex) {
             Logger.getLogger(GtfsFeed.class.getName()).log(Level.SEVERE, null, ex);
-            return generateError("Unable to access input GTFS " + input.getPath() + ".", "Does the file " + saveFileName + "exist and do I have permission to read it?", Response.Status.NOT_FOUND);
+            return generateError("Unable to access input GTFS " + input.getPath() + ".", "Does the file " + gtfsFileName + "exist and do I have permission to read it?", Response.Status.NOT_FOUND);
         }
         results.add(processor.getOutput());
         saveGtfsErrorCount(gtfsFeed, processor.getOutput());
         JsonSerializer serializer = new JsonSerializer(results);
-        //get the location of the executed jar file
-        GetFile jarInfo = new GetFile();
-        String saveDir = jarInfo.getJarLocation().getParentFile().getAbsolutePath();
-        saveFileName = saveDir + File.separator + jsonFilePath + File.separator + saveFileName + "_out.json";
+        File validationFile = FileUtil.getGtfsValidationOutputFile(this, gtfsFileName);
         try {
-            serializer.serializeToFile(new File(saveFileName));
-            _log.info("Static GTFS validation data written to " + saveFileName);
+            serializer.serializeToFile(validationFile);
+            _log.info("Static GTFS validation data written to " + validationFile.getAbsolutePath());
         } catch (Exception e) {
             _log.error("Exception running static GTFS validation on " + gtfsFeedUrl + ": " + e.getMessage());
         }
