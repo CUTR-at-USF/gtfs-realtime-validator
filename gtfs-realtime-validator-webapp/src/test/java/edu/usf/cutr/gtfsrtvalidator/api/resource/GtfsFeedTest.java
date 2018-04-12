@@ -19,9 +19,13 @@ package edu.usf.cutr.gtfsrtvalidator.api.resource;
 
 import edu.usf.cutr.gtfsrtvalidator.db.GTFSDB;
 import edu.usf.cutr.gtfsrtvalidator.hibernate.HibernateUtil;
+import edu.usf.cutr.gtfsrtvalidator.lib.model.GtfsFeedModel;
+import edu.usf.cutr.gtfsrtvalidator.util.FileUtil;
 import junit.framework.TestCase;
 
 import javax.ws.rs.core.Response;
+import java.io.File;
+import java.util.List;
 
 /*
  * Tests loading GTFS data.
@@ -33,27 +37,85 @@ public class GtfsFeedTest extends TestCase {
     private final String downloadFailURL = "http://gohart.org/google/file_not_exist.zip";
     private final String badGTFS = "https://github.com/CUTR-at-USF/gtfs-realtime-validator/raw/master/gtfs-realtime-validator-webapp/src/test/resources/badgtfs.zip";
 
-    GtfsFeed gtfsFeed;
+    private GtfsFeed mGtfsFeed;
 
     public void setUp() {
-        gtfsFeed  = new GtfsFeed();
+        mGtfsFeed = new GtfsFeed();
         HibernateUtil.configureSessionFactory();
         GTFSDB.initializeDB();
     }
 
     public void testGtfsFeed() {
-        Response response;
+        String gtfsFileName = FileUtil.getGtfsFileName(validGtfsFeedURL);
+        File validationFile = FileUtil.getGtfsValidationOutputFile(this, gtfsFileName);
 
-        response = gtfsFeed.postGtfsFeed(validGtfsFeedURL, "checked");
+        // Delete any existing validation file for the valid feed
+        validationFile.delete();
+        assertFalse(validationFile.exists());
+
+        // Valid feed URL with real GTFS data
+        Response response = mGtfsFeed.postGtfsFeed(validGtfsFeedURL, "checked");
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        GtfsFeedModel model = (GtfsFeedModel) response.getEntity();
+        assertEquals(model.getGtfsUrl(), validGtfsFeedURL);
 
-        response = gtfsFeed.postGtfsFeed(invalidGtfsFeedURL, "checked");
+        // We asked for the feed to be validated ("checked" parameter), so make sure the validation file exists
+        assertTrue(validationFile.exists());
+        long validationFileLastModified = validationFile.lastModified();
+
+        // Make sure we can get the GTFS feed that we just added
+        boolean foundFeed = false;
+        int feedId = model.getFeedId();
+        response = mGtfsFeed.getGtfsFeeds();
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        List<GtfsFeedModel> feedList = (List<GtfsFeedModel>) response.getEntity();
+        for (GtfsFeedModel m : feedList) {
+            if (m.getGtfsUrl().equals(validGtfsFeedURL)) {
+                foundFeed = true;
+            }
+        }
+        assertTrue(foundFeed);
+
+        // Submit the same URL again to make sure the validation file doesn't change (if the GTFS didn't change, it shouldn't validate again)
+        response = mGtfsFeed.postGtfsFeed(validGtfsFeedURL, "checked");
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertEquals(validationFileLastModified, validationFile.lastModified());
+
+        // Delete the feed we just added
+        response = mGtfsFeed.deleteGtfsFeed(String.valueOf(feedId));
+        assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus());
+
+        // Verify that it doesn't exist anymore
+        foundFeed = false;
+        response = mGtfsFeed.getGtfsFeeds();
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        feedList = (List<GtfsFeedModel>) response.getEntity();
+        for (GtfsFeedModel m : feedList) {
+            if (m.getGtfsUrl().equals(validGtfsFeedURL)) {
+                foundFeed = true;
+            }
+        }
+        assertFalse(foundFeed);
+
+        // Delete the validation file again
+        validationFile.delete();
+        assertFalse(validationFile.exists());
+
+        // Add the feed again, but this time don't request validation - the validation file then shouldn't exist
+        response = mGtfsFeed.postGtfsFeed(validGtfsFeedURL, "unchecked");
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertFalse(validationFile.exists());
+
+        // Invalid feed URL
+        response = mGtfsFeed.postGtfsFeed(invalidGtfsFeedURL, "checked");
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
 
-        response = gtfsFeed.postGtfsFeed(downloadFailURL, "checked");
+        // Valid URL, but missing file
+        response = mGtfsFeed.postGtfsFeed(downloadFailURL, "checked");
         assertTrue(Response.Status.BAD_REQUEST.getStatusCode() == response.getStatus() || Response.Status.FORBIDDEN.getStatusCode() == response.getStatus());
 
-        response = gtfsFeed.postGtfsFeed(badGTFS, "checked");
+        // Valid URL, but bad GTFS data
+        response = mGtfsFeed.postGtfsFeed(badGTFS, "checked");
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), response.getStatus());
     }
 }

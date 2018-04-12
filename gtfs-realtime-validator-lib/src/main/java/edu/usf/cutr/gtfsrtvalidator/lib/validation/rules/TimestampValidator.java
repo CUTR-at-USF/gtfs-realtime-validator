@@ -26,7 +26,7 @@ import edu.usf.cutr.gtfsrtvalidator.lib.util.RuleUtils;
 import edu.usf.cutr.gtfsrtvalidator.lib.util.TimestampUtils;
 import edu.usf.cutr.gtfsrtvalidator.lib.validation.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.lib.validation.interfaces.FeedEntityValidator;
-import org.onebusaway.gtfs.impl.GtfsDaoImpl;
+import org.onebusaway.gtfs.services.GtfsMutableDao;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
@@ -62,7 +62,7 @@ public class TimestampValidator implements FeedEntityValidator {
     private final static long IN_FUTURE_TOLERANCE_SECONDS = 60L; // Maximum allowed amount of time for a timetamp to be in the future, in seconds (E050)
 
     @Override
-    public List<ErrorListHelperModel> validate(long currentTimeMillis, GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage, GtfsRealtime.FeedMessage combinedFeedMessage) {
+    public List<ErrorListHelperModel> validate(long currentTimeMillis, GtfsMutableDao gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage, GtfsRealtime.FeedMessage combinedFeedMessage) {
         if (feedMessage.equals(previousFeedMessage)) {
             throw new IllegalArgumentException("feedMessage and previousFeedMessage must not be the same");
         }

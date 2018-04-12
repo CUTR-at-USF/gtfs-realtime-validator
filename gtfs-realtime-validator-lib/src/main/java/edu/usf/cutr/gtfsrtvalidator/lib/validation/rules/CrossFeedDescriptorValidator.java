@@ -25,8 +25,8 @@ import edu.usf.cutr.gtfsrtvalidator.lib.util.RuleUtils;
 import edu.usf.cutr.gtfsrtvalidator.lib.validation.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.lib.validation.interfaces.FeedEntityValidator;
 import org.apache.commons.lang3.StringUtils;
-import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.onebusaway.gtfs.model.Trip;
+import org.onebusaway.gtfs.services.GtfsMutableDao;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
@@ -46,7 +46,7 @@ public class CrossFeedDescriptorValidator implements FeedEntityValidator {
     private static final org.slf4j.Logger _log = LoggerFactory.getLogger(CrossFeedDescriptorValidator.class);
 
     @Override
-    public List<ErrorListHelperModel> validate(long currentTimeMillis, GtfsDaoImpl gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage, GtfsRealtime.FeedMessage combinedFeedMessage) {
+    public List<ErrorListHelperModel> validate(long currentTimeMillis, GtfsMutableDao gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage, GtfsRealtime.FeedMessage combinedFeedMessage) {
         if (combinedFeedMessage == null) {
             // If only one GTFS-rt feed is being monitored for the GTFS dataset, then don't run any of the cross-feed rules
             return new ArrayList<>();
