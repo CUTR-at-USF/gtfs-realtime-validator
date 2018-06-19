@@ -800,7 +800,7 @@ Frequency-based exact_times = 0 trip_updates should contain `vehicle_id`.  This 
 
 ### W007 - Refresh interval is more than 35 seconds
 
-GTFS-realtime feeds should be refreshed at least every 30 seconds.
+GTFS-realtime feeds should be refreshed at least every 35 seconds.
 
 <a name="W008"/>
 
