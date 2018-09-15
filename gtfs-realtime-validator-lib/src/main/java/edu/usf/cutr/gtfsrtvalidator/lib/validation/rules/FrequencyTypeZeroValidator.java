@@ -45,7 +45,7 @@ public class FrequencyTypeZeroValidator implements FeedEntityValidator {
 
     private static final org.slf4j.Logger _log = LoggerFactory.getLogger(FrequencyTypeZeroValidator.class);
     
-    private HashMap<String,GtfsRealtime.TripUpdate> previousTripUpdates=new HashMap<String, TripUpdate>();    
+    
     		
     @Override
     public List<ErrorListHelperModel> validate(long currentTimeMillis, GtfsMutableDao gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage, GtfsRealtime.FeedMessage combinedFeedMessage) {
@@ -56,10 +56,9 @@ public class FrequencyTypeZeroValidator implements FeedEntityValidator {
 
         for (GtfsRealtime.FeedEntity entity : feedMessage.getEntityList()) {
             if (entity.hasTripUpdate()) {
+            	
                 GtfsRealtime.TripUpdate tripUpdate = entity.getTripUpdate();
-                
-           
-
+                        
                 if (gtfsMetadata.getExactTimesZeroTripIds().contains(tripUpdate.getTrip().getTripId())) {
                     /**
                      * NOTE - W006 checks for missing trip_ids, because we can't check for that here - we need the trip_id to know if it's exact_times=0
@@ -84,26 +83,31 @@ public class FrequencyTypeZeroValidator implements FeedEntityValidator {
                         RuleUtils.addOccurrence(W005, "trip_id " + tripUpdate.getTrip().getTripId(), errorListW005, _log);
                     }
                     
-                    if(tripUpdate.getVehicle()!=null && tripUpdate.getVehicle().getId()!=null && previousTripUpdates.get(tripUpdate.getVehicle().getId())!=null)
-                    {             
-                    	if(tripUpdate.getStopTimeUpdateCount()>0 && previousTripUpdates.get(tripUpdate.getVehicle().getId()).getStopTimeUpdateCount()>0)
-                    	{
-		                    if(tripUpdate.getStopTimeUpdate(tripUpdate.getStopTimeUpdateCount()-1).getStopSequence()>=previousTripUpdates.get(tripUpdate.getVehicle().getId()).getStopTimeUpdate(previousTripUpdates.get(tripUpdate.getVehicle().getId()).getStopTimeUpdateCount()-1).getStopSequence())
-		                    {
-		                    	 // E053 - start time of trip not consistent for trip updates for frequency-based exact_times = 0
-		                    	if(!tripUpdate.getTrip().getStartTime().equals(previousTripUpdates.get(tripUpdate.getVehicle().getId()).getTrip().getStartTime()))
-		                    	{
-		                    		RuleUtils.addOccurrence(E053, "vehicle_id" + tripUpdate.getVehicle().getId(),  errorListE053, _log);
-		                    	}		                    			                    	
-		                    }
+                    for (GtfsRealtime.FeedEntity previousEntity : previousFeedMessage.getEntityList()) 
+                    {                                        
+                    	if (previousEntity.hasTripUpdate()) 
+                    	{	
+                    		if(tripUpdate.getVehicle()!=null && previousEntity.getTripUpdate().getVehicle()!=null)
+                    		{                    				                    		
+	                    		if(previousEntity.getTripUpdate().getVehicle().getId().equals(tripUpdate.getVehicle().getId()))
+	                    		{				                               
+				                    if(tripUpdate.getStopTimeUpdateCount()>0 && previousEntity.getTripUpdate().getStopTimeUpdateCount()>0)
+				                    {				                    						                    		
+				                    	if(tripUpdate.getStopTimeUpdate(tripUpdate.getStopTimeUpdateCount()-1).getStopSequence()>=previousEntity.getTripUpdate().getStopTimeUpdate(previousEntity.getTripUpdate().getStopTimeUpdateCount()-1).getStopSequence())
+				                    	{
+						                    // E053 - start time of trip not consistent for trip updates for frequency-based exact_times = 0
+						                    if(!tripUpdate.getTrip().getStartTime().equals(previousEntity.getTripUpdate().getTrip().getStartTime()))
+						                    {
+						                    		RuleUtils.addOccurrence(E053, "vehicle_id " + tripUpdate.getVehicle().getId(),  errorListE053, _log);
+						                    }		                    			                    	
+				                    	}				                    						                  
+				                    }	                    		
+	                    		}
+                    		}
                     	}
-	                    
-                    }                                        	
-                }                
-                // Need to store previous for checking E053
-                previousTripUpdates.put(tripUpdate.getVehicle().getId(), tripUpdate);                                               
+                    }                                                               
+                }
             }
-
             if (entity.hasVehicle()) {
                 GtfsRealtime.VehiclePosition vehiclePosition = entity.getVehicle();
                 if (vehiclePosition.hasTrip() &&

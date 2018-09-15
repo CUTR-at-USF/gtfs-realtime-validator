@@ -1,6 +1,8 @@
 package edu.usf.cutr.gtfsrtvalidator.lib.test.rules;
 
 import com.google.transit.realtime.GtfsRealtime;
+import com.google.transit.realtime.GtfsRealtime.FeedMessage;
+
 import edu.usf.cutr.gtfsrtvalidator.lib.model.ValidationRule;
 import edu.usf.cutr.gtfsrtvalidator.lib.test.FeedMessageTest;
 import edu.usf.cutr.gtfsrtvalidator.lib.test.util.TestUtils;
@@ -270,7 +272,7 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
     {
     	FrequencyTypeZeroValidator frequencyTypeZeroValidator = new FrequencyTypeZeroValidator();
         Map<ValidationRule, Integer> expected = new HashMap<>();
-        
+        FeedMessage[] feedMessages= new FeedMessage[2];
         for( int i = 0; i <2;i++)
         {
 	        GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
@@ -315,23 +317,22 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
 		                
 		        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
 	        }
-	        
-	        
+	        	       
 	        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
 	        
 	        // Add vehicle_id to vehicle position - 1 warning        
 	        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
-	
-	
+		
 	        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 	        	        
-	        results = frequencyTypeZeroValidator.validate(TimestampUtils.MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
-	        	        	        	        	        	            	        
-	      
+	        feedMessages[i]=feedMessageBuilder.build();
+	        
+	        	        	        	        	        	            	       	      
         }
+        results = frequencyTypeZeroValidator.validate(TimestampUtils.MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessages[1], feedMessages[0], null);
         expected.put(ValidationRules.E053, 1);
         TestUtils.assertResults(expected, results);
-
+        expected.clear();
         clearAndInitRequiredFeedFields();        
     }
 }
