@@ -55,6 +55,7 @@ Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-U
 | [E051](#E051) | GTFS-rt `stop_sequence` not found in GTFS data
 | [E052](#E052) | `vehicle.id` is not unique
 | [E053](#E053) | `start_time` for trip has changed
+| [E054](#E054) | `delay` for freq based trip with exact times=0 is set 
 
 ### Table of Warnings
 
@@ -727,6 +728,15 @@ A frequency based trip should have the same start time in the descriptor.
 From [TripUpdate.TripDescriptor](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor) for `start_time`:
 
 >If the trip corresponds to exact_times=0, then its start_time may be arbitrary, and is initially expected to be the first departure of the trip. Once established, the start_time of this frequency-based exact_times=0 trip should be considered immutable, even if the first departure time changes 
+
+### E054 - `start_time` for trip has changed
+
+A frequency based trip of type 0 should not have any delay values set.
+
+From [TripUpdate](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripupdate) for `delay`:
+
+>Delay should only be specified when the prediction is given relative to some existing schedule in GTFS. 
+
 
 # Warnings
 

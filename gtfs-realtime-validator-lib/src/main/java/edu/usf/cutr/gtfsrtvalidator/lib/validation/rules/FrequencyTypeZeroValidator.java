@@ -18,6 +18,7 @@ package edu.usf.cutr.gtfsrtvalidator.lib.validation.rules;
 
 import com.google.transit.realtime.GtfsRealtime;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate;
+import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
 
 import edu.usf.cutr.gtfsrtvalidator.lib.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.lib.model.OccurrenceModel;
@@ -53,6 +54,7 @@ public class FrequencyTypeZeroValidator implements FeedEntityValidator {
         List<OccurrenceModel> errorListE013 = new ArrayList<>();
         List<OccurrenceModel> errorListW005 = new ArrayList<>();
         List<OccurrenceModel> errorListE053 = new ArrayList<>();
+        List<OccurrenceModel> errorListE054 = new ArrayList<>();
 
         for (GtfsRealtime.FeedEntity entity : feedMessage.getEntityList()) {
             if (entity.hasTripUpdate()) {
@@ -82,6 +84,7 @@ public class FrequencyTypeZeroValidator implements FeedEntityValidator {
                         // W005 - Missing vehicle_id in trip_update for frequency-based exact_times = 0
                         RuleUtils.addOccurrence(W005, "trip_id " + tripUpdate.getTrip().getTripId(), errorListW005, _log);
                     }
+                    
                     if(previousFeedMessage!=null)
                     {
 	                    for (GtfsRealtime.FeedEntity previousEntity : previousFeedMessage.getEntityList()) 
@@ -107,6 +110,24 @@ public class FrequencyTypeZeroValidator implements FeedEntityValidator {
 	                    		}
 	                    	}
 	                    }
+                    }
+                    
+                    for(StopTimeUpdate stopTimeUpdate:tripUpdate.getStopTimeUpdateList())
+                    {                    	
+						if(stopTimeUpdate.hasArrival())
+                    	{
+                    		if(stopTimeUpdate.getArrival().hasDelay())
+                    		{                    			
+                    			RuleUtils.addOccurrence(E054, "vehicle_id " + tripUpdate.getVehicle().getId(),  errorListE054, _log);
+                    		}
+                    	}
+                    	if(stopTimeUpdate.hasDeparture())
+                    	{
+                    		if(stopTimeUpdate.getDeparture().hasDelay())
+                    		{                    		
+                    			RuleUtils.addOccurrence(E054, "vehicle_id " + tripUpdate.getVehicle().getId(),  errorListE054, _log);
+                    		}
+                    	}
                     }
                 }
             }
@@ -153,6 +174,9 @@ public class FrequencyTypeZeroValidator implements FeedEntityValidator {
         }
         if (!errorListE053.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(E053), errorListE053));
+        }        
+        if (!errorListE054.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E054), errorListE053));
         }
         return errors;
     }
