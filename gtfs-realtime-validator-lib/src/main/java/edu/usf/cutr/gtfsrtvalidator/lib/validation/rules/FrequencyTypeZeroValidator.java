@@ -82,30 +82,32 @@ public class FrequencyTypeZeroValidator implements FeedEntityValidator {
                         // W005 - Missing vehicle_id in trip_update for frequency-based exact_times = 0
                         RuleUtils.addOccurrence(W005, "trip_id " + tripUpdate.getTrip().getTripId(), errorListW005, _log);
                     }
-                    
-                    for (GtfsRealtime.FeedEntity previousEntity : previousFeedMessage.getEntityList()) 
-                    {                                        
-                    	if (previousEntity.hasTripUpdate()) 
-                    	{	
-                    		if(tripUpdate.getVehicle()!=null && previousEntity.getTripUpdate().getVehicle()!=null)
-                    		{                    				                    		
-	                    		if(previousEntity.getTripUpdate().getVehicle().getId().equals(tripUpdate.getVehicle().getId()))
-	                    		{				                               
-				                    if(tripUpdate.getStopTimeUpdateCount()>0 && previousEntity.getTripUpdate().getStopTimeUpdateCount()>0)
-				                    {				                    						                    		
-				                    	if(tripUpdate.getStopTimeUpdate(tripUpdate.getStopTimeUpdateCount()-1).getStopSequence()>=previousEntity.getTripUpdate().getStopTimeUpdate(previousEntity.getTripUpdate().getStopTimeUpdateCount()-1).getStopSequence())
-				                    	{
-						                    // E053 - start time of trip not consistent for trip updates for frequency-based exact_times = 0
-						                    if(!tripUpdate.getTrip().getStartTime().equals(previousEntity.getTripUpdate().getTrip().getStartTime()))
-						                    {
-						                    		RuleUtils.addOccurrence(E053, "vehicle_id " + tripUpdate.getVehicle().getId(),  errorListE053, _log);
-						                    }		                    			                    	
-				                    	}				                    						                  
-				                    }	                    		
+                    if(previousFeedMessage!=null)
+                    {
+	                    for (GtfsRealtime.FeedEntity previousEntity : previousFeedMessage.getEntityList()) 
+	                    {                                        
+	                    	if (previousEntity.hasTripUpdate()) 
+	                    	{	
+	                    		if(tripUpdate.getVehicle()!=null && previousEntity.getTripUpdate().getVehicle()!=null)
+	                    		{                    				                    		
+		                    		if(previousEntity.getTripUpdate().getVehicle().getId().equals(tripUpdate.getVehicle().getId()))
+		                    		{				                               
+					                    if(tripUpdate.getStopTimeUpdateCount()>0 && previousEntity.getTripUpdate().getStopTimeUpdateCount()>0)
+					                    {				                    						                    		
+					                    	if(tripUpdate.getStopTimeUpdate(tripUpdate.getStopTimeUpdateCount()-1).getStopSequence()>=previousEntity.getTripUpdate().getStopTimeUpdate(previousEntity.getTripUpdate().getStopTimeUpdateCount()-1).getStopSequence())
+					                    	{
+							                    // E053 - start time of trip not consistent for trip updates for frequency-based exact_times = 0
+							                    if(!tripUpdate.getTrip().getStartTime().equals(previousEntity.getTripUpdate().getTrip().getStartTime()))
+							                    {
+							                    		RuleUtils.addOccurrence(E053, "vehicle_id " + tripUpdate.getVehicle().getId(),  errorListE053, _log);
+							                    }		                    			                    	
+					                    	}				                    						                  
+					                    }	                    		
+		                    		}
 	                    		}
-                    		}
-                    	}
-                    }                                                               
+	                    	}
+	                    }
+                    }
                 }
             }
             if (entity.hasVehicle()) {
