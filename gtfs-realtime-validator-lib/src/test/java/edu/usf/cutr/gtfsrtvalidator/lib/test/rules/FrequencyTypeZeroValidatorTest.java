@@ -262,4 +262,76 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
 
         clearAndInitRequiredFeedFields();
     }
+    /**
+     * E053- inconsistent start time in trip descriptor for frequency-based exact_times = 0
+     */
+    @Test
+    public void testE053()
+    {
+    	FrequencyTypeZeroValidator frequencyTypeZeroValidator = new FrequencyTypeZeroValidator();
+        Map<ValidationRule, Integer> expected = new HashMap<>();
+        
+        for( int i = 0; i <2;i++)
+        {
+	        GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+	        
+	        tripDescriptorBuilder.setTripId("1");
+	        tripDescriptorBuilder.setStartDate("4-24-2016");
+	        if(i==0)
+	        {
+	        	tripDescriptorBuilder.setStartTime("08:00:00AM");
+	        }
+	        if(i==1)
+	        {
+	        	tripDescriptorBuilder.setStartTime("09:00:00AM");
+	        }
+	        	       
+	        
+	        GtfsRealtime.VehicleDescriptor.Builder vehicleDescriptorBuilder = GtfsRealtime.VehicleDescriptor.newBuilder();
+	                
+	        vehicleDescriptorBuilder.setId("1");
+	        
+	        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
+	        vehiclePositionBuilder.setTimestamp(TimestampUtils.MIN_POSIX_TIME);
+	        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+	        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
+	                                
+	        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+	
+	        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+	        
+	        tripUpdateBuilder.setVehicle(vehicleDescriptorBuilder.build());
+	        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+	        
+	        for(int j=0;j<i+1;j++)
+	        {
+		        GtfsRealtime.TripUpdate.StopTimeUpdate.Builder stopTimeUpdateBuilder = GtfsRealtime.TripUpdate.StopTimeUpdate.newBuilder();
+		        	        
+		        stopTimeUpdateBuilder.setStopId(""+j);
+		        stopTimeUpdateBuilder.setStopSequence(j);
+		        
+		        GtfsRealtime.TripUpdate.StopTimeEvent.Builder stopTimeEventBuilder =  GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder();  
+		        stopTimeUpdateBuilder.setArrival(stopTimeEventBuilder.build());
+		                
+		        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
+	        }
+	        
+	        
+	        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+	        
+	        // Add vehicle_id to vehicle position - 1 warning        
+	        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+	
+	
+	        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+	        	        
+	        results = frequencyTypeZeroValidator.validate(TimestampUtils.MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
+	        	        	        	        	        	            	        
+	      
+        }
+        expected.put(ValidationRules.E053, 1);
+        TestUtils.assertResults(expected, results);
+
+        clearAndInitRequiredFeedFields();        
+    }
 }
