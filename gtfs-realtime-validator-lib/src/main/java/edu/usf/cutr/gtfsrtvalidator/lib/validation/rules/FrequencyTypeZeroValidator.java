@@ -176,7 +176,7 @@ public class FrequencyTypeZeroValidator implements FeedEntityValidator {
             errors.add(new ErrorListHelperModel(new MessageLogModel(E053), errorListE053));
         }        
         if (!errorListE054.isEmpty()) {
-            errors.add(new ErrorListHelperModel(new MessageLogModel(E054), errorListE053));
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E054), errorListE054));
         }
         return errors;
     }

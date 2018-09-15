@@ -335,4 +335,65 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
         expected.clear();
         clearAndInitRequiredFeedFields();        
     }
+    /**
+     * E054- delay should not be set for frequency-based exact_times = 0
+     */
+    @Test
+    public void testE054()
+    {
+    	FrequencyTypeZeroValidator frequencyTypeZeroValidator = new FrequencyTypeZeroValidator();
+        Map<ValidationRule, Integer> expected = new HashMap<>();
+        FeedMessage[] feedMessages= new FeedMessage[2];
+        
+        GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+        
+        tripDescriptorBuilder.setTripId("1");
+        tripDescriptorBuilder.setStartDate("4-24-2016");
+       
+        tripDescriptorBuilder.setStartTime("08:00:00AM");
+        	       
+        
+        GtfsRealtime.VehicleDescriptor.Builder vehicleDescriptorBuilder = GtfsRealtime.VehicleDescriptor.newBuilder();
+                
+        vehicleDescriptorBuilder.setId("1");
+        
+        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
+        vehiclePositionBuilder.setTimestamp(TimestampUtils.MIN_POSIX_TIME);
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
+                                
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+        
+        tripUpdateBuilder.setVehicle(vehicleDescriptorBuilder.build());
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        
+       
+        GtfsRealtime.TripUpdate.StopTimeUpdate.Builder stopTimeUpdateBuilder = GtfsRealtime.TripUpdate.StopTimeUpdate.newBuilder();
+        	        
+        stopTimeUpdateBuilder.setStopId(""+1);
+        stopTimeUpdateBuilder.setStopSequence(1);
+        
+        
+        GtfsRealtime.TripUpdate.StopTimeEvent.Builder stopTimeEventBuilder =  GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder();
+        stopTimeEventBuilder.setDelay(10);
+        stopTimeUpdateBuilder.setArrival(stopTimeEventBuilder.build());
+                
+        tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
+        
+        	       
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        
+            
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+	
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = frequencyTypeZeroValidator.validate(TimestampUtils.MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
+        expected.put(ValidationRules.E054, 1);
+        TestUtils.assertResults(expected, results);
+        expected.clear();
+        clearAndInitRequiredFeedFields();       
+    }
 }
