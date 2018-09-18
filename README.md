@@ -7,14 +7,6 @@ A tool that validates [General Transit Feed Specification (GTFS)-realtime](https
 
 Questions? You can [open an issue](https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues), ask the [GTFS Slack Group](https://gtfs.herokuapp.com/) or reach out to the [GTFS-realtime Google Group](https://groups.google.com/forum/#!forum/gtfs-realtime).
 
-## Live demo
-
-We have a bleeding-edge alpha version running here as a demo:
- 
- [http://transittools.forest.usf.edu/](http://transittools.forest.usf.edu/)
- 
- Feel free to check it out, but just be aware that it may be unavailable at any time, or prone to hiccups.
-
 ## Quick start - Run it yourself
 
 *Please note that this project is still under active development and is in an early alpha state.*
