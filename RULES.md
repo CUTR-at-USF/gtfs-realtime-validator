@@ -720,9 +720,9 @@ From [VehiclePosition.VehicleDescriptor](https://github.com/google/transit/blob/
 
 <a name="E053"/>
 
-### E053 - `start_time` for trip has changed
+### E053 - `start_time` for frequency-based trip has changed
 
-A frequency based trip should have the same start time in the descriptor.
+A trip that is defined in frequencies.txt and has exact_times=0 or empty should have the same start_time in the descriptor for it's entire trip instance. A trip instance is defined as one journey of the vehicle from the starting stop_sequence for a trip_id in stop_times.txt to the ending stop_sequence for that same trip_id.
 
 From [TripUpdate.TripDescriptor](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor) for `start_time`:
 
