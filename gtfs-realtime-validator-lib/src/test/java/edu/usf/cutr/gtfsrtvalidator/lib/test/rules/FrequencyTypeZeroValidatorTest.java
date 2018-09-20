@@ -273,6 +273,8 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
 
         FrequencyTypeZeroValidator frequencyTypeZeroValidator = new FrequencyTypeZeroValidator();
         Map<ValidationRule, Integer> expected = new HashMap<>();
+        FeedMessage previousMessage=null;
+        FeedMessage currentMessage=null;
         for (int i = 0; i < 2; i++) {
             GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
 
@@ -318,13 +320,15 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
 
             feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-            results = frequencyTypeZeroValidator.validate(TimestampUtils.MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
+            currentMessage=feedMessageBuilder.build();
 
+            results = frequencyTypeZeroValidator.validate(TimestampUtils.MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, currentMessage, previousMessage, null);
 
+            previousMessage=currentMessage;
         }
         expected.clear();
         TestUtils.assertResults(expected, results);
-
+        previousMessage=null;
         for (int i = 0; i < 2; i++) {
             GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
 
@@ -375,7 +379,11 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
 
             feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
-            results = frequencyTypeZeroValidator.validate(TimestampUtils.MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
+            currentMessage=feedMessageBuilder.build();
+
+            results = frequencyTypeZeroValidator.validate(TimestampUtils.MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, currentMessage, previousMessage, null);
+
+            previousMessage=currentMessage;
 
         }
         expected.put(ValidationRules.E053, 1);
