@@ -386,9 +386,128 @@ public class FrequencyTypeZeroValidatorTest extends FeedMessageTest {
             previousMessage=currentMessage;
 
         }
+        expected.clear();
+        TestUtils.assertResults(expected, results);
+        previousMessage=null;
+        for (int i = 0; i < 2; i++) {
+            GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+
+            tripDescriptorBuilder.setTripId("1");
+            tripDescriptorBuilder.setStartDate("4-24-2016");
+            if (i == 0) {
+                tripDescriptorBuilder.setStartTime("08:00:00AM");
+            }
+            if (i == 1) {
+                tripDescriptorBuilder.setStartTime("07:00:00AM");
+            }
+
+
+            GtfsRealtime.VehicleDescriptor.Builder vehicleDescriptorBuilder = GtfsRealtime.VehicleDescriptor.newBuilder();
+
+            vehicleDescriptorBuilder.setId("1");
+
+            vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
+            vehiclePositionBuilder.setTimestamp(TimestampUtils.MIN_POSIX_TIME);
+            vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+            vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
+
+            feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+
+            feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+            tripUpdateBuilder.setVehicle(vehicleDescriptorBuilder.build());
+            tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+
+            for (int j = 0; j < i + 1; j++) {
+                GtfsRealtime.TripUpdate.StopTimeUpdate.Builder stopTimeUpdateBuilder = GtfsRealtime.TripUpdate.StopTimeUpdate.newBuilder();
+
+                stopTimeUpdateBuilder.setStopId("" + j);
+                stopTimeUpdateBuilder.setStopSequence(j);
+
+                GtfsRealtime.TripUpdate.StopTimeEvent.Builder stopTimeEventBuilder = GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder();
+                stopTimeUpdateBuilder.setArrival(stopTimeEventBuilder.build());
+
+                tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
+            }
+
+
+            feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+
+            // Add vehicle_id to vehicle position - 1 warning
+            feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+
+
+            feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+            currentMessage=feedMessageBuilder.build();
+
+            results = frequencyTypeZeroValidator.validate(TimestampUtils.MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, currentMessage, previousMessage, null);
+
+            previousMessage=currentMessage;
+
+        }
         expected.put(ValidationRules.E053, 1);
         TestUtils.assertResults(expected, results);
+        previousMessage=null;
+        for (int i = 0; i < 2; i++) {
+            GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
 
+            tripDescriptorBuilder.setTripId(""+i);
+            tripDescriptorBuilder.setStartDate("4-24-2016");
+            if (i == 0) {
+                tripDescriptorBuilder.setStartTime("08:00:00AM");
+            }
+            if (i == 1) {
+                tripDescriptorBuilder.setStartTime("07:00:00AM");
+            }
+
+
+            GtfsRealtime.VehicleDescriptor.Builder vehicleDescriptorBuilder = GtfsRealtime.VehicleDescriptor.newBuilder();
+
+            vehicleDescriptorBuilder.setId("1");
+
+            vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
+            vehiclePositionBuilder.setTimestamp(TimestampUtils.MIN_POSIX_TIME);
+            vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+            vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
+
+            feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+
+            feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+            tripUpdateBuilder.setVehicle(vehicleDescriptorBuilder.build());
+            tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+
+            for (int j = 0; j < i + 1; j++) {
+                GtfsRealtime.TripUpdate.StopTimeUpdate.Builder stopTimeUpdateBuilder = GtfsRealtime.TripUpdate.StopTimeUpdate.newBuilder();
+
+                stopTimeUpdateBuilder.setStopId("" + j);
+                stopTimeUpdateBuilder.setStopSequence(j);
+
+                GtfsRealtime.TripUpdate.StopTimeEvent.Builder stopTimeEventBuilder = GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder();
+                stopTimeUpdateBuilder.setArrival(stopTimeEventBuilder.build());
+
+                tripUpdateBuilder.addStopTimeUpdate(stopTimeUpdateBuilder.build());
+            }
+
+
+            feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+
+            // Add vehicle_id to vehicle position - 1 warning
+            feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+
+
+            feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+            currentMessage=feedMessageBuilder.build();
+
+            results = frequencyTypeZeroValidator.validate(TimestampUtils.MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, currentMessage, previousMessage, null);
+
+            previousMessage=currentMessage;
+
+        }
+        expected.clear();
+        TestUtils.assertResults(expected, results);
         clearAndInitRequiredFeedFields();
     }
 }
