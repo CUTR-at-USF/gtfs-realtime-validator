@@ -19,7 +19,6 @@ package edu.usf.cutr.gtfsrtvalidator.lib.validation.rules;
 import com.google.transit.realtime.GtfsRealtime;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 import edu.usf.cutr.gtfsrtvalidator.lib.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.lib.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.lib.model.helper.ErrorListHelperModel;
@@ -29,7 +28,9 @@ import edu.usf.cutr.gtfsrtvalidator.lib.validation.interfaces.FeedEntityValidato
 import org.onebusaway.gtfs.services.GtfsMutableDao;
 import org.slf4j.LoggerFactory;
 
+import java.text.ParseException;
 import java.util.*;
+import java.text.SimpleDateFormat;
 
 import static edu.usf.cutr.gtfsrtvalidator.lib.validation.ValidationRules.*;
 
@@ -55,25 +56,12 @@ public class FrequencyTypeZeroValidator implements FeedEntityValidator {
         HashMap<String, List<TripUpdate>> previousTripUpdates = new HashMap<String, List<TripUpdate>>();
         HashMap<String, List<TripUpdate>> currentTripUpdates = new HashMap<String, List<TripUpdate>>();
 
-        if(previousFeedMessage!=null) {
+        if (previousFeedMessage != null) {
             for (GtfsRealtime.FeedEntity entity : previousFeedMessage.getEntityList()) {
                 if (entity.hasTripUpdate()) {
                     GtfsRealtime.TripUpdate tripUpdate = entity.getTripUpdate();
 
-                    if (tripUpdate.hasVehicle() && tripUpdate.getVehicle().hasId()) {
-
-                        List<TripUpdate> tripUpdates = null;
-                        if (!previousTripUpdates.containsKey(tripUpdate.getVehicle().hasId())) {
-                            tripUpdates = new ArrayList<TripUpdate>();
-                        } else {
-                            tripUpdates = previousTripUpdates.get(tripUpdate.getVehicle().getId());
-                        }
-                        tripUpdates.add(tripUpdate);
-
-                        Collections.sort(tripUpdates, new TripUpdateStartTimeComparator());
-
-                        previousTripUpdates.put(tripUpdate.getVehicle().getId(), tripUpdates);
-                    }
+                    this.addTripUpdate(previousTripUpdates, tripUpdate);
                 }
             }
         }
@@ -84,22 +72,8 @@ public class FrequencyTypeZeroValidator implements FeedEntityValidator {
             	
                 GtfsRealtime.TripUpdate tripUpdate = entity.getTripUpdate();
 
-                if (tripUpdate.hasVehicle() && tripUpdate.getVehicle().hasId()) {
+                this.addTripUpdate(currentTripUpdates, tripUpdate);
 
-                    List<TripUpdate> tripUpdates = null;
-                    if (!currentTripUpdates.containsKey(tripUpdate.getVehicle().hasId())) {
-                        tripUpdates = new ArrayList<TripUpdate>();
-                    } else {
-                        tripUpdates = currentTripUpdates.get(tripUpdate.getVehicle().getId());
-                    }
-                    tripUpdates.add(tripUpdate);
-
-                    Collections.sort(tripUpdates, new TripUpdateStartTimeComparator());
-
-                    currentTripUpdates.put(tripUpdate.getVehicle().getId(), tripUpdates);
-                }
-
-                        
                 if (gtfsMetadata.getExactTimesZeroTripIds().contains(tripUpdate.getTrip().getTripId())) {
                     /**
                      * NOTE - W006 checks for missing trip_ids, because we can't check for that here - we need the trip_id to know if it's exact_times=0
@@ -178,7 +152,7 @@ public class FrequencyTypeZeroValidator implements FeedEntityValidator {
             }
         }
 
-
+        checkE053(currentTripUpdates, previousTripUpdates);
 
         List<ErrorListHelperModel> errors = new ArrayList<>();
         if (!errorListE006.isEmpty()) {
@@ -197,12 +171,47 @@ public class FrequencyTypeZeroValidator implements FeedEntityValidator {
 
     }
 
-    private class TripUpdateStartTimeComparator implements Comparator<TripUpdate>
-    {
+    private class TripUpdateStartTimeComparator implements Comparator<TripUpdate> {
+        SimpleDateFormat formatter = new SimpleDateFormat("hh:mm:ssa");
+
         @Override
         public int compare(TripUpdate t1, TripUpdate t2) {
-            return 0;
+
+            try {
+                if(t1.hasTrip()&&t1.getTrip().hasStartTime()&&t2.hasTrip()&&t2.getTrip().hasStartTime()) {
+
+                    Date t1_date = formatter.parse(t1.getTrip().getStartTime());
+
+                    Date t2_date = formatter.parse(t2.getTrip().getStartTime());
+
+                    return t1_date.compareTo(t2_date);
+                }
+            } catch (ParseException e) {
+                _log.error(e.getMessage(), e);
+            }
+            return -1;
         }
+
     }
 
+    private void checkE053(HashMap<String, List<TripUpdate>> currentTripUpdates, HashMap<String, List<TripUpdate>> previousTripUpdates) {
+
+    }
+
+    private void addTripUpdate(HashMap<String, List<TripUpdate>> tripUpdatesMap, GtfsRealtime.TripUpdate tripUpdate) {
+        if (tripUpdate.hasVehicle() && tripUpdate.getVehicle().hasId()) {
+
+            List<TripUpdate> tripUpdates = null;
+            if (!tripUpdatesMap.containsKey(tripUpdate.getVehicle().hasId())) {
+                tripUpdates = new ArrayList<TripUpdate>();
+            } else {
+                tripUpdates = tripUpdatesMap.get(tripUpdate.getVehicle().getId());
+            }
+            tripUpdates.add(tripUpdate);
+
+            Collections.sort(tripUpdates, new TripUpdateStartTimeComparator());
+
+            tripUpdatesMap.put(tripUpdate.getVehicle().getId(), tripUpdates);
+        }
+    }
 }
