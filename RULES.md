@@ -68,6 +68,7 @@ Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-U
 | [W007](#W007) | Refresh interval is more than 35 seconds
 | [W008](#W008) | Header `timestamp` is older than 65 seconds
 | [W009](#W009) | `schedule_relationship` not populated
+| [W099](#W099) | `schedule_relationship = NO_DATA`
 
 # Errors
 
