@@ -74,7 +74,7 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
         List<OccurrenceModel> e045List = new ArrayList<>();
         List<OccurrenceModel> e046List = new ArrayList<>();
         List<OccurrenceModel> e051List = new ArrayList<>();
-        List<OccurrenceModel> w099List = new ArrayList<>();
+		List<OccurrenceModel> w099List = new ArrayList<>();
 
         for (GtfsRealtime.FeedEntity entity : entityList) {
             if (entity.hasTripUpdate()) {
@@ -199,7 +199,7 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
                         RuleUtils.addOccurrence(ValidationRules.E002, id + " stop_sequence for stop_ids " + rtStopIdList.toString(), e002List, _log);
                     }
                 }
-                checkW099(entity, tripUpdate, w099List);
+				checkW099(entity, tripUpdate, w099List);
             }
         }
 
@@ -240,7 +240,7 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
         if (!e051List.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.E051), e051List));
         }
-        if (!w099List.isEmpty()) {
+		if (!w099List.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.W099), w099List));
         }
         return errors;
@@ -445,8 +445,7 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
             }
         }
     }
-
-    private void checkW099(GtfsRealtime.FeedEntity entity, GtfsRealtime.TripUpdate tripUpdate, List<OccurrenceModel> errors){
+		private void checkW099(GtfsRealtime.FeedEntity entity, GtfsRealtime.TripUpdate tripUpdate, List<OccurrenceModel> errors){
         List<GtfsRealtime.TripUpdate.StopTimeUpdate> stopTimeUpdateList = tripUpdate.getStopTimeUpdateList();
         for (GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate : stopTimeUpdateList) {
             if (stopTimeUpdate.hasScheduleRelationship()) {
