@@ -52,6 +52,7 @@ import static com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate
  * E045 - GTFS-rt stop_time_update stop_sequence and stop_id do not match GTFS
  * E046 - GTFS-rt stop_time_update without time doesn't have arrival/departure_time in GTFS
  * E051 - GTFS-rt stop_sequence not found in GTFS data
+ * w101 - StopTimeUpdate.schedule_relationship: SKIPPED
  */
 public class StopTimeUpdateValidator implements FeedEntityValidator {
 
@@ -72,6 +73,7 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
         List<OccurrenceModel> e045List = new ArrayList<>();
         List<OccurrenceModel> e046List = new ArrayList<>();
         List<OccurrenceModel> e051List = new ArrayList<>();
+        List<OccurrenceModel> W101List = new ArrayList<>();
 
         for (GtfsRealtime.FeedEntity entity : entityList) {
             if (entity.hasTripUpdate()) {
@@ -169,6 +171,7 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
                     checkE042(entity, tripUpdate, stopTimeUpdate, e042List);
                     checkE043(entity, tripUpdate, stopTimeUpdate, e043List);
                     checkE044(entity, tripUpdate, stopTimeUpdate, e044List);
+                    checkW101(entity, stopTimeUpdate, W101List);
 
                     if (unknownRtStopSequence) {
                         // E051 - GTFS-rt stop_sequence not found in GTFS data
@@ -235,6 +238,9 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
         }
         if (!e051List.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.E051), e051List));
+        }
+        if (!W101List.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.W101), W101List));
         }
         return errors;
     }
@@ -435,6 +441,16 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
             if (!stopTimeUpdate.getDeparture().hasTime() && !gtfsStopTime.isDepartureTimeSet()) {
                 String prefix = prefixBuilder.toString() + "departure.time";
                 RuleUtils.addOccurrence(ValidationRules.E046, prefix, errors, _log);
+            }
+        }
+    }
+
+    private void checkW101(GtfsRealtime.FeedEntity entity, GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate, List<OccurrenceModel> errors) {
+        if (stopTimeUpdate.hasScheduleRelationship()) {
+            GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship schedule_relationship = stopTimeUpdate.getScheduleRelationship();
+            if (schedule_relationship.equals(GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SKIPPED)) {
+                String id = GtfsUtils.getTripId(entity, entity.getTripUpdate());
+                RuleUtils.addOccurrence(ValidationRules.W101, id + " has schedule_relationship: SKIPPED " , errors, _log);
             }
         }
     }
