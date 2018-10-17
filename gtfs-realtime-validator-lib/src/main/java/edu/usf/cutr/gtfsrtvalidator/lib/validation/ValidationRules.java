@@ -56,7 +56,9 @@ public class ValidationRules {
     public static final ValidationRule W009 = new ValidationRule("W009", "WARNING", "schedule_relationship not populated",
             "trip.schedule_relationship and stop_time_update.schedule_relationship should be populated",
             "does not have a schedule_relationship");
-
+    public static final ValidationRule W099 = new ValidationRule("W099", "WARNING", "schedule_relationship = NO_DATA",
+            "schedule_relationship = NO_DATA",
+            "schedule_relationship = NO_DATA");
     /**
      * Errors
      */

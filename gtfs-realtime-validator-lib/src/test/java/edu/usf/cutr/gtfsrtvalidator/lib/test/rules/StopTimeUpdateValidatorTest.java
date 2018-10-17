@@ -1088,6 +1088,7 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
 
         results = stopSequenceValidator.validate(TimestampUtils.MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.put(E042, 1);
+		expected.put(W099, 1);
         TestUtils.assertResults(expected, results);
 
         // One stop_time_update with schedule_relationship NO_DATA and an arrival - 1 error
@@ -1173,7 +1174,6 @@ public class StopTimeUpdateValidatorTest extends FeedMessageTest {
 
         results = stopSequenceValidator.validate(TimestampUtils.MIN_POSIX_TIME, gtfsData, gtfsDataMetadata, feedMessageBuilder.build(), null, null);
         expected.clear();
-        TestUtils.assertResults(expected, results);
 
         // One stop_time_update with arrival - 0 errors
         stopTimeUpdateBuilder.clear();
