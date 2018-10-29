@@ -56,6 +56,9 @@ public class ValidationRules {
     public static final ValidationRule W009 = new ValidationRule("W009", "WARNING", "schedule_relationship not populated",
             "trip.schedule_relationship and stop_time_update.schedule_relationship should be populated",
             "does not have a schedule_relationship");
+    public static final ValidationRule W102 = new ValidationRule("W102", "WARNING", "trip_update only contains one stop_time_update",
+            "trip_update only contains one stop_time_update",
+            "trip_update only contains one stop_time_update");
 
     /**
      * Errors
