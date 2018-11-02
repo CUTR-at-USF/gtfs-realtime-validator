@@ -76,9 +76,22 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
         List<OccurrenceModel> e051List = new ArrayList<>();
         List<OccurrenceModel> w102List = new ArrayList<>();
 
+        Boolean one_stop_time_update;
+        if (entityList.size() == 0){
+            one_stop_time_update = Boolean.FALSE ;
+        } else {
+            one_stop_time_update = Boolean.TRUE ;
+        }
+
         for (GtfsRealtime.FeedEntity entity : entityList) {
             if (entity.hasTripUpdate()) {
                 GtfsRealtime.TripUpdate tripUpdate = entity.getTripUpdate();
+
+                // check if tripUpdate has more than stop_time_update
+                if (one_stop_time_update && tripUpdate.getStopTimeUpdateCount() > 1){
+                    one_stop_time_update = Boolean.FALSE;   // stop checking further
+                }
+
                 checkE041(entity, tripUpdate, e041List);
                 List<StopTime> gtfsStopTimes = null;
                 int gtfsStopTimeIndex = 0;
@@ -98,7 +111,6 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
                 boolean addedStopSequenceFromStopId = false;
                 Map<String, List<String>> tripWithMultiStop = gtfsMetadata.getTripsWithMultiStops();
                 boolean unknownRtStopSequence = false;
-                checkW102(entity, tripUpdate, w102List);
                 for (GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate : rtStopTimeUpdateList) {
                     if (!foundE009error && tripId != null && tripWithMultiStop.containsKey(tripId) && !stopTimeUpdate.hasStopSequence()) {
                         // E009 - GTFS-rt stop_sequence isn't provided for trip that visits same stop_id more than once
@@ -200,7 +212,14 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
                         RuleUtils.addOccurrence(ValidationRules.E002, id + " stop_sequence for stop_ids " + rtStopIdList.toString(), e002List, _log);
                     }
                 }
+            } else {
+                one_stop_time_update = Boolean.FALSE; // set to false if has no trip update
             }
+        }
+
+        // check W102
+        if (one_stop_time_update){
+            RuleUtils.addOccurrence(ValidationRules.W102, Long.toString(feedMessage.getHeader().getTimestamp()), w102List, _log);
         }
 
         List<ErrorListHelperModel> errors = new ArrayList<>();
@@ -446,12 +465,4 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
         }
     }
 
-    private void checkW102(GtfsRealtime.FeedEntity entity, GtfsRealtime.TripUpdate tripUpdate, List<OccurrenceModel> errors) {
-        StringBuilder prefixBuilder = new StringBuilder();
-        prefixBuilder.append("GTFS-rt " + GtfsUtils.getTripId(entity, tripUpdate) + " ");
-        if (tripUpdate.getStopTimeUpdateCount() == 1){
-            String prefix = prefixBuilder.toString();
-            RuleUtils.addOccurrence(ValidationRules.W102, prefix, errors, _log);
-        }
-    }
 }
