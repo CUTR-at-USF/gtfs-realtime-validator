@@ -68,7 +68,8 @@ Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-U
 | [W007](#W007) | Refresh interval is more than 35 seconds
 | [W008](#W008) | Header `timestamp` is older than 65 seconds
 | [W009](#W009) | `schedule_relationship` not populated
-| [W102](#W102) | `trip_update` only contains one `stop_time_update`
+| [W102](#W102) | all `trip_update` only contain one `stop_time_update`
+| [W103](#W103) | more than one `trip_update` for a `vehicle_id`
 
 # Errors
 
