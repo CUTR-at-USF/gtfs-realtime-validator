@@ -31,8 +31,17 @@ import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.services.GtfsMutableDao;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static edu.usf.cutr.gtfsrtvalidator.lib.validation.ValidationRules.*;
 
@@ -89,7 +98,10 @@ public class TripDescriptorValidator implements FeedEntityValidator {
         List<OccurrenceModel> errorListE035 = new ArrayList<>();
         List<OccurrenceModel> errorListW006 = new ArrayList<>();
         List<OccurrenceModel> errorListW009 = new ArrayList<>();
+        List<OccurrenceModel> errorListW103 = new ArrayList<>();
 
+        String agency = gtfsData.getAllAgencies().iterator().next().getName();
+        checkW103(feedMessage, agency, errorListW103);
         // Check the route_id values against the values from the GTFS feed
         for (GtfsRealtime.FeedEntity entity : feedMessage.getEntityList()) {
             if (entity.hasTripUpdate()) {
@@ -243,6 +255,10 @@ public class TripDescriptorValidator implements FeedEntityValidator {
         if (!errorListW009.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(W009), errorListW009));
         }
+        if (!errorListW103.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(W103), errorListW103));
+        }
+
         return errors;
     }
 
@@ -483,6 +499,38 @@ public class TripDescriptorValidator implements FeedEntityValidator {
     private void checkW009(GtfsRealtime.FeedEntity entity, GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate, List<OccurrenceModel> warnings) {
         if (stopTimeUpdate != null && !stopTimeUpdate.hasScheduleRelationship()) {
             RuleUtils.addOccurrence(W009, GtfsUtils.getTripId(entity, entity.getTripUpdate().getTrip()) + " " + GtfsUtils.getStopTimeUpdateId(stopTimeUpdate) + " (and potentially more for this trip)", warnings, _log);
+        }
+    }
+
+    private void checkW103(GtfsRealtime.FeedMessage feedMessage, String agency, List<OccurrenceModel> warnings) {
+        List<String> vehicle_ids = new ArrayList<String>();
+
+        for (GtfsRealtime.FeedEntity entity : feedMessage.getEntityList()) {
+            if (entity.hasTripUpdate()) {
+                GtfsRealtime.TripUpdate tripUpdate = entity.getTripUpdate();
+                if (tripUpdate.hasVehicle()){
+                    if (tripUpdate.getVehicle().hasId()){
+                        String vehicle_id = tripUpdate.getVehicle().getId();
+                        vehicle_ids.add(vehicle_id);
+                    }
+                }
+            }
+        }
+        Set<String> unique_vehicle_ids = new HashSet<String>(vehicle_ids);
+        int total_vehicle = vehicle_ids.size();
+        int unique_vehicle = unique_vehicle_ids.size();
+
+        if (total_vehicle > unique_vehicle){
+            RuleUtils.addOccurrence(W103, "" , warnings, _log);
+        }
+        int vehicle_dup_count = total_vehicle - unique_vehicle;
+        // write to file
+        String write_content = agency + "," + Integer.toString(total_vehicle) + "," + Integer.toString(unique_vehicle) + "," + Integer.toString(vehicle_dup_count) + System.lineSeparator();
+        Path file = Paths.get("./vehicle_id_count.txt");
+        try {
+            Files.write(file, write_content.getBytes(), StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

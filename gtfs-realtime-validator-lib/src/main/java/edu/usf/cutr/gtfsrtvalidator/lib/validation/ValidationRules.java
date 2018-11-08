@@ -59,6 +59,9 @@ public class ValidationRules {
     public static final ValidationRule W102 = new ValidationRule("W102", "WARNING", "trip_update only contains one stop_time_update",
             "trip_update only contains one stop_time_update",
             "trip_update only contains one stop_time_update");
+    public static final ValidationRule W103 = new ValidationRule("W103", "WARNING", "more than one trip_update for a vehicle_id",
+            "more than one trip_update for a vehicle_id",
+            "more than one trip_update for a vehicle_id");
 
     /**
      * Errors
