@@ -21,6 +21,7 @@ import com.google.common.collect.Ordering;
 import com.google.transit.realtime.GtfsRealtime;
 import edu.usf.cutr.gtfsrtvalidator.lib.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.lib.model.OccurrenceModel;
+import edu.usf.cutr.gtfsrtvalidator.lib.model.ValidationRule;
 import edu.usf.cutr.gtfsrtvalidator.lib.model.helper.ErrorListHelperModel;
 import edu.usf.cutr.gtfsrtvalidator.lib.util.GtfsUtils;
 import edu.usf.cutr.gtfsrtvalidator.lib.util.RuleUtils;
@@ -72,6 +73,9 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
         List<OccurrenceModel> e045List = new ArrayList<>();
         List<OccurrenceModel> e046List = new ArrayList<>();
         List<OccurrenceModel> e051List = new ArrayList<>();
+        List<OccurrenceModel> w104List = new ArrayList<>();
+        List<OccurrenceModel> w104_0List = new ArrayList<>();
+        List<OccurrenceModel> w104_1List = new ArrayList<>();
 
         for (GtfsRealtime.FeedEntity entity : entityList) {
             if (entity.hasTripUpdate()) {
@@ -169,6 +173,7 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
                     checkE042(entity, tripUpdate, stopTimeUpdate, e042List);
                     checkE043(entity, tripUpdate, stopTimeUpdate, e043List);
                     checkE044(entity, tripUpdate, stopTimeUpdate, e044List);
+                    checkW104(stopTimeUpdate, w104List, w104_0List, w104_1List);
 
                     if (unknownRtStopSequence) {
                         // E051 - GTFS-rt stop_sequence not found in GTFS data
@@ -235,6 +240,15 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
         }
         if (!e051List.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.E051), e051List));
+        }
+        if (!w104List.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.W104), w104List));
+        }
+        if (!w104_0List.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.W104_0), w104_0List));
+        }
+        if (!w104_1List.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.W104_1), w104_1List));
         }
         return errors;
     }
@@ -435,6 +449,20 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
             if (!stopTimeUpdate.getDeparture().hasTime() && !gtfsStopTime.isDepartureTimeSet()) {
                 String prefix = prefixBuilder.toString() + "departure.time";
                 RuleUtils.addOccurrence(ValidationRules.E046, prefix, errors, _log);
+            }
+        }
+    }
+
+    private void checkW104(GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate, List<OccurrenceModel> errors, List<OccurrenceModel> errors_0, List<OccurrenceModel> errors_1){
+        if (stopTimeUpdate.hasArrival()){
+            if (stopTimeUpdate.getArrival().hasUncertainty()){
+                RuleUtils.addOccurrence(ValidationRules.W104, "", errors, _log);
+                int uncertainty = stopTimeUpdate.getArrival().getUncertainty();
+                if (uncertainty == 0){
+                    RuleUtils.addOccurrence(ValidationRules.W104_0, "", errors_0, _log);
+                } else {
+                    RuleUtils.addOccurrence(ValidationRules.W104_1, "", errors_1, _log);
+                }
             }
         }
     }

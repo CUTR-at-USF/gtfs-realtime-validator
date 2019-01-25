@@ -56,6 +56,15 @@ public class ValidationRules {
     public static final ValidationRule W009 = new ValidationRule("W009", "WARNING", "schedule_relationship not populated",
             "trip.schedule_relationship and stop_time_update.schedule_relationship should be populated",
             "does not have a schedule_relationship");
+    public static final ValidationRule W104 = new ValidationRule("W104", "WARNING", "stop_time_update has uncertainty",
+            "stop_time_update.uncertainty has uncertainty",
+            "stop_time_update.uncertainty has uncertainty");
+    public static final ValidationRule W104_0 = new ValidationRule("W104_0", "WARNING", "stop_time_update.uncertainty = 0",
+            "stop_time_update.uncertainty = 0",
+            "stop_time_update.uncertainty = 0");
+    public static final ValidationRule W104_1 = new ValidationRule("W104_1", "WARNING", "stop_time_update is not 0",
+            "stop_time_update.uncertainty is not 0",
+            "stop_time_update.uncertainty is not 0");
 
     /**
      * Errors
