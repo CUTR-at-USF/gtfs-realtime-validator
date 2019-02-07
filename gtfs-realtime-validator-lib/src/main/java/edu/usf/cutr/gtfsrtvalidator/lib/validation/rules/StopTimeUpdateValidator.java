@@ -72,11 +72,16 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
         List<OccurrenceModel> e045List = new ArrayList<>();
         List<OccurrenceModel> e046List = new ArrayList<>();
         List<OccurrenceModel> e051List = new ArrayList<>();
+        List<OccurrenceModel> w104_1List = new ArrayList<>();
+        List<OccurrenceModel> w104_2List = new ArrayList<>();
+        List<OccurrenceModel> w104_3List = new ArrayList<>();
+
 
         for (GtfsRealtime.FeedEntity entity : entityList) {
             if (entity.hasTripUpdate()) {
                 GtfsRealtime.TripUpdate tripUpdate = entity.getTripUpdate();
                 checkE041(entity, tripUpdate, e041List);
+                checkW104(tripUpdate, w104_1List, w104_2List, w104_3List);
                 List<StopTime> gtfsStopTimes = null;
                 int gtfsStopTimeIndex = 0;
                 String tripId = null;
@@ -235,6 +240,15 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
         }
         if (!e051List.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.E051), e051List));
+        }
+        if (!w104_1List.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.W104_1), w104_1List));
+        }
+        if (!w104_2List.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.W104_2), w104_2List));
+        }
+        if (!w104_3List.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(ValidationRules.W104_3), w104_3List));
         }
         return errors;
     }
@@ -436,6 +450,40 @@ public class StopTimeUpdateValidator implements FeedEntityValidator {
                 String prefix = prefixBuilder.toString() + "departure.time";
                 RuleUtils.addOccurrence(ValidationRules.E046, prefix, errors, _log);
             }
+        }
+    }
+
+    private void checkW104(GtfsRealtime.TripUpdate tripUpdate, List<OccurrenceModel> warnings1, List<OccurrenceModel> warnings2, List<OccurrenceModel> warnings3){
+        Boolean trip_delay = tripUpdate.hasDelay();
+        Boolean stop_delay = Boolean.FALSE;
+        List<GtfsRealtime.TripUpdate.StopTimeUpdate> StopTimeUpdateList = tripUpdate.getStopTimeUpdateList();
+        for (GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate : StopTimeUpdateList) {
+            if (stopTimeUpdate.hasArrival()){
+                GtfsRealtime.TripUpdate.StopTimeEvent arrival = stopTimeUpdate.getArrival();
+                if (arrival.hasDelay()){
+                    stop_delay = Boolean.TRUE;
+                    break;
+                }
+            }
+            if (stopTimeUpdate.hasDeparture()){
+                GtfsRealtime.TripUpdate.StopTimeEvent departure = stopTimeUpdate.getDeparture();
+                if (departure.hasDelay()){
+                    stop_delay = Boolean.TRUE;
+                    break;
+                }
+
+            }
+        }
+
+        // record to warnings
+        if (trip_delay && !stop_delay){
+            RuleUtils.addOccurrence(ValidationRules.W104_1, "", warnings1, _log);
+        }
+        if (!trip_delay && stop_delay){
+            RuleUtils.addOccurrence(ValidationRules.W104_2, "", warnings2, _log);
+        }
+        if (trip_delay && stop_delay){
+            RuleUtils.addOccurrence(ValidationRules.W104_3, "", warnings3, _log);
         }
     }
 }

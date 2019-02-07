@@ -56,6 +56,15 @@ public class ValidationRules {
     public static final ValidationRule W009 = new ValidationRule("W009", "WARNING", "schedule_relationship not populated",
             "trip.schedule_relationship and stop_time_update.schedule_relationship should be populated",
             "does not have a schedule_relationship");
+    public static final ValidationRule W104_1 = new ValidationRule("W104_1", "WARNING", "trip_update has trip-level delay and not stop-level delay",
+            "trip_update has trip-level delay and not stop-level delay",
+            "trip_update has trip-level delay and not stop-level delay");
+    public static final ValidationRule W104_2 = new ValidationRule("W104_2", "WARNING", "trip_update has stop-level delay and not trip-level delay",
+            "trip_update has stop-level delay and not trip-level delay",
+            "trip_update has stop-level delay and not trip-level delay");
+    public static final ValidationRule W104_3 = new ValidationRule("W104_3", "WARNING", "trip_update has bot trip-level delay and stop-level delay",
+            "trip_update has both trip-level delay and stop-level delay",
+            "trip_update has both trip-level delay and stop-level delay");
 
     /**
      * Errors
