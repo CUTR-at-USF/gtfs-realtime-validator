@@ -56,6 +56,12 @@ public class ValidationRules {
     public static final ValidationRule W009 = new ValidationRule("W009", "WARNING", "schedule_relationship not populated",
             "trip.schedule_relationship and stop_time_update.schedule_relationship should be populated",
             "does not have a schedule_relationship");
+    public static final ValidationRule W105_1 = new ValidationRule("W105_1", "WARNING", "no timestamp on all vehicle_position.vehicle",
+            "no timestamp on all vehicle_position.vehicle",
+            "no timestamp on all vehicle_position.vehicle");
+    public static final ValidationRule W105_2 = new ValidationRule("W105_2", "WARNING", "all vehicle timestamp equal header timestamp",
+            "all vehicle timestamp equal header timestamp",
+            "all vehicle timestamp equal header timestamp");
 
     /**
      * Errors

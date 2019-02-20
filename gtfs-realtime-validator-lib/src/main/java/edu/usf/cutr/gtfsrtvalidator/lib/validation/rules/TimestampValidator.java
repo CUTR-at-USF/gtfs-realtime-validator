@@ -26,6 +26,7 @@ import edu.usf.cutr.gtfsrtvalidator.lib.util.RuleUtils;
 import edu.usf.cutr.gtfsrtvalidator.lib.util.TimestampUtils;
 import edu.usf.cutr.gtfsrtvalidator.lib.validation.GtfsMetadata;
 import edu.usf.cutr.gtfsrtvalidator.lib.validation.interfaces.FeedEntityValidator;
+import org.junit.Rule;
 import org.onebusaway.gtfs.services.GtfsMutableDao;
 import org.slf4j.LoggerFactory;
 
@@ -77,12 +78,15 @@ public class TimestampValidator implements FeedEntityValidator {
         List<OccurrenceModel> e025List = new ArrayList<>();
         List<OccurrenceModel> e048List = new ArrayList<>();
         List<OccurrenceModel> e050List = new ArrayList<>();
+        List<OccurrenceModel> w105_1List = new ArrayList<>();
+        List<OccurrenceModel> w105_2List = new ArrayList<>();
 
         String currentTimeText = TimestampUtils.posixToClock(TimeUnit.MILLISECONDS.toSeconds(currentTimeMillis), gtfsMetadata.getTimeZone());
 
         /**
          * Validate FeedHeader timestamp
          */
+        checkW105(feedMessage, w105_1List, w105_2List);
         long headerTimestamp = feedMessage.getHeader().getTimestamp();
         if (headerTimestamp == 0) {
             boolean isV2orHigher = true;
@@ -332,6 +336,12 @@ public class TimestampValidator implements FeedEntityValidator {
         if (!e050List.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(E050), e050List));
         }
+        if (!w105_1List.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(W105_1), w105_1List));
+        }
+        if (!w105_2List.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(W105_2), w105_2List));
+        }
         return errors;
     }
 
@@ -357,6 +367,32 @@ public class TimestampValidator implements FeedEntityValidator {
                     }
                 }
             }
+        }
+    }
+
+    private void checkW105(GtfsRealtime.FeedMessage feedMessage ,List<OccurrenceModel> errors1, List<OccurrenceModel> errors2) {
+        Boolean NoVehicleTimestamp = Boolean.TRUE;
+        Boolean SameVehicleTimestamp = Boolean.TRUE;
+        int count_vehiclePositionfeeds = 0;
+        long headerTimestamp = feedMessage.getHeader().getTimestamp();
+        for (GtfsRealtime.FeedEntity entity : feedMessage.getEntityList()) {
+            if (entity.hasVehicle()) {
+                GtfsRealtime.VehiclePosition vehiclePosition = entity.getVehicle();
+                count_vehiclePositionfeeds = count_vehiclePositionfeeds + 1;
+                if (vehiclePosition.hasTimestamp()) {
+                    NoVehicleTimestamp = Boolean.FALSE;
+                    long vehicleTimestamp = vehiclePosition.getTimestamp();
+                    if (vehicleTimestamp != headerTimestamp) {
+                        SameVehicleTimestamp = Boolean.FALSE;
+                    }
+                }
+            }
+        }
+        if (count_vehiclePositionfeeds > 0 && NoVehicleTimestamp){
+            RuleUtils.addOccurrence(W105_1, "", errors1, _log);
+        }
+        if (count_vehiclePositionfeeds > 0 && SameVehicleTimestamp){
+            RuleUtils.addOccurrence(W105_2, "", errors2, _log);
         }
     }
 }
