@@ -5,6 +5,8 @@ A tool that validates [General Transit Feed Specification (GTFS)-realtime](https
 
 <img src="https://cloud.githubusercontent.com/assets/928045/25874575/2afaa3b0-34e1-11e7-92a4-b0a68f233748.png" width="1000">
 
+Read more in [this Medium article](https://medium.com/@sjbarbeau/introducing-the-gtfs-realtime-validator-e1aae3185439).
+
 Questions? You can [open an issue](https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues), ask the [GTFS Slack Group](https://gtfs.herokuapp.com/) or reach out to the [GTFS-realtime Google Group](https://groups.google.com/forum/#!forum/gtfs-realtime).
 
 ## Quick start - Run it yourself
