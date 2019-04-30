@@ -70,8 +70,8 @@ public class QueryTest extends TestCase {
 
             String[] createStatements = createQuery.split(";");
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-            Connection con = DriverManager.getConnection("jdbc:sqlserver://cutr-db2.forest.usf.edu:1433;databaseName=gtfs-realtime-validator",
-                    "gtfs-rt-user9555", "8444Test*&");
+            Connection con = DriverManager.getConnection("jdbc:sqlserver://my.sqlserver.com:1433;databaseName=gtfs-realtime-validator",
+                    "testuser", "testpassword");
             for (String createStatement : createStatements) {
                 stmt = con.createStatement();
                 System.out.println(createStatement);
