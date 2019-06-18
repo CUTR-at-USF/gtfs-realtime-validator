@@ -20,12 +20,14 @@ import org.apache.commons.io.FilenameUtils;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
+import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -44,7 +46,8 @@ public class TimestampUtils {
             .parseCaseInsensitive().appendPattern(dateFormat).toFormatter();
     private static ThreadLocal<DateFormat> mTimeFormatTLocal = ThreadLocal.withInitial(() -> new SimpleDateFormat(timeFormat));
     private static Pattern mTimePattern = Pattern.compile("^[0-2][0-9]:[0-5][0-9]:[0-5][0-9]$"); // Up to 29 hrs
-    private static ThreadLocal<DecimalFormat> mDecimalFormatTLocal= ThreadLocal.withInitial(() -> new DecimalFormat("0.0##"));
+    private static ThreadLocal<DecimalFormat> mDecimalFormatTLocal= ThreadLocal.withInitial(() -> new DecimalFormat("0.0##",
+            new DecimalFormatSymbols(Locale.US)));
 
     /**
      * Returns true if the timestamp is a valid POSIX time, false if it is not
