@@ -315,7 +315,6 @@ public class UtilTest {
 
     @Test
     public void testGetElapsedTimeString() {
-        Locale.setDefault(Locale.US);
         double elapsedTime;
 
         elapsedTime = 2.5;
