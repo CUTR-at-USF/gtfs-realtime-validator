@@ -198,7 +198,9 @@ public class BatchProcessor {
             long startToByteArray = System.nanoTime();
             byte[] protobuf;
             try {
-                protobuf = IOUtils.toByteArray(Files.newInputStream(path));
+            	InputStream inputStream = Files.newInputStream(path);
+                protobuf = IOUtils.toByteArray(inputStream);
+                inputStream.close();
             } catch (IOException e) {
                 _log.error("Error reading GTFS-rt file to byte array, skipping to next file: " + e);
                 continue;
