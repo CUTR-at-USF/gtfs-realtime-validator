@@ -65,6 +65,7 @@ public class ViewFeedMessageModel {
         GtfsRealtime.FeedMessage feedMessage = null;
         try {
             feedMessage = GtfsRealtime.FeedMessage.parseFrom(is);
+        	is.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
