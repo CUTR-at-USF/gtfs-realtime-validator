@@ -25,6 +25,28 @@
             <artifactId>jackson-databind</artifactId>
             <version>2.9.8</version>
         </dependency>
+        <!-- starting with Java 11 these libraries are no longer part of the JRE by default
+             therefore they have to be added as ordinary dependencies -->
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+            <version>1.1.1</version>
+        </dependency>
         <!-- GTFS-to-Java objects -->
         <dependency>
             <groupId>org.onebusaway</groupId>
@@ -120,7 +142,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.20.1</version>
+                <version>3.0.0-M3</version>
                 <configuration>
                     <includes>
                         <include>**/*Spec.*</include>
