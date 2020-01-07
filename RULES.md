@@ -747,6 +747,8 @@ If separate `VehiclePositions` and `TripUpdates` feeds are provided, a `trip_id`
 
 In other words, if the `VehiclePosition` has a vehicle that is assigned to `trip_id` 4, then the `TripUpdate` feed should have a prediction for `trip_id` 4.
 
+Note that when a vehicle is serving more than one trip in a block, it is recommended to include not only a TripUpdate for the currently served trip, but also a TripUpdate for the next trip to be served. In this case, there will not yet be a VehiclePosition for the next TripUpdate, and the W003 warning can be ignored.
+
 Note that this is different from E047, which checks for a mismatch of IDs between the feeds - that is an error.
 
 #### References:
