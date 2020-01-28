@@ -223,7 +223,9 @@ public class GtfsMetadata {
             mStopIds.add(stop.getId().getId());
             mStopToLocationTypeMap.put(stop.getId().getId(), stop.getLocationType());
             // Create GTFS stops.txt bounding box
-            stopBuilder.pointXY(stop.getLon(), stop.getLat());
+            if (stop.isLonSet() && stop.isLatSet()) {
+                stopBuilder.pointXY(stop.getLon(), stop.getLat());
+            }
         }
 
         Shape stopShape = stopBuilder.build();
