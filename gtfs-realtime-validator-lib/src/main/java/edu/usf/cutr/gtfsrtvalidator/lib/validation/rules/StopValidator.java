@@ -37,7 +37,7 @@ import static edu.usf.cutr.gtfsrtvalidator.lib.validation.ValidationRules.E015;
  * Rules:
  *
  * E011 - All stop_ids referenced in GTFS-rt feed must appear in the GTFS feed
- * E015 - All stop_ids referenced in GTFS-rt feeds must have the location_type = 0
+ * E015 - All stop_ids referenced in GTFS-rt TripUpdates and VehiclePositions feeds must have the location_type = 0
  */
 public class StopValidator implements FeedEntityValidator {
 
@@ -94,11 +94,6 @@ public class StopValidator implements FeedEntityValidator {
                         if (!gtfsMetadata.getStopIds().contains(entitySelector.getStopId())) {
                             // E011 - All stop_ids referenced in GTFS-rt feed must appear in the GTFS feed
                             RuleUtils.addOccurrence(E011, prefix, e011List, _log);
-                        }
-                        Integer locationType = gtfsMetadata.getStopToLocationTypeMap().get(entitySelector.getStopId());
-                        if (locationType != null && locationType != 0) {
-                            // E015 - All stop_ids referenced in GTFS-rt feeds must have the location_type = 0
-                            RuleUtils.addOccurrence(E015, prefix, e015List, _log);
                         }
                     }
                 }

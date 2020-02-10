@@ -116,8 +116,8 @@ public class ValidationRules {
             "trip_updates for each trip in the feed must match the sequential order for the trips in the block. For example, if we have trip_ids 1, 2, and 3 that all belong to the same block, and the vehicle travels trip 1, then trip 2, and then trip 3, the trip_updates should occur in the GTFS-rt feed in the order trips 1, 2, and 3. For example, trip 3 predictions shouldn't occur in the feed prior to trip 2 predictions.",
             "predictions are not ordered by appearance in block");
 
-    public static final ValidationRule E015 = new ValidationRule("E015", "ERROR", "All stop_ids referenced in GTFS-rt feeds must have the location_type = 0",
-            "All stop_ids referenced in GTFS-rt feeds must have the location_type = 0 in GTFS stops.txt",
+    public static final ValidationRule E015 = new ValidationRule("E015", "ERROR", "All stop_ids referenced in GTFS-rt TripUpdates and VehiclePositions feeds must have the location_type = 0",
+            "All stop_ids referenced in GTFS-rt TripUpdates and VehiclePositions feeds must have the location_type = 0 in GTFS stops.txt",
             "does not have location_type=0 in GTFS stops.txt");
 
     public static final ValidationRule E016 = new ValidationRule("E016", "ERROR", "trip_ids with schedule_relationship ADDED must not be in GTFS data",

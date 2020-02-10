@@ -172,8 +172,8 @@ public class StopValidatorTest extends FeedMessageTest {
         feedEntityBuilder.setAlert(alertBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
         results = locationValidator.validate(TimestampUtils.MIN_POSIX_TIME, gtfsData2, gtfsData2Metadata, feedMessageBuilder.build(), null, null);
-        // 3 results from TripUpdate, VehiclePosition and alert feeds stop_id = "B", which is location_type 1
-        expected.put(E015, 3);
+        // 2 results from TripUpdate, VehiclePosition and alert feeds stop_id = "B", which is location_type 1. Alerts can reference location_types other than 0.
+        expected.put(E015, 2);
         TestUtils.assertResults(expected, results);
 
         clearAndInitRequiredFeedFields();

@@ -16,7 +16,7 @@ Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-U
 | [E011](#E011) | GTFS-rt `stop_id` does not exist in GTFS data
 | [E012](#E012) | Header `timestamp` should be greater than or equal to all other `timestamps`
 | [E013](#E013) | Frequency type 0 trip `schedule_relationship` should be `UNSCHEDULED` or empty
-| [E015](#E015) | All `stop_ids` referenced in GTFS-rt feeds must have the `location_type` = 0
+| [E015](#E015) | All `stop_ids` referenced in GTFS-rt TripUpdates and VehiclePositions feeds must have the `location_type` = 0
 | [E016](#E016) | `trip_ids` with `schedule_relationship` `ADDED` must not be in GTFS data
 | [E017](#E017) | GTFS-rt content changed but has the same header `timestamp`
 | [E018](#E018) | GTFS-rt header `timestamp` decreased between two sequential iterations
@@ -231,9 +231,11 @@ From [`trip_update.trip.schedule_relationship`](https://github.com/google/transi
 
 <a name="E015"/>
 
-### E015 - All `stop_ids` referenced in GTFS-rt feeds must have the `location_type` = 0
+### E015 - All `stop_ids` referenced in GTFS-rt TripUpdates and VehiclePositions feeds must have the `location_type` = 0
 
-All `stop_ids` referenced in GTFS-rt feeds must have the `location_type` = 0 in GTFS `stops.txt`.
+All `stop_ids` referenced in GTFS-rt TripUpdates and VehiclePositions feeds must have the `location_type` = 0 in GTFS `stops.txt`.
+
+Alerts may reference stops with `location_type` other than 0 (e.g., for pathway nodes of 2-4).
 
 From [GTFS `stop_times.txt`](https://github.com/google/transit/blob/master/gtfs/spec/en/reference.md#stop_timestxt):
 
