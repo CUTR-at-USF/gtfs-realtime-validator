@@ -15,7 +15,7 @@ Questions? You can [open an issue](https://github.com/CUTR-at-USF/gtfs-realtime-
 
 ### Prerequisites
 
-1. Install [Java Development Kit (JDK) 1.8 or higher](http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html)
+1. Install [Java Development Kit (JDK) 1.8 or higher](https://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html)
 
 ### Run the webapp
 
@@ -28,11 +28,11 @@ Questions? You can [open an issue](https://github.com/CUTR-at-USF/gtfs-realtime-
         * GTFS-realtime - http://api.tampa.onebusaway.org:8088/trip-updates
         * GTFS - http://gohart.org/google/google_transit.zip
     * MBTA (Boston, MA)
-        * GTFS-realtime - http://developer.mbta.com/lib/GTRTFS/Alerts/TripUpdates.pb
-        * GTFS - http://www.mbta.com/uploadedfiles/MBTA_GTFS.zip
-    * ...more at [Transitfeeds.com](http://transitfeeds.com/search?q=gtfsrt)
+        * GTFS-realtime - https://cdn.mbta.com/realtime/TripUpdates.pb
+        * GTFS - https://cdn.mbta.com/MBTA_GTFS.zip
+    * ...more at [OpenMobilityData.org](https://openmobilitydata.org/search?q=gtfsrt)
 
-Please note that if you're using `https` URLS, you'll need to use the `-Djsse.enableSNIExtension=false` command-line parameter or install the [Java Cryptography Extension (JCE)](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html) - see the [Prerequisites](https://github.com/CUTR-at-USF/gtfs-realtime-validator#prerequisites) section for details.
+Please note that if you're using `https` URLS, you'll need to use the `-Djsse.enableSNIExtension=false` command-line parameter or install the [Java Cryptography Extension (JCE)](https://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html) - see the [Prerequisites](https://github.com/CUTR-at-USF/gtfs-realtime-validator#prerequisites) section for details.
 
 ### Run batch validation
 
@@ -51,18 +51,18 @@ There are two components to this project:
 * **gtfs-realtime-validator-lib** - The core library that implements GTFS-realtime [validation rules](RULES.md) as well as [batch processing mode](gtfs-realtime-validator-lib/README.md#batch-processing).  You can use this same library [in your own project](gtfs-realtime-validator-lib/README.md#using-validation-rules-or-the-batch-processor-in-your-project).
 * **gtfs-realtime-validator-webapp** - A server and website that allows multiple users to validate GTFS-relatime feeds by simply entering URLs into the website.
 
-The main **gtfs-realtime-validator-webapp** user interface is implemented as a web application, with the backend code written in Java.  An instance of the [Jetty embedded server](http://www.eclipse.org/jetty/) is used to run the application, with [Hibernate](http://hibernate.org/) used for data persistence.
+The main **gtfs-realtime-validator-webapp** user interface is implemented as a web application, with the backend code written in Java.  An instance of the [Jetty embedded server](https://www.eclipse.org/jetty/) is used to run the application, with [Hibernate](https://hibernate.org/) used for data persistence.
 
 #### Prerequisites 
 
 Following are the requirements to build and run the project from source code: 
 
-* [Java Development Kit (JDK) 1.8 or higher](http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html)
+* [Java Development Kit (JDK) 1.8 or higher](https://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html)
 * [Apache Maven](https://maven.apache.org/)
 
 If you're using `https` URLs for GTFS or GTFS-rt feeds, either:
 * Use the `-Djsse.enableSNIExtension=false` parameter when running the tool
-* Install the [Java Cryptography Extension (JCE)](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html) - You will need to replace the `US_export_policy.jar` and `local_policy.jar` files in your JVM `/security` directory, such as `C:\Program Files\Java\jdk1.8.0_73\jre\lib\security`, with the JAR files in the JCE Extension download.
+* Install the [Java Cryptography Extension (JCE)](https://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html) - You will need to replace the `US_export_policy.jar` and `local_policy.jar` files in your JVM `/security` directory, such as `C:\Program Files\Java\jdk1.8.0_73\jre\lib\security`, with the JAR files in the JCE Extension download.
 
 #### 1. Build the project 
 
@@ -132,4 +132,4 @@ If you want to include snapshot releases in your project, you'll need to add the
 
 ## Acknowledgements
 
-This project was funded by the [National Institute for Transportation Communities (NITC)](http://nitc.trec.pdx.edu/) via the project ["Overcoming Barriers for the Wide-scale Adoption of Standardized Real-time Transit Information"](http://nitc.trec.pdx.edu/research/project/1062/Overcoming_Barriers_for_the_Wide-scale_Adoption_of_Standardized_Real-time_Transit_Information).  It also includes work funded under the [2015 Google Summer of Code](https://www.google-melange.com/archive/gsoc/2015/orgs/osgeo/projects/nipuna777.html).
+This project was funded by the [National Institute for Transportation Communities (NITC)](https://nitc.trec.pdx.edu/) via the project ["Overcoming Barriers for the Wide-scale Adoption of Standardized Real-time Transit Information"](https://nitc.trec.pdx.edu/research/project/1062/Overcoming_Barriers_for_the_Wide-scale_Adoption_of_Standardized_Real-time_Transit_Information).  It also includes work funded under the [2015 Google Summer of Code](https://www.google-melange.com/archive/gsoc/2015/orgs/osgeo/projects/nipuna777.html).
