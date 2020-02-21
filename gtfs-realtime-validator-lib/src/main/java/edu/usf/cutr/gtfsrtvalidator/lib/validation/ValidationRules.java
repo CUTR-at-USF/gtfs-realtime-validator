@@ -137,8 +137,8 @@ public class ValidationRules {
             "- the GTFS-rt start_time is not a multiple of headway_secs later than GTFS start_time");
 
     public static final ValidationRule E020 = new ValidationRule("E020", "ERROR", "Invalid start_time format",
-            "start_time must be in the format 25:15:35",
-            "which is not the valid format of 25:15:35");
+            "start_time must be in the format HH:MM:SS or H:MM:SS",
+            "which is not the valid format of HH:MM:SS or H:MM:SS");
 
     public static final ValidationRule E021 = new ValidationRule("E021", "ERROR", "Invalid start_date format",
             "start_date must be in the YYYYMMDD format",

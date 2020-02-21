@@ -223,14 +223,15 @@ public class UtilTest {
         validTime = "29:15:35";
         assertEquals(true, TimestampUtils.isValidTimeFormat(validTime));
 
+        // H:MM:SS is ok
+        validTime = "5:15:35";
+        assertEquals(true, TimestampUtils.isValidTimeFormat(validTime));
+
         /**
          * Bad times
          */
-        String badTime = "5:15:35";
-        assertEquals(false, TimestampUtils.isValidTimeFormat(badTime));
-
         // Anything of 29hrs will currently fail validation
-        badTime = "30:15:35";
+        String badTime = "30:15:35";
         assertEquals(false, TimestampUtils.isValidTimeFormat(badTime));
 
         badTime = "12345678";

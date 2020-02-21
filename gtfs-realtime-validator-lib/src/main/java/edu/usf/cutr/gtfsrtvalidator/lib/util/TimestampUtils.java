@@ -18,11 +18,7 @@ package edu.usf.cutr.gtfsrtvalidator.lib.util;
 
 import org.apache.commons.io.FilenameUtils;
 
-import java.text.DateFormat;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.ParsePosition;
-import java.text.SimpleDateFormat;
+import java.text.*;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -45,7 +41,7 @@ public class TimestampUtils {
     private static DateTimeFormatter mDateFormat = new DateTimeFormatterBuilder().parseStrict()
             .parseCaseInsensitive().appendPattern(dateFormat).toFormatter();
     private static ThreadLocal<DateFormat> mTimeFormatTLocal = ThreadLocal.withInitial(() -> new SimpleDateFormat(timeFormat));
-    private static Pattern mTimePattern = Pattern.compile("^[0-2][0-9]:[0-5][0-9]:[0-5][0-9]$"); // Up to 29 hrs
+    private static Pattern mTimePattern = Pattern.compile("^[0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$"); // Up to 29 hrs
     private static ThreadLocal<DecimalFormat> mDecimalFormatTLocal= ThreadLocal.withInitial(() -> new DecimalFormat("0.0##",
             new DecimalFormatSymbols(Locale.US)));
 
@@ -104,7 +100,7 @@ public class TimestampUtils {
      * @return true if the provided GTFS-rt start_time is in 25:15:35 format, false if it is not
      */
     public static boolean isValidTimeFormat(String startTime) {
-        if (startTime.length() != 8) {
+        if (startTime.length() != 7 && startTime.length() != 8) {
             return false;
         }
 

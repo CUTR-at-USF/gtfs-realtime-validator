@@ -313,11 +313,11 @@ From [`trip.start_time`](https://github.com/google/transit/blob/master/gtfs-real
 
 ### E020 - Invalid `start_time` format
 
-`start_time` must be in the format `25:15:35`.  Note that times can exceed 24 hrs if service goes into the next service day.
+`start_time` must be in the format `HH:MM:SS` or `H:MM:SS`.  Note that times can exceed 24 hrs if service goes into the next service day.
 
 From [`trip.start_time`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor):
 
->`start_time` - ...Format and semantics of the field is same as that of GTFS/frequencies.txt/start_time, e.g., 11:15:35 or 25:15:35.
+>`start_time` - ...Format and semantics of the field is same as that of GTFS/frequencies.txt/start_time, e.g., 1:15:35 or 25:15:35.
 
 #### References:
 * [`trip.start_time`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor)

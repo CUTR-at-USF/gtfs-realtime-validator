@@ -196,7 +196,7 @@ public class TripDescriptorValidatorTest extends FeedMessageTest {
         expected.clear();
         TestUtils.assertResults(expected, results);
 
-        // Set valid start_time - no errors
+        // Set valid start_time (HH:MM:SS) - no errors
         tripDescriptorBuilder.setStartTime("00:20:00");
         tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
         vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
@@ -208,8 +208,56 @@ public class TripDescriptorValidatorTest extends FeedMessageTest {
         expected.clear();
         TestUtils.assertResults(expected, results);
 
-        // Set invalid start_time - 2 errors
+        // Set valid start_time (HH:MM:SS) - no errors
+        tripDescriptorBuilder.setStartTime("26:59:59");
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripIdValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
+        expected.clear();
+        TestUtils.assertResults(expected, results);
+
+        // Set valid start_time (H:MM:SS is ok) - 0 errors
         tripDescriptorBuilder.setStartTime("5:15:35");
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripIdValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
+        expected.clear();
+        TestUtils.assertResults(expected, results);
+
+        // Set invalid start_time - 2 errors
+        tripDescriptorBuilder.setStartTime("005:15:35");
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripIdValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
+        expected.put(E020, 2);
+        TestUtils.assertResults(expected, results);
+
+        // Set invalid start_time - 2 errors
+        tripDescriptorBuilder.setStartTime("00:60:60");
+        tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
+        vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
+        feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
+        feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
+        feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
+
+        results = tripIdValidator.validate(MIN_POSIX_TIME, bullRunnerGtfs, bullRunnerGtfsMetadata, feedMessageBuilder.build(), null, null);
+        expected.put(E020, 2);
+        TestUtils.assertResults(expected, results);
+
+        // Set invalid start_time - 2 errors
+        tripDescriptorBuilder.setStartTime("30:00:00");
         tripUpdateBuilder.setTrip(tripDescriptorBuilder.build());
         vehiclePositionBuilder.setTrip(tripDescriptorBuilder.build());
         feedEntityBuilder.setTripUpdate(tripUpdateBuilder.build());
