@@ -285,6 +285,7 @@ public class GtfsFeed {
             reader.setEntityStore(store);
             reader.run();
         } catch (Exception ex) {
+            Logger.getLogger(GtfsFeed.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
         return store;
