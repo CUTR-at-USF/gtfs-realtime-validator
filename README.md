@@ -1,4 +1,4 @@
-# GTFS-realtime Validator [![Build Status](https://travis-ci.org/CUTR-at-USF/gtfs-realtime-validator.svg?branch=master)](https://travis-ci.org/CUTR-at-USF/gtfs-realtime-validator) [![Join the GTFS-realtime chat](https://mobilitydata-io.herokuapp.com/badge.svg)](https://mobilitydata-io.herokuapp.com/)
+# GTFS-realtime Validator [![Build Status](https://travis-ci.org/CUTR-at-USF/gtfs-realtime-validator.svg?branch=master)](https://travis-ci.org/CUTR-at-USF/gtfs-realtime-validator) [![Docker Badge](https://img.shields.io/docker/cloud/build/cutrusf/gtfs-realtime-validator.svg)](https://hub.docker.com/r/cutrusf/gtfs-realtime-validator) [![Join the GTFS-realtime chat](https://mobilitydata-io.herokuapp.com/badge.svg)](https://mobilitydata-io.herokuapp.com/)
 
 A tool that validates [General Transit Feed Specification (GTFS)-realtime](https://developers.google.com/transit/gtfs-realtime/) feeds
 
@@ -99,12 +99,17 @@ Note that the validator also has a [batch processing mode](gtfs-realtime-validat
  
 ## Docker
  
-Build and run the image using the following:
+Pull the latest image from [Docker Hub](https://hub.docker.com/r/cutrusf/gtfs-realtime-validator):
 
-~~~
-docker build -t gtfs-realtime-validator .
-docker run gtfs-realtime-validator
-~~~
+`docker pull cutrusf/gtfs-realtime-validator`
+ 
+Or, build the image yourself using the following:
+
+`docker build -t gtfs-realtime-validator .`
+
+Then, run with:
+
+`docker run gtfs-realtime-validator`
 
 Then go to `http://<docker-machine-ip>:8080` in your web browser. For example, `http://192.168.99.100:8080/`.
 
