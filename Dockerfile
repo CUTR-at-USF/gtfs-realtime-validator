@@ -6,7 +6,7 @@ RUN mvn package
 
 FROM openjdk:8-alpine AS final
 EXPOSE 8080
-ENTRYPOINT ["java"]
-CMD ["-Djsee.enableSNIExtension=false", "-jar", "gtfs-realtime-validator-webapp-1.0.0-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-Djsee.enableSNIExtension=false", "-jar", "gtfs-realtime-validator-webapp-1.0.0-SNAPSHOT.jar"]
+CMD []
 WORKDIR /app
 COPY --from=build /build/gtfs-realtime-validator-webapp/target/ .
