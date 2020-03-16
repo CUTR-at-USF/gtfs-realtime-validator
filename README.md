@@ -99,7 +99,16 @@ Note that the validator also has a [batch processing mode](gtfs-realtime-validat
  
 ## Docker
  
-Want to run this in [Docker](https://www.docker.com/)?  Check out [gtfs-realtime-validator-docker](https://github.com/scrudden/gtfs-realtime-validator-docker).
+Build and run the image using the following:
+
+~~~
+docker build -t gtfs-realtime-validator .
+docker run gtfs-realtime-validator
+~~~
+
+Then go to `http://<docker-machine-ip>:8080` in your web browser. For example, `http://192.168.99.100:8080/`.
+
+You can use `docker-machine ip` to find your docker machine IP.
 
 ## Troubleshooting
 
