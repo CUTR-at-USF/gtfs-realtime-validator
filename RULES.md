@@ -1,6 +1,6 @@
 # Implemented rules
 
-Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-USF/gtfs-realtime-validator/blob/master/src/main/java/edu/usf/cutr/gtfsrtvalidator/validation/ValidationRules.java).  Below are details of currently implemented rules.
+Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-USF/gtfs-realtime-validator/blob/master/gtfs-realtime-validator-lib/src/main/java/edu/usf/cutr/gtfsrtvalidator/lib/validation/ValidationRules.java).  Below are details of currently implemented rules.
 
 ### Table of Errors
 
