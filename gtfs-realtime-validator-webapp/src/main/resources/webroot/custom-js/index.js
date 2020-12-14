@@ -23,6 +23,11 @@ var enableShapes;
 
 var server = window.location.protocol + "//" + window.location.host;
 
+
+function about() {
+
+}
+
 function addInput(){
     if (counter == limit)  {
         alert("You have reached the limit of adding " + counter + " inputs");
