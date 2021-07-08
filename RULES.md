@@ -54,6 +54,7 @@ Rules are declared in the [`ValidationRules` class](https://github.com/CUTR-at-U
 | [E050](#E050) | `timestamp` is in the future
 | [E051](#E051) | GTFS-rt `stop_sequence` not found in GTFS data
 | [E052](#E052) | `vehicle.id` is not unique
+| [E053](#E053) | `start_time` for trip has changed
 
 ### Table of Warnings
 
@@ -718,6 +719,16 @@ From [VehiclePosition.VehicleDescriptor](https://github.com/google/transit/blob/
 
 #### References:
 * [`vehicle.id`](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-vehicledescriptor)
+
+<a name="E053"/>
+
+### E053 - `start_time` for frequency-based trip has changed
+
+A trip that is defined in frequencies.txt and has exact_times=0 or empty should have the same start_time in the descriptor for it's entire trip instance. A trip instance is defined as one journey of the vehicle from the starting stop_sequence for a trip_id in stop_times.txt to the ending stop_sequence for that same trip_id.
+
+From [TripUpdate.TripDescriptor](https://github.com/google/transit/blob/master/gtfs-realtime/spec/en/reference.md#message-tripdescriptor) for `start_time`:
+
+>If the trip corresponds to exact_times=0, then its start_time may be arbitrary, and is initially expected to be the first departure of the trip. Once established, the start_time of this frequency-based exact_times=0 trip should be considered immutable, even if the first departure time changes 
 
 # Warnings
 
