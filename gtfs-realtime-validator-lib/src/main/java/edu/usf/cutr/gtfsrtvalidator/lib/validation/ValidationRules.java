@@ -267,6 +267,14 @@ public class ValidationRules {
     public static final ValidationRule E052 = new ValidationRule("E052", "ERROR", "vehicle.id is not unique",
             "Each vehicle should have a unique ID",
             "which is used by more than one vehicle in the feed");
+    
+    public static final ValidationRule E053 = new ValidationRule("E053", "ERROR", "start_time for frequency-based trip changed.",
+            "start_time for frequency-based trips",
+            "exact_times=0 must be immutable");
+    
+    public static final ValidationRule E054 = new ValidationRule("E054", "ERROR", "Frequency type 0 trips should not have delay set.",
+            "Frequency type 0 trips should",
+            "not have delay values");
 
     private static List<ValidationRule> mAllRules = new ArrayList<>();
 

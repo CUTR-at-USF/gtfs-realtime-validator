@@ -17,6 +17,9 @@
 package edu.usf.cutr.gtfsrtvalidator.lib.validation.rules;
 
 import com.google.transit.realtime.GtfsRealtime;
+import com.google.transit.realtime.GtfsRealtime.TripUpdate;
+import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
+
 import edu.usf.cutr.gtfsrtvalidator.lib.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.lib.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.lib.model.helper.ErrorListHelperModel;
@@ -27,6 +30,7 @@ import org.onebusaway.gtfs.services.GtfsMutableDao;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static edu.usf.cutr.gtfsrtvalidator.lib.validation.ValidationRules.*;
@@ -41,17 +45,22 @@ import static edu.usf.cutr.gtfsrtvalidator.lib.validation.ValidationRules.*;
 public class FrequencyTypeZeroValidator implements FeedEntityValidator {
 
     private static final org.slf4j.Logger _log = LoggerFactory.getLogger(FrequencyTypeZeroValidator.class);
-
+    
+    
+    		
     @Override
     public List<ErrorListHelperModel> validate(long currentTimeMillis, GtfsMutableDao gtfsData, GtfsMetadata gtfsMetadata, GtfsRealtime.FeedMessage feedMessage, GtfsRealtime.FeedMessage previousFeedMessage, GtfsRealtime.FeedMessage combinedFeedMessage) {
         List<OccurrenceModel> errorListE006 = new ArrayList<>();
         List<OccurrenceModel> errorListE013 = new ArrayList<>();
         List<OccurrenceModel> errorListW005 = new ArrayList<>();
+        List<OccurrenceModel> errorListE053 = new ArrayList<>();
+        List<OccurrenceModel> errorListE054 = new ArrayList<>();
 
         for (GtfsRealtime.FeedEntity entity : feedMessage.getEntityList()) {
             if (entity.hasTripUpdate()) {
+            	
                 GtfsRealtime.TripUpdate tripUpdate = entity.getTripUpdate();
-
+                        
                 if (gtfsMetadata.getExactTimesZeroTripIds().contains(tripUpdate.getTrip().getTripId())) {
                     /**
                      * NOTE - W006 checks for missing trip_ids, because we can't check for that here - we need the trip_id to know if it's exact_times=0
@@ -75,9 +84,53 @@ public class FrequencyTypeZeroValidator implements FeedEntityValidator {
                         // W005 - Missing vehicle_id in trip_update for frequency-based exact_times = 0
                         RuleUtils.addOccurrence(W005, "trip_id " + tripUpdate.getTrip().getTripId(), errorListW005, _log);
                     }
+                    
+                    if(previousFeedMessage!=null)
+                    {
+	                    for (GtfsRealtime.FeedEntity previousEntity : previousFeedMessage.getEntityList()) 
+	                    {                                        
+	                    	if (previousEntity.hasTripUpdate()) 
+	                    	{	
+	                    		if(tripUpdate.getVehicle()!=null && previousEntity.getTripUpdate().getVehicle()!=null)
+	                    		{                    				                    		
+		                    		if(previousEntity.getTripUpdate().getVehicle().getId().equals(tripUpdate.getVehicle().getId()))
+		                    		{				                               
+					                    if(tripUpdate.getStopTimeUpdateCount()>0 && previousEntity.getTripUpdate().getStopTimeUpdateCount()>0)
+					                    {				                    						                    		
+					                    	if(tripUpdate.getStopTimeUpdate(tripUpdate.getStopTimeUpdateCount()-1).getStopSequence()>=previousEntity.getTripUpdate().getStopTimeUpdate(previousEntity.getTripUpdate().getStopTimeUpdateCount()-1).getStopSequence())
+					                    	{
+							                    // E053 - start time of trip not consistent for trip updates for frequency-based exact_times = 0
+							                    if(!tripUpdate.getTrip().getStartTime().equals(previousEntity.getTripUpdate().getTrip().getStartTime()))
+							                    {
+							                    		RuleUtils.addOccurrence(E053, "vehicle_id " + tripUpdate.getVehicle().getId(),  errorListE053, _log);
+							                    }		                    			                    	
+					                    	}				                    						                  
+					                    }	                    		
+		                    		}
+	                    		}
+	                    	}
+	                    }
+                    }
+                    
+                    for(StopTimeUpdate stopTimeUpdate:tripUpdate.getStopTimeUpdateList())
+                    {                    	
+						if(stopTimeUpdate.hasArrival())
+                    	{
+                    		if(stopTimeUpdate.getArrival().hasDelay())
+                    		{                    			
+                    			RuleUtils.addOccurrence(E054, "vehicle_id " + tripUpdate.getVehicle().getId(),  errorListE054, _log);
+                    		}
+                    	}
+                    	if(stopTimeUpdate.hasDeparture())
+                    	{
+                    		if(stopTimeUpdate.getDeparture().hasDelay())
+                    		{                    		
+                    			RuleUtils.addOccurrence(E054, "vehicle_id " + tripUpdate.getVehicle().getId(),  errorListE054, _log);
+                    		}
+                    	}
+                    }
                 }
             }
-
             if (entity.hasVehicle()) {
                 GtfsRealtime.VehiclePosition vehiclePosition = entity.getVehicle();
                 if (vehiclePosition.hasTrip() &&
@@ -118,6 +171,12 @@ public class FrequencyTypeZeroValidator implements FeedEntityValidator {
         }
         if (!errorListW005.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(W005), errorListW005));
+        }
+        if (!errorListE053.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E053), errorListE053));
+        }        
+        if (!errorListE054.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E054), errorListE054));
         }
         return errors;
     }
