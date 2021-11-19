@@ -20,11 +20,11 @@
     <repositories>
         <repository>
             <id>conveyal-releases-mvn-repo</id>
-            <url>http://build.staging.obanyc.com/archiva/repository/releases/</url>
+            <url>https://build.staging.obanyc.com/archiva/repository/releases/</url>
         </repository>
         <repository>
             <id>conveyal-snapshots-mvn-repo</id>
-            <url>http://build.staging.obanyc.com/archiva/repository/snapshots/</url>
+            <url>https://build.staging.obanyc.com/archiva/repository/snapshots/</url>
         </repository>
     </repositories>
 
