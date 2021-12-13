@@ -1,0 +1,21 @@
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 http://maven.apache.org/xsd/settings-1.2.0.xsd">
+    <!-- This file should be removed, along with maven.config, when the Conveyal GTFS validator dependency is removed. -->
+    <mirrors>
+        <mirror>
+            <id>conveyal-snapshots-mvn-repo-mirror</id>
+            <mirrorOf>conveyal-snapshots-mvn-repo</mirrorOf>
+            <name>Snapshots build.staging.obanyc.com</name>
+            <url>http://build.staging.obanyc.com/archiva/repository/snapshots/</url>
+            <blocked>false</blocked>
+        </mirror>
+		<mirror>
+            <id>conveyal-releases-mvn-repo-mirror</id>
+            <mirrorOf>conveyal-releases-mvn-repo</mirrorOf>
+            <name>Releases build.staging.obanyc.com</name>
+            <url>http://build.staging.obanyc.com/archiva/repository/releases/</url>
+            <blocked>false</blocked>
+        </mirror>
+    </mirrors>
+</settings>
