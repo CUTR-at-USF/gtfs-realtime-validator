@@ -1,4 +1,4 @@
-# GTFS-realtime Validator [![Build Status](https://travis-ci.org/CUTR-at-USF/gtfs-realtime-validator.svg?branch=master)](https://travis-ci.org/CUTR-at-USF/gtfs-realtime-validator) [![Docker Badge](https://img.shields.io/docker/cloud/build/cutrusf/gtfs-realtime-validator.svg)](https://hub.docker.com/r/cutrusf/gtfs-realtime-validator) [![Join the GTFS-realtime chat](https://img.shields.io/badge/chat-on%20slack-red)](https://bit.ly/mobilitydata-slack)
+# GTFS-realtime Validator [![Java CI with Maven](https://github.com/CUTR-at-USF/gtfs-realtime-validator/actions/workflows/maven.yml/badge.svg)](https://github.com/CUTR-at-USF/gtfs-realtime-validator/actions/workflows/maven.yml) [![Docker Badge](https://img.shields.io/docker/cloud/build/cutrusf/gtfs-realtime-validator.svg)](https://hub.docker.com/r/cutrusf/gtfs-realtime-validator) [![Join the GTFS-realtime chat](https://img.shields.io/badge/chat-on%20slack-red)](https://bit.ly/mobilitydata-slack)
 
 A tool that validates [General Transit Feed Specification (GTFS)-realtime](https://developers.google.com/transit/gtfs-realtime/) feeds
 
