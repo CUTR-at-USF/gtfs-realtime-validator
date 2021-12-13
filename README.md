@@ -20,7 +20,7 @@ Questions? You can [open an issue](https://github.com/CUTR-at-USF/gtfs-realtime-
 ### Run the webapp
 
 1. Download the latest webapp alpha build:
-    * [gtfs-realtime-validator-webapp-1.0.0-SNAPSHOT.jar](https://s3.amazonaws.com/gtfs-rt-validator/travis_builds/gtfs-realtime-validator-webapp/1.0.0-SNAPSHOT/gtfs-realtime-validator-webapp-1.0.0-SNAPSHOT.jar)
+   * (TODO - COMING SOON!)
 1. From the command line run `java -Djsse.enableSNIExtension=false -jar gtfs-realtime-validator-webapp-1.0.0-SNAPSHOT.jar`
 1. When prompted, in your browser go to `http://localhost:8080`
 1. Enter your [General Transit Feed Specification (GTFS)-realtime](https://developers.google.com/transit/gtfs-realtime/) and [GTFS](https://developers.google.com/transit/gtfs/) feed URLs and click "Start".  Example feeds:
