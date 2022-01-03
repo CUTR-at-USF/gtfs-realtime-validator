@@ -147,5 +147,6 @@ If you want to include snapshot releases in your project, you'll need to add the
 ## Acknowledgements
 
 This project was initially created by the [Center for Transportation Research](https://www.cutr.usf.edu/) at the University of South Florida. 
-In December 2021, the ownership was transferred to [MobilityData](https://mobilitydata.org/). 
+In December 2021, the ownership was transferred to [MobilityData](https://mobilitydata.org/).
+
 The first part of this project was funded by the [National Institute for Transportation Communities (NITC)](https://nitc.trec.pdx.edu/) via the project ["Overcoming Barriers for the Wide-scale Adoption of Standardized Real-time Transit Information"](https://nitc.trec.pdx.edu/research/project/1062/Overcoming_Barriers_for_the_Wide-scale_Adoption_of_Standardized_Real-time_Transit_Information).  It also includes work funded under the [2015 Google Summer of Code](https://www.google-melange.com/archive/gsoc/2015/orgs/osgeo/projects/nipuna777.html).
