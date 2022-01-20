@@ -26,6 +26,7 @@ jobs:
       - name: Run Java tests
         run: mvn test
       - name: Persist Java tests reports
+        if: always()
         uses: actions/upload-artifact@v2
         with:
           name: Test reports
