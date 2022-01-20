@@ -210,7 +210,7 @@ public class UtilTest {
         assertEquals(true, TimestampUtils.isValidTimeFormat(validTime));
 
         validTime = "02:15:35";
-        assertEquals(false, TimestampUtils.isValidTimeFormat(validTime));
+        assertEquals(true, TimestampUtils.isValidTimeFormat(validTime));
 
         validTime = "22:15:35";
         assertEquals(true, TimestampUtils.isValidTimeFormat(validTime));
