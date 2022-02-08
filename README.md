@@ -100,11 +100,13 @@ Note that the validator also has a [batch processing mode](gtfs-realtime-validat
 ## Docker
 ### Setup
 1. Download and install [Docker](https://docs.docker.com/get-started/)
-2. Pull the [latest Docker image for this project](https://github.com/orgs/MobilityData/packages/container/package/gtfs-realtime-validator). For example, `docker pull ghcr.io/mobilitydata/gtfs-realtime-validator` for the latest snapshot version of the validator.
+2. `docker pull ghcr.io/mobilitydata/gtfs-realtime-validator` to get the latest snapshot version of the validator. You can look at other Docker images for this project [here](https://github.com/orgs/MobilityData/packages/container/package/gtfs-realtime-validator).
+
 Or, build the image yourself using the following:
+
 `docker build -t gtfs-realtime-validator .`
 
-Then, run with:
+### Run
 
 `docker run -p 8080:8080 ghcr.io/mobilitydata/gtfs-realtime-validator`
 
