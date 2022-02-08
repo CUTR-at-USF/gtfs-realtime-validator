@@ -106,11 +106,9 @@ Or, build the image yourself using the following:
 
 Then, run with:
 
-`docker run gtfs-realtime-validator`
+`docker run -p 8080:8080 ghcr.io/mobilitydata/gtfs-realtime-validator`
 
-Then go to `http://<docker-machine-ip>:8080` in your web browser. For example, `http://192.168.99.100:8080/`.
-
-You can use `docker-machine ip` to find your docker machine IP.
+Then go to `http://localhost:8080` in your web browser.
 
 ## Troubleshooting
 
