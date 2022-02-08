@@ -58,7 +58,7 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
           cache: maven
-      - name: Package cli app jar with Maven
+      - name: Package lib and webapp JARs with Maven
         run: mvn package
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
