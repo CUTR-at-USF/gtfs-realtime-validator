@@ -46,7 +46,7 @@ public class Main {
         String gtfs = getGtfsPathAndFileFromArgs(options, args);
         String gtfsRealtime = getGtfsRealtimePath(options, args);
         if (gtfs == null || gtfsRealtime == null) {
-            throw new IllegalArgumentException("For batch mode you must provide a path and file name to GTFS data (e.g., -gtfs /dir/gtfs.zip) and path to directory of all archived GTFS-rt files (e.g., -gtfs-realtime-path /dir/gtfsarchive)");
+            throw new IllegalArgumentException("For batch mode you must provide a path and file name to GTFS data (e.g., -gtfs /dir/gtfs.zip) and path to directory of all archived GTFS-rt files (e.g., -gtfsRealtimePath /dir/gtfsarchive)");
         }
         BatchProcessor.SortBy sortBy = getSortBy(options, args);
         String plainText = getPlainTextFileExtensionfromArgs(options, args);
