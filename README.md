@@ -5,7 +5,7 @@ A tool that validates [General Transit Feed Specification (GTFS)-realtime](https
 
 Read more in [this Medium article](https://medium.com/@sjbarbeau/introducing-the-gtfs-realtime-validator-e1aae3185439).
 
-Questions? You can [open an issue](https://github.com/MobilityData/gtfs-realtime-validator/issues), ask the [MobilityData Slack Group](https://mobilitydata-io.herokuapp.com/) or reach out to the [GTFS-realtime Google Group](https://groups.google.com/forum/#!forum/gtfs-realtime).
+Questions? You can [open an issue](https://github.com/MobilityData/gtfs-realtime-validator/issues), ask the [MobilityData Slack Group](https://bit.ly/mobilitydata-slack) or reach out to the [GTFS-realtime Google Group](https://groups.google.com/forum/#!forum/gtfs-realtime).
 
 ## Quick start - Run it yourself
 
