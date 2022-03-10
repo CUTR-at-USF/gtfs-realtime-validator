@@ -4,10 +4,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>edu.usf.cutr</groupId>
+    <groupId>org.mobilitydata</groupId>
     <artifactId>gtfs-realtime-validator</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
+
+    <properties>
+        <GITHUB_REPOSITORY>MobilityData/gtfs-realtime-validator</GITHUB_REPOSITORY>
+    </properties>
 
     <modules>
         <module>gtfs-realtime-validator-lib</module>
@@ -31,4 +35,11 @@
             <url>https://repo.camsys-apps.com/releases/</url>
         </repository>
     </repositories>
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>MobilityData GTFS Realtime Validator Maven Repository on Github Packages</name>
+            <url>https://maven.pkg.github.com/${GITHUB_REPOSITORY}/</url>
+        </repository>
+    </distributionManagement>
 </project>

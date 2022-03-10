@@ -2,7 +2,7 @@
 
 The core library that implements GTFS-realtime [validation rules](../RULES.md) as well as [batch processing mode](#batch-processing).
 
-See the main project [README](../README.md) for more details on the [**gtfs-realtime-validator-webapp**](https://github.com/CUTR-at-USF/gtfs-realtime-validator/gtfs-realtime-validator-webapp) submodule in this repository that implements a web server and website where you can input GTFS and GTFS-realtime URLs for validation. 
+See the main project [README](../README.md) for more details on the [**gtfs-realtime-validator-webapp**](https://github.com/MobilityData/gtfs-realtime-validator/tree/master/gtfs-realtime-validator-webapp) submodule in this repository that implements a web server and website where you can input GTFS and GTFS-realtime URLs for validation. 
 
 ## Batch processing
  
@@ -10,13 +10,12 @@ As part of the **gtfs-realtime-validator-lib** module we support a command-line 
  
 ### Prerequisites
  
-1. Install [Java Development Kit (JDK) 1.8 or higher](http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html)
+1. Install [Java Development Kit (JDK) 11 or higher](https://www.oracle.com/java/technologies/javase/jdk11-archive-downloads.html)
  
 ### Run it yourself
  
-1. Download the latest library build:
-    * [gtfs-realtime-validator-lib-1.0.0-SNAPSHOT.jar](https://s3.amazonaws.com/gtfs-rt-validator/travis_builds/gtfs-realtime-validator-lib/1.0.0-SNAPSHOT/gtfs-realtime-validator-lib-1.0.0-SNAPSHOT.jar)
-1. From the command line run `java -jar target/gtfs-realtime-validator-lib-1.0.0-SNAPSHOT.jar -gtfs "D:\HART\google_transit.zip" -gtfsRealtimePath "D:\HART\gtfs-rt"`
+1. Download the latest library snapshot jar of the validator from the [library package](https://github.com/MobilityData/gtfs-realtime-validator/packages/1268974).
+2. From the command line run `java -jar {JAR file name} -gtfs "D:\HART\google_transit.zip" -gtfsRealtimePath "D:\HART\gtfs-rt"`, where `{JAR file name}` is the name of the file you downloaded in the previous step. For example, if the JAR file name is `gtfs-realtime-validator-webapp-1.0.0-20220223.003109-1.jar`, you would run `java -jar gtfs-realtime-validator-webapp-1.0.0-20220223.003109-1.jar`.
     * `-gtfs` should point to the GTFS zip file 
     * `-gtfsRealtimePath` should point to the directory holding the GTFS-realtime files
 
@@ -78,7 +77,7 @@ For logging configuration, see the [Config->Logging](../CONFIG.md#logging) secti
 
 Following are the requirements to build and run the project from source code: 
 
-* [Java Development Kit (JDK) 1.8 or higher](http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html)
+* [Java Development Kit (JDK) 11 or higher](https://www.oracle.com/java/technologies/downloads/)
 * [Apache Maven](https://maven.apache.org/)
 
 #### 1. Build the project 
@@ -99,28 +98,27 @@ This will generate a JAR file in the `gtfs-realtime-validator-lib/target/` direc
 
 You can use the **gtfs-realtime-validator-lib** library in your own project as well.  
 
-To include a snapshot JAR via Maven, you'll need to add the below repository to your `pom.xml` 
+NOTE: You need to [authenticate with GitHub](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry#authenticating-with-a-personal-access-token) to download the below artifacts
+
+To include a snapshot JAR via Maven, you'll need to add the below dependency to your `pom.xml`
 
 ~~~
-<!-- CUTR SNAPSHOTs -->
+<!-- MobilityData SNAPSHOTs/RELEASES -->
 <repositories>
     <repository>
-        <id>cutr-snapshots</id>
-        <url>https://raw.githubusercontent.com/CUTR-at-USF/cutr-mvn-repo/master/snapshots</url>
-    </repository>        
+        <id>github</id>
+        <name>GitHub gtfs-realtime-validator</name>
+        <url>https://maven.pkg.github.com/MobilityData/gtfs-realtime-validator</url>
+        <releases><enabled>true</enabled></releases>
+        <snapshots><enabled>true</enabled></snapshots>
+    </repository>
 </repositories>
-~~~
-
-Then, you can use this dependency:
-
-~~~
-<dependencies>
-	<dependency>
-		<groupId>edu.usf.cutr</groupId>
-		<artifactId>gtfs-realtime-validator-lib</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
-	</dependency>
-</dependencies>
+...
+   <dependency>
+     <groupId>org.mobilitydata</groupId>
+     <artifactId>gtfs-realtime-validator-lib</artifactId>
+     <version>1.0.0-SNAPSHOT</version>
+   </dependency>
 ~~~
 
 See the [**transit-feed-quality-calculator**](https://github.com/CUTR-at-USF/transit-feed-quality-calculator) for an example of using this library in another project.

@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>edu.usf.cutr</groupId>
-		<artifactId>gtfs-realtime-validator</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
+		<groupId>org.mobilitydata</groupId>
+        <artifactId>gtfs-realtime-validator</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
 	</parent>
-	
+
 	<artifactId>gtfs-realtime-validator-webapp</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 
@@ -30,7 +30,7 @@
 
     <dependencies>
 		<dependency>
-            <groupId>edu.usf.cutr</groupId>
+            <groupId>org.mobilitydata</groupId>
             <artifactId>gtfs-realtime-validator-lib</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
@@ -151,11 +151,6 @@
             <groupId>org.locationtech.spatial4j</groupId>
             <artifactId>spatial4j</artifactId>
             <version>0.6</version>
-        </dependency>
-        <dependency>
-            <groupId>edu.usf.cutr</groupId>
-            <artifactId>gtfs-realtime-validator-lib</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

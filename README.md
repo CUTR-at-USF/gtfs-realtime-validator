@@ -1,13 +1,11 @@
-# GTFS-realtime Validator [![Java CI with Maven](https://github.com/CUTR-at-USF/gtfs-realtime-validator/actions/workflows/maven.yml/badge.svg)](https://github.com/CUTR-at-USF/gtfs-realtime-validator/actions/workflows/maven.yml) [![Docker image](https://github.com/MobilityData/gtfs-realtime-validator/actions/workflows/docker.yml/badge.svg)](https://github.com/MobilityData/gtfs-realtime-validator/actions/workflows/docker.yml) [![Join the GTFS-realtime chat](https://img.shields.io/badge/chat-on%20slack-red)](https://bit.ly/mobilitydata-slack)
-
+# GTFS-realtime Validator [![Test and Package](https://github.com/MobilityData/gtfs-realtime-validator/actions/workflows/test_package.yml/badge.svg)](https://github.com/MobilityData/gtfs-realtime-validator/actions/workflows/test_package.yml) [![Docker image](https://github.com/MobilityData/gtfs-realtime-validator/actions/workflows/docker.yml/badge.svg)](https://github.com/MobilityData/gtfs-realtime-validator/actions/workflows/docker.yml) [![Join the GTFS-realtime chat](https://img.shields.io/badge/chat-on%20slack-red)](https://bit.ly/mobilitydata-slack)
 A tool that validates [General Transit Feed Specification (GTFS)-realtime](https://developers.google.com/transit/gtfs-realtime/) feeds
-
 
 <img src="https://cloud.githubusercontent.com/assets/928045/25874575/2afaa3b0-34e1-11e7-92a4-b0a68f233748.png" width="1000">
 
 Read more in [this Medium article](https://medium.com/@sjbarbeau/introducing-the-gtfs-realtime-validator-e1aae3185439).
 
-Questions? You can [open an issue](https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues), ask the [MobilityData Slack Group](https://mobilitydata-io.herokuapp.com/) or reach out to the [GTFS-realtime Google Group](https://groups.google.com/forum/#!forum/gtfs-realtime).
+Questions? You can [open an issue](https://github.com/MobilityData/gtfs-realtime-validator/issues), ask the [MobilityData Slack Group](https://mobilitydata-io.herokuapp.com/) or reach out to the [GTFS-realtime Google Group](https://groups.google.com/forum/#!forum/gtfs-realtime).
 
 ## Quick start - Run it yourself
 
@@ -15,13 +13,12 @@ Questions? You can [open an issue](https://github.com/CUTR-at-USF/gtfs-realtime-
 
 ### Prerequisites
 
-1. Install [Java Development Kit (JDK) 1.8 or higher](https://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html)
+1. Install [Java Development Kit (JDK) 11 or higher](https://www.oracle.com/java/technologies/downloads/)
 
 ### Run the webapp
 
-1. Download the latest webapp alpha build:
-   * (TODO - COMING SOON!)
-1. From the command line run `java -Djsse.enableSNIExtension=false -jar gtfs-realtime-validator-webapp-1.0.0-SNAPSHOT.jar`
+1. Download the latest webapp snapshot jar of the validator from the [webapp package](https://github.com/MobilityData/gtfs-realtime-validator/packages/1268975).
+1. From the command line run `java -jar {JAR file name}`, where `{JAR file name}` is the name of the file you downloaded in the previous step. For example, if the JAR file name is `gtfs-realtime-validator-webapp-1.0.0-20220223.003109-1.jar`, you would run `java -jar gtfs-realtime-validator-webapp-1.0.0-20220223.003109-1.jar`.
 1. When prompted, in your browser go to `http://localhost:8080`
 1. Enter your [General Transit Feed Specification (GTFS)-realtime](https://developers.google.com/transit/gtfs-realtime/) and [GTFS](https://developers.google.com/transit/gtfs/) feed URLs and click "Start".  Example feeds:
     * HART (Tampa, FL)
@@ -32,7 +29,6 @@ Questions? You can [open an issue](https://github.com/CUTR-at-USF/gtfs-realtime-
         * GTFS - https://cdn.mbta.com/MBTA_GTFS.zip
     * ...more at [OpenMobilityData.org](https://openmobilitydata.org/search?q=gtfsrt)
 
-Please note that if you're using `https` URLS, you'll need to use the `-Djsse.enableSNIExtension=false` command-line parameter or install the [Java Cryptography Extension (JCE)](https://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html) - see the [Prerequisites](https://github.com/CUTR-at-USF/gtfs-realtime-validator#prerequisites) section for details.
 
 ### Run batch validation
 
@@ -57,12 +53,8 @@ The main **gtfs-realtime-validator-webapp** user interface is implemented as a w
 
 Following are the requirements to build and run the project from source code: 
 
-* [Java Development Kit (JDK) 1.8 or higher](https://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html)
+* [Java Development Kit (JDK) 11 or higher](https://www.oracle.com/java/technologies/downloads/)
 * [Apache Maven](https://maven.apache.org/)
-
-If you're using `https` URLs for GTFS or GTFS-rt feeds, either:
-* Use the `-Djsse.enableSNIExtension=false` parameter when running the tool
-* Install the [Java Cryptography Extension (JCE)](https://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html) - You will need to replace the `US_export_policy.jar` and `local_policy.jar` files in your JVM `/security` directory, such as `C:\Program Files\Java\jdk1.8.0_73\jre\lib\security`, with the JAR files in the JCE Extension download.
 
 #### 1. Build the project 
 
@@ -80,7 +72,7 @@ If you're going to be rebuilding the project frequently (e.g., editing source co
 
 To start up the server so you can view the web interface, from the command-line, run: 
 
-* `java -Djsse.enableSNIExtension=false -jar gtfs-realtime-validator-webapp/target/gtfs-realtime-validator-webapp-1.0.0-SNAPSHOT.jar`
+* `java -jar {JAR file name}`, where `{JAR file name}` is the name of the file you downloaded previously. For example, if the JAR file name is `gtfs-realtime-validator-webapp-1.0.0-20220223.003109-1.jar`, you would run `java -jar gtfs-realtime-validator-webapp-1.0.0-20220223.003109-1.jar`.
 
 
 You should see some output, and a message saying `Go to http://localhost:8080 in your browser`.
@@ -116,29 +108,33 @@ Then go to `http://localhost:8080` in your web browser.
 
 Having problems?  Check out our [Troubleshooting guide](TROUBLESHOOTING.md).
 
-## CUTR Release Process
+## MobilityData Release Process
 
 **Snapshots**
 
-We've set up a Maven repository to hold the snapshot artifacts from this project in a Github project - [cutr-mvn-repo](https://github.com/CUTR-at-USF/cutr-mvn-repo).
+We've set up a Maven repository on GitHub Packages to hold the snapshot artifacts from this project - [GTFS Realtime Validator Packages](https://github.com/orgs/MobilityData/packages?repo_name=gtfs-realtime-validator). The GitHub Action [`test_package.yml`](../.github/workflows/test_package.yml) publishes to this repository.
 
-At CUTR, we should run the following at the command-line to create a new artifact:
-~~~
-mvn -Dgpg.skip -DaltDeploymentRepository=cutr-snapshots::default::file:"/Git Projects/cutr-mvn-repo/snapshots" clean deploy
-~~~
-
-Then commit using Git and push new artifacts to Github.
+NOTE: You need to [authenticate with GitHub](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry#authenticating-with-a-personal-access-token) to download the below artifacts
 
 If you want to include snapshot releases in your project, you'll need to add the following to the `pom.xml` of the project you want to use it in:
 
 ~~~
-<!-- CUTR SNAPSHOTs/RELEASES -->
+<!-- MobilityData SNAPSHOTs/RELEASES -->
 <repositories>
     <repository>
-        <id>cutr-snapshots</id>
-        <url>https://raw.githubusercontent.com/CUTR-at-USF/cutr-mvn-repo/master/snapshots</url>
-    </repository>        
+        <id>github</id>
+        <name>GitHub gtfs-realtime-validator</name>
+        <url>https://maven.pkg.github.com/MobilityData/gtfs-realtime-validator</url>
+        <releases><enabled>true</enabled></releases>
+        <snapshots><enabled>true</enabled></snapshots>
+    </repository>
 </repositories>
+...
+   <dependency>
+     <groupId>org.mobilitydata</groupId>
+     <artifactId>gtfs-realtime-validator</artifactId>
+     <version>1.0.0-SNAPSHOT</version>
+   </dependency>
 ~~~
 
 ## Acknowledgements
