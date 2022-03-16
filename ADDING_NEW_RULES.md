@@ -1,13 +1,13 @@
 # Adding new rules
 
-We will want to add new rules to this validator as the [GTFS-realtime spec](https://github.com/google/transit/tree/master/gtfs-realtime) and the surrounding applications and tools change.  This page outlines the process of adding new rules to this tool.
+We will want to add new rules to this validator as the [GTFS Realtime spec](https://github.com/google/transit/tree/master/gtfs-realtime) and the surrounding applications and tools change.  This page outlines the process of adding new rules to this tool.
 
 ### 0. Prepare for implementation 
 
 * Check the list of [currently implemented rules](RULES.md) to make sure the rule doesn't already exist.
 * Check the list of [planned future rules](https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues?q=is%3Aissue+is%3Aopen+label%3A%22new+rule%22) to see if an issue already exists for the proposed rule.
     * If no existing issue exists, open a new issue with the ["new rule" label](https://github.com/CUTR-at-USF/gtfs-realtime-validator/issues?q=is%3Aissue+is%3Aopen+label%3A%22new+rule%22).
-* Discuss the rule with the community via the Github issue and come to a general consensus on the exact logic, and if it should be an `ERROR` or `WARNING`.  Generally, errors are behavior that directly violate the GTFS-realtime documentation.  Warnings are behavior that is not advised (e.g., against best practices) but not explicitly forbidden in the GTSF-realtime documentation.
+* Discuss the rule with the community via the Github issue and come to a general consensus on the exact logic, and if it should be an `ERROR` or `WARNING`.  Generally, errors are behavior that directly violate the GTFS Realtime specification.  Warnings are behavior that is not advised (e.g., against best practices) but not explicitly forbidden in the GTSF Realtime specification.
 * Implement new rule using the process below
 
 For the below example, let's look at implementing a new rule that will make sure that each `vehicle.id` in a VehiclePositions feed is unique.  If there are two VehiclePosition entities in a feed with the same `vehicle.id`, then the validator should log an error.
@@ -71,7 +71,7 @@ Here are the currently implemented `*Validator.java` classes (all defined in [`g
 *  `CrossFeedDescriptorValidator` - Examines multiple GTFS-rt feeds (e.g., comparing TripUpdates to VehiclePositions) to identify potential discrepancies between them (e.g., `E047 - VehiclePosition and TripUpdate ID pairing mismatch`).
 *  `FrequencyTypeOneValidator` - Examines frequency-based type 1 trips - trips defined in GTFS frequencies.txt with `exact_times = 1`
 *  `FrequencyTypeZeroValidator` - Examines frequency-based type 0 trips - trips defined in GTFS frequencies.txt with `exact_times = 0`
-*  `HeaderValidator` - Examines the GTFS-realtime header
+*  `HeaderValidator` - Examines the GTFS Realtime header
 *  `StopTimeUpdateValidator` - Examines `stop_time_updates` in trips
 *  `StopValidator` - Examines `stops`
 *  `TimestampValidator` -  Examines entity `timestamps`
@@ -246,7 +246,7 @@ Because we added the rule in `VehicleValidator`, we'll add the unit test for thi
 
 (If you created a new `MyValidator.java` class earlier, you'll want to create a new `MyValidatorTest.java` class in the [`test/rules`](https://github.com/CUTR-at-USF/gtfs-realtime-validator/tree/master/gtfs-realtime-validator-lib/src/test/java/edu/usf/cutr/gtfsrtvalidator/lib/test/rules) directory, and have it extend [`FeedMessageTest`](https://github.com/CUTR-at-USF/gtfs-realtime-validator/blob/master/gtfs-realtime-validator-lib/src/test/java/edu/usf/cutr/gtfsrtvalidator/lib/test/FeedMessageTest.java))
 
-Because our test classes extend [`FeedMessageTest`](https://github.com/CUTR-at-USF/gtfs-realtime-validator/blob/master/gtfs-realtime-validator-lib/src/test/java/edu/usf/cutr/gtfsrtvalidator/lib/test/FeedMessageTest.java), a lot of the setup of loading test GTFS data and initializing GTFS-realtime data structures is already taken care of.  We'll only cover the details that you absolutely need to know for writing a new rule. 
+Because our test classes extend [`FeedMessageTest`](https://github.com/CUTR-at-USF/gtfs-realtime-validator/blob/master/gtfs-realtime-validator-lib/src/test/java/edu/usf/cutr/gtfsrtvalidator/lib/test/FeedMessageTest.java), a lot of the setup of loading test GTFS data and initializing GTFS Realtime data structures is already taken care of.  We'll only cover the details that you absolutely need to know for writing a new rule. 
 
 First, we will create a new method annotated with `@Test` in [`VehicleValidatorTest`](https://github.com/CUTR-at-USF/gtfs-realtime-validator/blob/master/gtfs-realtime-validator-lib/src/test/java/edu/usf/cutr/gtfsrtvalidator/lib/test/rules/VehicleValidatorTest.java):
 
@@ -281,7 +281,7 @@ Next, we need to add a data structure to hold the expected results from the unit
         
     }
     
-Now we can create the GTFS-realtime VehiclePosition messages that we're going to test our rule against.  First, let's just add a single message with the vehicle ID of `1`:
+Now we can create the GTFS Realtime VehiclePosition messages that we're going to test our rule against.  First, let's just add a single message with the vehicle ID of `1`:
 
     /**
      * E052 - vehicle.id is not unique
@@ -294,14 +294,14 @@ Now we can create the GTFS-realtime VehiclePosition messages that we're going to
         GtfsRealtime.VehicleDescriptor.Builder vehicleDescriptorBuilder = GtfsRealtime.VehicleDescriptor.newBuilder();
         vehicleDescriptorBuilder.setId("1");
 
-        // The below code adds the above VehicleDescriptor to a VehiclePosition entity, and builds a new GTFS-realtime message that contains that entity
+        // The below code adds the above VehicleDescriptor to a VehiclePosition entity, and builds a new GTFS Realtime message that contains that entity
         vehiclePositionBuilder.setVehicle(vehicleDescriptorBuilder.build());
         feedEntityBuilder.setVehicle(vehiclePositionBuilder.build());
         feedMessageBuilder.setEntity(0, feedEntityBuilder.build());
 
     }
     
-We now have a GTFS-realtime feed with a single `VehiclePosition` message. Note that the `vehiclePositionBuilder` we're adding the `VehicleDescriptor` has already been declared and initialized in the class we're extending, which is `FeedMessageTest`.  This cuts down on the boilerplace code in each unit test.
+We now have a GTFS Realtime feed with a single `VehiclePosition` message. Note that the `vehiclePositionBuilder` we're adding the `VehicleDescriptor` has already been declared and initialized in the class we're extending, which is `FeedMessageTest`.  This cuts down on the boilerplace code in each unit test.
 
 Now let's run our test data through the `vehicleValidator` to actually validate it using the rule we just wrote:
 

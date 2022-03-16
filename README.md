@@ -1,11 +1,11 @@
-# GTFS-realtime Validator [![Test and Package](https://github.com/MobilityData/gtfs-realtime-validator/actions/workflows/test_package.yml/badge.svg)](https://github.com/MobilityData/gtfs-realtime-validator/actions/workflows/test_package.yml) [![Docker image](https://github.com/MobilityData/gtfs-realtime-validator/actions/workflows/docker.yml/badge.svg)](https://github.com/MobilityData/gtfs-realtime-validator/actions/workflows/docker.yml) [![Join the GTFS-realtime chat](https://img.shields.io/badge/chat-on%20slack-red)](https://bit.ly/mobilitydata-slack)
+# GTFS Realtime Validator [![Test and Package](https://github.com/MobilityData/gtfs-realtime-validator/actions/workflows/test_package.yml/badge.svg)](https://github.com/MobilityData/gtfs-realtime-validator/actions/workflows/test_package.yml) [![Docker image](https://github.com/MobilityData/gtfs-realtime-validator/actions/workflows/docker.yml/badge.svg)](https://github.com/MobilityData/gtfs-realtime-validator/actions/workflows/docker.yml) [![Join the GTFS Realtime chat](https://img.shields.io/badge/chat-on%20slack-red)](https://bit.ly/mobilitydata-slack)
 A tool that validates [General Transit Feed Specification (GTFS)-realtime](https://developers.google.com/transit/gtfs-realtime/) feeds
 
 <img src="https://cloud.githubusercontent.com/assets/928045/25874575/2afaa3b0-34e1-11e7-92a4-b0a68f233748.png" width="1000">
 
 Read more in [this Medium article](https://medium.com/@sjbarbeau/introducing-the-gtfs-realtime-validator-e1aae3185439).
 
-Questions? You can [open an issue](https://github.com/MobilityData/gtfs-realtime-validator/issues), ask the [MobilityData Slack Group](https://bit.ly/mobilitydata-slack) or reach out to the [GTFS-realtime Google Group](https://groups.google.com/forum/#!forum/gtfs-realtime).
+Questions? You can [open an issue](https://github.com/MobilityData/gtfs-realtime-validator/issues), ask the [MobilityData Slack Group](https://bit.ly/mobilitydata-slack) or reach out to the [GTFS Realtime Google Group](https://groups.google.com/forum/#!forum/gtfs-realtime).
 
 ## Quick start - Run it yourself
 
@@ -22,10 +22,10 @@ Questions? You can [open an issue](https://github.com/MobilityData/gtfs-realtime
 1. When prompted, in your browser go to `http://localhost:8080`
 1. Enter your [General Transit Feed Specification (GTFS)-realtime](https://developers.google.com/transit/gtfs-realtime/) and [GTFS](https://developers.google.com/transit/gtfs/) feed URLs and click "Start".  Example feeds:
     * HART (Tampa, FL)
-        * GTFS-realtime - http://api.tampa.onebusaway.org:8088/trip-updates
+        * GTFS Realtime - http://api.tampa.onebusaway.org:8088/trip-updates
         * GTFS - http://gohart.org/google/google_transit.zip
     * MBTA (Boston, MA)
-        * GTFS-realtime - https://cdn.mbta.com/realtime/TripUpdates.pb
+        * GTFS Realtime - https://cdn.mbta.com/realtime/TripUpdates.pb
         * GTFS - https://cdn.mbta.com/MBTA_GTFS.zip
     * ...more at [OpenMobilityData.org](https://openmobilitydata.org/search?q=gtfsrt)
 
@@ -44,7 +44,7 @@ Have a suggestion for a new rule?  Open an issue with the ["new rule" label](htt
 ## Building the project 
 
 There are two components to this project:
-* **gtfs-realtime-validator-lib** - The core library that implements GTFS-realtime [validation rules](RULES.md) as well as [batch processing mode](gtfs-realtime-validator-lib/README.md#batch-processing).  You can use this same library [in your own project](gtfs-realtime-validator-lib/README.md#using-validation-rules-or-the-batch-processor-in-your-project).
+* **gtfs-realtime-validator-lib** - The core library that implements GTFS Realtime [validation rules](RULES.md) as well as [batch processing mode](gtfs-realtime-validator-lib/README.md#batch-processing).  You can use this same library [in your own project](gtfs-realtime-validator-lib/README.md#using-validation-rules-or-the-batch-processor-in-your-project).
 * **gtfs-realtime-validator-webapp** - A server and website that allows multiple users to validate GTFS-relatime feeds by simply entering URLs into the website.
 
 The main **gtfs-realtime-validator-webapp** user interface is implemented as a web application, with the backend code written in Java.  An instance of the [Jetty embedded server](https://www.eclipse.org/jetty/) is used to run the application, with [Hibernate](https://hibernate.org/) used for data persistence.

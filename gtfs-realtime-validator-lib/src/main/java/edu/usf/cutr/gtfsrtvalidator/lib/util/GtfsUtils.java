@@ -24,7 +24,7 @@ import org.locationtech.spatial4j.shape.SpatialRelation;
 import static org.locationtech.spatial4j.context.SpatialContext.GEO;
 
 /**
- * Utilities for working with GTFS and GTFS-realtime objects
+ * Utilities for working with GTFS and GTFS Realtime objects
  */
 public class GtfsUtils {
 

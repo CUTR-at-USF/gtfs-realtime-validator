@@ -14,6 +14,6 @@ Try including the `java.xml.bind` module with the `--add-modules` parameter:
 
 ### SSL handshake still fails after following [prerequisites](https://github.com/CUTR-at-USF/gtfs-realtime-validator#prerequisites-1)
 
-*Symptom* - I use `java -Djsee.enableSNIExtension=false ...` as instructed to run the app when retrieving GTFS or GTFS-realtime feeds from HTTPS URLs over SSL, but it fails with an error like `javax.net.ssl.SSLHandshakeException: java.security.cert.CertificateException: No subject alternative DNS name matching www.donneesquebec.ca found.` 
+*Symptom* - I use `java -Djsee.enableSNIExtension=false ...` as instructed to run the app when retrieving GTFS or GTFS Realtime feeds from HTTPS URLs over SSL, but it fails with an error like `javax.net.ssl.SSLHandshakeException: java.security.cert.CertificateException: No subject alternative DNS name matching www.donneesquebec.ca found.` 
 
-*Solution* - The underlying problem is probably with the server certificate configuration where the GTFS or GTFS-realtime data is hosted.  You can try to change the parameter to `-Djsse.enableSNIExtension=true` instead, which has helped [in the past](https://github.com/CUTR-at-USF/gtfs-realtime-validator/pull/310) for Linux deployments.
+*Solution* - The underlying problem is probably with the server certificate configuration where the GTFS or GTFS Realtime data is hosted.  You can try to change the parameter to `-Djsse.enableSNIExtension=true` instead, which has helped [in the past](https://github.com/CUTR-at-USF/gtfs-realtime-validator/pull/310) for Linux deployments.

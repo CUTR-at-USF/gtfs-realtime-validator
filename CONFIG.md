@@ -33,4 +33,4 @@ If you'd like to change the logging level, for example to see all debug statemen
 
 #### Batch processing
  
-We support a command-line batch processing mode for archived GTFS-realtime files.  See the [**gtfs-realtime-validator-lib** README](gtfs-realtime-validator-lib/README.md) page for details, including command-line configuration options for the batch processing mode.
+We support a command-line batch processing mode for archived GTFS Realtime files.  See the [**gtfs-realtime-validator-lib** README](gtfs-realtime-validator-lib/README.md) page for details, including command-line configuration options for the batch processing mode.

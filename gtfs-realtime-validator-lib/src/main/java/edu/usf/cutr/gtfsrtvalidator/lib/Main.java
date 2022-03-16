@@ -84,7 +84,7 @@ public class Main {
                 .build();
         Option gtfsRealtimeOption = Option.builder(GTFS_RT_PATH)
                 .hasArg()
-                .desc("The full path to the directory containing the archived GTFS-realtime files")
+                .desc("The full path to the directory containing the archived GTFS Realtime files")
                 .build();
         Option sort = Option.builder(SORT_OPTION)
                 .hasArg()
@@ -96,7 +96,7 @@ public class Main {
                 .build();
         Option saveStats = Option.builder(RETURN_STATS)
                 .hasArg()
-                .desc("If the validator should keep tracks of statistics for all validated GTFS-realtime files.")
+                .desc("If the validator should keep tracks of statistics for all validated GTFS Realtime files.")
                 .build();
         Option ignoreShapes = Option.builder(IGNORE_SHAPES)
                 .hasArg()
