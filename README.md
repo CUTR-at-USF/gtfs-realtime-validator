@@ -137,6 +137,12 @@ If you want to include snapshot releases in your project, you'll need to add the
    </dependency>
 ~~~
 
+## Projects based on this validator
+- [**transport.data.gouv.fr - Online GTFS Realtime validation**](https://transport.data.gouv.fr/validation?type=gtfs-rt) - A website by the [French national access point to transport data](https://transport.data.gouv.fr/) that allows users to enter GTFS and GTFS Realtime URLs for validation. The [gtfs-realtime-validator batch processor](gtfs-realtime-validator-lib/README.md#batch-processing) is then run by transport.data.gouv.fr and the results displayed on the website. Their project is [open-source on GitHub](https://github.com/etalab/transport-site).
+- [**CalTrans California Integrated Travel Project (Cal-ITP) GTFS Realtime validation**](https://dot.ca.gov/cal-itp/Critical-GTFS-Validation-Errors) - Cal-ITP is using the [gtfs-realtime-validator batch processor](https://github.com/CUTR-at-USF/gtfs-realtime-validator/compare/master...MobilityData:gtfs-realtime-validator-lib/README.md?expand=1#batch-processing), along with an [open-source Python wrapper they developed](https://github.com/cal-itp/gtfs-rt-validator-api), to validate GTFS Realtime data for transit agencies in the state of California. 
+- [**CUTR-at-USF's transit-feed-quality-calculator**](https://github.com/cal-itp/gtfs-rt-validator-api) - An open-source command-line Java application that uses the [gtfs-realtime-validator batch processor](https://github.com/MobilityData/gtfs-realtime-validator/pull/gtfs-realtime-validator-lib/README.md#batch-processing) to assess the quality of a large number of transit feeds. It downloads a list of GTFS Realtime feed URLs from [OpenMobilityData](https://openmobilitydata.org/), fetches GTFS Realtime feeds from those agency URLs, runs the [gtfs-realtime-validator batch processor](https://github.com/MobilityData/gtfs-realtime-validator/pull/gtfs-realtime-validator-lib/README.md#batch-processing) on all of the downloaded feeds, and then outputs summary statistics and graphs on the results.
+- [**Traffic Brain (Japan)**](https://t-brain.jp/) - Runs a [hosted website version](https://gtfs.t-brain.jp/rt-validator/) of the [gtfs-realtime-validator-webapp](https://github.com/MobilityData/gtfs-realtime-validator/pull/gtfs-realtime-validator-webapp/README.md) in this project.
+
 ## Acknowledgements
 
 This project was initially created by the [Center for Transportation Research](https://www.cutr.usf.edu/) at the University of South Florida. 
