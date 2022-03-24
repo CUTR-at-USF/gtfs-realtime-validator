@@ -36,9 +36,9 @@ import javax.xml.bind.annotation.XmlRootElement;
                 "INNER JOIN " +
                 "(SELECT IterationID, IterationTimestamp " +
                 "FROM GtfsRtFeedIteration " +
-                "WHERE rtFeedID = ?) GtfsRtFeedIDIteration " +
+                "WHERE rtFeedID = :gtfsRtId) GtfsRtFeedIDIteration " +
                 "ON MessageLog.iterationID = GtfsRtFeedIDIteration.IterationID " +
-                    "AND IterationTimestamp >= ? AND IterationTimestamp <= ? " +
+                    "AND IterationTimestamp >= :sessionStartTime AND IterationTimestamp <= :sessionEndTime " +
                 "GROUP BY errorID) errorCount " +
                 "ON Error.errorID = errorCount.errorID ",
         resultClass = ViewGtfsRtFeedErrorCountModel.class)

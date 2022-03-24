@@ -31,12 +31,12 @@ import java.io.InputStream;
     @NamedNativeQuery (name = "feedMessageByIterationId",
             query = "SELECT feedProtobuf AS feedMessage " +
                     "FROM GtfsRtFeedIteration " +
-                    "WHERE IterationID = ? ",
+                    "WHERE IterationID = :iterationId ",
             resultClass = ViewFeedMessageModel.class),
     @NamedNativeQuery (name = "feedMessageByGtfsRtId",
             query = "SELECT feedProtobuf AS feedMessage " +
                     "FROM GtfsRtFeedIteration " +
-                    "WHERE rtFeedId = ?  ORDER BY IterationTimestamp DESC",
+                    "WHERE rtFeedId = :gtfsRtId  ORDER BY IterationTimestamp DESC",
             resultClass = ViewFeedMessageModel.class)
 })
 public class ViewFeedMessageModel {

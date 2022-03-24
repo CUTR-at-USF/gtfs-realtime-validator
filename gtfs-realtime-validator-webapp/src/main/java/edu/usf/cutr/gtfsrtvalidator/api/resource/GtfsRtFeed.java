@@ -197,35 +197,35 @@ public class GtfsRtFeed {
 
         ViewFeedIterationsCount iterationsCount;
         iterationsCount = (ViewFeedIterationsCount) session.createNamedQuery("feedIterationsCount", ViewFeedIterationsCount.class)
-                .setParameter(0, gtfsRtId)
-                .setParameter(1, sessionStartTime)
-                .setParameter(2, sessionEndTime)
+                .setParameter("gtfsRtId", gtfsRtId)
+                .setParameter("sessionStartTime", sessionStartTime)
+                .setParameter("sessionEndTime", sessionEndTime)
                 .uniqueResult();
         mergeMonitorData.setIterationCount(iterationsCount.getIterationCount());
 
         ViewFeedUniqueResponseCount uniqueResponseCount;
         uniqueResponseCount = (ViewFeedUniqueResponseCount) session.createNamedQuery("feedUniqueResponseCount", ViewFeedUniqueResponseCount.class)
-                .setParameter(0, gtfsRtId)
-                .setParameter(1, sessionStartTime)
-                .setParameter(2, sessionEndTime)
+                .setParameter("gtfsRtId", gtfsRtId)
+                .setParameter("sessionStartTime", sessionStartTime)
+                .setParameter("sessionEndTime", sessionEndTime)
                 .uniqueResult();
         mergeMonitorData.setUniqueFeedCount(uniqueResponseCount.getUniqueFeedCount());
 
         List<ViewGtfsRtFeedErrorCountModel> viewGtfsRtFeedErrorCountModel;
         viewGtfsRtFeedErrorCountModel = session.createNamedQuery("feedErrorCount", ViewGtfsRtFeedErrorCountModel.class)
-                .setParameter(0, gtfsRtId)
-                .setParameter(1, sessionStartTime)
-                .setParameter(2, sessionEndTime)
+                .setParameter("gtfsRtId", gtfsRtId)
+                .setParameter("sessionStartTime", sessionStartTime)
+                .setParameter("sessionEndTime", sessionEndTime)
                 .list();
         mergeMonitorData.setViewGtfsRtFeedErrorCountModelList(viewGtfsRtFeedErrorCountModel);
 
         List<ViewErrorSummaryModel> feedSummary;
         int fromRow = (summaryCurPage - 1) * summaryRowsPerPage;
         feedSummary = session.createNamedQuery("ErrorSummaryByrtfeedID", ViewErrorSummaryModel.class)
-                .setParameter(0, gtfsRtId)
-                .setParameter(1, gtfsRtId)
-                .setParameter(2, sessionStartTime)
-                .setParameter(3, sessionEndTime)
+                .setParameter("gtfsRtId1", gtfsRtId)
+                .setParameter("gtfsRtId2", gtfsRtId)
+                .setParameter("sessionStartTime", sessionStartTime)
+                .setParameter("sessionEndTime", sessionEndTime)
                 .setFirstResult(fromRow)
                 .setMaxResults(summaryRowsPerPage)
                 .list();
@@ -245,10 +245,10 @@ public class GtfsRtFeed {
         // Getting the value of fromRow from the rowsPerPage and currentPage values.
         fromRow = (logCurPage - 1) * logRowsPerPage;
         feedLog = session.createNamedQuery("ErrorLogByrtfeedID", ViewErrorLogModel.class)
-                .setParameter(0, gtfsRtId)
-                .setParameter(1, gtfsRtId)
-                .setParameter(2, sessionStartTime)
-                .setParameter(3, sessionEndTime)
+                .setParameter("gtfsRtId1", gtfsRtId)
+                .setParameter("gtfsRtId2", gtfsRtId)
+                .setParameter("sessionStartTime", sessionStartTime)
+                .setParameter("sessionEndTime", sessionEndTime)
                 .setParameterList("errorIds", removeIds)
                 .setFirstResult(fromRow)
                 .setMaxResults(logRowsPerPage)
@@ -279,11 +279,11 @@ public class GtfsRtFeed {
          Session session = GTFSDB.initSessionBeginTrans();
          if(iterationId != -1) {
              feedMessageModel = session.createNamedQuery("feedMessageByIterationId", ViewFeedMessageModel.class)
-                 .setParameter(0, iterationId)
+                 .setParameter("iterationId", iterationId)
                  .uniqueResult();
          } else {
              feedMessageModel = session.createNamedQuery("feedMessageByGtfsRtId", ViewFeedMessageModel.class)
-                     .setParameter(0, gtfsRtId)
+                     .setParameter("gtfsRtId", gtfsRtId)
                      .setMaxResults(1).getSingleResult();
          }
 
@@ -329,8 +329,8 @@ public class GtfsRtFeed {
         for (int messageId: messageIdList) {
             session = GTFSDB.initSessionBeginTrans();
             viewIterationErrorsModelList = session.createNamedQuery("IterationIdErrors", ViewIterationErrorsModel.class)
-                    .setParameter(0, iterationId)
-                    .setParameter(1, messageId)
+                    .setParameter("iterationId", iterationId)
+                    .setParameter("messageId", messageId)
                     .list();
             GTFSDB.closeSession(session);
             if (!viewIterationErrorsModelList.isEmpty()) {

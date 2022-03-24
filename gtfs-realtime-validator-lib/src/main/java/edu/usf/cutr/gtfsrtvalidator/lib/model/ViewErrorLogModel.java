@@ -25,7 +25,7 @@ import java.io.Serializable;
 @Entity
 @NamedNativeQuery(name = "ErrorLogByrtfeedID",
         query = // Retrieve the remaining columns, title and severity from Error and FinalResult tables on matching errorIds.
-                "SELECT rowIdentifier, ? AS rtFeedID, errorId AS id, " +
+                "SELECT rowIdentifier, :gtfsRtId1 AS rtFeedID, errorId AS id, " +
                     "Error.title, Error.severity, iterationId, occurrence, loggingTime " +
                 "FROM Error " +
                 "INNER JOIN " +
@@ -50,9 +50,9 @@ import java.io.Serializable;
                                     "INNER JOIN " +
                                     "(SELECT  IterationID, IterationTimestamp, feedTimestamp " +
                                     "FROM GtfsRtFeedIteration " +
-                                    "WHERE rtFeedID = ?) GtfsRtFeedIDIteration " +
+                                    "WHERE rtFeedID = :gtfsRtId2) GtfsRtFeedIDIteration " +
                                     "ON MessageLog.iterationID = GtfsRtFeedIDIteration.IterationID " +
-                                        "AND IterationTimestamp >= ? AND IterationTimestamp <= ? " +
+                                        "AND IterationTimestamp >= :sessionStartTime AND IterationTimestamp <= :sessionEndTime " +
                                 ") errorLog " +
                             "ORDER BY IterationID " +
                             ") " +

@@ -24,7 +24,7 @@ import java.io.Serializable;
 @XmlRootElement
 @Entity
 @NamedNativeQuery(name = "ErrorSummaryByrtfeedID",
-    query = "SELECT ? AS rtFeedID, errorID AS id, " +
+    query = "SELECT :gtfsRtId1 AS rtFeedID, errorID AS id, " +
                 "title, severity, totalCount, lastTime, " +
                 "lastFeedTime, lastIterationId, lastRowId " +
             "FROM Error " +
@@ -51,9 +51,9 @@ import java.io.Serializable;
                                 "INNER JOIN " +
                                 "(SELECT  IterationID, IterationTimestamp, feedTimestamp " +
                                 "FROM GtfsRtFeedIteration " +
-                                "WHERE rtFeedID = ?) GtfsRtFeedIDIteration " +
+                                "WHERE rtFeedID = :gtfsRtId2) GtfsRtFeedIDIteration " +
                             "ON MessageLog.iterationID = GtfsRtFeedIDIteration.IterationID " +
-                                "AND IterationTimestamp >= ? AND IterationTimestamp <= ? " +
+                                "AND IterationTimestamp >= :sessionStartTime AND IterationTimestamp <= :sessionEndTime " +
                             ") errorLog " +
                             "ORDER BY iterationId " +
                         ") " +

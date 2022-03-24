@@ -35,9 +35,9 @@ import javax.xml.bind.annotation.XmlRootElement;
                     "INNER JOIN " +
                         "(SELECT messageId, errorId " +
                         "FROM MessageLog " +
-                        "WHERE iterationId = ?) MessageLogIteration " +
+                        "WHERE iterationId = :iterationId) MessageLogIteration " +
                     "ON Occurrence.messageId = MessageLogIteration.messageId " +
-                    "WHERE messageId = ? ) OccurrenceList " +
+                    "WHERE messageId = :messageId ) OccurrenceList " +
                 "ON Error.errorId = OccurrenceList.errorId " +
                 "ORDER BY occurrenceId ",
         resultClass = ViewIterationErrorsModel.class)

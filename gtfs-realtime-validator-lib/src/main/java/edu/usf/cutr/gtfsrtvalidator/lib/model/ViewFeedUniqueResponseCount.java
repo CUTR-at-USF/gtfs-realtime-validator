@@ -28,8 +28,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NamedNativeQuery(name = "feedUniqueResponseCount",
         query = "SELECT count(*) AS uniqueFeedCount " +
                 "FROM GtfsRtFeedIteration " +
-                "WHERE (rtFeedID = ? " +
-                    "AND IterationTimestamp >= ? AND IterationTimestamp <= ? " +
+                "WHERE (rtFeedID = :gtfsRtId " +
+                    "AND IterationTimestamp >= :sessionStartTime AND IterationTimestamp <= :sessionEndTime " +
                     "AND feedProtobuf IS NOT NULL) ",
         resultClass = ViewFeedUniqueResponseCount.class)
 public class ViewFeedUniqueResponseCount {
