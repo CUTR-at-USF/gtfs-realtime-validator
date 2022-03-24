@@ -32,10 +32,10 @@ import java.util.List;
  */
 public class GtfsFeedTest extends TestCase {
 
-    private final String validGtfsFeedURL = "https://github.com/CUTR-at-USF/gtfs-realtime-validator/raw/master/gtfs-realtime-validator-webapp/src/test/resources/bullrunner-gtfs.zip";
+    private final String validGtfsFeedURL = "https://github.com/MobilityData/gtfs-realtime-validator/raw/master/gtfs-realtime-validator-webapp/src/test/resources/bullrunner-gtfs.zip";
     private final String invalidGtfsFeedURL = "DUMMY";
     private final String downloadFailURL = "http://gohart.org/google/file_not_exist.zip";
-    private final String badGTFS = "https://github.com/CUTR-at-USF/gtfs-realtime-validator/raw/master/gtfs-realtime-validator-webapp/src/test/resources/badgtfs.zip";
+    private final String badGTFS = "https://github.com/MobilityData/gtfs-realtime-validator/raw/master/gtfs-realtime-validator-webapp/src/test/resources/badgtfs.zip";
 
     private GtfsFeed mGtfsFeed;
 

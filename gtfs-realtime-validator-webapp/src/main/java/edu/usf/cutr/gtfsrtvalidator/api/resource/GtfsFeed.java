@@ -128,7 +128,8 @@ public class GtfsFeed {
         if (response == Response.Status.BAD_REQUEST) {
             return generateError("Download Failed", "Downloading static GTFS feed from provided Url failed.", Response.Status.BAD_REQUEST);
         } else if (response == Response.Status.FORBIDDEN) {
-            return generateError("SSL Handshake Failed", "SSL handshake failed.  Try installing the JCE Extension - see https://github.com/CUTR-at-USF/gtfs-realtime-validator#prerequisites", Response.Status.FORBIDDEN);
+            // TODO - Needs further testing to determine better error message on Java 11 and up (JCE Extension is no longer required there)
+            return generateError("SSL Handshake Failed", "SSL handshake failed.  Try installing the JCE Extension if you're running Java 8 - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/blob/fca9c73b3d3b377c606065648750b777d36ad553/README.md#prerequisites-1", Response.Status.FORBIDDEN);
         }
 
         _log.info("GTFS zip file downloaded successfully");
@@ -308,7 +309,8 @@ public class GtfsFeed {
             try {
                 inputStream = connection.getInputStream();
             } catch (SSLHandshakeException sslEx) {
-                _log.error("SSL handshake failed.  Try installing the JCE Extension - see https://github.com/CUTR-at-USF/gtfs-realtime-validator#prerequisites", sslEx);
+                // TODO - Needs further testing to determine better error message on Java 11 and up (JCE Extension is no longer required there)
+                _log.error("SSL handshake failed.  Try installing the JCE Extension if you're running Java 8 - see https://github.com/CUTR-at-USF/gtfs-realtime-validator/blob/fca9c73b3d3b377c606065648750b777d36ad553/README.md#prerequisites-1", sslEx);
                 return Response.Status.FORBIDDEN;
             }
 
