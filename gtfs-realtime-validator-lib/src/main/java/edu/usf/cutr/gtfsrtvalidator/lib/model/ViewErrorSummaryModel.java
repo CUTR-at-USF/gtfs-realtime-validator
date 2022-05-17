@@ -24,24 +24,24 @@ import java.io.Serializable;
 @XmlRootElement
 @Entity
 @NamedNativeQuery(name = "ErrorSummaryByrtfeedID",
-    query = "SELECT ? AS rtFeedID, errorID AS id, " +
+    query = "SELECT ? AS rtFeedID, Error.errorID AS id, " +
                 "title, severity, totalCount, lastTime, " +
                 "lastFeedTime, lastIterationId, lastRowId " +
             "FROM Error " +
                 "INNER JOIN " +
-                "(SELECT errorID, MAX(rowIdentifier) AS lastRowId, " +
-                    "count(*) AS totalCount, MAX(iterationId) AS lastIterationId, " +
+                "(SELECT MessageLog.errorID, MAX(rowIdentifier) AS lastRowId, " +
+                    "count(*) AS totalCount, MAX(MessageLog.iterationId) AS lastIterationId, " +
                     "MAX(iterationTimestamp) AS lastTime, " +
                     "MAX(feedTimestamp) AS lastFeedTime " +
                 "FROM MessageLog " +
                     "INNER JOIN " +
                     // Retrieve rowIdentifier for each of unique (iterationId, iterationTimestamp)
-                    "(SELECT ROWNUM() AS rowIdentifier, " +
+                    "(SELECT ROW_NUMBER() OVER(ORDER BY iterationID) AS rowIdentifier, " +
                         "IterationID AS iterationId, " +
                         "IterationTimestamp AS iterationTimestamp, feedTimestamp " +
                     "FROM " +
                         // Retrieve unique IterationID and IterationTimestamp, so that we can get ROWNUM in sequence
-                        "(SELECT DISTINCT errorLog.IterationID, errorLog.IterationTimestamp, " +
+                        "(SELECT errorLog.IterationID, errorLog.IterationTimestamp, " +
                             "errorLog.feedTimestamp " +
                         "FROM " +
                             "(SELECT GtfsRtFeedIDIteration.IterationID, " +
@@ -55,8 +55,7 @@ import java.io.Serializable;
                             "ON MessageLog.iterationID = GtfsRtFeedIDIteration.IterationID " +
                                 "AND IterationTimestamp >= ? AND IterationTimestamp <= ? " +
                             ") errorLog " +
-                            "ORDER BY iterationId " +
-                        ") " +
+                        "GROUP BY errorLog.IterationID, errorLog.IterationTimestamp, errorLog.feedTimestamp) t" +
                     ") UniqueRowIdResult " +
                 "ON MessageLog.iterationID = UniqueRowIdResult.iterationId " +
                 "GROUP BY errorId " +

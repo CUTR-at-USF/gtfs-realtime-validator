@@ -31,7 +31,7 @@ import javax.xml.bind.annotation.XmlRootElement;
                 "INNER JOIN " +
                 "(SELECT errorID, count(*) AS totalCount, " +
                 "MAX(IterationTimestamp)  AS IterationTimestamp, " +
-                "MAX(IterationID) AS lastIterationId " +
+                "MAX(MessageLog.IterationID) AS lastIterationId " +
                 "FROM MessageLog " +
                 "INNER JOIN " +
                 "(SELECT IterationID, IterationTimestamp " +

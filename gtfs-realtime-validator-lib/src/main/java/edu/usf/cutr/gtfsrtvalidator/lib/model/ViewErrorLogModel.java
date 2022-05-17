@@ -25,23 +25,23 @@ import java.io.Serializable;
 @Entity
 @NamedNativeQuery(name = "ErrorLogByrtfeedID",
         query = // Retrieve the remaining columns, title and severity from Error and FinalResult tables on matching errorIds.
-                "SELECT rowIdentifier, ? AS rtFeedID, errorId AS id, " +
+                "SELECT rowIdentifier, ? AS rtFeedID, Error.errorId AS id, " +
                     "Error.title, Error.severity, iterationId, occurrence, loggingTime " +
                 "FROM Error " +
                 "INNER JOIN " +
                     // Retrieve the other required column errorId on matching iterationId from MessageLog and UniqueRowIdResult tables.
-                    "(SELECT rowIdentifier, errorId, iterationId, " +
+                    "(SELECT rowIdentifier, MessageLog.errorId, MessageLog.iterationId, " +
                         "occurrence, loggingTime " +
                     "FROM MessageLog " +
                         "INNER JOIN " +
                         // Retrieve ROWNUM here.
-                        "(SELECT ROWNUM() AS rowIdentifier, " +
+                        "(SELECT ROW_NUMBER() OVER(ORDER BY IterationID) AS rowIdentifier, " +
                             "IterationID AS iterationId, " +
                             "feedTimestamp AS occurrence, " +
                             "IterationTimestamp AS loggingTime " +
                         "FROM " +
                             // Retrieve unique IteraionID and IterationTimestamp to get ROWNUM in sequential order.
-                            "(SELECT DISTINCT errorLog.IterationID, errorLog.IterationTimestamp, errorLog.feedTimestamp " +
+                            "(SELECT errorLog.IterationID, errorLog.IterationTimestamp, errorLog.feedTimestamp " +
                             "FROM " +
                                 "(SELECT GtfsRtFeedIDIteration.IterationID, " +
                                     "GtfsRtFeedIDIteration.IterationTimestamp, " +
@@ -54,8 +54,7 @@ import java.io.Serializable;
                                     "ON MessageLog.iterationID = GtfsRtFeedIDIteration.IterationID " +
                                         "AND IterationTimestamp >= ? AND IterationTimestamp <= ? " +
                                 ") errorLog " +
-                            "ORDER BY IterationID " +
-                            ") " +
+                            "GROUP BY errorLog.IterationID, errorLog.IterationTimestamp, errorLog.feedTimestamp) t" +
                         ") UniqueRowIdResult " +
                         "ON MessageLog.iterationId = UniqueRowIdResult.iterationId " +
                     ") FinalResult " +
