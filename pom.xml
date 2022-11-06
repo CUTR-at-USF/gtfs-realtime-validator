@@ -31,4 +31,9 @@
             <url>https://repo.camsys-apps.com/releases/</url>
         </repository>
     </repositories>
+
+    <scm>
+        <connection>scm:git:https://github.com/CUTR-at-USF/gtfs-realtime-validator.git</connection>
+        <url>https://github.com/CUTR-at-USF/gtfs-realtime-validator.git</url>
+    </scm>
 </project>
