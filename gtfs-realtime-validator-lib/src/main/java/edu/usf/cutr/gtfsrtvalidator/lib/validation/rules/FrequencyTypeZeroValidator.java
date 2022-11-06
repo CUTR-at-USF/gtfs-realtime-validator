@@ -17,6 +17,8 @@
 package edu.usf.cutr.gtfsrtvalidator.lib.validation.rules;
 
 import com.google.transit.realtime.GtfsRealtime;
+import com.google.transit.realtime.GtfsRealtime.TripUpdate;
+
 import edu.usf.cutr.gtfsrtvalidator.lib.model.MessageLogModel;
 import edu.usf.cutr.gtfsrtvalidator.lib.model.OccurrenceModel;
 import edu.usf.cutr.gtfsrtvalidator.lib.model.helper.ErrorListHelperModel;
@@ -26,8 +28,9 @@ import edu.usf.cutr.gtfsrtvalidator.lib.validation.interfaces.FeedEntityValidato
 import org.onebusaway.gtfs.services.GtfsMutableDao;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.text.ParseException;
+import java.util.*;
+import java.text.SimpleDateFormat;
 
 import static edu.usf.cutr.gtfsrtvalidator.lib.validation.ValidationRules.*;
 
@@ -37,6 +40,7 @@ import static edu.usf.cutr.gtfsrtvalidator.lib.validation.ValidationRules.*;
  * E006 - Missing required vehicle_position trip field for frequency-based exact_times = 0
  * E013 - Frequency type 0 trip schedule_relationship should be UNSCHEDULED or empty
  * W005 - Missing vehicle_id in trip_update for frequency-based exact_times = 0
+ * E053 - An exact_times = 0 frequencies.txt trip should have the same start_time through it's trip
  */
 public class FrequencyTypeZeroValidator implements FeedEntityValidator {
 
@@ -47,9 +51,22 @@ public class FrequencyTypeZeroValidator implements FeedEntityValidator {
         List<OccurrenceModel> errorListE006 = new ArrayList<>();
         List<OccurrenceModel> errorListE013 = new ArrayList<>();
         List<OccurrenceModel> errorListW005 = new ArrayList<>();
+        List<OccurrenceModel> errorListE053 = new ArrayList<>();
+
+        HashMap<TripUpdateKey, List<TripUpdate>> previousTripUpdates = new HashMap<TripUpdateKey, List<TripUpdate>>();
+
+        if (previousFeedMessage != null) {
+            for (GtfsRealtime.FeedEntity entity : previousFeedMessage.getEntityList()) {
+                if (entity.hasTripUpdate()) {
+                    GtfsRealtime.TripUpdate tripUpdate = entity.getTripUpdate();
+                    addTripUpdate(previousTripUpdates, tripUpdate);
+                }
+            }
+        }
 
         for (GtfsRealtime.FeedEntity entity : feedMessage.getEntityList()) {
             if (entity.hasTripUpdate()) {
+            	
                 GtfsRealtime.TripUpdate tripUpdate = entity.getTripUpdate();
 
                 if (gtfsMetadata.getExactTimesZeroTripIds().contains(tripUpdate.getTrip().getTripId())) {
@@ -75,9 +92,11 @@ public class FrequencyTypeZeroValidator implements FeedEntityValidator {
                         // W005 - Missing vehicle_id in trip_update for frequency-based exact_times = 0
                         RuleUtils.addOccurrence(W005, "trip_id " + tripUpdate.getTrip().getTripId(), errorListW005, _log);
                     }
+
+                    if(previousFeedMessage!=null)
+                        checkE053(tripUpdate, previousTripUpdates, errorListE053);
                 }
             }
-
             if (entity.hasVehicle()) {
                 GtfsRealtime.VehiclePosition vehiclePosition = entity.getVehicle();
                 if (vehiclePosition.hasTrip() &&
@@ -109,6 +128,7 @@ public class FrequencyTypeZeroValidator implements FeedEntityValidator {
                 }
             }
         }
+
         List<ErrorListHelperModel> errors = new ArrayList<>();
         if (!errorListE006.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(E006), errorListE006));
@@ -119,6 +139,126 @@ public class FrequencyTypeZeroValidator implements FeedEntityValidator {
         if (!errorListW005.isEmpty()) {
             errors.add(new ErrorListHelperModel(new MessageLogModel(W005), errorListW005));
         }
+        if (!errorListE053.isEmpty()) {
+            errors.add(new ErrorListHelperModel(new MessageLogModel(E053), errorListE053));
+        }
         return errors;
+
+    }
+
+    private void checkE053(TripUpdate currentTripUpdate, HashMap<TripUpdateKey, List<TripUpdate>> previousTripUpdates, List<OccurrenceModel> errorListE053) {
+
+        if (!inTripUpdates(currentTripUpdate, previousTripUpdates)) {
+            if (!isNewTrip(previousTripUpdates, currentTripUpdate)) {
+                String errorMessage = "vehicle_id " + currentTripUpdate.getVehicle().getId() + " startTime has changed and is now " + currentTripUpdate.getTrip().getStartTime();
+                RuleUtils.addOccurrence(E053, errorMessage, errorListE053, _log);
+            }
+        }
+
+    }
+
+    private boolean isNewTrip(HashMap<TripUpdateKey, List<TripUpdate>> previousTripUpdates, TripUpdate tripUpdate) {
+        TripUpdate latest = null;
+        List<TripUpdate> tripUpdates = previousTripUpdates.get(new TripUpdateKey(tripUpdate.getVehicle().getId(), tripUpdate.getTrip().getTripId()));
+        if (tripUpdates != null) {
+            for (TripUpdate previousTripUpdate : tripUpdates) {
+                if (latest == null) {
+                    latest = previousTripUpdate;
+                }
+                if (new TripUpdateStartTimeComparator().compare(latest, previousTripUpdate) > 0) {
+                    latest = previousTripUpdate;
+                }
+            }
+            if (new TripUpdateStartTimeComparator().compare(tripUpdate, latest) > 0) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean inTripUpdates(TripUpdate tripUpdate, HashMap<TripUpdateKey, List<TripUpdate>> previousTripUpdates ) {
+
+        List<TripUpdate> tripUpdates = previousTripUpdates.get(new TripUpdateKey(tripUpdate.getVehicle().getId(), tripUpdate.getTrip().getTripId()));
+        if(tripUpdates !=null )
+        {
+            for (TripUpdate previousTripUpdate : tripUpdates) {
+                if (previousTripUpdate.getTrip().getStartTime().equals(tripUpdate.getTrip().getStartTime())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    private void addTripUpdate(HashMap<TripUpdateKey, List<TripUpdate>> tripUpdatesMap, GtfsRealtime.TripUpdate tripUpdate) {
+        if (tripUpdate.hasVehicle() && tripUpdate.getVehicle().hasId()) {
+
+            List<TripUpdate> tripUpdates = null;
+            if (!tripUpdatesMap.containsKey(new TripUpdateKey(tripUpdate.getVehicle().getId(), tripUpdate.getTrip().getTripId()))) {
+                tripUpdates = new ArrayList<TripUpdate>();
+            } else {
+                tripUpdates = tripUpdatesMap.get(new TripUpdateKey(tripUpdate.getVehicle().getId(), tripUpdate.getTrip().getTripId()));
+            }
+            tripUpdates.add(tripUpdate);
+
+            //Collections.sort(tripUpdates, new TripUpdateStartTimeComparator());
+
+            tripUpdatesMap.put(new TripUpdateKey(tripUpdate.getVehicle().getId(), tripUpdate.getTrip().getTripId()), tripUpdates);
+        }
+    }
+    private class TripUpdateKey
+    {
+        String vehicle_id;
+        String trip_id;
+
+        public TripUpdateKey(String vehicle_id, String trip_id)
+        {
+            this.vehicle_id=vehicle_id;
+            this.trip_id=trip_id;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            TripUpdateKey that = (TripUpdateKey) o;
+
+            if (vehicle_id != null ? !vehicle_id.equals(that.vehicle_id) : that.vehicle_id != null) return false;
+            return trip_id != null ? trip_id.equals(that.trip_id) : that.trip_id == null;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = vehicle_id != null ? vehicle_id.hashCode() : 0;
+            result = 31 * result + (trip_id != null ? trip_id.hashCode() : 0);
+            return result;
+        }
+    }
+
+    private class TripUpdateStartTimeComparator implements Comparator<TripUpdate> {
+        SimpleDateFormat formatter = new SimpleDateFormat("hh:mm:ssa");
+
+        @Override
+        public int compare(TripUpdate t1, TripUpdate t2) {
+
+            try {
+                if(t1.hasTrip()&&t1.getTrip().hasStartTime()&&t2.hasTrip()&&t2.getTrip().hasStartTime()) {
+
+                    Date t1_date = formatter.parse(t1.getTrip().getStartTime());
+
+                    Date t2_date = formatter.parse(t2.getTrip().getStartTime());
+
+                    return t1_date.compareTo(t2_date);
+                }
+            } catch (ParseException e) {
+                _log.error(e.getMessage(), e);
+            }
+            return -1;
+        }
+
     }
 }
